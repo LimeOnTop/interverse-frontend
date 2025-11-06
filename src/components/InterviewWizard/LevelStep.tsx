@@ -15,7 +15,6 @@ const levels = [
         description: 'Начинающий разработчик',
         experience: '0-1 год',
         icon: Star,
-        color: 'bg-blue-100 text-blue-600',
     },
     {
         id: 'junior',
@@ -23,7 +22,6 @@ const levels = [
         description: 'Младший разработчик',
         experience: '1-2 года',
         icon: TrendingUp,
-        color: 'bg-green-100 text-green-600',
     },
     {
         id: 'middle',
@@ -31,7 +29,6 @@ const levels = [
         description: 'Средний разработчик',
         experience: '2-5 лет',
         icon: Users,
-        color: 'bg-yellow-100 text-yellow-600',
     },
     {
         id: 'senior',
@@ -39,7 +36,6 @@ const levels = [
         description: 'Старший разработчик',
         experience: '5+ лет',
         icon: Award,
-        color: 'bg-purple-100 text-purple-600',
     },
     {
         id: 'lead',
@@ -47,7 +43,6 @@ const levels = [
         description: 'Руководитель',
         experience: '7+ лет',
         icon: Crown,
-        color: 'bg-red-100 text-red-600',
     },
 ]
 
@@ -88,10 +83,8 @@ export default function LevelStep({
                                 }`}
                             onClick={() => onSelect(level.id)}
                         >
-                            <div className={`w-12 h-12 rounded-xl mb-4 flex items-center justify-center ${isSelected ? 'gradient-bg-adaptive' : level.color
-                                }`}>
-                                <Icon className={`w-6 h-6 ${isSelected ? 'text-white' : level.color.split(' ')[1]
-                                    }`} />
+                            <div className="w-12 h-12 rounded-xl mb-4 flex items-center justify-center bg-gray-100 dark:bg-gray-700">
+                                <Icon className="w-6 h-6 text-gray-700 dark:text-gray-300" />
                             </div>
                             <h3 className={`text-lg font-semibold mb-2 ${isSelected ? 'text-inter-verse-green dark:text-purple-400' : 'text-gray-900 dark:text-gray-100'
                                 }`}>

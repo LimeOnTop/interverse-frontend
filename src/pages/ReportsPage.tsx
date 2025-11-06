@@ -4,6 +4,7 @@ import { FileText, Search, Download, Eye } from 'lucide-react'
 import { api } from '../services/api'
 import toast from 'react-hot-toast'
 import { Link } from 'react-router-dom'
+import { useTheme } from '../contexts/ThemeContext'
 
 interface Report {
     id: string
@@ -32,6 +33,7 @@ export default function ReportsPage() {
     const [reports, setReports] = useState<Report[]>([])
     const [loading, setLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState('')
+    const { isDark } = useTheme()
 
     useEffect(() => {
         fetchReports()
@@ -103,9 +105,9 @@ export default function ReportsPage() {
     }
 
     const getScoreColor = (score: number) => {
-        if (score >= 80) return 'text-green-600 bg-green-100'
-        if (score >= 60) return 'text-yellow-600 bg-yellow-100'
-        return 'text-red-600 bg-red-100'
+        if (score >= 80) return 'text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900'
+        if (score >= 60) return 'text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900'
+        return 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900'
     }
 
     const getScoreLabel = (score: number) => {
@@ -117,7 +119,7 @@ export default function ReportsPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-inter-verse-green"></div>
+                <div className={`animate-spin rounded-full h-12 w-12 border-b-2 ${isDark ? 'border-purple-500' : 'border-inter-verse-green'}`}></div>
             </div>
         )
     }
@@ -127,8 +129,8 @@ export default function ReportsPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Отчёты</h1>
-                    <p className="text-gray-600 mt-1">Результаты проведённых интервью</p>
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Отчёты</h1>
+                    <p className="text-gray-600 dark:text-gray-400 mt-1">Результаты проведённых интервью</p>
                 </div>
                 <button className="btn-secondary inline-flex items-center space-x-2">
                     <Download className="w-5 h-5" />
@@ -139,35 +141,35 @@ export default function ReportsPage() {
             {/* Search */}
             <div className="card p-6">
                 <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
                     <input
                         type="text"
                         placeholder="Поиск по названию интервью, кандидату или специализации..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="input-field pl-10"
+                        className="input-field-adaptive pl-10"
                     />
                 </div>
             </div>
 
             {/* Reports List */}
             <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
                     Отчёты ({filteredReports.length})
                 </h2>
 
                 {filteredReports.length === 0 ? (
                     <div className="card p-12 text-center">
-                        <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">
+                        <FileText className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
                             Нет отчётов
                         </h3>
-                        <p className="text-gray-600 mb-6">
+                        <p className="text-gray-600 dark:text-gray-400 mb-6">
                             Отчёты появятся после завершения интервью
                         </p>
                         <Link
                             to="/dashboard"
-                            className="btn-primary inline-flex items-center space-x-2"
+                            className="btn-primary-adaptive inline-flex items-center space-x-2"
                         >
                             <span>Перейти к интервью</span>
                         </Link>
@@ -184,10 +186,10 @@ export default function ReportsPage() {
                             >
                                 <div className="flex items-start justify-between mb-6">
                                     <div className="flex-1">
-                                        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                                        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
                                             {report.interview.title}
                                         </h3>
-                                        <div className="flex items-center space-x-6 text-sm text-gray-600 mb-4">
+                                        <div className="flex items-center space-x-6 text-sm text-gray-600 dark:text-gray-400 mb-4">
                                             <span className="flex items-center space-x-1">
                                                 <span className="font-medium">Кандидат:</span>
                                                 <span>{report.interview.candidate.name}</span>
@@ -207,7 +209,7 @@ export default function ReportsPage() {
                                         <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getScoreColor(report.overall_score)}`}>
                                             {report.overall_score}% - {getScoreLabel(report.overall_score)}
                                         </div>
-                                        <p className="text-xs text-gray-500 mt-2">
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                                             {new Date(report.created_at).toLocaleDateString('ru-RU')}
                                         </p>
                                     </div>
@@ -216,25 +218,25 @@ export default function ReportsPage() {
                                 {/* Scores */}
                                 <div className="grid md:grid-cols-4 gap-4 mb-6">
                                     <div className="text-center">
-                                        <p className="text-sm font-medium text-gray-600 mb-1">Алгоритмы</p>
+                                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Алгоритмы</p>
                                         <div className={`inline-flex items-center px-2 py-1 rounded text-sm font-medium ${getScoreColor(report.algorithm_score)}`}>
                                             {report.algorithm_score}%
                                         </div>
                                     </div>
                                     <div className="text-center">
-                                        <p className="text-sm font-medium text-gray-600 mb-1">Архитектура</p>
+                                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Архитектура</p>
                                         <div className={`inline-flex items-center px-2 py-1 rounded text-sm font-medium ${getScoreColor(report.architecture_score)}`}>
                                             {report.architecture_score}%
                                         </div>
                                     </div>
                                     <div className="text-center">
-                                        <p className="text-sm font-medium text-gray-600 mb-1">Кодинг</p>
+                                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Кодинг</p>
                                         <div className={`inline-flex items-center px-2 py-1 rounded text-sm font-medium ${getScoreColor(report.coding_score)}`}>
                                             {report.coding_score}%
                                         </div>
                                     </div>
                                     <div className="text-center">
-                                        <p className="text-sm font-medium text-gray-600 mb-1">Soft Skills</p>
+                                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Soft Skills</p>
                                         <div className={`inline-flex items-center px-2 py-1 rounded text-sm font-medium ${getScoreColor(report.soft_skills_score)}`}>
                                             {report.soft_skills_score}%
                                         </div>
@@ -244,25 +246,25 @@ export default function ReportsPage() {
                                 {/* Comments */}
                                 {report.comments && (
                                     <div className="mb-6">
-                                        <h4 className="text-sm font-medium text-gray-600 mb-2">Комментарии</h4>
-                                        <p className="text-gray-700 text-sm">{report.comments}</p>
+                                        <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Комментарии</h4>
+                                        <p className="text-gray-700 dark:text-gray-300 text-sm">{report.comments}</p>
                                     </div>
                                 )}
 
                                 {/* Recommendations */}
                                 {report.recommendations && (
                                     <div className="mb-6">
-                                        <h4 className="text-sm font-medium text-gray-600 mb-2">Рекомендации</h4>
-                                        <p className="text-gray-700 text-sm">{report.recommendations}</p>
+                                        <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Рекомендации</h4>
+                                        <p className="text-gray-700 dark:text-gray-300 text-sm">{report.recommendations}</p>
                                     </div>
                                 )}
 
                                 {/* Actions */}
-                                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                                <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
                                     <div className="flex items-center space-x-4">
                                         <Link
                                             to={`/reports/${report.id}`}
-                                            className="btn-primary text-sm px-4 py-2 inline-flex items-center space-x-2"
+                                            className="btn-primary-adaptive text-sm px-4 py-2 inline-flex items-center space-x-2"
                                         >
                                             <Eye className="w-4 h-4" />
                                             <span>Подробнее</span>
@@ -272,7 +274,7 @@ export default function ReportsPage() {
                                             <span>PDF</span>
                                         </button>
                                     </div>
-                                    <span className="text-xs text-gray-500">
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">
                                         ID: {report.interview_id}
                                     </span>
                                 </div>

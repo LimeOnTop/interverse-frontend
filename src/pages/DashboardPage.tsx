@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Plus, Calendar, Users, CheckCircle } from 'lucide-react'
 import { api } from '../services/api'
@@ -32,10 +32,11 @@ export default function DashboardPage() {
     const [statusFilter, setStatusFilter] = useState('')
     const [levelFilter, setLevelFilter] = useState('')
     const { isDark } = useTheme()
+    const location = useLocation()
 
     useEffect(() => {
         fetchInterviews()
-    }, [])
+    }, [location.pathname])
 
     const fetchInterviews = async () => {
         try {
@@ -111,8 +112,8 @@ export default function DashboardPage() {
                             <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Всего интервью</p>
                             <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.total}</p>
                         </div>
-                        <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center">
-                            <Calendar className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                        <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center">
+                            <Calendar className="w-6 h-6 text-gray-700 dark:text-gray-300" />
                         </div>
                     </div>
                 </motion.div>
@@ -128,8 +129,8 @@ export default function DashboardPage() {
                             <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Запланировано</p>
                             <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.scheduled}</p>
                         </div>
-                        <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900 rounded-xl flex items-center justify-center">
-                            <Calendar className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+                        <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center">
+                            <Calendar className="w-6 h-6 text-gray-700 dark:text-gray-300" />
                         </div>
                     </div>
                 </motion.div>
@@ -145,8 +146,8 @@ export default function DashboardPage() {
                             <p className="text-sm font-medium text-gray-600 dark:text-gray-400">В процессе</p>
                             <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.inProgress}</p>
                         </div>
-                        <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-xl flex items-center justify-center">
-                            <Users className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+                        <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center">
+                            <Users className="w-6 h-6 text-gray-700 dark:text-gray-300" />
                         </div>
                     </div>
                 </motion.div>
@@ -162,8 +163,8 @@ export default function DashboardPage() {
                             <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Завершено</p>
                             <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.completed}</p>
                         </div>
-                        <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-xl flex items-center justify-center">
-                            <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
+                        <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center">
+                            <CheckCircle className="w-6 h-6 text-gray-700 dark:text-gray-300" />
                         </div>
                     </div>
                 </motion.div>
@@ -216,10 +217,6 @@ export default function DashboardPage() {
                             >
                                 <InterviewCard
                                     interview={interview}
-                                    onClick={() => {
-                                        // Navigate to interview details or start interview
-                                        console.log('Open interview:', interview.id)
-                                    }}
                                 />
                             </motion.div>
                         ))}

@@ -4,6 +4,7 @@ import { Plus, User, Mail, Phone, Calendar } from 'lucide-react'
 import { api } from '../services/api'
 import toast from 'react-hot-toast'
 import CandidateFilters from '../components/CandidateFilters'
+import { useTheme } from '../contexts/ThemeContext'
 
 interface Candidate {
     id: string
@@ -23,6 +24,7 @@ export default function CandidatesPage() {
     const [searchTerm, setSearchTerm] = useState('')
     const [levelFilter, setLevelFilter] = useState('')
     const [specializationFilter, setSpecializationFilter] = useState('')
+    const { isDark } = useTheme()
 
     useEffect(() => {
         fetchCandidates()
@@ -81,7 +83,7 @@ export default function CandidatesPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-inter-verse-green"></div>
+                <div className={`animate-spin rounded-full h-12 w-12 border-b-2 ${isDark ? 'border-purple-500' : 'border-inter-verse-green'}`}></div>
             </div>
         )
     }
@@ -91,10 +93,10 @@ export default function CandidatesPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Кандидаты</h1>
-                    <p className="text-gray-600 mt-1">Управление базой кандидатов</p>
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Кандидаты</h1>
+                    <p className="text-gray-600 dark:text-gray-400 mt-1">Управление базой кандидатов</p>
                 </div>
-                <button className="btn-primary inline-flex items-center space-x-2">
+                <button className="btn-primary-adaptive inline-flex items-center space-x-2">
                     <Plus className="w-5 h-5" />
                     <span>Добавить кандидата</span>
                 </button>
@@ -114,20 +116,20 @@ export default function CandidatesPage() {
 
             {/* Candidates List */}
             <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
                     Кандидаты ({filteredCandidates.length})
                 </h2>
 
                 {filteredCandidates.length === 0 ? (
                     <div className="card p-12 text-center">
-                        <User className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">
+                        <User className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
                             Нет кандидатов
                         </h3>
-                        <p className="text-gray-600 mb-6">
+                        <p className="text-gray-600 dark:text-gray-400 mb-6">
                             Добавьте кандидатов для проведения интервью
                         </p>
-                        <button className="btn-primary inline-flex items-center space-x-2">
+                        <button className="btn-primary-adaptive inline-flex items-center space-x-2">
                             <Plus className="w-5 h-5" />
                             <span>Добавить кандидата</span>
                         </button>
@@ -145,14 +147,14 @@ export default function CandidatesPage() {
                                 <div className="flex items-start justify-between">
                                     <div className="flex-1">
                                         <div className="flex items-center space-x-3 mb-3">
-                                            <div className="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
+                                            <div className="w-12 h-12 gradient-bg-adaptive rounded-full flex items-center justify-center">
                                                 <User className="w-6 h-6 text-white" />
                                             </div>
                                             <div>
-                                                <h3 className="text-lg font-semibold text-gray-900">
+                                                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                                                     {candidate.name}
                                                 </h3>
-                                                <div className="flex items-center space-x-4 text-sm text-gray-600">
+                                                <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
                                                     <span className="flex items-center space-x-1">
                                                         <Mail className="w-4 h-4" />
                                                         <span>{candidate.email}</span>
@@ -169,27 +171,27 @@ export default function CandidatesPage() {
 
                                         <div className="grid md:grid-cols-3 gap-4">
                                             <div>
-                                                <p className="text-sm font-medium text-gray-600">Специализация</p>
-                                                <p className="text-gray-900">{getSpecializationLabel(candidate.specialization)}</p>
+                                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Специализация</p>
+                                                <p className="text-gray-900 dark:text-gray-100">{getSpecializationLabel(candidate.specialization)}</p>
                                             </div>
                                             <div>
-                                                <p className="text-sm font-medium text-gray-600">Уровень</p>
-                                                <p className="text-gray-900">{getLevelLabel(candidate.level)}</p>
+                                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Уровень</p>
+                                                <p className="text-gray-900 dark:text-gray-100">{getLevelLabel(candidate.level)}</p>
                                             </div>
                                             <div>
-                                                <p className="text-sm font-medium text-gray-600">Опыт</p>
-                                                <p className="text-gray-900">{candidate.experience} лет</p>
+                                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Опыт</p>
+                                                <p className="text-gray-900 dark:text-gray-100">{candidate.experience} лет</p>
                                             </div>
                                         </div>
 
                                         {candidate.tech_stack && (
                                             <div className="mt-4">
-                                                <p className="text-sm font-medium text-gray-600 mb-2">Технологии</p>
+                                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Технологии</p>
                                                 <div className="flex flex-wrap gap-2">
                                                     {JSON.parse(candidate.tech_stack).map((tech: string, techIndex: number) => (
                                                         <span
                                                             key={techIndex}
-                                                            className="px-2 py-1 bg-gray-100 text-gray-700 rounded-md text-xs"
+                                                            className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md text-xs"
                                                         >
                                                             {tech}
                                                         </span>
@@ -200,7 +202,7 @@ export default function CandidatesPage() {
                                     </div>
 
                                     <div className="text-right">
-                                        <div className="flex items-center text-sm text-gray-500 mb-2">
+                                        <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-2">
                                             <Calendar className="w-4 h-4 mr-1" />
                                             <span>Добавлен: {new Date(candidate.created_at).toLocaleDateString('ru-RU')}</span>
                                         </div>
@@ -208,7 +210,7 @@ export default function CandidatesPage() {
                                             <button className="btn-secondary text-sm px-4 py-2">
                                                 Редактировать
                                             </button>
-                                            <button className="btn-primary text-sm px-4 py-2">
+                                            <button className="btn-primary-adaptive text-sm px-4 py-2">
                                                 Создать интервью
                                             </button>
                                         </div>

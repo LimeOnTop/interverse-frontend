@@ -4,8 +4,8 @@ export default function CalendarPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-2xl font-bold text-gray-900">Календарь интервью</h1>
-                <p className="text-gray-600 mt-1">Просмотр и управление запланированными интервью</p>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Календарь интервью</h1>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">Просмотр и управление запланированными интервью</p>
             </div>
 
             <InterviewCalendar />

@@ -82,10 +82,8 @@ export default function SpecializationStep({
                                 }`}
                             onClick={() => onSelect(spec.id)}
                         >
-                            <div className={`w-12 h-12 rounded-xl mb-4 flex items-center justify-center ${isSelected ? 'gradient-bg-adaptive' : 'bg-gray-100 dark:bg-gray-700'
-                                }`}>
-                                <Icon className={`w-6 h-6 ${isSelected ? 'text-white' : 'text-gray-600'
-                                    }`} />
+                            <div className="w-12 h-12 rounded-xl mb-4 flex items-center justify-center bg-gray-100 dark:bg-gray-700">
+                                <Icon className="w-6 h-6 text-gray-700 dark:text-gray-300" />
                             </div>
                             <h3 className={`text-lg font-semibold mb-2 ${isSelected ? 'text-inter-verse-green dark:text-purple-400' : 'text-gray-900 dark:text-gray-100'
                                 }`}>

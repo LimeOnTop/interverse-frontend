@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import { api } from '../services/api'
 import toast from 'react-hot-toast'
@@ -16,15 +16,52 @@ const STEPS = {
     SCHEDULE: 4,
 }
 
-export default function InterviewWizardPage() {
+export default function EditInterviewPage() {
+    const { id } = useParams<{ id: string }>()
     const [currentStep, setCurrentStep] = useState(STEPS.SPECIALIZATION)
     const [selectedSpecialization, setSelectedSpecialization] = useState('')
     const [selectedTechStack, setSelectedTechStack] = useState<string[]>([])
     const [selectedLevel, setSelectedLevel] = useState('')
     const [scheduledAt, setScheduledAt] = useState('')
     const [isLoading, setIsLoading] = useState(false)
+    const [isLoadingData, setIsLoadingData] = useState(true)
 
     const navigate = useNavigate()
+
+    useEffect(() => {
+        if (id) {
+            fetchInterview()
+        }
+    }, [id])
+
+    const fetchInterview = async () => {
+        try {
+            setIsLoadingData(true)
+            const response = await api.get(`/interviews/${id}`)
+            const interview = response.data.interview
+
+            setSelectedSpecialization(interview.specialization || '')
+            setSelectedLevel(interview.level || '')
+            setScheduledAt(interview.scheduled_at || '')
+
+            // Parse tech_stack
+            if (interview.tech_stack) {
+                try {
+                    const techStack = JSON.parse(interview.tech_stack)
+                    setSelectedTechStack(Array.isArray(techStack) ? techStack : [])
+                } catch {
+                    setSelectedTechStack([])
+                }
+            } else {
+                setSelectedTechStack([])
+            }
+        } catch (error: any) {
+            toast.error('Ошибка при загрузке интервью')
+            navigate('/dashboard')
+        } finally {
+            setIsLoadingData(false)
+        }
+    }
 
     const handleNext = () => {
         if (currentStep < 4) {
@@ -39,49 +76,28 @@ export default function InterviewWizardPage() {
     }
 
     const handleSubmit = async () => {
+        if (!id) {
+            toast.error('ID интервью не найден')
+            return
+        }
+
         setIsLoading(true)
         try {
-            // First, create a candidate (for demo purposes, we'll use a placeholder)
-            const candidateData = {
-                name: 'Новый кандидат',
-                email: 'candidate@example.com',
-                phone: '',
-                experience: '0',
-                level: selectedLevel,
-                specialization: selectedSpecialization,
-                tech_stack: JSON.stringify(selectedTechStack),
-            }
-
-            const candidateResponse = await api.post('/candidates/', candidateData)
-            console.log('Candidate response:', candidateResponse.data)
-            const candidateId = candidateResponse.data.id
-
-            if (!candidateId) {
-                console.error('Candidate ID is missing! Response:', candidateResponse.data)
-                toast.error('Ошибка: не удалось получить ID кандидата')
-                return
-            }
-
-            // Then create the interview
             const interviewData = {
                 title: `${selectedSpecialization} интервью - ${selectedLevel}`,
                 description: `Техническое интервью для позиции ${selectedLevel} ${selectedSpecialization} разработчика`,
-                candidate_id: candidateId,
                 specialization: selectedSpecialization,
                 tech_stack: JSON.stringify(selectedTechStack),
                 level: selectedLevel,
-                duration: 60,
                 scheduled_at: scheduledAt,
             }
 
-            console.log('Interview data:', interviewData)
+            await api.put(`/interviews/${id}`, interviewData)
 
-            await api.post('/interviews/', interviewData)
-
-            toast.success('Интервью создано успешно!')
+            toast.success('Интервью обновлено успешно!')
             navigate('/dashboard')
         } catch (error: any) {
-            toast.error(error.response?.data?.error || 'Ошибка при создании интервью')
+            toast.error(error.response?.data?.error || 'Ошибка при обновлении интервью')
         } finally {
             setIsLoading(false)
         }
@@ -130,33 +146,42 @@ export default function InterviewWizardPage() {
         }
     }
 
+    if (isLoadingData) {
+        return (
+            <div className="flex items-center justify-center h-96">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-inter-verse-green"></div>
+            </div>
+        )
+    }
+
     return (
-        <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-6">
-                <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-                    Создание интервью
+        <div className="max-w-4xl mx-auto py-8">
+            <div className="mb-8">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                    Редактирование интервью
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400">
-                    Следуйте шагам для создания структурированного технического интервью
+                    Обновите информацию об интервью
                 </p>
             </div>
 
             <StepIndicator currentStep={currentStep} totalSteps={4} />
 
-            <div className="min-h-[400px] pb-8">
-                <AnimatePresence mode="wait">
+            <AnimatePresence mode="wait">
+                <div className="mt-8">
                     {renderStep()}
-                </AnimatePresence>
-            </div>
+                </div>
+            </AnimatePresence>
 
             {isLoading && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white dark:bg-gray-800 p-8 rounded-xl text-center">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-inter-verse-green dark:border-purple-500 mx-auto mb-4"></div>
-                        <p className="text-gray-600 dark:text-gray-400">Создание интервью...</p>
+                    <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-inter-verse-green mx-auto"></div>
+                        <p className="mt-4 text-gray-600 dark:text-gray-400">Обновление интервью...</p>
                     </div>
                 </div>
             )}
         </div>
     )
 }
+

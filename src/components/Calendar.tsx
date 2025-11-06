@@ -69,33 +69,46 @@ export default function Calendar() {
 
     const eventStyleGetter = (event: CalendarEvent) => {
         const status = event.resource.interview.status
+        const isDark = document.documentElement.classList.contains('dark')
+
         let backgroundColor = '#3174ad'
+        let borderColor = '#2563eb'
 
         switch (status) {
             case 'scheduled':
-                backgroundColor = '#3174ad'
+                backgroundColor = isDark ? '#6366f1' : '#3174ad'
+                borderColor = isDark ? '#818cf8' : '#2563eb'
                 break
             case 'in_progress':
-                backgroundColor = '#f59e0b'
+                backgroundColor = isDark ? '#f59e0b' : '#f59e0b'
+                borderColor = isDark ? '#fbbf24' : '#f59e0b'
                 break
             case 'completed':
-                backgroundColor = '#10b981'
+                backgroundColor = isDark ? '#10b981' : '#10b981'
+                borderColor = isDark ? '#34d399' : '#10b981'
                 break
             case 'cancelled':
-                backgroundColor = '#ef4444'
+                backgroundColor = isDark ? '#ef4444' : '#ef4444'
+                borderColor = isDark ? '#f87171' : '#ef4444'
                 break
             default:
-                backgroundColor = '#6b7280'
+                backgroundColor = isDark ? '#6b7280' : '#6b7280'
+                borderColor = isDark ? '#9ca3af' : '#6b7280'
         }
 
         return {
             style: {
                 backgroundColor,
-                borderRadius: '4px',
-                opacity: 0.8,
+                borderLeft: `4px solid ${borderColor}`,
+                borderRadius: '6px',
+                opacity: 0.9,
                 color: 'white',
                 border: '0px',
-                display: 'block'
+                display: 'block',
+                padding: '4px 8px',
+                fontWeight: '500',
+                fontSize: '0.875rem',
+                boxShadow: isDark ? '0 2px 4px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.1)'
             }
         }
     }
@@ -103,19 +116,19 @@ export default function Calendar() {
     if (loading) {
         return (
             <div className="flex items-center justify-center h-96">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-inter-verse-green"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-inter-verse-green dark:border-purple-500"></div>
             </div>
         )
     }
 
     return (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="card p-6">
             <div className="mb-4">
-                <h2 className="text-xl font-semibold text-gray-900">Календарь интервью</h2>
-                <p className="text-sm text-gray-600 mt-1">Просмотр запланированных интервью</p>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Календарь интервью</h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Просмотр запланированных интервью</p>
             </div>
 
-            <div className="h-96">
+            <div className="h-[600px] calendar-container">
                 <BigCalendar
                     localizer={localizer}
                     events={events}
@@ -148,20 +161,20 @@ export default function Calendar() {
 
             <div className="mt-4 flex flex-wrap gap-4">
                 <div className="flex items-center">
-                    <div className="w-3 h-3 bg-blue-500 rounded mr-2"></div>
-                    <span className="text-sm text-gray-600">Запланировано</span>
+                    <div className="w-3 h-3 bg-blue-500 dark:bg-blue-400 rounded mr-2"></div>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Запланировано</span>
                 </div>
                 <div className="flex items-center">
-                    <div className="w-3 h-3 bg-yellow-500 rounded mr-2"></div>
-                    <span className="text-sm text-gray-600">В процессе</span>
+                    <div className="w-3 h-3 bg-yellow-500 dark:bg-yellow-400 rounded mr-2"></div>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">В процессе</span>
                 </div>
                 <div className="flex items-center">
-                    <div className="w-3 h-3 bg-green-500 rounded mr-2"></div>
-                    <span className="text-sm text-gray-600">Завершено</span>
+                    <div className="w-3 h-3 bg-green-500 dark:bg-green-400 rounded mr-2"></div>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Завершено</span>
                 </div>
                 <div className="flex items-center">
-                    <div className="w-3 h-3 bg-red-500 rounded mr-2"></div>
-                    <span className="text-sm text-gray-600">Отменено</span>
+                    <div className="w-3 h-3 bg-red-500 dark:bg-red-400 rounded mr-2"></div>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Отменено</span>
                 </div>
             </div>
         </div>

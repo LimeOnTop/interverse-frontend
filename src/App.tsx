@@ -9,6 +9,8 @@ import RegisterPage from './pages/RegisterPage'
 import DashboardPage from './pages/DashboardPage'
 import CalendarPage from './pages/CalendarPage'
 import InterviewWizardPage from './pages/InterviewWizardPage'
+import EditInterviewPage from './pages/EditInterviewPage'
+import EditInterviewFullPage from './pages/EditInterviewFullPage'
 import InterviewServicePage from './pages/InterviewServicePage'
 import InterviewPage from './pages/InterviewPage'
 import CandidatesPage from './pages/CandidatesPage'
@@ -65,6 +67,26 @@ function App() {
                             <ProtectedRoute>
                                 <Layout>
                                     <InterviewWizardPage />
+                                </Layout>
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/interviews/:id/edit"
+                        element={
+                            <ProtectedRoute>
+                                <Layout>
+                                    <EditInterviewPage />
+                                </Layout>
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/interviews/:id/edit-full"
+                        element={
+                            <ProtectedRoute>
+                                <Layout>
+                                    <EditInterviewFullPage />
                                 </Layout>
                             </ProtectedRoute>
                         }
