@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Search, X } from 'lucide-react'
 
 interface TechStackStepProps {
@@ -41,6 +41,7 @@ export default function TechStackStep({
     onBack,
 }: TechStackStepProps) {
     const [searchTerm, setSearchTerm] = useState('')
+    const [isSearchOpen, setIsSearchOpen] = useState(false)
 
     const availableTechs = techStacks[selectedSpecialization as keyof typeof techStacks] || []
     const filteredTechs = availableTechs.filter(tech =>
@@ -76,26 +77,74 @@ export default function TechStackStep({
                 </p>
             </div>
 
-            {/* Search */}
-            <div className="mb-4">
-                <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
-                    <input
-                        type="text"
-                        placeholder="Введите название технологии..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="input-field pl-10"
-                    />
-                </div>
-            </div>
-
-            {/* Selected Technologies */}
-            {selectedTechStack.length > 0 && (
-                <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
-                        Выбранные технологии ({selectedTechStack.length})
+            {/* Selected Technologies with Search Icon */}
+            <div className="mb-6">
+                <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                        {selectedTechStack.length > 0
+                            ? `Выбранные технологии (${selectedTechStack.length})`
+                            : 'Выбранные технологии'
+                        }
                     </h3>
+                    <div className="flex items-center justify-end">
+                        <div
+                            className="relative flex items-center"
+                            onMouseEnter={() => {
+                                if (!isSearchOpen) {
+                                    setIsSearchOpen(true)
+                                }
+                            }}
+                            onMouseLeave={() => {
+                                if (isSearchOpen && !searchTerm) {
+                                    setIsSearchOpen(false)
+                                }
+                            }}
+                        >
+                            {/* Search Input - выезжает влево */}
+                            <AnimatePresence>
+                                {isSearchOpen && (
+                                    <motion.div
+                                        key="search-input"
+                                        initial={{ opacity: 0, width: 0, x: 20 }}
+                                        animate={{ opacity: 1, width: 220, x: 0 }}
+                                        exit={{ opacity: 0, width: 0, x: 20 }}
+                                        transition={{ duration: 0.3, ease: 'easeInOut' }}
+                                        className="mr-2 overflow-hidden"
+                                    >
+                                        <input
+                                            type="text"
+                                            placeholder="поиск технологии"
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            className="bg-transparent border-0 border-b-2 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-0 focus:border-inter-verse-green dark:focus:border-purple-500 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 px-2 py-1 text-sm w-full transition-colors"
+                                            autoFocus
+                                            onBlur={() => {
+                                                if (!searchTerm) {
+                                                    setIsSearchOpen(false)
+                                                }
+                                            }}
+                                        />
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+
+                            {/* Search Button - всегда видна */}
+                            <button
+                                onClick={(e) => {
+                                    e.preventDefault()
+                                    setIsSearchOpen(true)
+                                }}
+                                className="p-2 rounded-lg transition-colors flex-shrink-0 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-0 active:outline-none"
+                                aria-label="Поиск технологий"
+                            >
+                                <Search className="w-5 h-5 text-gray-600 dark:text-gray-400 transition-colors" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Selected Technologies Tags */}
+                {selectedTechStack.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                         {selectedTechStack.map((tech) => (
                             <span
@@ -112,8 +161,8 @@ export default function TechStackStep({
                             </span>
                         ))}
                     </div>
-                </div>
-            )}
+                )}
+            </div>
 
             {/* Available Technologies */}
             <div className="mb-8">

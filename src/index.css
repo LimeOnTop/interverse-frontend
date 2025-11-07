@@ -161,7 +161,14 @@
     input[type="date"].input-field-adaptive,
     input[type="datetime-local"].input-field-adaptive {
         @apply bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100;
-        color-scheme: light dark;
+        color-scheme: light;
+    }
+
+    .dark input[type="date"].input-field-adaptive,
+    .dark input[type="datetime-local"].input-field-adaptive {
+        color-scheme: dark;
+        color: rgb(243 244 246);
+        /* gray-100 */
     }
 
     input[type="date"].input-field-adaptive::-webkit-calendar-picker-indicator,
@@ -173,13 +180,6 @@
     .dark input[type="date"].input-field-adaptive::-webkit-calendar-picker-indicator,
     .dark input[type="datetime-local"].input-field-adaptive::-webkit-calendar-picker-indicator {
         filter: invert(1) brightness(1.5);
-    }
-
-    /* Ensure date input text is visible in dark mode */
-    .dark input[type="date"].input-field-adaptive,
-    .dark input[type="datetime-local"].input-field-adaptive {
-        color: rgb(243 244 246);
-        /* gray-100 */
     }
 
     /* Date input placeholder styling */

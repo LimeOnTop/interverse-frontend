@@ -41,10 +41,10 @@ export default function InterviewWizardPage() {
     const handleSubmit = async () => {
         setIsLoading(true)
         try {
-            // First, create a candidate (for demo purposes, we'll use a placeholder)
+            // First, create a candidate (email is optional)
             const candidateData = {
                 name: 'Новый кандидат',
-                email: 'candidate@example.com',
+                email: '', // Email is optional to avoid duplicate key errors
                 phone: '',
                 experience: '0',
                 level: selectedLevel,
