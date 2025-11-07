@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useTheme } from '../contexts/ThemeContext'
+import { api } from '../services/api'
 
 interface Question {
     id: string
@@ -28,10 +29,10 @@ interface Interview {
     title: string
     description: string
     scheduled_at: string
-    duration: number
+    duration?: number
     level: string
     specialization: string
-    candidate: {
+    candidate?: {
         name: string
         email: string
     }
@@ -40,7 +41,13 @@ interface Interview {
 interface InterviewSession {
     sessionId: string
     questions: Question[]
-    interview: Interview
+    interview: Interview & {
+        candidate: {
+            name: string
+            email: string
+        }
+        duration: number
+    }
 }
 
 export default function InterviewPage() {
@@ -59,7 +66,9 @@ export default function InterviewPage() {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        loadInterviewSession()
+        if (id) {
+            loadInterviewSession()
+        }
     }, [id])
 
     useEffect(() => {
@@ -72,21 +81,84 @@ export default function InterviewPage() {
         return () => clearInterval(interval)
     }, [isPlaying])
 
-    const loadInterviewSession = () => {
+    const loadInterviewSession = async () => {
         try {
+            // First, try to load from localStorage
             const sessionData = localStorage.getItem('interview-session')
             if (sessionData) {
-                const parsed = JSON.parse(sessionData)
-                setSession(parsed)
-                setLoading(false)
+                try {
+                    const parsed = JSON.parse(sessionData)
+                    // Check if the session matches the current interview ID
+                    if (parsed.interview && parsed.interview.id === id) {
+                        // Ensure candidate data exists
+                        if (!parsed.interview.candidate) {
+                            parsed.interview.candidate = {
+                                name: 'Кандидат',
+                                email: ''
+                            }
+                        }
+                        // Ensure duration exists
+                        if (!parsed.interview.duration) {
+                            parsed.interview.duration = 60
+                        }
+                        setSession(parsed)
+                        setLoading(false)
+                        return
+                    }
+                } catch (parseError) {
+                    console.error('Error parsing session data:', parseError)
+                    // Continue to load from API
+                }
+            }
+
+            // If no session or ID mismatch, try to load interview from API
+            if (id) {
+                try {
+                    const interviewResponse = await api.get(`/interviews/${id}`)
+                    const interview = interviewResponse.data.interview
+
+                    // Create a basic session structure with interview data
+                    // Questions will need to be generated separately
+                    const candidateData = interview.candidate || {}
+                    const basicSession: InterviewSession = {
+                        sessionId: `session-${id}`,
+                        questions: [],
+                        interview: {
+                            id: interview.id,
+                            title: interview.title || 'Интервью',
+                            description: interview.description || '',
+                            scheduled_at: interview.scheduled_at || '',
+                            duration: (interview as any).duration || 60,
+                            level: interview.level || '',
+                            specialization: interview.specialization || '',
+                            candidate: {
+                                name: candidateData.name || 'Кандидат',
+                                email: candidateData.email || ''
+                            }
+                        }
+                    }
+
+                    setSession(basicSession)
+                    setLoading(false)
+
+                    // Show message that questions need to be generated
+                    toast('Загружено интервью. Для начала работы сгенерируйте вопросы.', {
+                        icon: 'ℹ️',
+                        duration: 4000
+                    })
+                } catch (error: any) {
+                    console.error('Error loading interview:', error)
+                    toast.error('Ошибка при загрузке интервью')
+                    navigate('/dashboard')
+                }
             } else {
-                toast.error('Сессия интервью не найдена')
-                navigate('/interview-service')
+                toast.error('ID интервью не указан')
+                navigate('/dashboard')
             }
         } catch (error) {
             console.error('Error loading session:', error)
             toast.error('Ошибка загрузки сессии')
-            navigate('/interview-service')
+            navigate('/dashboard')
         }
     }
 
@@ -105,7 +177,7 @@ export default function InterviewPage() {
                 return newScores
             })
         } else {
-        setScores(prev => ({ ...prev, [questionId]: score }))
+            setScores(prev => ({ ...prev, [questionId]: score }))
         }
     }
 
@@ -178,14 +250,86 @@ export default function InterviewPage() {
         return (
             <div className="text-center py-12">
                 <h2 className={`text-2xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    Сессия интервью не найдена
+                    Интервью не найдено
                 </h2>
                 <button
-                    onClick={() => navigate('/interview-service')}
-                    className="btn-primary"
+                    onClick={() => navigate('/dashboard')}
+                    className="btn-primary-adaptive px-6 py-3 rounded-xl"
                 >
-                    Вернуться к выбору интервью
+                    Вернуться на главную
                 </button>
+            </div>
+        )
+    }
+
+    // Show message if no questions are available
+    if (session.questions.length === 0) {
+        return (
+            <div className="max-w-4xl mx-auto space-y-6">
+                {/* Header */}
+                <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center">
+                            <button
+                                onClick={() => navigate('/dashboard')}
+                                className={`mr-4 p-2 rounded-lg transition-colors ${isDark
+                                    ? 'text-gray-300 hover:text-white hover:bg-gray-700'
+                                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
+                                    }`}
+                            >
+                                <ArrowLeft className="w-5 h-5" />
+                            </button>
+                            <div>
+                                <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                    {session.interview.title}
+                                </h1>
+                                <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{session.interview.description}</p>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <div className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                                Кандидат: <span className="font-medium">{session.interview.candidate.name || 'Не указан'}</span>
+                            </div>
+                            <div className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                                {session.interview.specialization || 'Не указано'} • {session.interview.level || 'Не указано'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* No Questions Message */}
+                <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-12 text-center">
+                    <h3 className={`text-xl font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        Вопросы не сгенерированы
+                    </h3>
+                    <p className={`mb-6 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                        Для начала работы с интервью необходимо сгенерировать вопросы.
+                    </p>
+                    <button
+                        onClick={async () => {
+                            try {
+                                const response = await api.post('/interviews/generate-questions', {
+                                    interview_id: id
+                                })
+
+                                // Save session to localStorage
+                                localStorage.setItem('interview-session', JSON.stringify({
+                                    sessionId: response.data.session_id,
+                                    questions: response.data.questions,
+                                    interview: response.data.interview
+                                }))
+
+                                // Reload the page to show questions
+                                window.location.reload()
+                            } catch (error: any) {
+                                toast.error('Ошибка при генерации вопросов')
+                            }
+                        }}
+                        className="btn-primary-adaptive px-6 py-3 rounded-xl"
+                    >
+                        Сгенерировать вопросы
+                    </button>
+                </div>
             </div>
         )
     }
@@ -214,10 +358,10 @@ export default function InterviewPage() {
                     </div>
                     <div className="text-right">
                         <div className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                            Кандидат: <span className="font-medium">{session.interview.candidate.name}</span>
+                            Кандидат: <span className="font-medium">{session.interview.candidate?.name || 'Не указан'}</span>
                         </div>
                         <div className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                            {session.interview.specialization} • {session.interview.level}
+                            {session.interview.specialization || 'Не указано'} • {session.interview.level || 'Не указано'}
                         </div>
                     </div>
                 </div>
@@ -347,10 +491,10 @@ export default function InterviewPage() {
                                                         key={rating}
                                                         onClick={() => handleScoreChange(currentQuestion.id, rating)}
                                                         className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold transition-all duration-200 transform hover:scale-105 ${scores[currentQuestion.id] === rating
-                                                                ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg ring-2 ring-yellow-300'
-                                                                : isDark
-                                                                    ? 'bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-yellow-400 hover:shadow-md'
-                                                                    : 'bg-gray-200 text-gray-500 hover:bg-gray-300 hover:text-yellow-500 hover:shadow-md'
+                                                            ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg ring-2 ring-yellow-300'
+                                                            : isDark
+                                                                ? 'bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-yellow-400 hover:shadow-md'
+                                                                : 'bg-gray-200 text-gray-500 hover:bg-gray-300 hover:text-yellow-500 hover:shadow-md'
                                                             }`}
                                                     >
                                                         {rating}
@@ -372,10 +516,10 @@ export default function InterviewPage() {
                                                                 <span className="text-gray-400">5</span>
                                                             </div>
                                                             <div className={`text-sm ${scores[currentQuestion.id] === 1 ? 'text-red-500' :
-                                                                    scores[currentQuestion.id] === 2 ? 'text-orange-500' :
-                                                                        scores[currentQuestion.id] === 3 ? 'text-yellow-500' :
-                                                                            scores[currentQuestion.id] === 4 ? 'text-green-500' :
-                                                                                'text-green-600'
+                                                                scores[currentQuestion.id] === 2 ? 'text-orange-500' :
+                                                                    scores[currentQuestion.id] === 3 ? 'text-yellow-500' :
+                                                                        scores[currentQuestion.id] === 4 ? 'text-green-500' :
+                                                                            'text-green-600'
                                                                 }`}>
                                                                 {scores[currentQuestion.id] === 1 ? 'Неудовлетворительно' :
                                                                     scores[currentQuestion.id] === 2 ? 'Удовлетворительно' :
@@ -396,8 +540,8 @@ export default function InterviewPage() {
                                                     <button
                                                         onClick={() => handleScoreChange(currentQuestion.id, 0)}
                                                         className={`text-xs px-4 py-2 rounded-lg transition-all duration-200 ${isDark
-                                                                ? 'text-gray-400 hover:text-gray-300 hover:bg-gray-700 border border-gray-600'
-                                                                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200 border border-gray-300'
+                                                            ? 'text-gray-400 hover:text-gray-300 hover:bg-gray-700 border border-gray-600'
+                                                            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200 border border-gray-300'
                                                             }`}
                                                     >
                                                         ✕ Сбросить оценку
@@ -456,7 +600,7 @@ export default function InterviewPage() {
                             : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                         : isDark
                             ? 'bg-gray-600 text-gray-200 hover:bg-gray-500'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                         }`}
                 >
                     <ArrowLeft className="w-5 h-5" />

@@ -10,10 +10,10 @@ interface Interview {
     title: string
     description: string
     scheduled_at: string
-    duration: number
+    duration?: number
     level: string
     specialization: string
-    candidate: {
+    candidate?: {
         name: string
         email: string
     }
@@ -33,8 +33,13 @@ export default function InterviewServicePage() {
     const fetchScheduledInterviews = async () => {
         try {
             setLoading(true)
-            const response = await api.get('/interviews/scheduled')
-            setInterviews(response.data.interviews || [])
+            // Use GetInterviews with status filter instead of GetScheduledInterviews
+            // to get all scheduled interviews regardless of date
+            const response = await api.get('/interviews/?status=scheduled')
+            console.log('Fetched interviews:', response.data)
+            const interviewsList = response.data.interviews || []
+            console.log('Interviews list:', interviewsList)
+            setInterviews(interviewsList)
         } catch (error: any) {
             console.error('Error fetching interviews:', error)
             toast.error('Ошибка при загрузке интервью')
@@ -163,16 +168,22 @@ export default function InterviewServicePage() {
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                        <div className={`flex items-center text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                                            <User className="w-4 h-4 mr-2" />
-                                            <span className="font-medium">{interview.candidate.name}</span>
-                                            <span className="mx-2">•</span>
-                                            <span>{interview.candidate.email}</span>
-                                        </div>
+                                        {interview.candidate && (
+                                            <div className={`flex items-center text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                                                <User className="w-4 h-4 mr-2" />
+                                                <span className="font-medium">{interview.candidate.name || 'Не указан'}</span>
+                                                {interview.candidate.email && (
+                                                    <>
+                                                        <span className="mx-2">•</span>
+                                                        <span>{interview.candidate.email}</span>
+                                                    </>
+                                                )}
+                                            </div>
+                                        )}
 
                                         <div className={`flex items-center text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
                                             <Clock className="w-4 h-4 mr-2" />
-                                            <span>{interview.duration} минут</span>
+                                            <span>{interview.duration || 60} минут</span>
                                         </div>
 
                                         <div className={`flex items-center text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>

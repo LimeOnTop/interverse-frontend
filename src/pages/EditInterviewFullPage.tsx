@@ -214,57 +214,57 @@ export default function EditInterviewFullPage() {
                 </p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-2 gap-12">
                 {/* Interview Section */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="card p-6"
+                    className="space-y-8"
                 >
-                    <div className="flex items-center mb-6">
+                    <div className="flex items-center mb-8">
                         <Calendar className="w-6 h-6 text-inter-verse-green dark:text-purple-400 mr-3" />
                         <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                             Информация об интервью
                         </h2>
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="space-y-6">
                         {/* Title */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
                                 Название
                             </label>
                             <input
                                 type="text"
                                 value={interviewData.title}
                                 onChange={(e) => setInterviewData({ ...interviewData, title: e.target.value })}
-                                className="input-field-adaptive w-full"
+                                className="input-field-underlined text-lg font-medium text-gray-900 dark:text-gray-100"
                                 placeholder="Название интервью"
                             />
                         </div>
 
                         {/* Description */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
                                 Описание
                             </label>
                             <textarea
                                 value={interviewData.description}
                                 onChange={(e) => setInterviewData({ ...interviewData, description: e.target.value })}
-                                className="input-field-adaptive w-full min-h-[100px]"
+                                className="input-field-underlined text-base text-gray-900 dark:text-gray-100"
                                 placeholder="Описание интервью"
                             />
                         </div>
 
                         {/* Status */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
                                 Статус
                             </label>
                             <select
                                 value={interviewData.status}
                                 onChange={(e) => setInterviewData({ ...interviewData, status: e.target.value })}
-                                className="input-field-adaptive w-full"
+                                className="input-field-underlined text-base font-medium text-gray-900 dark:text-gray-100"
                             >
                                 <option value="scheduled">Запланировано</option>
                                 <option value="in_progress">В процессе</option>
@@ -275,7 +275,7 @@ export default function EditInterviewFullPage() {
 
                         {/* Scheduled At */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
                                 Дата и время
                             </label>
                             <input
@@ -285,19 +285,19 @@ export default function EditInterviewFullPage() {
                                     const date = e.target.value ? new Date(e.target.value).toISOString() : ''
                                     setInterviewData({ ...interviewData, scheduled_at: date })
                                 }}
-                                className="input-field-adaptive w-full"
+                                className="input-field-underlined text-base font-medium text-gray-900 dark:text-gray-100"
                             />
                         </div>
 
                         {/* Specialization */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
                                 Специализация
                             </label>
                             <select
                                 value={interviewData.specialization}
                                 onChange={(e) => setInterviewData({ ...interviewData, specialization: e.target.value })}
-                                className="input-field-adaptive w-full"
+                                className="input-field-underlined text-base font-medium text-gray-900 dark:text-gray-100"
                             >
                                 <option value="">Выберите специализацию</option>
                                 <option value="frontend">Frontend</option>
@@ -310,13 +310,13 @@ export default function EditInterviewFullPage() {
 
                         {/* Level */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
                                 Уровень
                             </label>
                             <select
                                 value={interviewData.level}
                                 onChange={(e) => setInterviewData({ ...interviewData, level: e.target.value })}
-                                className="input-field-adaptive w-full"
+                                className="input-field-underlined text-base font-medium text-gray-900 dark:text-gray-100"
                             >
                                 <option value="">Выберите уровень</option>
                                 <option value="intern">Intern</option>
@@ -329,10 +329,10 @@ export default function EditInterviewFullPage() {
 
                         {/* Tech Stack */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
                                 Технологии
                             </label>
-                            <div className="flex flex-wrap gap-2 mb-2">
+                            <div className="flex flex-wrap gap-2 mb-3">
                                 {techStack.map((tech, index) => (
                                     <span
                                         key={index}
@@ -359,7 +359,7 @@ export default function EditInterviewFullPage() {
                                         e.currentTarget.value = ''
                                     }
                                 }}
-                                className="input-field-adaptive w-full"
+                                className="input-field-underlined text-base text-gray-900 dark:text-gray-100"
                             />
                         </div>
                     </div>
@@ -370,19 +370,19 @@ export default function EditInterviewFullPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="card p-6"
+                    className="space-y-8"
                 >
-                    <div className="flex items-center mb-6">
+                    <div className="flex items-center mb-8">
                         <User className="w-6 h-6 text-inter-verse-green dark:text-purple-400 mr-3" />
                         <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                             Данные кандидата
                         </h2>
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="space-y-6">
                         {/* Name */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
                                 <User className="w-4 h-4 inline mr-1" />
                                 ФИО
                             </label>
@@ -390,14 +390,14 @@ export default function EditInterviewFullPage() {
                                 type="text"
                                 value={candidateData.name}
                                 onChange={(e) => setCandidateData({ ...candidateData, name: e.target.value })}
-                                className="input-field-adaptive w-full"
+                                className="input-field-underlined text-base font-medium text-gray-900 dark:text-gray-100"
                                 placeholder="Имя кандидата"
                             />
                         </div>
 
                         {/* Email */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
                                 <Mail className="w-4 h-4 inline mr-1" />
                                 Email
                             </label>
@@ -405,14 +405,14 @@ export default function EditInterviewFullPage() {
                                 type="email"
                                 value={candidateData.email}
                                 onChange={(e) => setCandidateData({ ...candidateData, email: e.target.value })}
-                                className="input-field-adaptive w-full"
+                                className="input-field-underlined text-base font-medium text-gray-900 dark:text-gray-100"
                                 placeholder="email@example.com"
                             />
                         </div>
 
                         {/* Phone */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
                                 <Phone className="w-4 h-4 inline mr-1" />
                                 Телефон
                             </label>
@@ -420,14 +420,14 @@ export default function EditInterviewFullPage() {
                                 type="tel"
                                 value={candidateData.phone}
                                 onChange={(e) => setCandidateData({ ...candidateData, phone: e.target.value })}
-                                className="input-field-adaptive w-full"
+                                className="input-field-underlined text-base font-medium text-gray-900 dark:text-gray-100"
                                 placeholder="+7 (999) 123-45-67"
                             />
                         </div>
 
                         {/* Position */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
                                 <Briefcase className="w-4 h-4 inline mr-1" />
                                 Позиция
                             </label>
@@ -435,14 +435,14 @@ export default function EditInterviewFullPage() {
                                 type="text"
                                 value={candidateData.position}
                                 onChange={(e) => setCandidateData({ ...candidateData, position: e.target.value })}
-                                className="input-field-adaptive w-full"
+                                className="input-field-underlined text-base font-medium text-gray-900 dark:text-gray-100"
                                 placeholder="Должность"
                             />
                         </div>
 
                         {/* Experience */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
                                 <Award className="w-4 h-4 inline mr-1" />
                                 Опыт работы
                             </label>
@@ -450,27 +450,27 @@ export default function EditInterviewFullPage() {
                                 type="text"
                                 value={candidateData.experience}
                                 onChange={(e) => setCandidateData({ ...candidateData, experience: e.target.value })}
-                                className="input-field-adaptive w-full"
+                                className="input-field-underlined text-base font-medium text-gray-900 dark:text-gray-100"
                                 placeholder="Например: 3 года"
                             />
                         </div>
 
                         {/* Skills */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
                                 Навыки
                             </label>
                             <textarea
                                 value={candidateData.skills}
                                 onChange={(e) => setCandidateData({ ...candidateData, skills: e.target.value })}
-                                className="input-field-adaptive w-full min-h-[80px]"
+                                className="input-field-underlined text-base text-gray-900 dark:text-gray-100"
                                 placeholder="Список навыков"
                             />
                         </div>
 
                         {/* Resume URL */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
                                 <FileText className="w-4 h-4 inline mr-1" />
                                 Ссылка на резюме
                             </label>
@@ -478,14 +478,14 @@ export default function EditInterviewFullPage() {
                                 type="url"
                                 value={candidateData.resume_url}
                                 onChange={(e) => setCandidateData({ ...candidateData, resume_url: e.target.value })}
-                                className="input-field-adaptive w-full"
+                                className="input-field-underlined text-base font-medium text-gray-900 dark:text-gray-100"
                                 placeholder="https://example.com/resume.pdf"
                             />
                         </div>
 
                         {/* LinkedIn URL */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
                                 <Linkedin className="w-4 h-4 inline mr-1" />
                                 LinkedIn
                             </label>
@@ -493,14 +493,14 @@ export default function EditInterviewFullPage() {
                                 type="url"
                                 value={candidateData.linkedin_url}
                                 onChange={(e) => setCandidateData({ ...candidateData, linkedin_url: e.target.value })}
-                                className="input-field-adaptive w-full"
+                                className="input-field-underlined text-base font-medium text-gray-900 dark:text-gray-100"
                                 placeholder="https://linkedin.com/in/username"
                             />
                         </div>
 
                         {/* GitHub URL */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
                                 <Github className="w-4 h-4 inline mr-1" />
                                 GitHub
                             </label>
@@ -508,20 +508,20 @@ export default function EditInterviewFullPage() {
                                 type="url"
                                 value={candidateData.github_url}
                                 onChange={(e) => setCandidateData({ ...candidateData, github_url: e.target.value })}
-                                className="input-field-adaptive w-full"
+                                className="input-field-underlined text-base font-medium text-gray-900 dark:text-gray-100"
                                 placeholder="https://github.com/username"
                             />
                         </div>
 
                         {/* Status */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
                                 Статус кандидата
                             </label>
                             <select
                                 value={candidateData.status}
                                 onChange={(e) => setCandidateData({ ...candidateData, status: e.target.value })}
-                                className="input-field-adaptive w-full"
+                                className="input-field-underlined text-base font-medium text-gray-900 dark:text-gray-100"
                             >
                                 <option value="active">Активный</option>
                                 <option value="archived">Архивирован</option>

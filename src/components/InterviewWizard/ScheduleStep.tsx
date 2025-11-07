@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Calendar, Clock, ChevronRight, CalendarDays } from 'lucide-react'
 import { motion } from 'framer-motion'
 
@@ -15,12 +15,25 @@ export default function ScheduleStep({
     onNext,
     onBack,
 }: ScheduleStepProps) {
+    // Get today's date in YYYY-MM-DD format
+    const getTodayDate = () => {
+        return new Date().toISOString().split('T')[0]
+    }
+
     const [selectedDate, setSelectedDate] = useState(
-        scheduledAt ? new Date(scheduledAt).toISOString().split('T')[0] : ''
+        scheduledAt ? new Date(scheduledAt).toISOString().split('T')[0] : getTodayDate()
     )
     const [selectedTime, setSelectedTime] = useState(
         scheduledAt ? new Date(scheduledAt).toISOString().split('T')[1]?.substring(0, 5) : ''
     )
+
+    // Set default date to today if scheduledAt is empty
+    useEffect(() => {
+        if (!scheduledAt) {
+            const today = getTodayDate()
+            setSelectedDate(today)
+        }
+    }, [scheduledAt])
 
     const handleDateChange = (date: string) => {
         setSelectedDate(date)
