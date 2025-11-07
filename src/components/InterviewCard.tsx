@@ -46,12 +46,13 @@ const levelColors = {
     lead: 'bg-orange-200 text-orange-800 dark:bg-orange-600 dark:text-orange-200 border border-orange-300 dark:border-orange-500',
 }
 
+// Specialization without colored background - just text
 const specializationColors = {
-    frontend: 'bg-blue-200 text-blue-800 dark:bg-blue-600 dark:text-blue-200 border border-blue-300 dark:border-blue-500',
-    backend: 'bg-green-200 text-green-800 dark:bg-green-600 dark:text-green-200 border border-green-300 dark:border-green-500',
-    devops: 'bg-purple-200 text-purple-800 dark:bg-purple-600 dark:text-purple-200 border border-purple-300 dark:border-purple-500',
-    qa: 'bg-yellow-200 text-yellow-800 dark:bg-yellow-600 dark:text-yellow-200 border border-yellow-300 dark:border-yellow-500',
-    data_science: 'bg-pink-200 text-pink-800 dark:bg-pink-600 dark:text-pink-200 border border-pink-300 dark:border-pink-500',
+    frontend: 'text-gray-700 dark:text-gray-300',
+    backend: 'text-gray-700 dark:text-gray-300',
+    devops: 'text-gray-700 dark:text-gray-300',
+    qa: 'text-gray-700 dark:text-gray-300',
+    data_science: 'text-gray-700 dark:text-gray-300',
 }
 
 export default function InterviewCard({ interview, onClick }: InterviewCardProps) {
@@ -161,7 +162,7 @@ export default function InterviewCard({ interview, onClick }: InterviewCardProps
                 {/* Specialization */}
                 <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-xl">
                     <div className="text-xs text-gray-500 dark:text-gray-400 mb-1.5 h-4">Специализация</div>
-                    <div className={`text-sm font-medium px-2 py-1 rounded-md inline-block ${specializationColors[interview.specialization as keyof typeof specializationColors]}`}>
+                    <div className={`text-sm font-medium ${specializationColors[interview.specialization as keyof typeof specializationColors]}`}>
                         {getSpecializationLabel(interview.specialization)}
                     </div>
                 </div>
