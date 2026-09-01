@@ -1,10 +1,16 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Plus, User, Mail, Phone, Calendar } from 'lucide-react'
+import { Plus, Briefcase, Mail, Phone, Calendar } from 'lucide-react'
 import { api } from '../services/api'
 import toast from 'react-hot-toast'
 import CandidateFilters from '../components/CandidateFilters'
-import { useTheme } from '../contexts/ThemeContext'
+import PageHeader from '../components/ui/PageHeader'
+import PageTransition from '../components/ui/PageTransition'
+import Card from '../components/ui/Card'
+import EmptyState from '../components/ui/EmptyState'
+import Spinner from '../components/ui/Spinner'
+import Badge from '../components/ui/Badge'
+import Button from '../components/ui/Button'
 
 interface Candidate {
     id: string
@@ -24,7 +30,6 @@ export default function CandidatesPage() {
     const [searchTerm, setSearchTerm] = useState('')
     const [levelFilter, setLevelFilter] = useState('')
     const [specializationFilter, setSpecializationFilter] = useState('')
-    const { isDark } = useTheme()
 
     useEffect(() => {
         fetchCandidates()
@@ -40,7 +45,7 @@ export default function CandidatesPage() {
             const response = await api.get(`/candidates/?${params.toString()}`)
             setCandidates(response.data.candidates || [])
         } catch (error: any) {
-            toast.error('Ошибка при загрузке кандидатов')
+            toast.error('Ошибка при загрузке вакансий')
         } finally {
             setLoading(false)
         }
@@ -80,29 +85,20 @@ export default function CandidatesPage() {
         return labels[level] || level
     }
 
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center h-64">
-                <div className={`animate-spin rounded-full h-12 w-12 border-b-2 ${isDark ? 'border-purple-500' : 'border-inter-verse-green'}`}></div>
-            </div>
-        )
-    }
+    if (loading) return <Spinner size="lg" className="h-64" />
 
     return (
-        <div className="space-y-8">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Кандидаты</h1>
-                    <p className="text-gray-600 dark:text-gray-400 mt-1">Управление базой кандидатов</p>
-                </div>
-                <button className="btn-primary-adaptive inline-flex items-center space-x-2">
-                    <Plus className="w-5 h-5" />
-                    <span>Добавить кандидата</span>
-                </button>
-            </div>
+        <PageTransition className="space-y-8">
+            <PageHeader
+                title="Вакансии"
+                description="Управление открытыми вакансиями"
+                action={
+                    <Button>
+                        <Plus className="w-5 h-5" /> Добавить вакансию
+                    </Button>
+                }
+            />
 
-            {/* Modern Filters */}
             <CandidateFilters
                 searchTerm={searchTerm}
                 onSearchChange={setSearchTerm}
@@ -114,113 +110,101 @@ export default function CandidatesPage() {
                 onClearFilters={handleClearFilters}
             />
 
-            {/* Candidates List */}
-            <div>
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
-                    Кандидаты ({filteredCandidates.length})
+            <section>
+                <h2 className="text-lg font-semibold mb-4 tabular-nums">
+                    Вакансии <span className="text-secondary font-normal">({filteredCandidates.length})</span>
                 </h2>
 
                 {filteredCandidates.length === 0 ? (
-                    <div className="card p-12 text-center">
-                        <User className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                            Нет кандидатов
-                        </h3>
-                        <p className="text-gray-600 dark:text-gray-400 mb-6">
-                            Добавьте кандидатов для проведения интервью
-                        </p>
-                        <button className="btn-primary-adaptive inline-flex items-center space-x-2">
-                            <Plus className="w-5 h-5" />
-                            <span>Добавить кандидата</span>
-                        </button>
-                    </div>
+                    <EmptyState
+                        icon={Briefcase}
+                        title="Нет вакансий"
+                        description="Добавьте вакансию, чтобы начать подбор"
+                        action={
+                            <Button>
+                                <Plus className="w-5 h-5" /> Добавить вакансию
+                            </Button>
+                        }
+                    />
                 ) : (
-                    <div className="grid gap-6">
+                    <div className="grid gap-4">
                         {filteredCandidates.map((candidate, index) => (
                             <motion.div
                                 key={candidate.id}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.1 }}
-                                className="card p-6 hover:shadow-lg transition-all duration-200"
+                                transition={{ delay: index * 0.05, duration: 0.4 }}
                             >
-                                <div className="flex items-start justify-between">
-                                    <div className="flex-1">
-                                        <div className="flex items-center space-x-3 mb-3">
-                                            <div className="w-12 h-12 gradient-bg-adaptive rounded-full flex items-center justify-center">
-                                                <User className="w-6 h-6 text-white" />
-                                            </div>
-                                            <div>
-                                                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                                                    {candidate.name}
-                                                </h3>
-                                                <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
-                                                    <span className="flex items-center space-x-1">
-                                                        <Mail className="w-4 h-4" />
-                                                        <span>{candidate.email}</span>
-                                                    </span>
-                                                    {candidate.phone && (
-                                                        <span className="flex items-center space-x-1">
-                                                            <Phone className="w-4 h-4" />
-                                                            <span>{candidate.phone}</span>
+                                <Card hover padding="md">
+                                    <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+                                        <div className="flex-1">
+                                            <div className="flex items-start gap-3 mb-4">
+                                                <div className="w-12 h-12 gradient-bg-adaptive flex items-center justify-center shrink-0">
+                                                    <Briefcase className="w-6 h-6 text-white" />
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                                                        {candidate.name}
+                                                    </h3>
+                                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-secondary mt-1">
+                                                        <span className="flex items-center gap-1">
+                                                            <Mail className="w-4 h-4" />
+                                                            {candidate.email}
                                                         </span>
-                                                    )}
+                                                        {candidate.phone && (
+                                                            <span className="flex items-center gap-1">
+                                                                <Phone className="w-4 h-4" />
+                                                                {candidate.phone}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        <div className="grid md:grid-cols-3 gap-4">
-                                            <div>
-                                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Специализация</p>
-                                                <p className="text-gray-900 dark:text-gray-100">{getSpecializationLabel(candidate.specialization)}</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Уровень</p>
-                                                <p className="text-gray-900 dark:text-gray-100">{getLevelLabel(candidate.level)}</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Опыт</p>
-                                                <p className="text-gray-900 dark:text-gray-100">{candidate.experience} лет</p>
-                                            </div>
-                                        </div>
-
-                                        {candidate.tech_stack && (
-                                            <div className="mt-4">
-                                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Технологии</p>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {JSON.parse(candidate.tech_stack).map((tech: string, techIndex: number) => (
-                                                        <span
-                                                            key={techIndex}
-                                                            className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md text-xs"
-                                                        >
-                                                            {tech}
-                                                        </span>
-                                                    ))}
+                                            <div className="grid sm:grid-cols-3 gap-4 mb-4">
+                                                <div>
+                                                    <p className="text-xs font-medium uppercase tracking-wide text-secondary mb-1">Направление</p>
+                                                    <p className="text-gray-900 dark:text-gray-100">{getSpecializationLabel(candidate.specialization)}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs font-medium uppercase tracking-wide text-secondary mb-1">Уровень</p>
+                                                    <p className="text-gray-900 dark:text-gray-100">{getLevelLabel(candidate.level)}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs font-medium uppercase tracking-wide text-secondary mb-1">Опыт</p>
+                                                    <p className="text-gray-900 dark:text-gray-100">{candidate.experience} лет</p>
                                                 </div>
                                             </div>
-                                        )}
-                                    </div>
 
-                                    <div className="text-right">
-                                        <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-2">
-                                            <Calendar className="w-4 h-4 mr-1" />
-                                            <span>Добавлен: {new Date(candidate.created_at).toLocaleDateString('ru-RU')}</span>
+                                            {candidate.tech_stack && (
+                                                <div>
+                                                    <p className="text-xs font-medium uppercase tracking-wide text-secondary mb-2">Технологии</p>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {JSON.parse(candidate.tech_stack).map((tech: string, techIndex: number) => (
+                                                            <Badge key={techIndex}>{tech}</Badge>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
-                                        <div className="flex space-x-2">
-                                            <button className="btn-secondary text-sm px-4 py-2">
-                                                Редактировать
-                                            </button>
-                                            <button className="btn-primary-adaptive text-sm px-4 py-2">
-                                                Создать интервью
-                                            </button>
+
+                                        <div className="flex flex-col items-start lg:items-end gap-3 shrink-0">
+                                            <div className="flex items-center text-sm text-secondary">
+                                                <Calendar className="w-4 h-4 mr-1" />
+                                                Создана: {new Date(candidate.created_at).toLocaleDateString('ru-RU')}
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <Button variant="secondary" className="text-sm px-4 py-2">Редактировать</Button>
+                                                <Button className="text-sm px-4 py-2">Начать тренировку</Button>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                </Card>
                             </motion.div>
                         ))}
                     </div>
                 )}
-            </div>
-        </div>
+            </section>
+        </PageTransition>
     )
 }

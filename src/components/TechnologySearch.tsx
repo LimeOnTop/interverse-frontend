@@ -152,12 +152,12 @@ const TechnologySearch: React.FC<TechnologySearchProps> = ({
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.8 }}
-                            className="inline-flex items-center gap-2 px-3 py-1 gradient-bg-adaptive text-white rounded-full text-sm"
+                            className="inline-flex items-center gap-2 px-3 py-1 gradient-bg-adaptive text-white rounded-none text-sm"
                         >
                             <span>{tech}</span>
                             <button
                                 onClick={() => handleTechnologyRemove(tech)}
-                                className="hover:bg-white dark:bg-gray-800 hover:bg-opacity-20 rounded-full p-0.5 transition-colors"
+                                className="hover:bg-white dark:bg-iv-dark-surface hover:bg-opacity-20 rounded-none p-0.5 transition-colors"
                             >
                                 <X size={14} />
                             </button>
@@ -182,7 +182,7 @@ const TechnologySearch: React.FC<TechnologySearchProps> = ({
                 />
                 {isLoading && (
                     <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-inter-verse-green"></div>
+                        <div className="animate-spin rounded-none h-4 w-4 border-b-2 border-inter-verse-green"></div>
                     </div>
                 )}
             </div>
@@ -194,7 +194,7 @@ const TechnologySearch: React.FC<TechnologySearchProps> = ({
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto"
+                        className="absolute z-50 w-full mt-2 bg-white dark:bg-iv-dark-surface border border-gray-200 dark:border-gray-700 rounded-none shadow-lg max-h-60 overflow-y-auto"
                     >
                         {technologies.length === 0 && !isLoading ? (
                             <div className="p-4 text-center text-gray-500">
@@ -215,7 +215,7 @@ const TechnologySearch: React.FC<TechnologySearchProps> = ({
                                             <div className="flex-1">
                                                 <div className="flex items-center gap-2 mb-1">
                                                     <span className="font-medium text-gray-900">{tech.name}</span>
-                                                    <span className={`px-2 py-0.5 rounded-full text-xs ${getCategoryColor(tech.category)}`}>
+                                                    <span className={`px-2 py-0.5 rounded-none text-xs ${getCategoryColor(tech.category)}`}>
                                                         {tech.category}
                                                     </span>
                                                 </div>

@@ -14,10 +14,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                 toastOptions={{
                     duration: 4000,
                     style: {
-                        background: '#fff',
-                        color: '#013220',
-                        border: '1px solid #e5e7eb',
-                        borderRadius: '12px',
+                        background: 'var(--iv-surface)',
+                        color: 'var(--iv-text)',
+                        border: '1px solid var(--iv-border)',
+                        borderRadius: '0',
+                        boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.08)',
                     },
                 }}
             />

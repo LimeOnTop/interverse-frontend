@@ -2,18 +2,34 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import { api } from '../services/api'
+import { startInterviewSession } from '../lib/interviewSession'
 import toast from 'react-hot-toast'
 import StepIndicator from '../components/InterviewWizard/StepIndicator'
 import SpecializationStep from '../components/InterviewWizard/SpecializationStep'
 import TechStackStep from '../components/InterviewWizard/TechStackStep'
 import LevelStep from '../components/InterviewWizard/LevelStep'
+import SchedulePromptStep from '../components/InterviewWizard/SchedulePromptStep'
 import ScheduleStep from '../components/InterviewWizard/ScheduleStep'
+import PageHeader from '../components/ui/PageHeader'
+import PageTransition from '../components/ui/PageTransition'
+import Card from '../components/ui/Card'
+import Spinner from '../components/ui/Spinner'
 
 const STEPS = {
     SPECIALIZATION: 1,
     TECH_STACK: 2,
     LEVEL: 3,
-    SCHEDULE: 4,
+    SCHEDULE_PROMPT: 4,
+    SCHEDULE: 5,
+}
+
+const DISPLAY_STEPS = 4
+
+function getDisplayStep(step: number): number {
+    if (step >= STEPS.SCHEDULE_PROMPT) {
+        return DISPLAY_STEPS
+    }
+    return step
 }
 
 export default function InterviewWizardPage() {
@@ -26,62 +42,35 @@ export default function InterviewWizardPage() {
 
     const navigate = useNavigate()
 
-    const handleNext = () => {
-        if (currentStep < 4) {
-            setCurrentStep(currentStep + 1)
-        }
-    }
-
-    const handleBack = () => {
-        if (currentStep > 1) {
-            setCurrentStep(currentStep - 1)
-        }
-    }
-
-    const handleSubmit = async () => {
+    const handleSubmit = async (withSchedule: boolean) => {
         setIsLoading(true)
         try {
-            // First, create a candidate (email is optional)
-            const candidateData = {
-                name: 'Новый кандидат',
-                email: '', // Email is optional to avoid duplicate key errors
-                phone: '',
-                experience: '0',
-                level: selectedLevel,
+            const interviewData: Record<string, unknown> = {
+                title: `Тренировка: ${selectedSpecialization} — ${selectedLevel}`,
+                description: `Самостоятельная тренировка интервью по направлению ${selectedSpecialization}, уровень ${selectedLevel}`,
                 specialization: selectedSpecialization,
                 tech_stack: JSON.stringify(selectedTechStack),
+                level: selectedLevel,
             }
 
-            const candidateResponse = await api.post('/candidates/', candidateData)
-            console.log('Candidate response:', candidateResponse.data)
-            const candidateId = candidateResponse.data.id
+            if (withSchedule && scheduledAt) {
+                interviewData.scheduled_at = scheduledAt
+            }
 
-            if (!candidateId) {
-                console.error('Candidate ID is missing! Response:', candidateResponse.data)
-                toast.error('Ошибка: не удалось получить ID кандидата')
+            const response = await api.post('/interviews/', interviewData)
+            const interviewId = response.data?.interview?.id as string | undefined
+
+            if (!withSchedule && interviewId) {
+                await startInterviewSession(api, interviewId)
+                toast.success('Тренировка запущена!')
+                navigate(`/interview/${interviewId}`)
                 return
             }
 
-            // Then create the interview
-            const interviewData = {
-                title: `${selectedSpecialization} интервью - ${selectedLevel}`,
-                description: `Техническое интервью для позиции ${selectedLevel} ${selectedSpecialization} разработчика`,
-                candidate_id: candidateId,
-                specialization: selectedSpecialization,
-                tech_stack: JSON.stringify(selectedTechStack),
-                level: selectedLevel,
-                duration: 60,
-                scheduled_at: scheduledAt,
-            }
-
-            console.log('Interview data:', interviewData)
-
-            await api.post('/interviews/', interviewData)
-
-            toast.success('Интервью создано успешно!')
+            toast.success(withSchedule ? 'Тренировка запланирована!' : 'Тренировка создана!')
             navigate('/dashboard')
         } catch (error: any) {
-            toast.error(error.response?.data?.error || 'Ошибка при создании интервью')
+            toast.error(error.response?.data?.error || 'Ошибка при создании тренировки')
         } finally {
             setIsLoading(false)
         }
@@ -94,7 +83,7 @@ export default function InterviewWizardPage() {
                     <SpecializationStep
                         selectedSpecialization={selectedSpecialization}
                         onSelect={setSelectedSpecialization}
-                        onNext={handleNext}
+                        onNext={() => setCurrentStep(STEPS.TECH_STACK)}
                     />
                 )
             case STEPS.TECH_STACK:
@@ -103,8 +92,8 @@ export default function InterviewWizardPage() {
                         selectedSpecialization={selectedSpecialization}
                         selectedTechStack={selectedTechStack}
                         onUpdateTechStack={setSelectedTechStack}
-                        onNext={handleNext}
-                        onBack={handleBack}
+                        onNext={() => setCurrentStep(STEPS.LEVEL)}
+                        onBack={() => setCurrentStep(STEPS.SPECIALIZATION)}
                     />
                 )
             case STEPS.LEVEL:
@@ -112,8 +101,16 @@ export default function InterviewWizardPage() {
                     <LevelStep
                         selectedLevel={selectedLevel}
                         onSelect={setSelectedLevel}
-                        onNext={handleNext}
-                        onBack={handleBack}
+                        onNext={() => setCurrentStep(STEPS.SCHEDULE_PROMPT)}
+                        onBack={() => setCurrentStep(STEPS.TECH_STACK)}
+                    />
+                )
+            case STEPS.SCHEDULE_PROMPT:
+                return (
+                    <SchedulePromptStep
+                        onYes={() => setCurrentStep(STEPS.SCHEDULE)}
+                        onNo={() => handleSubmit(false)}
+                        onBack={() => setCurrentStep(STEPS.LEVEL)}
                     />
                 )
             case STEPS.SCHEDULE:
@@ -121,8 +118,8 @@ export default function InterviewWizardPage() {
                     <ScheduleStep
                         scheduledAt={scheduledAt}
                         onScheduleChange={setScheduledAt}
-                        onNext={handleSubmit}
-                        onBack={handleBack}
+                        onNext={() => handleSubmit(true)}
+                        onBack={() => setCurrentStep(STEPS.SCHEDULE_PROMPT)}
                     />
                 )
             default:
@@ -131,32 +128,28 @@ export default function InterviewWizardPage() {
     }
 
     return (
-        <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-6">
-                <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-                    Создание интервью
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400">
-                    Следуйте шагам для создания структурированного технического интервью
-                </p>
-            </div>
+        <PageTransition className="max-w-6xl mx-auto">
+            <PageHeader
+                title="Начать тренировку"
+                description="Спланируйте тренировочное интервью и выберите навыки для отработки"
+            />
 
-            <StepIndicator currentStep={currentStep} totalSteps={4} />
+            <StepIndicator currentStep={getDisplayStep(currentStep)} totalSteps={DISPLAY_STEPS} />
 
-            <div className="min-h-[400px] pb-8">
+            <Card padding="lg" className="min-h-[400px] mt-6">
                 <AnimatePresence mode="wait">
                     {renderStep()}
                 </AnimatePresence>
-            </div>
+            </Card>
 
             {isLoading && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white dark:bg-gray-800 p-8 rounded-xl text-center">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-inter-verse-green dark:border-purple-500 mx-auto mb-4"></div>
-                        <p className="text-gray-600 dark:text-gray-400">Создание интервью...</p>
-                    </div>
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <Card padding="lg" className="text-center">
+                        <Spinner size="lg" />
+                        <p className="text-secondary mt-4">Подготовка тренировки...</p>
+                    </Card>
                 </div>
             )}
-        </div>
+        </PageTransition>
     )
 }

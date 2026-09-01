@@ -1,56 +1,103 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, Link } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
     LayoutDashboard,
-    Users,
     FileText,
     Plus,
-    Calendar,
-    PlayCircle
+    BarChart3,
+    PlayCircle,
+    Briefcase,
+    UserCircle,
+    X,
 } from 'lucide-react'
 
 const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Календарь', href: '/calendar', icon: Calendar },
+    { name: 'Активность', href: '/activity', icon: BarChart3 },
     { name: 'Интервью', href: '/interview-service', icon: PlayCircle },
-    { name: 'Кандидаты', href: '/candidates', icon: Users },
+    { name: 'Вакансии', href: '/vacancies', icon: Briefcase },
     { name: 'Отчёты', href: '/reports', icon: FileText },
+    { name: 'Профиль', href: '/profile', icon: UserCircle },
 ]
 
-export default function Sidebar() {
-    return (
-        <aside className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 min-h-screen">
-            <div className="p-6">
-                <nav className="space-y-2">
-                    {navigation.map((item) => {
-                        const Icon = item.icon
-                        return (
-                            <NavLink
-                                key={item.name}
-                                to={item.href}
-                                className={({ isActive }) =>
-                                    `flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${isActive
-                                        ? 'gradient-bg-adaptive text-white shadow-lg'
-                                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-100'
-                                    }`
-                                }
-                            >
-                                <Icon className="w-5 h-5" />
-                                <span className="font-medium">{item.name}</span>
-                            </NavLink>
-                        )
-                    })}
-                </nav>
+interface SidebarProps {
+    mobileOpen?: boolean
+    onClose?: () => void
+}
 
-                <div className="mt-8 pt-6 border-t border-gray-200">
-                    <NavLink
-                        to="/interviews/create"
-                        className="flex items-center space-x-3 px-4 py-3 rounded-xl bg-green-50 text-inter-verse-green hover:bg-green-100 dark:bg-purple-900/20 dark:text-purple-300 dark:hover:bg-purple-900/30 transition-all duration-200"
-                    >
-                        <Plus className="w-5 h-5" />
-                        <span className="font-medium">Создать интервью</span>
-                    </NavLink>
-                </div>
+function NavContent({ onNavigate }: { onNavigate?: () => void }) {
+    return (
+        <>
+            <div className="px-3 pt-4 pb-3 border-b border-gray-200 dark:border-gray-600">
+                <Link
+                    to="/interviews/create"
+                    onClick={onNavigate}
+                    className="iv-sidebar-cta"
+                >
+                    <Plus className="w-5 h-5 shrink-0" strokeWidth={1.75} />
+                    <span>Начать тренировку</span>
+                </Link>
             </div>
-        </aside>
+
+            <nav className="px-3 py-4 space-y-1">
+                {navigation.map((item) => {
+                    const Icon = item.icon
+                    return (
+                        <NavLink
+                            key={item.name}
+                            to={item.href}
+                            onClick={onNavigate}
+                            className={({ isActive }) =>
+                                `iv-nav-item ${isActive ? 'iv-nav-item-active' : ''}`
+                            }
+                        >
+                            <Icon className="w-5 h-5 shrink-0" strokeWidth={1.75} />
+                            <span>{item.name}</span>
+                        </NavLink>
+                    )
+                })}
+            </nav>
+        </>
+    )
+}
+
+export default function Sidebar({ mobileOpen = false, onClose }: SidebarProps) {
+    return (
+        <>
+            {/* Desktop sidebar */}
+            <aside className="iv-sidebar hidden lg:flex flex-col shrink-0 h-full overflow-y-auto custom-scrollbar">
+                <NavContent />
+            </aside>
+
+            {/* Mobile drawer */}
+            <AnimatePresence>
+                {mobileOpen && (
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="fixed inset-0 bg-black/50 z-50 lg:hidden"
+                            onClick={onClose}
+                        />
+                        <motion.aside
+                            initial={{ x: '-100%' }}
+                            animate={{ x: 0 }}
+                            exit={{ x: '-100%' }}
+                            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                            className="fixed inset-y-0 left-0 z-50 w-60 iv-sidebar flex flex-col lg:hidden"
+                        >
+                            <div className="flex items-center justify-end p-3">
+                                <button onClick={onClose} className="btn-icon" aria-label="Закрыть меню">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            <NavContent onNavigate={onClose} />
+                        </motion.aside>
+                    </>
+                )}
+            </AnimatePresence>
+        </>
     )
 }

@@ -3,7 +3,14 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { api } from '../services/api'
 import toast from 'react-hot-toast'
-import { User, Mail, Phone, Briefcase, Award, FileText, Linkedin, Github, Calendar } from 'lucide-react'
+import { User, Calendar } from 'lucide-react'
+import PageHeader from '../components/ui/PageHeader'
+import PageTransition from '../components/ui/PageTransition'
+import Card from '../components/ui/Card'
+import Badge from '../components/ui/Badge'
+import Button from '../components/ui/Button'
+import Spinner from '../components/ui/Spinner'
+import Input from '../components/ui/Input'
 
 interface CandidateData {
     id: string
@@ -11,7 +18,7 @@ interface CandidateData {
     email: string
     phone: string
     position: string
-    experience: string
+    experience: number
     skills: string
     resume_url: string
     linkedin_url: string
@@ -38,7 +45,6 @@ export default function EditInterviewFullPage() {
     const [isLoading, setIsLoading] = useState(false)
     const [isLoadingData, setIsLoadingData] = useState(true)
 
-    // Interview data
     const [interviewData, setInterviewData] = useState<InterviewData>({
         id: '',
         title: '',
@@ -51,14 +57,13 @@ export default function EditInterviewFullPage() {
         candidate_id: '',
     })
 
-    // Candidate data
     const [candidateData, setCandidateData] = useState<CandidateData>({
         id: '',
         name: '',
         email: '',
         phone: '',
         position: '',
-        experience: '',
+        experience: 0,
         skills: '',
         resume_url: '',
         linkedin_url: '',
@@ -66,7 +71,6 @@ export default function EditInterviewFullPage() {
         status: '',
     })
 
-    // Tech stack
     const [techStack, setTechStack] = useState<string[]>([])
 
     useEffect(() => {
@@ -79,7 +83,6 @@ export default function EditInterviewFullPage() {
         try {
             setIsLoadingData(true)
 
-            // Fetch interview
             const interviewResponse = await api.get(`/interviews/${id}`)
             const interview = interviewResponse.data.interview
 
@@ -95,7 +98,6 @@ export default function EditInterviewFullPage() {
                 candidate_id: interview.candidate_id || '',
             })
 
-            // Parse tech stack
             if (interview.tech_stack) {
                 try {
                     const parsed = JSON.parse(interview.tech_stack)
@@ -105,7 +107,6 @@ export default function EditInterviewFullPage() {
                 }
             }
 
-            // Fetch candidate if candidate_id exists
             if (interview.candidate_id) {
                 try {
                     const candidateResponse = await api.get(`/candidates/${interview.candidate_id}`)
@@ -117,7 +118,7 @@ export default function EditInterviewFullPage() {
                         email: candidate.email || '',
                         phone: candidate.phone || '',
                         position: candidate.position || '',
-                        experience: candidate.experience || '',
+                        experience: Number(candidate.experience) || 0,
                         skills: candidate.skills || '',
                         resume_url: candidate.resume_url || '',
                         linkedin_url: candidate.linkedin_url || '',
@@ -145,7 +146,6 @@ export default function EditInterviewFullPage() {
 
         setIsLoading(true)
         try {
-            // Update interview
             const interviewUpdateData = {
                 title: interviewData.title,
                 description: interviewData.description,
@@ -158,14 +158,13 @@ export default function EditInterviewFullPage() {
 
             await api.put(`/interviews/${id}`, interviewUpdateData)
 
-            // Update candidate if candidate_id exists
             if (candidateData.id) {
                 const candidateUpdateData = {
                     name: candidateData.name,
                     email: candidateData.email,
                     phone: candidateData.phone,
                     position: candidateData.position,
-                    experience: candidateData.experience,
+                    experience: Number(candidateData.experience) || 0,
                     skills: candidateData.skills,
                     resume_url: candidateData.resume_url,
                     linkedin_url: candidateData.linkedin_url,
@@ -195,368 +194,181 @@ export default function EditInterviewFullPage() {
         setTechStack(techStack.filter((_, i) => i !== index))
     }
 
-    if (isLoadingData) {
-        return (
-            <div className="flex items-center justify-center h-96">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-inter-verse-green"></div>
-            </div>
-        )
-    }
+    if (isLoadingData) return <Spinner size="lg" className="h-96" />
 
     return (
-        <div className="max-w-6xl mx-auto py-8 px-4">
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                    Редактирование интервью
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400">
-                    Обновите информацию об интервью и данные кандидата
-                </p>
-            </div>
+        <PageTransition className="max-w-6xl mx-auto">
+            <PageHeader
+                title="Редактирование интервью"
+                description="Обновите информацию об интервью и данные кандидата"
+            />
 
-            <div className="grid md:grid-cols-2 gap-12">
-                {/* Interview Section */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="space-y-8"
-                >
-                    <div className="flex items-center mb-8">
-                        <Calendar className="w-6 h-6 text-inter-verse-green dark:text-purple-400 mr-3" />
-                        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                            Информация об интервью
-                        </h2>
-                    </div>
+            <div className="grid md:grid-cols-2 gap-6">
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                    <Card padding="lg">
+                        <div className="flex items-center gap-3 mb-6">
+                            <Calendar className="w-5 h-5 text-inter-verse-green dark:text-purple-400" />
+                            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                                Информация об интервью
+                            </h2>
+                        </div>
 
-                    <div className="space-y-6">
-                        {/* Title */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                                Название
-                            </label>
-                            <input
+                        <div className="space-y-5">
+                            <Input
+                                label="Название"
                                 type="text"
                                 value={interviewData.title}
                                 onChange={(e) => setInterviewData({ ...interviewData, title: e.target.value })}
-                                className="input-field-underlined text-lg font-medium text-gray-900 dark:text-gray-100"
+                                variant="underlined"
                                 placeholder="Название интервью"
                             />
-                        </div>
 
-                        {/* Description */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                                Описание
-                            </label>
-                            <textarea
-                                value={interviewData.description}
-                                onChange={(e) => setInterviewData({ ...interviewData, description: e.target.value })}
-                                className="input-field-underlined text-base text-gray-900 dark:text-gray-100"
-                                placeholder="Описание интервью"
-                            />
-                        </div>
+                            <div>
+                                <label className="block text-xs font-medium uppercase tracking-wide text-secondary mb-2">Описание</label>
+                                <textarea
+                                    value={interviewData.description}
+                                    onChange={(e) => setInterviewData({ ...interviewData, description: e.target.value })}
+                                    className="input-field-underlined w-full"
+                                    placeholder="Описание интервью"
+                                />
+                            </div>
 
-                        {/* Status */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                                Статус
-                            </label>
-                            <select
-                                value={interviewData.status}
-                                onChange={(e) => setInterviewData({ ...interviewData, status: e.target.value })}
-                                className="input-field-underlined text-base font-medium text-gray-900 dark:text-gray-100"
-                            >
-                                <option value="scheduled">Запланировано</option>
-                                <option value="in_progress">В процессе</option>
-                                <option value="completed">Завершено</option>
-                                <option value="cancelled">Отменено</option>
-                            </select>
-                        </div>
+                            <div>
+                                <label className="block text-xs font-medium uppercase tracking-wide text-secondary mb-2">Статус</label>
+                                <select
+                                    value={interviewData.status}
+                                    onChange={(e) => setInterviewData({ ...interviewData, status: e.target.value })}
+                                    className="input-field-underlined w-full"
+                                >
+                                    <option value="scheduled">Запланировано</option>
+                                    <option value="in_progress">В процессе</option>
+                                    <option value="completed">Завершено</option>
+                                    <option value="cancelled">Отменено</option>
+                                </select>
+                            </div>
 
-                        {/* Scheduled At */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                                Дата и время
-                            </label>
-                            <input
+                            <Input
+                                label="Дата и время"
                                 type="datetime-local"
                                 value={interviewData.scheduled_at ? new Date(interviewData.scheduled_at).toISOString().slice(0, 16) : ''}
                                 onChange={(e) => {
                                     const date = e.target.value ? new Date(e.target.value).toISOString() : ''
                                     setInterviewData({ ...interviewData, scheduled_at: date })
                                 }}
-                                className="input-field-underlined text-base font-medium text-gray-900 dark:text-gray-100"
+                                variant="underlined"
                             />
-                        </div>
 
-                        {/* Specialization */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                                Специализация
-                            </label>
-                            <select
-                                value={interviewData.specialization}
-                                onChange={(e) => setInterviewData({ ...interviewData, specialization: e.target.value })}
-                                className="input-field-underlined text-base font-medium text-gray-900 dark:text-gray-100"
-                            >
-                                <option value="">Выберите специализацию</option>
-                                <option value="frontend">Frontend</option>
-                                <option value="backend">Backend</option>
-                                <option value="devops">DevOps</option>
-                                <option value="qa">QA</option>
-                                <option value="data_science">Data Science</option>
-                            </select>
-                        </div>
-
-                        {/* Level */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                                Уровень
-                            </label>
-                            <select
-                                value={interviewData.level}
-                                onChange={(e) => setInterviewData({ ...interviewData, level: e.target.value })}
-                                className="input-field-underlined text-base font-medium text-gray-900 dark:text-gray-100"
-                            >
-                                <option value="">Выберите уровень</option>
-                                <option value="intern">Intern</option>
-                                <option value="junior">Junior</option>
-                                <option value="middle">Middle</option>
-                                <option value="senior">Senior</option>
-                                <option value="lead">Lead/CTO</option>
-                            </select>
-                        </div>
-
-                        {/* Tech Stack */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                                Технологии
-                            </label>
-                            <div className="flex flex-wrap gap-2 mb-3">
-                                {techStack.map((tech, index) => (
-                                    <span
-                                        key={index}
-                                        className="px-3 py-1 bg-inter-verse-green/20 text-inter-verse-green dark:bg-purple-600/30 dark:text-purple-200 text-sm rounded-full flex items-center gap-2"
-                                    >
-                                        {tech}
-                                        <button
-                                            type="button"
-                                            onClick={() => removeTechStackItem(index)}
-                                            className="hover:text-red-500"
-                                        >
-                                            ×
-                                        </button>
-                                    </span>
-                                ))}
+                            <div>
+                                <label className="block text-xs font-medium uppercase tracking-wide text-secondary mb-2">Специализация</label>
+                                <select
+                                    value={interviewData.specialization}
+                                    onChange={(e) => setInterviewData({ ...interviewData, specialization: e.target.value })}
+                                    className="input-field-underlined w-full"
+                                >
+                                    <option value="">Выберите специализацию</option>
+                                    <option value="frontend">Frontend</option>
+                                    <option value="backend">Backend</option>
+                                    <option value="devops">DevOps</option>
+                                    <option value="qa">QA</option>
+                                    <option value="data_science">Data Science</option>
+                                </select>
                             </div>
-                            <input
-                                type="text"
-                                placeholder="Добавить технологию"
-                                onKeyPress={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault()
-                                        addTechStackItem(e.currentTarget.value)
-                                        e.currentTarget.value = ''
-                                    }
-                                }}
-                                className="input-field-underlined text-base text-gray-900 dark:text-gray-100"
-                            />
+
+                            <div>
+                                <label className="block text-xs font-medium uppercase tracking-wide text-secondary mb-2">Уровень</label>
+                                <select
+                                    value={interviewData.level}
+                                    onChange={(e) => setInterviewData({ ...interviewData, level: e.target.value })}
+                                    className="input-field-underlined w-full"
+                                >
+                                    <option value="">Выберите уровень</option>
+                                    <option value="intern">Intern</option>
+                                    <option value="junior">Junior</option>
+                                    <option value="middle">Middle</option>
+                                    <option value="senior">Senior</option>
+                                    <option value="lead">Lead/CTO</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-medium uppercase tracking-wide text-secondary mb-2">Технологии</label>
+                                <div className="flex flex-wrap gap-2 mb-3">
+                                    {techStack.map((tech, index) => (
+                                        <Badge key={index} variant="success" className="gap-2">
+                                            {tech}
+                                            <button type="button" onClick={() => removeTechStackItem(index)} className="hover:opacity-70">×</button>
+                                        </Badge>
+                                    ))}
+                                </div>
+                                <input
+                                    type="text"
+                                    placeholder="Добавить технологию (Enter)"
+                                    onKeyPress={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault()
+                                            addTechStackItem(e.currentTarget.value)
+                                            e.currentTarget.value = ''
+                                        }
+                                    }}
+                                    className="input-field-underlined w-full"
+                                />
+                            </div>
                         </div>
-                    </div>
+                    </Card>
                 </motion.div>
 
-                {/* Candidate Section */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    className="space-y-8"
-                >
-                    <div className="flex items-center mb-8">
-                        <User className="w-6 h-6 text-inter-verse-green dark:text-purple-400 mr-3" />
-                        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                            Данные кандидата
-                        </h2>
-                    </div>
-
-                    <div className="space-y-6">
-                        {/* Name */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                                <User className="w-4 h-4 inline mr-1" />
-                                ФИО
-                            </label>
-                            <input
-                                type="text"
-                                value={candidateData.name}
-                                onChange={(e) => setCandidateData({ ...candidateData, name: e.target.value })}
-                                className="input-field-underlined text-base font-medium text-gray-900 dark:text-gray-100"
-                                placeholder="Имя кандидата"
-                            />
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                    <Card padding="lg">
+                        <div className="flex items-center gap-3 mb-6">
+                            <User className="w-5 h-5 text-inter-verse-green dark:text-purple-400" />
+                            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                                Данные кандидата
+                            </h2>
                         </div>
 
-                        {/* Email */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                                <Mail className="w-4 h-4 inline mr-1" />
-                                Email
-                            </label>
-                            <input
-                                type="email"
-                                value={candidateData.email}
-                                onChange={(e) => setCandidateData({ ...candidateData, email: e.target.value })}
-                                className="input-field-underlined text-base font-medium text-gray-900 dark:text-gray-100"
-                                placeholder="email@example.com"
-                            />
-                        </div>
+                        <div className="space-y-5">
+                            <Input label="ФИО" type="text" value={candidateData.name} onChange={(e) => setCandidateData({ ...candidateData, name: e.target.value })} variant="underlined" placeholder="Имя кандидата" />
+                            <Input label="Email" type="email" value={candidateData.email} onChange={(e) => setCandidateData({ ...candidateData, email: e.target.value })} variant="underlined" placeholder="email@example.com" />
+                            <Input label="Телефон" type="tel" value={candidateData.phone} onChange={(e) => setCandidateData({ ...candidateData, phone: e.target.value })} variant="underlined" placeholder="+7 (999) 123-45-67" />
+                            <Input label="Позиция" type="text" value={candidateData.position} onChange={(e) => setCandidateData({ ...candidateData, position: e.target.value })} variant="underlined" placeholder="Должность" />
+                            <Input label="Опыт работы" type="number" min={0} value={candidateData.experience} onChange={(e) => setCandidateData({ ...candidateData, experience: Number(e.target.value) || 0 })} variant="underlined" placeholder="Лет опыта" />
 
-                        {/* Phone */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                                <Phone className="w-4 h-4 inline mr-1" />
-                                Телефон
-                            </label>
-                            <input
-                                type="tel"
-                                value={candidateData.phone}
-                                onChange={(e) => setCandidateData({ ...candidateData, phone: e.target.value })}
-                                className="input-field-underlined text-base font-medium text-gray-900 dark:text-gray-100"
-                                placeholder="+7 (999) 123-45-67"
-                            />
-                        </div>
+                            <div>
+                                <label className="block text-xs font-medium uppercase tracking-wide text-secondary mb-2">Навыки</label>
+                                <textarea value={candidateData.skills} onChange={(e) => setCandidateData({ ...candidateData, skills: e.target.value })} className="input-field-underlined w-full" placeholder="Список навыков" />
+                            </div>
 
-                        {/* Position */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                                <Briefcase className="w-4 h-4 inline mr-1" />
-                                Позиция
-                            </label>
-                            <input
-                                type="text"
-                                value={candidateData.position}
-                                onChange={(e) => setCandidateData({ ...candidateData, position: e.target.value })}
-                                className="input-field-underlined text-base font-medium text-gray-900 dark:text-gray-100"
-                                placeholder="Должность"
-                            />
-                        </div>
+                            <Input label="Ссылка на резюме" type="url" value={candidateData.resume_url} onChange={(e) => setCandidateData({ ...candidateData, resume_url: e.target.value })} variant="underlined" placeholder="https://example.com/resume.pdf" />
+                            <Input label="LinkedIn" type="url" value={candidateData.linkedin_url} onChange={(e) => setCandidateData({ ...candidateData, linkedin_url: e.target.value })} variant="underlined" placeholder="https://linkedin.com/in/username" />
+                            <Input label="GitHub" type="url" value={candidateData.github_url} onChange={(e) => setCandidateData({ ...candidateData, github_url: e.target.value })} variant="underlined" placeholder="https://github.com/username" />
 
-                        {/* Experience */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                                <Award className="w-4 h-4 inline mr-1" />
-                                Опыт работы
-                            </label>
-                            <input
-                                type="text"
-                                value={candidateData.experience}
-                                onChange={(e) => setCandidateData({ ...candidateData, experience: e.target.value })}
-                                className="input-field-underlined text-base font-medium text-gray-900 dark:text-gray-100"
-                                placeholder="Например: 3 года"
-                            />
+                            <div>
+                                <label className="block text-xs font-medium uppercase tracking-wide text-secondary mb-2">Статус кандидата</label>
+                                <select value={candidateData.status} onChange={(e) => setCandidateData({ ...candidateData, status: e.target.value })} className="input-field-underlined w-full">
+                                    <option value="active">Активный</option>
+                                    <option value="archived">Архивирован</option>
+                                </select>
+                            </div>
                         </div>
-
-                        {/* Skills */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                                Навыки
-                            </label>
-                            <textarea
-                                value={candidateData.skills}
-                                onChange={(e) => setCandidateData({ ...candidateData, skills: e.target.value })}
-                                className="input-field-underlined text-base text-gray-900 dark:text-gray-100"
-                                placeholder="Список навыков"
-                            />
-                        </div>
-
-                        {/* Resume URL */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                                <FileText className="w-4 h-4 inline mr-1" />
-                                Ссылка на резюме
-                            </label>
-                            <input
-                                type="url"
-                                value={candidateData.resume_url}
-                                onChange={(e) => setCandidateData({ ...candidateData, resume_url: e.target.value })}
-                                className="input-field-underlined text-base font-medium text-gray-900 dark:text-gray-100"
-                                placeholder="https://example.com/resume.pdf"
-                            />
-                        </div>
-
-                        {/* LinkedIn URL */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                                <Linkedin className="w-4 h-4 inline mr-1" />
-                                LinkedIn
-                            </label>
-                            <input
-                                type="url"
-                                value={candidateData.linkedin_url}
-                                onChange={(e) => setCandidateData({ ...candidateData, linkedin_url: e.target.value })}
-                                className="input-field-underlined text-base font-medium text-gray-900 dark:text-gray-100"
-                                placeholder="https://linkedin.com/in/username"
-                            />
-                        </div>
-
-                        {/* GitHub URL */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                                <Github className="w-4 h-4 inline mr-1" />
-                                GitHub
-                            </label>
-                            <input
-                                type="url"
-                                value={candidateData.github_url}
-                                onChange={(e) => setCandidateData({ ...candidateData, github_url: e.target.value })}
-                                className="input-field-underlined text-base font-medium text-gray-900 dark:text-gray-100"
-                                placeholder="https://github.com/username"
-                            />
-                        </div>
-
-                        {/* Status */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                                Статус кандидата
-                            </label>
-                            <select
-                                value={candidateData.status}
-                                onChange={(e) => setCandidateData({ ...candidateData, status: e.target.value })}
-                                className="input-field-underlined text-base font-medium text-gray-900 dark:text-gray-100"
-                            >
-                                <option value="active">Активный</option>
-                                <option value="archived">Архивирован</option>
-                            </select>
-                        </div>
-                    </div>
+                    </Card>
                 </motion.div>
             </div>
 
-            {/* Action Buttons */}
             <div className="flex justify-end gap-4 mt-8">
-                <button
-                    onClick={() => navigate('/dashboard')}
-                    className="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-                >
-                    Отмена
-                </button>
-                <button
-                    onClick={handleSubmit}
-                    disabled={isLoading}
-                    className="btn-primary-adaptive px-6 py-2"
-                >
+                <Button variant="secondary" onClick={() => navigate('/dashboard')}>Отмена</Button>
+                <Button onClick={handleSubmit} loading={isLoading}>
                     {isLoading ? 'Сохранение...' : 'Сохранить изменения'}
-                </button>
+                </Button>
             </div>
 
             {isLoading && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-inter-verse-green mx-auto"></div>
-                        <p className="mt-4 text-gray-600 dark:text-gray-400">Обновление данных...</p>
-                    </div>
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <Card padding="lg" className="text-center">
+                        <Spinner size="lg" />
+                        <p className="text-secondary mt-4">Обновление данных...</p>
+                    </Card>
                 </div>
             )}
-        </div>
+        </PageTransition>
     )
 }
-

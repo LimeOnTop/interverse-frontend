@@ -1,0 +1,60 @@
+/* InterVerse Design Tokens */
+
+:root {
+    --iv-radius: 0;
+    --iv-ease: cubic-bezier(0.4, 0, 0.2, 1);
+    --iv-duration-fast: 150ms;
+    --iv-duration: 200ms;
+    --iv-duration-slow: 300ms;
+    --iv-duration-page: 500ms;
+
+    /* Brand gradients — light */
+    --iv-gradient-from: #013220;
+    --iv-gradient-to: #014d30;
+    --iv-gradient: linear-gradient(135deg, #013220 0%, #014d30 100%);
+
+    /* Neutrals — light */
+    --iv-bg: #F9FAFB;
+    --iv-surface: #FFFFFF;
+    --iv-text: #111827;
+    --iv-text-secondary: #6B7280;
+    --iv-border: #E5E7EB;
+    --iv-border-hover: #D1D5DB;
+
+    /* Focus */
+    --iv-focus-ring: rgba(1, 50, 32, 0.4);
+
+    /* Scrollbar */
+    --iv-scrollbar-track: #F3F4F6;
+    --iv-scrollbar-thumb: #013220;
+}
+
+.dark {
+    color-scheme: dark;
+
+    --iv-gradient-from: #c084fc;
+    --iv-gradient-to: #9333ea;
+    --iv-gradient: linear-gradient(to right, #c084fc 0%, #9333ea 100%);
+
+    --iv-bg: #2F2F2F;
+    --iv-surface: #4A4A4A;
+    --iv-text: #F3F4F6;
+    --iv-text-secondary: #9CA3AF;
+    --iv-border: #4B5563;
+    --iv-border-hover: #6B7280;
+
+    --iv-focus-ring: rgba(168, 85, 247, 0.4);
+    --iv-scrollbar-track: #2F2F2F;
+    --iv-scrollbar-thumb: #9333EA;
+}
+
+/* Theme transition */
+html.theme-transition,
+html.theme-transition *,
+html.theme-transition *::before,
+html.theme-transition *::after {
+    transition: background-color 300ms var(--iv-ease),
+        border-color 300ms var(--iv-ease),
+        color 300ms var(--iv-ease),
+        fill 300ms var(--iv-ease) !important;
+}

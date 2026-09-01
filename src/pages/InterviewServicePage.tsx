@@ -1,9 +1,19 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Calendar, Clock, User, Play, ArrowRight } from 'lucide-react'
 import { api } from '../services/api'
+import {
+    startInterviewSession,
+} from '../lib/interviewSession'
 import toast from 'react-hot-toast'
-import { useTheme } from '../contexts/ThemeContext'
+import PageHeader from '../components/ui/PageHeader'
+import PageTransition from '../components/ui/PageTransition'
+import Card from '../components/ui/Card'
+import EmptyState from '../components/ui/EmptyState'
+import Spinner from '../components/ui/Spinner'
+import Badge from '../components/ui/Badge'
+import Button from '../components/ui/Button'
 
 interface Interview {
     id: string
@@ -20,11 +30,10 @@ interface Interview {
 }
 
 export default function InterviewServicePage() {
-    const { isDark } = useTheme()
+    const navigate = useNavigate()
     const [interviews, setInterviews] = useState<Interview[]>([])
     const [loading, setLoading] = useState(true)
-    // Removed unused local selection state to avoid TS6133
-    const [generating, setGenerating] = useState(false)
+    const [startingId, setStartingId] = useState<string | null>(null)
 
     useEffect(() => {
         fetchScheduledInterviews()
@@ -33,8 +42,6 @@ export default function InterviewServicePage() {
     const fetchScheduledInterviews = async () => {
         try {
             setLoading(true)
-            // Use GetInterviews with status filter instead of GetScheduledInterviews
-            // to get all scheduled interviews regardless of date
             const response = await api.get('/interviews/?status=scheduled')
             console.log('Fetched interviews:', response.data)
             const interviewsList = response.data.interviews || []
@@ -50,30 +57,15 @@ export default function InterviewServicePage() {
 
     const handleStartInterview = async (interview: Interview) => {
         try {
-            setGenerating(true)
-            const response = await api.post('/interviews/generate-questions', {
-                interview_id: interview.id
-            })
-
-            // Сохраняем данные в localStorage для передачи на страницу интервью
-            localStorage.setItem('interview-session', JSON.stringify({
-                sessionId: response.data.session_id,
-                questions: response.data.questions,
-                interview: response.data.interview
-            }))
-
-            toast.success('Вопросы сгенерированы! Переходим к интервью...')
-
-            // Перенаправляем на страницу интервью
-            setTimeout(() => {
-                window.location.href = `/interview/${interview.id}`
-            }, 1000)
-
+            setStartingId(interview.id)
+            await startInterviewSession(api, interview.id)
+            toast.success('Тренировка запущена!')
+            navigate(`/interview/${interview.id}`)
         } catch (error: any) {
-            console.error('Error generating questions:', error)
-            toast.error('Ошибка при генерации вопросов')
+            console.error('Error starting session:', error)
+            toast.error(error.response?.data?.error || 'Ошибка при запуске тренировки')
         } finally {
-            setGenerating(false)
+            setStartingId(null)
         }
     }
 
@@ -114,116 +106,90 @@ export default function InterviewServicePage() {
         return labels[specialization] || specialization
     }
 
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center h-96">
-                <div className={`animate-spin rounded-full h-12 w-12 border-b-2 ${isDark ? 'border-inter-verse-green' : 'border-inter-verse-green'}`}></div>
-            </div>
-        )
-    }
+    if (loading) return <Spinner size="lg" className="h-96" />
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Сервис интервью</h1>
-                <p className={`mt-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Выберите интервью для проведения и сгенерируйте вопросы</p>
-            </div>
+        <PageTransition className="space-y-8">
+            <PageHeader
+                title="Тренировки"
+                description="Выберите запланированную тренировку и начните прохождение"
+            />
 
             {interviews.length === 0 ? (
-                <div className="text-center py-12">
-                    <Calendar className={`w-16 h-16 mx-auto mb-4 ${isDark ? 'text-gray-600' : 'text-gray-300'}`} />
-                    <h3 className={`text-lg font-medium mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        Нет запланированных интервью
-                    </h3>
-                    <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                        Создайте интервью в разделе "Создать интервью", чтобы начать работу
-                    </p>
-                </div>
+                <EmptyState
+                    icon={Calendar}
+                    title="Нет запланированных интервью"
+                    description='Создайте интервью в разделе "Создать интервью", чтобы начать работу'
+                />
             ) : (
-                <div className="grid gap-6">
+                <div className="grid gap-4">
                     {interviews.map((interview, index) => (
                         <motion.div
                             key={interview.id}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.1 }}
-                            className={`rounded-2xl border p-6 shadow-sm hover:shadow-md transition-shadow ${isDark
-                                ? 'bg-gray-800 border-gray-700'
-                                : 'bg-white border-gray-200'
-                                }`}
+                            transition={{ delay: index * 0.05, duration: 0.4 }}
                         >
-                            <div className="flex items-start justify-between">
-                                <div className="flex-1">
-                                    <div className="flex items-center mb-3">
-                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 ${isDark ? 'bg-blue-900/20' : 'bg-blue-100'
-                                            }`}>
-                                            <Calendar className={`w-5 h-5 ${isDark ? 'text-blue-300' : 'text-blue-600'}`} />
-                                        </div>
-                                        <div>
-                                            <h3 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                                                {interview.title}
-                                            </h3>
-                                            <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{interview.description}</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                        {interview.candidate && (
-                                            <div className={`flex items-center text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                                                <User className="w-4 h-4 mr-2" />
-                                                <span className="font-medium">{interview.candidate.name || 'Не указан'}</span>
-                                                {interview.candidate.email && (
-                                                    <>
-                                                        <span className="mx-2">•</span>
-                                                        <span>{interview.candidate.email}</span>
-                                                    </>
-                                                )}
+                            <Card hover padding="md">
+                                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+                                    <div className="flex-1">
+                                        <div className="flex items-start gap-3 mb-4">
+                                            <div className="w-10 h-10 gradient-bg-adaptive flex items-center justify-center shrink-0">
+                                                <Calendar className="w-5 h-5 text-white" />
                                             </div>
-                                        )}
-
-                                        <div className={`flex items-center text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                                            <Clock className="w-4 h-4 mr-2" />
-                                            <span>{interview.duration || 60} минут</span>
+                                            <div>
+                                                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                                                    {interview.title}
+                                                </h3>
+                                                <p className="text-secondary text-sm mt-1">{interview.description}</p>
+                                            </div>
                                         </div>
 
-                                        <div className={`flex items-center text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                                            <span className="font-medium">
-                                                {getSpecializationLabel(interview.specialization)}
-                                            </span>
-                                            <span className="mx-2">•</span>
-                                            <span>{getLevelLabel(interview.level)}</span>
-                                        </div>
-
-                                        <div className={`flex items-center text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                                            <Calendar className="w-4 h-4 mr-2" />
-                                            <span>{formatDate(interview.scheduled_at)}</span>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-secondary">
+                                            {interview.candidate && (
+                                                <div className="flex items-center gap-2">
+                                                    <User className="w-4 h-4 shrink-0" />
+                                                    <span className="font-medium text-gray-900 dark:text-gray-100">{interview.candidate.name || 'Не указан'}</span>
+                                                    {interview.candidate.email && (
+                                                        <>
+                                                            <span>•</span>
+                                                            <span>{interview.candidate.email}</span>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            )}
+                                            <div className="flex items-center gap-2">
+                                                <Clock className="w-4 h-4 shrink-0" />
+                                                {interview.duration || 60} минут
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <Badge variant="info">{getSpecializationLabel(interview.specialization)}</Badge>
+                                                <Badge>{getLevelLabel(interview.level)}</Badge>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <Calendar className="w-4 h-4 shrink-0" />
+                                                {formatDate(interview.scheduled_at)}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div className="ml-6">
-                                    <button
-                                        onClick={() => handleStartInterview(interview)}
-                                        disabled={generating}
-                                        className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center space-x-2 ${generating
-                                            ? isDark
-                                                ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                            : 'gradient-bg-adaptive text-white hover:opacity-90 shadow-lg hover:shadow-xl'
-                                            }`}
-                                    >
-                                        <Play className="w-5 h-5" />
-                                        <span>
-                                            {generating ? 'Генерируем...' : 'Начать интервью'}
-                                        </span>
-                                        <ArrowRight className="w-5 h-5" />
-                                    </button>
+                                    <div className="shrink-0">
+                                        <Button
+                                            onClick={() => handleStartInterview(interview)}
+                                            disabled={startingId !== null}
+                                            loading={startingId === interview.id}
+                                        >
+                                            <Play className="w-5 h-5" />
+                                            {startingId === interview.id ? 'Запуск...' : 'Начать интервью'}
+                                            <ArrowRight className="w-5 h-5" />
+                                        </Button>
+                                    </div>
                                 </div>
-                            </div>
+                            </Card>
                         </motion.div>
                     ))}
                 </div>
             )}
-        </div>
+        </PageTransition>
     )
 }

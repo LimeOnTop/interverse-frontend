@@ -4,7 +4,13 @@ import { FileText, Search, Download, Eye } from 'lucide-react'
 import { api } from '../services/api'
 import toast from 'react-hot-toast'
 import { Link } from 'react-router-dom'
-import { useTheme } from '../contexts/ThemeContext'
+import PageHeader from '../components/ui/PageHeader'
+import PageTransition from '../components/ui/PageTransition'
+import Card from '../components/ui/Card'
+import EmptyState from '../components/ui/EmptyState'
+import Spinner from '../components/ui/Spinner'
+import Badge from '../components/ui/Badge'
+import Button from '../components/ui/Button'
 
 interface Report {
     id: string
@@ -29,11 +35,22 @@ interface Report {
     }
 }
 
+const getScoreVariant = (score: number): 'success' | 'warning' | 'danger' => {
+    if (score >= 80) return 'success'
+    if (score >= 60) return 'warning'
+    return 'danger'
+}
+
+const getScoreLabel = (score: number) => {
+    if (score >= 80) return 'Отлично'
+    if (score >= 60) return 'Хорошо'
+    return 'Требует улучшения'
+}
+
 export default function ReportsPage() {
     const [reports, setReports] = useState<Report[]>([])
     const [loading, setLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState('')
-    const { isDark } = useTheme()
 
     useEffect(() => {
         fetchReports()
@@ -42,12 +59,9 @@ export default function ReportsPage() {
     const fetchReports = async () => {
         try {
             setLoading(true)
-            // In a real app, you'd have a dedicated reports endpoint
-            // For now, we'll simulate with interviews that have reports
             const response = await api.get('/interviews/')
             const interviews = response.data.interviews || []
 
-            // Filter interviews that have reports (simulate)
             const reportsWithData = interviews.slice(0, 3).map((interview: any, index: number) => ({
                 id: `report-${interview.id}`,
                 interview_id: interview.id,
@@ -104,185 +118,127 @@ export default function ReportsPage() {
         return labels[level] || level
     }
 
-    const getScoreColor = (score: number) => {
-        if (score >= 80) return 'text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900'
-        if (score >= 60) return 'text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900'
-        return 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900'
-    }
-
-    const getScoreLabel = (score: number) => {
-        if (score >= 80) return 'Отлично'
-        if (score >= 60) return 'Хорошо'
-        return 'Требует улучшения'
-    }
-
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center h-64">
-                <div className={`animate-spin rounded-full h-12 w-12 border-b-2 ${isDark ? 'border-purple-500' : 'border-inter-verse-green'}`}></div>
-            </div>
-        )
-    }
+    if (loading) return <Spinner size="lg" className="h-64" />
 
     return (
-        <div className="space-y-8">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Отчёты</h1>
-                    <p className="text-gray-600 dark:text-gray-400 mt-1">Результаты проведённых интервью</p>
-                </div>
-                <button className="btn-secondary inline-flex items-center space-x-2">
-                    <Download className="w-5 h-5" />
-                    <span>Экспорт всех</span>
-                </button>
-            </div>
+        <PageTransition className="space-y-8">
+            <PageHeader
+                title="Отчёты"
+                description="Результаты проведённых интервью"
+                action={
+                    <Button variant="secondary">
+                        <Download className="w-5 h-5" /> Экспорт всех
+                    </Button>
+                }
+            />
 
-            {/* Search */}
-            <div className="card p-6">
+            <Card padding="md">
                 <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" strokeWidth={1.75} />
                     <input
                         type="text"
                         placeholder="Поиск по названию интервью, кандидату или специализации..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="input-field-adaptive pl-10"
+                        className="input-field pl-10"
                     />
                 </div>
-            </div>
+            </Card>
 
-            {/* Reports List */}
-            <div>
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
-                    Отчёты ({filteredReports.length})
+            <section>
+                <h2 className="text-lg font-semibold mb-4 tabular-nums">
+                    Отчёты <span className="text-secondary font-normal">({filteredReports.length})</span>
                 </h2>
 
                 {filteredReports.length === 0 ? (
-                    <div className="card p-12 text-center">
-                        <FileText className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                            Нет отчётов
-                        </h3>
-                        <p className="text-gray-600 dark:text-gray-400 mb-6">
-                            Отчёты появятся после завершения интервью
-                        </p>
-                        <Link
-                            to="/dashboard"
-                            className="btn-primary-adaptive inline-flex items-center space-x-2"
-                        >
-                            <span>Перейти к интервью</span>
-                        </Link>
-                    </div>
+                    <EmptyState
+                        icon={FileText}
+                        title="Нет отчётов"
+                        description="Отчёты появятся после завершения интервью"
+                        action={
+                            <Link to="/dashboard">
+                                <Button>Перейти к интервью</Button>
+                            </Link>
+                        }
+                    />
                 ) : (
-                    <div className="grid gap-6">
+                    <div className="grid gap-4">
                         {filteredReports.map((report, index) => (
                             <motion.div
                                 key={report.id}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.1 }}
-                                className="card p-6 hover:shadow-lg transition-all duration-200"
+                                transition={{ delay: index * 0.05, duration: 0.4 }}
                             >
-                                <div className="flex items-start justify-between mb-6">
-                                    <div className="flex-1">
-                                        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                                            {report.interview.title}
-                                        </h3>
-                                        <div className="flex items-center space-x-6 text-sm text-gray-600 dark:text-gray-400 mb-4">
-                                            <span className="flex items-center space-x-1">
-                                                <span className="font-medium">Кандидат:</span>
-                                                <span>{report.interview.candidate.name}</span>
-                                            </span>
-                                            <span className="flex items-center space-x-1">
-                                                <span className="font-medium">Специализация:</span>
-                                                <span>{getSpecializationLabel(report.interview.specialization)}</span>
-                                            </span>
-                                            <span className="flex items-center space-x-1">
-                                                <span className="font-medium">Уровень:</span>
-                                                <span>{getLevelLabel(report.interview.level)}</span>
-                                            </span>
+                                <Card hover padding="md">
+                                    <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6">
+                                        <div className="flex-1">
+                                            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                                                {report.interview.title}
+                                            </h3>
+                                            <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-secondary">
+                                                <span>Кандидат: <span className="text-gray-900 dark:text-gray-100">{report.interview.candidate.name}</span></span>
+                                                <span>Специализация: {getSpecializationLabel(report.interview.specialization)}</span>
+                                                <span>Уровень: {getLevelLabel(report.interview.level)}</span>
+                                            </div>
+                                        </div>
+                                        <div className="text-right shrink-0">
+                                            <Badge variant={getScoreVariant(report.overall_score)}>
+                                                {report.overall_score}% — {getScoreLabel(report.overall_score)}
+                                            </Badge>
+                                            <p className="text-xs text-secondary mt-2">
+                                                {new Date(report.created_at).toLocaleDateString('ru-RU')}
+                                            </p>
                                         </div>
                                     </div>
 
-                                    <div className="text-right">
-                                        <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getScoreColor(report.overall_score)}`}>
-                                            {report.overall_score}% - {getScoreLabel(report.overall_score)}
-                                        </div>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                                            {new Date(report.created_at).toLocaleDateString('ru-RU')}
-                                        </p>
+                                    <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                                        {[
+                                            { label: 'Алгоритмы', score: report.algorithm_score },
+                                            { label: 'Архитектура', score: report.architecture_score },
+                                            { label: 'Кодинг', score: report.coding_score },
+                                            { label: 'Soft Skills', score: report.soft_skills_score },
+                                        ].map(({ label, score }) => (
+                                            <div key={label} className="text-center">
+                                                <p className="text-xs font-medium uppercase tracking-wide text-secondary mb-1">{label}</p>
+                                                <Badge variant={getScoreVariant(score)}>{score}%</Badge>
+                                            </div>
+                                        ))}
                                     </div>
-                                </div>
 
-                                {/* Scores */}
-                                <div className="grid md:grid-cols-4 gap-4 mb-6">
-                                    <div className="text-center">
-                                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Алгоритмы</p>
-                                        <div className={`inline-flex items-center px-2 py-1 rounded text-sm font-medium ${getScoreColor(report.algorithm_score)}`}>
-                                            {report.algorithm_score}%
+                                    {report.comments && (
+                                        <div className="mb-4">
+                                            <h4 className="text-xs font-medium uppercase tracking-wide text-secondary mb-2">Комментарии</h4>
+                                            <p className="text-sm text-gray-700 dark:text-gray-300">{report.comments}</p>
                                         </div>
-                                    </div>
-                                    <div className="text-center">
-                                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Архитектура</p>
-                                        <div className={`inline-flex items-center px-2 py-1 rounded text-sm font-medium ${getScoreColor(report.architecture_score)}`}>
-                                            {report.architecture_score}%
-                                        </div>
-                                    </div>
-                                    <div className="text-center">
-                                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Кодинг</p>
-                                        <div className={`inline-flex items-center px-2 py-1 rounded text-sm font-medium ${getScoreColor(report.coding_score)}`}>
-                                            {report.coding_score}%
-                                        </div>
-                                    </div>
-                                    <div className="text-center">
-                                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Soft Skills</p>
-                                        <div className={`inline-flex items-center px-2 py-1 rounded text-sm font-medium ${getScoreColor(report.soft_skills_score)}`}>
-                                            {report.soft_skills_score}%
-                                        </div>
-                                    </div>
-                                </div>
+                                    )}
 
-                                {/* Comments */}
-                                {report.comments && (
-                                    <div className="mb-6">
-                                        <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Комментарии</h4>
-                                        <p className="text-gray-700 dark:text-gray-300 text-sm">{report.comments}</p>
-                                    </div>
-                                )}
+                                    {report.recommendations && (
+                                        <div className="mb-4">
+                                            <h4 className="text-xs font-medium uppercase tracking-wide text-secondary mb-2">Рекомендации</h4>
+                                            <p className="text-sm text-gray-700 dark:text-gray-300">{report.recommendations}</p>
+                                        </div>
+                                    )}
 
-                                {/* Recommendations */}
-                                {report.recommendations && (
-                                    <div className="mb-6">
-                                        <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Рекомендации</h4>
-                                        <p className="text-gray-700 dark:text-gray-300 text-sm">{report.recommendations}</p>
+                                    <div className="flex items-center justify-between pt-4 iv-divider">
+                                        <div className="flex items-center gap-3">
+                                            <Link to={`/reports/${report.id}`}>
+                                                <Button className="text-sm px-4 py-2">
+                                                    <Eye className="w-4 h-4" /> Подробнее
+                                                </Button>
+                                            </Link>
+                                            <Button variant="secondary" className="text-sm px-4 py-2">
+                                                <Download className="w-4 h-4" /> PDF
+                                            </Button>
+                                        </div>
+                                        <span className="text-xs text-secondary">ID: {report.interview_id}</span>
                                     </div>
-                                )}
-
-                                {/* Actions */}
-                                <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
-                                    <div className="flex items-center space-x-4">
-                                        <Link
-                                            to={`/reports/${report.id}`}
-                                            className="btn-primary-adaptive text-sm px-4 py-2 inline-flex items-center space-x-2"
-                                        >
-                                            <Eye className="w-4 h-4" />
-                                            <span>Подробнее</span>
-                                        </Link>
-                                        <button className="btn-secondary text-sm px-4 py-2 inline-flex items-center space-x-2">
-                                            <Download className="w-4 h-4" />
-                                            <span>PDF</span>
-                                        </button>
-                                    </div>
-                                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                                        ID: {report.interview_id}
-                                    </span>
-                                </div>
+                                </Card>
                             </motion.div>
                         ))}
                     </div>
                 )}
-            </div>
-        </div>
+            </section>
+        </PageTransition>
     )
 }

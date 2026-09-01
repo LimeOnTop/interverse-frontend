@@ -12,10 +12,20 @@ import {
     Trash2,
     Play,
     Eye,
-    Plus
+    Plus,
+    X,
 } from 'lucide-react'
 import { api } from '../services/api'
 import toast from 'react-hot-toast'
+import PageHeader from '../components/ui/PageHeader'
+import PageTransition from '../components/ui/PageTransition'
+import Card from '../components/ui/Card'
+import StatCard from '../components/ui/StatCard'
+import EmptyState from '../components/ui/EmptyState'
+import Spinner from '../components/ui/Spinner'
+import Badge, { statusBadgeVariant } from '../components/ui/Badge'
+import Button from '../components/ui/Button'
+import ModernSelect from '../components/ModernSelect'
 
 interface Interview {
     id: string
@@ -33,36 +43,55 @@ interface Interview {
     created_at: string
 }
 
-const statusLabels = {
+const statusLabels: Record<string, string> = {
     draft: 'Черновик',
     scheduled: 'Запланировано',
     in_progress: 'В процессе',
     completed: 'Завершено',
-    cancelled: 'Отменено'
+    cancelled: 'Отменено',
 }
 
-const statusColors = {
-    draft: 'bg-gray-100 text-gray-800',
-    scheduled: 'bg-blue-100 text-blue-800',
-    in_progress: 'bg-yellow-100 text-yellow-800',
-    completed: 'bg-green-100 text-green-800',
-    cancelled: 'bg-red-100 text-red-800'
-}
+const levelOptions = [
+    { value: '', label: 'Все уровни' },
+    { value: 'intern', label: 'Intern' },
+    { value: 'junior', label: 'Junior' },
+    { value: 'middle', label: 'Middle' },
+    { value: 'senior', label: 'Senior' },
+    { value: 'lead', label: 'Lead' },
+]
 
-const levelLabels = {
-    intern: 'Intern',
-    junior: 'Junior',
-    middle: 'Middle',
-    senior: 'Senior',
-    lead: 'Lead'
-}
+const statusOptions = [
+    { value: '', label: 'Все статусы' },
+    { value: 'draft', label: 'Черновик' },
+    { value: 'scheduled', label: 'Запланировано' },
+    { value: 'in_progress', label: 'В процессе' },
+    { value: 'completed', label: 'Завершено' },
+    { value: 'cancelled', label: 'Отменено' },
+]
 
-const specializationLabels = {
+const specializationOptions = [
+    { value: '', label: 'Все специализации' },
+    { value: 'frontend', label: 'Frontend' },
+    { value: 'backend', label: 'Backend' },
+    { value: 'devops', label: 'DevOps' },
+    { value: 'qa', label: 'QA' },
+    { value: 'data_science', label: 'Data Science' },
+]
+
+const specializationLabels: Record<string, string> = {
     frontend: 'Frontend',
     backend: 'Backend',
     devops: 'DevOps',
     qa: 'QA',
-    data_science: 'Data Science'
+    data_science: 'Data Science',
+}
+
+const levelLabels: Record<string, string> = {
+    intern: 'Intern',
+    junior: 'Junior',
+    middle: 'Middle',
+    senior: 'Senior',
+    lead: 'Lead',
 }
 
 export default function InterviewsPage() {
@@ -72,7 +101,6 @@ export default function InterviewsPage() {
     const [statusFilter, setStatusFilter] = useState('')
     const [levelFilter, setLevelFilter] = useState('')
     const [specializationFilter, setSpecializationFilter] = useState('')
-    const [showFilters, setShowFilters] = useState(false)
 
     useEffect(() => {
         fetchInterviews()
@@ -115,16 +143,13 @@ export default function InterviewsPage() {
         }
     }
 
-    const getStatusCounts = () => {
-        const counts = {
-            total: interviews.length,
-            scheduled: interviews.filter(i => i.status === 'scheduled').length,
-            completed: interviews.filter(i => i.status === 'completed').length,
-            in_progress: interviews.filter(i => i.status === 'in_progress').length,
-            cancelled: interviews.filter(i => i.status === 'cancelled').length
-        }
-        return counts
-    }
+    const getStatusCounts = () => ({
+        total: interviews.length,
+        scheduled: interviews.filter(i => i.status === 'scheduled').length,
+        completed: interviews.filter(i => i.status === 'completed').length,
+        in_progress: interviews.filter(i => i.status === 'in_progress').length,
+        cancelled: interviews.filter(i => i.status === 'cancelled').length,
+    })
 
     const handleDelete = async (id: string) => {
         if (window.confirm('Вы уверены, что хотите удалить это интервью?')) {
@@ -140,282 +165,173 @@ export default function InterviewsPage() {
 
     const handleStartInterview = (interview: Interview) => {
         if (interview.status === 'scheduled') {
-            // Перенаправляем на страницу проведения интервью
             window.location.href = `/interview-service`
         } else {
             toast.error('Можно проводить только запланированные интервью')
         }
     }
 
-    const statusCounts = getStatusCounts()
-
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center h-96">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-inter-verse-green"></div>
-            </div>
-        )
+    const handleClearFilters = () => {
+        setStatusFilter('')
+        setLevelFilter('')
+        setSpecializationFilter('')
+        setSearchTerm('')
     }
 
+    const hasActiveFilters = statusFilter || levelFilter || specializationFilter
+    const statusCounts = getStatusCounts()
+
+    if (loading) return <Spinner size="lg" className="h-96" />
+
     return (
-        <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Интервью</h1>
-                    <p className="text-gray-600 mt-2">Управление всеми интервью</p>
-                </div>
-                <Link
-                    to="/interviews/create"
-                    className="btn-primary flex items-center space-x-2"
-                >
-                    <Plus className="w-5 h-5" />
-                    <span>Создать интервью</span>
-                </Link>
+        <PageTransition className="space-y-8">
+            <PageHeader
+                title="Интервью"
+                description="Управление всеми интервью"
+                action={
+                    <Link to="/interviews/create">
+                        <Button><Plus className="w-5 h-5" /> Создать интервью</Button>
+                    </Link>
+                }
+            />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
+                <StatCard label="Всего" value={statusCounts.total} icon={Calendar} delay={0} />
+                <StatCard label="Запланировано" value={statusCounts.scheduled} icon={Calendar} delay={0.05} />
+                <StatCard label="В процессе" value={statusCounts.in_progress} icon={User} delay={0.1} />
+                <StatCard label="Завершено" value={statusCounts.completed} icon={Calendar} delay={0.15} />
+                <StatCard label="Отменено" value={statusCounts.cancelled} icon={Calendar} delay={0.2} />
             </div>
 
-            {/* Statistics */}
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                    <div className="text-2xl font-bold text-gray-900">{statusCounts.total}</div>
-                    <div className="text-sm text-gray-600">Всего интервью</div>
-                </div>
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                    <div className="text-2xl font-bold text-blue-600">{statusCounts.scheduled}</div>
-                    <div className="text-sm text-gray-600">Запланировано</div>
-                </div>
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                    <div className="text-2xl font-bold text-yellow-600">{statusCounts.in_progress}</div>
-                    <div className="text-sm text-gray-600">В процессе</div>
-                </div>
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                    <div className="text-2xl font-bold text-green-600">{statusCounts.completed}</div>
-                    <div className="text-sm text-gray-600">Завершено</div>
-                </div>
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                    <div className="text-2xl font-bold text-red-600">{statusCounts.cancelled}</div>
-                    <div className="text-sm text-gray-600">Отменено</div>
-                </div>
-            </div>
-
-            {/* Search and Filters */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 lg:space-x-4">
-                    {/* Search */}
+            <Card padding="md">
+                <div className="flex flex-col lg:flex-row gap-3">
                     <div className="flex-1 relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" strokeWidth={1.75} />
                         <input
                             type="text"
                             placeholder="Поиск по названию или кандидату..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-inter-verse-green focus:border-transparent"
+                            className="input-field pl-10"
                         />
                     </div>
-
-                    {/* Filter Toggle */}
-                    <button
-                        onClick={() => setShowFilters(!showFilters)}
-                        className="flex items-center space-x-2 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                        <Filter className="w-5 h-5" />
-                        <span>Фильтры</span>
-                    </button>
-                </div>
-
-                {/* Filters */}
-                {showFilters && (
-                    <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="mt-4 pt-4 border-t border-gray-200"
-                    >
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Статус</label>
-                                <select
-                                    value={statusFilter}
-                                    onChange={(e) => setStatusFilter(e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-inter-verse-green focus:border-transparent"
-                                >
-                                    <option value="">Все статусы</option>
-                                    {Object.entries(statusLabels).map(([key, label]) => (
-                                        <option key={key} value={key}>{label}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Уровень</label>
-                                <select
-                                    value={levelFilter}
-                                    onChange={(e) => setLevelFilter(e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-inter-verse-green focus:border-transparent"
-                                >
-                                    <option value="">Все уровни</option>
-                                    {Object.entries(levelLabels).map(([key, label]) => (
-                                        <option key={key} value={key}>{label}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Специализация</label>
-                                <select
-                                    value={specializationFilter}
-                                    onChange={(e) => setSpecializationFilter(e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-inter-verse-green focus:border-transparent"
-                                >
-                                    <option value="">Все специализации</option>
-                                    {Object.entries(specializationLabels).map(([key, label]) => (
-                                        <option key={key} value={key}>{label}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-                        <div className="mt-4 flex space-x-3">
-                            <button
-                                onClick={fetchInterviews}
-                                className="px-4 py-2 gradient-bg-adaptive text-white rounded-lg hover:opacity-90 transition-colors"
-                            >
-                                Применить фильтры
+                    <div className="flex flex-col sm:flex-row gap-2">
+                        <ModernSelect options={statusOptions} value={statusFilter} onChange={setStatusFilter} placeholder="Статус" className="min-w-[140px]" />
+                        <ModernSelect options={levelOptions} value={levelFilter} onChange={setLevelFilter} placeholder="Уровень" className="min-w-[140px]" />
+                        <ModernSelect options={specializationOptions} value={specializationFilter} onChange={setSpecializationFilter} placeholder="Специализация" className="min-w-[160px]" />
+                        <Button variant="secondary" onClick={fetchInterviews} className="px-4 py-3">
+                            <Filter className="w-4 h-4" /> Применить
+                        </Button>
+                        {hasActiveFilters && (
+                            <button onClick={handleClearFilters} className="btn-ghost px-3">
+                                <X className="w-4 h-4" /> Сброс
                             </button>
-                            <button
-                                onClick={() => {
-                                    setStatusFilter('')
-                                    setLevelFilter('')
-                                    setSpecializationFilter('')
-                                    fetchInterviews()
-                                }}
-                                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                            >
-                                Сбросить
-                            </button>
-                        </div>
-                    </motion.div>
-                )}
-            </div>
-
-            {/* Interviews List */}
-            <div className="space-y-4">
-                {filteredInterviews.length === 0 ? (
-                    <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
-                        <User className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">
-                            {searchTerm || statusFilter || levelFilter || specializationFilter
-                                ? 'Интервью не найдены'
-                                : 'Нет интервью'
-                            }
-                        </h3>
-                        <p className="text-gray-600 mb-4">
-                            {searchTerm || statusFilter || levelFilter || specializationFilter
-                                ? 'Попробуйте изменить фильтры или поисковый запрос'
-                                : 'Создайте первое интервью, чтобы начать работу'
-                            }
-                        </p>
-                        {!searchTerm && !statusFilter && !levelFilter && !specializationFilter && (
-                            <Link
-                                to="/interviews/create"
-                                className="btn-primary"
-                            >
-                                Создать интервью
-                            </Link>
                         )}
                     </div>
+                </div>
+            </Card>
+
+            <section>
+                <h2 className="text-lg font-semibold mb-4 tabular-nums">
+                    Интервью <span className="text-secondary font-normal">({filteredInterviews.length})</span>
+                </h2>
+
+                {filteredInterviews.length === 0 ? (
+                    <EmptyState
+                        icon={User}
+                        title={searchTerm || hasActiveFilters ? 'Интервью не найдены' : 'Нет интервью'}
+                        description={
+                            searchTerm || hasActiveFilters
+                                ? 'Попробуйте изменить фильтры или поисковый запрос'
+                                : 'Создайте первое интервью, чтобы начать работу'
+                        }
+                        action={
+                            !searchTerm && !hasActiveFilters ? (
+                                <Link to="/interviews/create">
+                                    <Button>Создать интервью</Button>
+                                </Link>
+                            ) : undefined
+                        }
+                    />
                 ) : (
-                    filteredInterviews.map((interview, index) => (
-                        <motion.div
-                            key={interview.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.05 }}
-                            className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow"
-                        >
-                            <div className="flex items-start justify-between">
-                                <div className="flex-1">
-                                    <div className="flex items-center mb-3">
-                                        <h3 className="text-xl font-semibold text-gray-900 mr-3">
-                                            {interview.title}
-                                        </h3>
-                                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColors[interview.status as keyof typeof statusColors]}`}>
-                                            {statusLabels[interview.status as keyof typeof statusLabels]}
-                                        </span>
-                                    </div>
-
-                                    <p className="text-gray-600 mb-4">{interview.description}</p>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-gray-600">
-                                        <div className="flex items-center">
-                                            <User className="w-4 h-4 mr-2" />
-                                            <span className="font-medium">{interview.candidate.name}</span>
-                                        </div>
-                                        <div className="flex items-center">
-                                            <Clock className="w-4 h-4 mr-2" />
-                                            <span>{interview.duration} мин</span>
-                                        </div>
-                                        <div className="flex items-center">
-                                            <span className="font-medium">
-                                                {specializationLabels[interview.specialization as keyof typeof specializationLabels]}
-                                            </span>
-                                            <span className="mx-2">•</span>
-                                            <span>{levelLabels[interview.level as keyof typeof levelLabels]}</span>
-                                        </div>
-                                        {interview.scheduled_at && (
-                                            <div className="flex items-center">
-                                                <Calendar className="w-4 h-4 mr-2" />
-                                                <span>{formatDate(interview.scheduled_at)}</span>
+                    <div className="grid gap-4">
+                        {filteredInterviews.map((interview, index) => (
+                            <motion.div
+                                key={interview.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.05, duration: 0.4 }}
+                            >
+                                <Card hover padding="md">
+                                    <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                                        <div className="flex-1">
+                                            <div className="flex flex-wrap items-center gap-3 mb-3">
+                                                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                                                    {interview.title}
+                                                </h3>
+                                                <Badge variant={statusBadgeVariant(interview.status)}>
+                                                    {statusLabels[interview.status] || interview.status}
+                                                </Badge>
                                             </div>
-                                        )}
-                                    </div>
-                                </div>
 
-                                <div className="ml-6 flex items-center space-x-2">
-                                    {interview.status === 'scheduled' && (
-                                        <button
-                                            onClick={() => handleStartInterview(interview)}
-                                            className="px-4 py-2 gradient-bg-adaptive text-white rounded-lg hover:opacity-90 transition-colors flex items-center space-x-2"
-                                        >
-                                            <Play className="w-4 h-4" />
-                                            <span>Провести</span>
-                                        </button>
-                                    )}
+                                            <p className="text-secondary text-sm mb-4">{interview.description}</p>
 
-                                    <div className="relative group">
-                                        <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                                            <MoreVertical className="w-5 h-5" />
-                                        </button>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-sm text-secondary">
+                                                <div className="flex items-center gap-2">
+                                                    <User className="w-4 h-4 shrink-0" />
+                                                    <span className="font-medium text-gray-900 dark:text-gray-100">{interview.candidate.name}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <Clock className="w-4 h-4 shrink-0" />
+                                                    {interview.duration} мин
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    {specializationLabels[interview.specialization] || interview.specialization}
+                                                    <span>•</span>
+                                                    {levelLabels[interview.level] || interview.level}
+                                                </div>
+                                                {interview.scheduled_at && (
+                                                    <div className="flex items-center gap-2">
+                                                        <Calendar className="w-4 h-4 shrink-0" />
+                                                        {formatDate(interview.scheduled_at)}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
 
-                                        <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
-                                            <div className="py-2">
-                                                <Link
-                                                    to={`/interviews/${interview.id}`}
-                                                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                                >
-                                                    <Eye className="w-4 h-4 mr-3" />
-                                                    Просмотр
-                                                </Link>
-                                                <Link
-                                                    to={`/interviews/${interview.id}/edit`}
-                                                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                                >
-                                                    <Edit className="w-4 h-4 mr-3" />
-                                                    Редактировать
-                                                </Link>
-                                                <button
-                                                    onClick={() => handleDelete(interview.id)}
-                                                    className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                                                >
-                                                    <Trash2 className="w-4 h-4 mr-3" />
-                                                    Удалить
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            {interview.status === 'scheduled' && (
+                                                <Button onClick={() => handleStartInterview(interview)} className="text-sm px-4 py-2">
+                                                    <Play className="w-4 h-4" /> Провести
+                                                </Button>
+                                            )}
+
+                                            <div className="relative group">
+                                                <button className="btn-icon">
+                                                    <MoreVertical className="w-5 h-5" />
                                                 </button>
+                                                <div className="absolute right-0 top-full mt-2 w-48 iv-surface border border-gray-200 dark:border-gray-600 shadow-iv-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
+                                                    <div className="py-1">
+                                                        <Link to={`/interviews/${interview.id}`} className="iv-nav-item">
+                                                            <Eye className="w-4 h-4" /> Просмотр
+                                                        </Link>
+                                                        <Link to={`/interviews/${interview.id}/edit`} className="iv-nav-item">
+                                                            <Edit className="w-4 h-4" /> Редактировать
+                                                        </Link>
+                                                        <button onClick={() => handleDelete(interview.id)} className="iv-nav-item w-full text-red-600 dark:text-red-400">
+                                                            <Trash2 className="w-4 h-4" /> Удалить
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        </motion.div>
-                    ))
+                                </Card>
+                            </motion.div>
+                        ))}
+                    </div>
                 )}
-            </div>
-        </div>
+            </section>
+        </PageTransition>
     )
 }

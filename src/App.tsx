@@ -7,7 +7,7 @@ import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import DashboardPage from './pages/DashboardPage'
-import CalendarPage from './pages/CalendarPage'
+import ActivityPage from './pages/ActivityPage'
 import InterviewWizardPage from './pages/InterviewWizardPage'
 import EditInterviewPage from './pages/EditInterviewPage'
 import EditInterviewFullPage from './pages/EditInterviewFullPage'
@@ -16,6 +16,7 @@ import InterviewPage from './pages/InterviewPage'
 import CandidatesPage from './pages/CandidatesPage'
 import ReportsPage from './pages/ReportsPage'
 import ReportDetailPage from './pages/ReportDetailPage'
+import ProfilePage from './pages/ProfilePage'
 import OAuthCallbackPage from './pages/OAuthCallbackPage'
 
 // Components
@@ -32,7 +33,7 @@ function App() {
 
     return (
         <ThemeProvider>
-            <div className="min-h-screen bg-white dark:bg-gray-900">
+            <div className="min-h-screen bg-gray-50 dark:bg-iv-dark-bg">
                 <Routes>
                     {/* Public routes */}
                     <Route path="/" element={<HomePage />} />
@@ -52,11 +53,21 @@ function App() {
                         }
                     />
                     <Route
+                        path="/activity"
+                        element={
+                            <ProtectedRoute>
+                                <Layout>
+                                    <ActivityPage />
+                                </Layout>
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
                         path="/calendar"
                         element={
                             <ProtectedRoute>
                                 <Layout>
-                                    <CalendarPage />
+                                    <ActivityPage />
                                 </Layout>
                             </ProtectedRoute>
                         }
@@ -112,11 +123,31 @@ function App() {
                         }
                     />
                     <Route
+                        path="/vacancies"
+                        element={
+                            <ProtectedRoute>
+                                <Layout>
+                                    <CandidatesPage />
+                                </Layout>
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
                         path="/candidates"
                         element={
                             <ProtectedRoute>
                                 <Layout>
                                     <CandidatesPage />
+                                </Layout>
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/profile"
+                        element={
+                            <ProtectedRoute>
+                                <Layout>
+                                    <ProfilePage />
                                 </Layout>
                             </ProtectedRoute>
                         }

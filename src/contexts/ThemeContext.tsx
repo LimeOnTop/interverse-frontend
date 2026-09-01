@@ -43,7 +43,11 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     }, [isDark])
 
     const toggleTheme = () => {
+        document.documentElement.classList.add('theme-transition')
         setIsDark(!isDark)
+        setTimeout(() => {
+            document.documentElement.classList.remove('theme-transition')
+        }, 300)
     }
 
     return (

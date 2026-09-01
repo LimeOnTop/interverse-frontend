@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, X } from 'lucide-react'
+import Button from '../ui/Button'
 
 interface TechStackStepProps {
     selectedSpecialization: string
@@ -69,15 +70,14 @@ export default function TechStackStep({
             className="max-w-4xl mx-auto"
         >
             <div className="text-center mb-6">
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-                    Выберите стек технологий
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                    Выберите навыки
                 </h2>
-                <p className="text-gray-600 dark:text-gray-400">
-                    Выберите технологии для оценки кандидата
+                <p className="text-secondary text-sm">
+                    Отметьте технологии, которые хотите прокачать на тренировке
                 </p>
             </div>
 
-            {/* Selected Technologies with Search Icon */}
             <div className="mb-6">
                 <div className="flex items-center justify-between mb-3">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
@@ -86,101 +86,83 @@ export default function TechStackStep({
                             : 'Выбранные технологии'
                         }
                     </h3>
-                    <div className="flex items-center justify-end">
-                        <div
-                            className="relative flex items-center"
-                            onMouseEnter={() => {
-                                if (!isSearchOpen) {
-                                    setIsSearchOpen(true)
-                                }
-                            }}
-                            onMouseLeave={() => {
-                                if (isSearchOpen && !searchTerm) {
-                                    setIsSearchOpen(false)
-                                }
-                            }}
+                    <div
+                        className="relative flex items-center"
+                        onMouseEnter={() => { if (!isSearchOpen) setIsSearchOpen(true) }}
+                        onMouseLeave={() => { if (isSearchOpen && !searchTerm) setIsSearchOpen(false) }}
+                    >
+                        <AnimatePresence>
+                            {isSearchOpen && (
+                                <motion.div
+                                    key="search-input"
+                                    initial={{ opacity: 0, width: 0, x: 20 }}
+                                    animate={{ opacity: 1, width: 220, x: 0 }}
+                                    exit={{ opacity: 0, width: 0, x: 20 }}
+                                    transition={{ duration: 0.3, ease: 'easeInOut' }}
+                                    className="mr-2 overflow-hidden"
+                                >
+                                    <input
+                                        type="text"
+                                        placeholder="поиск технологии"
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="input-field-underlined text-sm w-full"
+                                        autoFocus
+                                        onBlur={() => { if (!searchTerm) setIsSearchOpen(false) }}
+                                    />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                        <button
+                            onClick={(e) => { e.preventDefault(); setIsSearchOpen(true) }}
+                            className="btn-icon"
+                            aria-label="Поиск технологий"
                         >
-                            {/* Search Input - выезжает влево */}
-                            <AnimatePresence>
-                                {isSearchOpen && (
-                                    <motion.div
-                                        key="search-input"
-                                        initial={{ opacity: 0, width: 0, x: 20 }}
-                                        animate={{ opacity: 1, width: 220, x: 0 }}
-                                        exit={{ opacity: 0, width: 0, x: 20 }}
-                                        transition={{ duration: 0.3, ease: 'easeInOut' }}
-                                        className="mr-2 overflow-hidden"
-                                    >
-                                        <input
-                                            type="text"
-                                            placeholder="поиск технологии"
-                                            value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
-                                            className="bg-transparent border-0 border-b-2 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-0 focus:border-inter-verse-green dark:focus:border-purple-500 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 px-2 py-1 text-sm w-full transition-colors"
-                                            autoFocus
-                                            onBlur={() => {
-                                                if (!searchTerm) {
-                                                    setIsSearchOpen(false)
-                                                }
-                                            }}
-                                        />
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-
-                            {/* Search Button - всегда видна */}
-                            <button
-                                onClick={(e) => {
-                                    e.preventDefault()
-                                    setIsSearchOpen(true)
-                                }}
-                                className="p-2 rounded-lg transition-colors flex-shrink-0 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-0 active:outline-none"
-                                aria-label="Поиск технологий"
-                            >
-                                <Search className="w-5 h-5 text-gray-600 dark:text-gray-400 transition-colors" />
-                            </button>
-                        </div>
+                            <Search className="w-5 h-5" />
+                        </button>
                     </div>
                 </div>
 
-                {/* Selected Technologies Tags */}
-                {selectedTechStack.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                        {selectedTechStack.map((tech) => (
-                            <span
-                                key={tech}
-                                className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-inter-verse-green dark:bg-purple-900/20 dark:text-purple-300"
-                            >
-                                {tech}
-                                <button
-                                    onClick={() => removeTech(tech)}
-                                    className="ml-2 hover:text-green-600 dark:hover:text-purple-400"
-                                >
-                                    <X className="w-3 h-3" />
-                                </button>
-                            </span>
-                        ))}
+                {selectedTechStack.length > 0 ? (
+                    <div className="wizard-stack-panel">
+                        <div className="flex flex-wrap gap-2">
+                            {selectedTechStack.map((tech) => (
+                                <span key={tech} className="wizard-stack-chip">
+                                    {tech}
+                                    <button
+                                        type="button"
+                                        onClick={() => removeTech(tech)}
+                                        className="hover:opacity-70 transition-iv"
+                                        aria-label={`Убрать ${tech}`}
+                                    >
+                                        <X className="w-3.5 h-3.5" />
+                                    </button>
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                ) : (
+                    <div className="wizard-stack-panel flex items-center">
+                        <p className="text-sm text-secondary">Пока ничего не выбрано — отметьте технологии ниже</p>
                     </div>
                 )}
             </div>
 
-            {/* Available Technologies */}
             <div className="mb-8">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
                     Доступные технологии
                 </h3>
-                <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-3">
+                <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-2">
                     {filteredTechs.map((tech) => {
                         const isSelected = selectedTechStack.includes(tech)
 
                         return (
                             <motion.button
                                 key={tech}
+                                type="button"
                                 onClick={() => handleTechSelect(tech)}
-                                className={`p-3 rounded-xl text-sm font-medium transition-all duration-200 ${isSelected
-                                    ? 'gradient-bg-adaptive text-white'
-                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                                    }`}
+                                whileTap={{ scale: 0.98 }}
+                                className={`wizard-tech-chip ${isSelected ? 'wizard-tech-chip-selected' : ''}`}
                             >
                                 {tech}
                             </motion.button>
@@ -189,21 +171,9 @@ export default function TechStackStep({
                 </div>
             </div>
 
-            {/* Navigation */}
             <div className="flex justify-between">
-                <button
-                    onClick={onBack}
-                    className="btn-secondary"
-                >
-                    Назад
-                </button>
-                <button
-                    onClick={onNext}
-                    disabled={selectedTechStack.length === 0}
-                    className="btn-primary-adaptive disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    Далее
-                </button>
+                <Button variant="secondary" onClick={onBack}>Назад</Button>
+                <Button onClick={onNext} disabled={selectedTechStack.length === 0}>Далее</Button>
             </div>
         </motion.div>
     )

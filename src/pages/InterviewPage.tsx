@@ -1,639 +1,333 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
-import {
-    ArrowLeft,
-    ArrowRight,
-    Play,
-    Pause,
-    RotateCcw,
-    Save
-} from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { ArrowLeft, ArrowRight, Play } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { useTheme } from '../contexts/ThemeContext'
 import { api } from '../services/api'
+import PageTransition from '../components/ui/PageTransition'
+import Card from '../components/ui/Card'
+import EmptyState from '../components/ui/EmptyState'
+import Spinner from '../components/ui/Spinner'
+import Button from '../components/ui/Button'
+import InterviewQuestionStep, {
+    InterviewTaskStep,
+    InterviewSessionHeader,
+    InterviewSessionComplete,
+} from '../components/interview/InterviewSessionSteps'
+import {
+    startInterviewSession,
+    parseSessionResponse,
+    getSessionStorageKey,
+    getAnswersStorageKey,
+    type InterviewSessionData,
+    type StepAnswer,
+} from '../lib/interviewSession'
 
-interface Question {
-    id: string
-    text: string
-    type: 'question' | 'task'
-    technology: string
-    level: string
-    specialization: string
-    difficulty: number
-    time_estimate: number
+const specLabels: Record<string, string> = {
+    frontend: 'Frontend',
+    backend: 'Backend',
+    devops: 'DevOps',
+    qa: 'QA',
+    data_science: 'Data Science',
 }
 
-interface Interview {
-    id: string
-    title: string
-    description: string
-    scheduled_at: string
-    duration?: number
-    level: string
-    specialization: string
-    candidate?: {
-        name: string
-        email: string
-    }
-}
-
-interface InterviewSession {
-    sessionId: string
-    questions: Question[]
-    interview: Interview & {
-        candidate: {
-            name: string
-            email: string
-        }
-        duration: number
-    }
+const levelLabels: Record<string, string> = {
+    intern: 'Intern',
+    junior: 'Junior',
+    middle: 'Middle',
+    senior: 'Senior',
+    lead: 'Lead / CTO',
 }
 
 export default function InterviewPage() {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
-    const { isDark } = useTheme()
 
-    const [session, setSession] = useState<InterviewSession | null>(null)
-    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-    const [answers, setAnswers] = useState<Record<string, string>>({})
-    const [scores, setScores] = useState<Record<string, number>>({})
-    const [notes, setNotes] = useState<Record<string, string>>({})
-    const [timeSpent, setTimeSpent] = useState<Record<string, number>>({})
-    const [isPlaying, setIsPlaying] = useState(false)
-    const [currentTime, setCurrentTime] = useState(0)
+    const [session, setSession] = useState<InterviewSessionData | null>(null)
+    const [currentStepIndex, setCurrentStepIndex] = useState(0)
+    const [answers, setAnswers] = useState<Record<string, StepAnswer>>({})
     const [loading, setLoading] = useState(true)
+    const [starting, setStarting] = useState(false)
+    const [isComplete, setIsComplete] = useState(false)
 
-    useEffect(() => {
-        if (id) {
-            loadInterviewSession()
-        }
+    const persistSession = useCallback((data: InterviewSessionData) => {
+        if (!id) return
+        localStorage.setItem(getSessionStorageKey(id), JSON.stringify(data))
     }, [id])
 
-    useEffect(() => {
-        let interval: ReturnType<typeof setInterval>
-        if (isPlaying) {
-            interval = setInterval(() => {
-                setCurrentTime(prev => prev + 1)
-            }, 1000)
-        }
-        return () => clearInterval(interval)
-    }, [isPlaying])
+    const persistAnswers = useCallback((nextAnswers: Record<string, StepAnswer>) => {
+        if (!id) return
+        localStorage.setItem(getAnswersStorageKey(id), JSON.stringify(nextAnswers))
+    }, [id])
 
-    const loadInterviewSession = async () => {
+    const loadSession = useCallback(async () => {
+        if (!id) return
+
         try {
-            // First, try to load from localStorage
-            const sessionData = localStorage.getItem('interview-session')
-            if (sessionData) {
-                try {
-                    const parsed = JSON.parse(sessionData)
-                    // Check if the session matches the current interview ID
-                    if (parsed.interview && parsed.interview.id === id) {
-                        // Ensure candidate data exists
-                        if (!parsed.interview.candidate) {
-                            parsed.interview.candidate = {
-                                name: 'Кандидат',
-                                email: ''
-                            }
-                        }
-                        // Ensure duration exists
-                        if (!parsed.interview.duration) {
-                            parsed.interview.duration = 60
-                        }
-                        setSession(parsed)
-                        setLoading(false)
-                        return
+            setLoading(true)
+
+            const cached = localStorage.getItem(getSessionStorageKey(id))
+            if (cached) {
+                const parsed = JSON.parse(cached) as InterviewSessionData
+                if (parsed.interview?.id === id && parsed.steps?.length > 0) {
+                    setSession(parsed)
+                    const cachedAnswers = localStorage.getItem(getAnswersStorageKey(id))
+                    if (cachedAnswers) {
+                        setAnswers(JSON.parse(cachedAnswers))
                     }
-                } catch (parseError) {
-                    console.error('Error parsing session data:', parseError)
-                    // Continue to load from API
+                    setLoading(false)
+                    return
                 }
             }
 
-            // If no session or ID mismatch, try to load interview from API
-            if (id) {
-                try {
-                    const interviewResponse = await api.get(`/interviews/${id}`)
-                    const interview = interviewResponse.data.interview
+            const sessionResponse = await api.get(`/interviews/${id}/session`)
+            const sessionData = parseSessionResponse(sessionResponse.data)
 
-                    // Create a basic session structure with interview data
-                    // Questions will need to be generated separately
-                    const candidateData = interview.candidate || {}
-                    const basicSession: InterviewSession = {
-                        sessionId: `session-${id}`,
-                        questions: [],
-                        interview: {
-                            id: interview.id,
-                            title: interview.title || 'Интервью',
-                            description: interview.description || '',
-                            scheduled_at: interview.scheduled_at || '',
-                            duration: (interview as any).duration || 60,
-                            level: interview.level || '',
-                            specialization: interview.specialization || '',
-                            candidate: {
-                                name: candidateData.name || 'Кандидат',
-                                email: candidateData.email || ''
-                            }
-                        }
-                    }
-
-                    setSession(basicSession)
-                    setLoading(false)
-
-                    // Show message that questions need to be generated
-                    toast('Загружено интервью. Для начала работы сгенерируйте вопросы.', {
-                        icon: 'ℹ️',
-                        duration: 4000
-                    })
-                } catch (error: any) {
-                    console.error('Error loading interview:', error)
-                    toast.error('Ошибка при загрузке интервью')
-                    navigate('/dashboard')
-                }
+            if (sessionData.steps.length === 0) {
+                const interviewResponse = await api.get(`/interviews/${id}`)
+                setSession({
+                    sessionId: id,
+                    interview: interviewResponse.data.interview,
+                    steps: [],
+                })
             } else {
-                toast.error('ID интервью не указан')
-                navigate('/dashboard')
+                setSession(sessionData)
+                persistSession(sessionData)
             }
         } catch (error) {
             console.error('Error loading session:', error)
-            toast.error('Ошибка загрузки сессии')
+            toast.error('Не удалось загрузить тренировку')
             navigate('/dashboard')
+        } finally {
+            setLoading(false)
+        }
+    }, [id, navigate, persistSession])
+
+    useEffect(() => {
+        loadSession()
+    }, [loadSession])
+
+    const currentStep = session?.steps[currentStepIndex]
+    const totalSteps = session?.steps.length ?? 0
+
+    const stats = useMemo(() => {
+        if (!session) {
+            return { answeredQuestions: 0, completedTasks: 0 }
+        }
+
+        let answeredQuestions = 0
+        let completedTasks = 0
+
+        session.steps.forEach((step) => {
+            const answer = answers[step.id]
+            if (!answer) return
+
+            if (step.type === 'question' && answer.selectedOptionIndex !== undefined) {
+                answeredQuestions += 1
+            }
+
+            if (step.type === 'task' && answer.taskAnswer?.trim()) {
+                completedTasks += 1
+            }
+        })
+
+        return { answeredQuestions, completedTasks }
+    }, [answers, session])
+
+    const handleStartSession = async () => {
+        if (!id) return
+
+        try {
+            setStarting(true)
+            const sessionData = await startInterviewSession(api, id)
+
+            if (sessionData.steps.length === 0) {
+                toast.error('Сессия пуста — проверьте банк вопросов')
+                return
+            }
+
+            setSession(sessionData)
+            setCurrentStepIndex(0)
+            setAnswers({})
+            setIsComplete(false)
+            toast.success('Тренировка начата')
+        } catch (error) {
+            console.error('Error starting session:', error)
+            toast.error('Не удалось начать тренировку')
+        } finally {
+            setStarting(false)
         }
     }
 
-    const currentQuestion = session?.questions[currentQuestionIndex]
-    const progress = session ? ((currentQuestionIndex + 1) / session.questions.length) * 100 : 0
+    const handleSelectOption = (optionIndex: number) => {
+        if (!currentStep) return
 
-    const handleAnswerChange = (questionId: string, answer: string) => {
-        setAnswers(prev => ({ ...prev, [questionId]: answer }))
-    }
-
-    const handleScoreChange = (questionId: string, score: number) => {
-        if (score === 0) {
-            setScores(prev => {
-                const newScores = { ...prev }
-                delete newScores[questionId]
-                return newScores
-            })
-        } else {
-            setScores(prev => ({ ...prev, [questionId]: score }))
+        const nextAnswers = {
+            ...answers,
+            [currentStep.id]: {
+                stepId: currentStep.id,
+                selectedOptionIndex: optionIndex,
+            },
         }
+        setAnswers(nextAnswers)
+        persistAnswers(nextAnswers)
     }
 
-    const handleNotesChange = (questionId: string, note: string) => {
-        setNotes(prev => ({ ...prev, [questionId]: note }))
+    const handleTaskChange = (value: string) => {
+        if (!currentStep) return
+
+        const nextAnswers = {
+            ...answers,
+            [currentStep.id]: {
+                stepId: currentStep.id,
+                taskAnswer: value,
+            },
+        }
+        setAnswers(nextAnswers)
+        persistAnswers(nextAnswers)
     }
 
-    const handleTimeSpentChange = (questionId: string, time: number) => {
-        setTimeSpent(prev => ({ ...prev, [questionId]: time }))
+    const canProceed = () => {
+        if (!currentStep) return false
+        const answer = answers[currentStep.id]
+
+        if (currentStep.type === 'question') {
+            return answer?.selectedOptionIndex !== undefined
+        }
+
+        return Boolean(answer?.taskAnswer?.trim())
     }
 
     const handleNext = () => {
-        if (currentQuestionIndex < (session?.questions.length || 0) - 1) {
-            setCurrentQuestionIndex(prev => prev + 1)
-            setCurrentTime(0)
-            setIsPlaying(false)
+        if (!session) return
+
+        if (currentStepIndex < session.steps.length - 1) {
+            setCurrentStepIndex((prev) => prev + 1)
+            return
         }
+
+        setIsComplete(true)
     }
 
     const handlePrevious = () => {
-        if (currentQuestionIndex > 0) {
-            setCurrentQuestionIndex(prev => prev - 1)
-            setCurrentTime(0)
-            setIsPlaying(false)
+        if (currentStepIndex > 0) {
+            setCurrentStepIndex((prev) => prev - 1)
         }
     }
 
-    const handleSave = () => {
-        // Здесь можно добавить сохранение ответов на сервер
-        toast.success('Ответы сохранены')
-    }
-
-    const toggleTimer = () => {
-        setIsPlaying(!isPlaying)
-    }
-
-    const resetTimer = () => {
-        setCurrentTime(0)
-        setIsPlaying(false)
-    }
-
-    const formatTime = (seconds: number) => {
-        const mins = Math.floor(seconds / 60)
-        const secs = seconds % 60
-        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-    }
-
-    const getDifficultyLabel = (difficulty: number) => {
-        const labels = ['Очень легко', 'Легко', 'Средне', 'Сложно', 'Очень сложно']
-        return labels[difficulty - 1] || 'Средне'
-    }
-
-    const getTypeLabel = (type: string) => {
-        return type === 'question' ? 'Вопрос' : 'Практическая задача'
-    }
-
-    const getTypeIcon = (type: string) => {
-        return type === 'question' ? '' : '⚡'
+    const handleFinish = () => {
+        if (id) {
+            localStorage.removeItem(getSessionStorageKey(id))
+            localStorage.removeItem(getAnswersStorageKey(id))
+        }
+        navigate('/dashboard')
     }
 
     if (loading) {
-        return (
-            <div className="flex items-center justify-center h-96">
-                <div className={`animate-spin rounded-full h-12 w-12 border-b-2 ${isDark ? 'border-inter-verse-green' : 'border-inter-verse-green'}`}></div>
-            </div>
-        )
+        return <Spinner size="lg" className="h-96" />
     }
 
     if (!session) {
         return (
-            <div className="text-center py-12">
-                <h2 className={`text-2xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    Интервью не найдено
-                </h2>
-                <button
-                    onClick={() => navigate('/dashboard')}
-                    className="btn-primary-adaptive px-6 py-3 rounded-xl"
-                >
-                    Вернуться на главную
-                </button>
-            </div>
+            <PageTransition className="text-center py-12">
+                <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Тренировка не найдена</h2>
+                <Button onClick={() => navigate('/dashboard')}>Вернуться на дашборд</Button>
+            </PageTransition>
         )
     }
 
-    // Show message if no questions are available
-    if (session.questions.length === 0) {
+    if (session.steps.length === 0) {
         return (
-            <div className="max-w-4xl mx-auto space-y-6">
-                {/* Header */}
-                <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center">
-                            <button
-                                onClick={() => navigate('/dashboard')}
-                                className={`mr-4 p-2 rounded-lg transition-colors ${isDark
-                                    ? 'text-gray-300 hover:text-white hover:bg-gray-700'
-                                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
-                                    }`}
-                            >
-                                <ArrowLeft className="w-5 h-5" />
-                            </button>
-                            <div>
-                                <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                                    {session.interview.title}
-                                </h1>
-                                <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{session.interview.description}</p>
-                            </div>
-                        </div>
-                        <div className="text-right">
-                            <div className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                                Кандидат: <span className="font-medium">{session.interview.candidate.name || 'Не указан'}</span>
-                            </div>
-                            <div className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                                {session.interview.specialization || 'Не указано'} • {session.interview.level || 'Не указано'}
-                            </div>
+            <PageTransition className="max-w-3xl mx-auto space-y-6">
+                <Card padding="md">
+                    <div className="flex items-start gap-3">
+                        <Button variant="icon" onClick={() => navigate('/interview-service')}>
+                            <ArrowLeft className="w-5 h-5" />
+                        </Button>
+                        <div>
+                            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{session.interview.title}</h1>
+                            <p className="text-secondary text-sm mt-1">{session.interview.description}</p>
                         </div>
                     </div>
-                </div>
+                </Card>
 
-                {/* No Questions Message */}
-                <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-12 text-center">
-                    <h3 className={`text-xl font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        Вопросы не сгенерированы
-                    </h3>
-                    <p className={`mb-6 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                        Для начала работы с интервью необходимо сгенерировать вопросы.
-                    </p>
-                    <button
-                        onClick={async () => {
-                            try {
-                                const response = await api.post('/interviews/generate-questions', {
-                                    interview_id: id
-                                })
+                <EmptyState
+                    icon={Play}
+                    title="Сессия ещё не начата"
+                    description="Нажмите кнопку ниже, чтобы получить 20 вопросов и 2 практические задачи"
+                    action={
+                        <Button onClick={handleStartSession} loading={starting}>
+                            Начать тренировку
+                        </Button>
+                    }
+                />
+            </PageTransition>
+        )
+    }
 
-                                // Save session to localStorage
-                                localStorage.setItem('interview-session', JSON.stringify({
-                                    sessionId: response.data.session_id,
-                                    questions: response.data.questions,
-                                    interview: response.data.interview
-                                }))
-
-                                // Reload the page to show questions
-                                window.location.reload()
-                            } catch (error: any) {
-                                toast.error('Ошибка при генерации вопросов')
-                            }
-                        }}
-                        className="btn-primary-adaptive px-6 py-3 rounded-xl"
-                    >
-                        Сгенерировать вопросы
-                    </button>
-                </div>
-            </div>
+    if (isComplete) {
+        return (
+            <PageTransition className="max-w-3xl mx-auto">
+                <InterviewSessionComplete
+                    answeredQuestions={stats.answeredQuestions}
+                    completedTasks={stats.completedTasks}
+                    onFinish={handleFinish}
+                />
+            </PageTransition>
         )
     }
 
     return (
-        <div className="max-w-4xl mx-auto space-y-6">
-            {/* Header */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
-                <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center">
-                        <button
-                            onClick={() => navigate('/interview-service')}
-                            className={`mr-4 p-2 rounded-lg transition-colors ${isDark
-                                ? 'text-gray-300 hover:text-white hover:bg-gray-700'
-                                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
-                                }`}
-                        >
-                            <ArrowLeft className="w-5 h-5" />
-                        </button>
-                        <div>
-                            <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                                {session.interview.title}
-                            </h1>
-                            <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{session.interview.description}</p>
-                        </div>
-                    </div>
-                    <div className="text-right">
-                        <div className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                            Кандидат: <span className="font-medium">{session.interview.candidate?.name || 'Не указан'}</span>
-                        </div>
-                        <div className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                            {session.interview.specialization || 'Не указано'} • {session.interview.level || 'Не указано'}
-                        </div>
-                    </div>
-                </div>
+        <PageTransition className="max-w-3xl mx-auto space-y-6">
+            <InterviewSessionHeader
+                title={session.interview.title}
+                description={session.interview.description}
+                currentStep={currentStepIndex + 1}
+                totalSteps={totalSteps}
+                level={levelLabels[session.interview.level || ''] || session.interview.level}
+                specialization={specLabels[session.interview.specialization || ''] || session.interview.specialization}
+                onBack={() => navigate('/interview-service')}
+            />
 
-                {/* Progress */}
-                <div className="mb-4">
-                    <div className={`flex items-center justify-between text-sm mb-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                        <span>Прогресс: {currentQuestionIndex + 1} из {session.questions.length}</span>
-                        <span>{Math.round(progress)}%</span>
-                    </div>
-                    <div className={`w-full rounded-full h-2 ${isDark ? 'bg-gray-700' : 'bg-gray-200'}`}>
-                        <div
-                            className="gradient-bg-adaptive h-2 rounded-full transition-all duration-300"
-                            style={{ width: `${progress}%` }}
-                        />
-                    </div>
-                </div>
-            </div>
-
-            {/* Question Card */}
             <AnimatePresence mode="wait">
                 <motion.div
-                    key={currentQuestionIndex}
+                    key={currentStep?.id}
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm"
+                    transition={{ duration: 0.25 }}
                 >
-                    {currentQuestion && (
-                        <>
-                            {/* Question Header */}
-                            <div className="flex items-start justify-between mb-6">
-                                <div className="flex-1">
-                                    <div className="flex items-center mb-3">
-                                        <span className="text-2xl mr-3">
-                                            {getTypeIcon(currentQuestion.type)}
-                                        </span>
-                                        <div>
-                                            <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                                                {getTypeLabel(currentQuestion.type)}
-                                            </h2>
-                                            <div className={`flex items-center space-x-4 text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                                                <span>Технология: {currentQuestion.technology}</span>
-                                                <span>•</span>
-                                                <span>Сложность: {getDifficultyLabel(currentQuestion.difficulty)}</span>
-                                                <span>•</span>
-                                                <span>Время: {currentQuestion.time_estimate} мин</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <p className={`text-lg leading-relaxed ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
-                                        {currentQuestion.text}
-                                    </p>
-                                </div>
-
-                                {/* Timer */}
-                                <div className={`ml-6 rounded-xl p-4 text-center ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                                    <div className={`text-2xl font-mono font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                                        {formatTime(currentTime)}
-                                    </div>
-                                    <div className="flex space-x-2">
-                                        <button
-                                            onClick={toggleTimer}
-                                            className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${isPlaying
-                                                ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                                                : 'bg-green-100 text-green-700 hover:bg-green-200'
-                                                }`}
-                                        >
-                                            {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                                        </button>
-                                        <button
-                                            onClick={resetTimer}
-                                            className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${isDark
-                                                ? 'bg-gray-600 text-gray-200 hover:bg-gray-500'
-                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                                }`}
-                                        >
-                                            <RotateCcw className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Answer Section */}
-                            <div className="space-y-6">
-                                <div>
-                                    <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                                        Ответ кандидата:
-                                    </label>
-                                    <textarea
-                                        value={answers[currentQuestion.id] || ''}
-                                        onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
-                                        placeholder="Запишите ответ кандидата..."
-                                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-inter-verse-green focus:border-transparent resize-none ${isDark
-                                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                                            : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                                            }`}
-                                        rows={4}
-                                    />
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                                            Оценка (1-5):
-                                        </label>
-                                        <div className={`p-6 rounded-xl border-2 border-dashed transition-all duration-200 ${isDark
-                                            ? 'bg-gray-800/50 border-gray-600 hover:border-gray-500'
-                                            : 'bg-gray-50 border-gray-300 hover:border-gray-400'
-                                            }`}>
-                                            {/* Rating Scale Header */}
-                                            <div className="flex items-center justify-between mb-4">
-                                                <span className={`text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                                                    Оценка:
-                                                </span>
-                                                <div className="flex items-center space-x-1">
-                                                    <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>1</span>
-                                                    <div className="w-16 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-2"></div>
-                                                    <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>5</span>
-                                                </div>
-                                            </div>
-
-                                            {/* Interactive Rating Buttons */}
-                                            <div className="flex items-center justify-center space-x-3 mb-4">
-                                                {[1, 2, 3, 4, 5].map((rating) => (
-                                                    <button
-                                                        key={rating}
-                                                        onClick={() => handleScoreChange(currentQuestion.id, rating)}
-                                                        className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold transition-all duration-200 transform hover:scale-105 ${scores[currentQuestion.id] === rating
-                                                            ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg ring-2 ring-yellow-300'
-                                                            : isDark
-                                                                ? 'bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-yellow-400 hover:shadow-md'
-                                                                : 'bg-gray-200 text-gray-500 hover:bg-gray-300 hover:text-yellow-500 hover:shadow-md'
-                                                            }`}
-                                                    >
-                                                        {rating}
-                                                    </button>
-                                                ))}
-                                            </div>
-
-                                            {/* Rating Description */}
-                                            <div className="text-center">
-                                                <div className={`text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-600'
-                                                    }`}>
-                                                    {scores[currentQuestion.id] ? (
-                                                        <div className="space-y-1">
-                                                            <div className="flex items-center justify-center space-x-2">
-                                                                <span className="text-lg font-bold text-yellow-500">
-                                                                    {scores[currentQuestion.id]}
-                                                                </span>
-                                                                <span className="text-gray-400">/</span>
-                                                                <span className="text-gray-400">5</span>
-                                                            </div>
-                                                            <div className={`text-sm ${scores[currentQuestion.id] === 1 ? 'text-red-500' :
-                                                                scores[currentQuestion.id] === 2 ? 'text-orange-500' :
-                                                                    scores[currentQuestion.id] === 3 ? 'text-yellow-500' :
-                                                                        scores[currentQuestion.id] === 4 ? 'text-green-500' :
-                                                                            'text-green-600'
-                                                                }`}>
-                                                                {scores[currentQuestion.id] === 1 ? 'Неудовлетворительно' :
-                                                                    scores[currentQuestion.id] === 2 ? 'Удовлетворительно' :
-                                                                        scores[currentQuestion.id] === 3 ? 'Хорошо' :
-                                                                            scores[currentQuestion.id] === 4 ? 'Очень хорошо' :
-                                                                                'Отлично'}
-                                                            </div>
-                                                        </div>
-                                                    ) : (
-                                                        <span className="text-gray-400">Нажмите на цифру для оценки</span>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            {/* Clear Selection Button */}
-                                            {scores[currentQuestion.id] && (
-                                                <div className="text-center mt-3">
-                                                    <button
-                                                        onClick={() => handleScoreChange(currentQuestion.id, 0)}
-                                                        className={`text-xs px-4 py-2 rounded-lg transition-all duration-200 ${isDark
-                                                            ? 'text-gray-400 hover:text-gray-300 hover:bg-gray-700 border border-gray-600'
-                                                            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200 border border-gray-300'
-                                                            }`}
-                                                    >
-                                                        ✕ Сбросить оценку
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                                            Время на ответ (минуты):
-                                        </label>
-                                        <input
-                                            type="number"
-                                            value={timeSpent[currentQuestion.id] || ''}
-                                            onChange={(e) => handleTimeSpentChange(currentQuestion.id, parseInt(e.target.value))}
-                                            placeholder="0"
-                                            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-inter-verse-green focus:border-transparent ${isDark
-                                                ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                                                : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                                                }`}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                                        Заметки:
-                                    </label>
-                                    <textarea
-                                        value={notes[currentQuestion.id] || ''}
-                                        onChange={(e) => handleNotesChange(currentQuestion.id, e.target.value)}
-                                        placeholder="Дополнительные заметки..."
-                                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-inter-verse-green focus:border-transparent resize-none ${isDark
-                                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                                            : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                                            }`}
-                                        rows={2}
-                                    />
-                                </div>
-                            </div>
-                        </>
-                    )}
+                    {currentStep?.type === 'question' ? (
+                        <InterviewQuestionStep
+                            step={currentStep}
+                            selectedOptionIndex={answers[currentStep.id]?.selectedOptionIndex}
+                            onSelectOption={handleSelectOption}
+                        />
+                    ) : currentStep ? (
+                        <InterviewTaskStep
+                            step={currentStep}
+                            value={answers[currentStep.id]?.taskAnswer || ''}
+                            onChange={handleTaskChange}
+                        />
+                    ) : null}
                 </motion.div>
             </AnimatePresence>
 
-            {/* Navigation */}
-            <div className="flex items-center justify-between">
-                <button
+            <div className="flex items-center justify-between gap-4">
+                <Button
+                    variant="secondary"
                     onClick={handlePrevious}
-                    disabled={currentQuestionIndex === 0}
-                    className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center space-x-2 ${currentQuestionIndex === 0
-                        ? isDark
-                            ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : isDark
-                            ? 'bg-gray-600 text-gray-200 hover:bg-gray-500'
-                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
+                    disabled={currentStepIndex === 0}
                 >
                     <ArrowLeft className="w-5 h-5" />
-                    <span>Предыдущий</span>
-                </button>
+                    Назад
+                </Button>
 
-                <div className="flex space-x-3">
-                    <button
-                        onClick={handleSave}
-                        className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center space-x-2 ${isDark
-                            ? 'bg-blue-900 text-blue-200 hover:bg-blue-800'
-                            : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                            }`}
-                    >
-                        <Save className="w-5 h-5" />
-                        <span>Сохранить</span>
-                    </button>
-
-                    <button
-                        onClick={handleNext}
-                        disabled={currentQuestionIndex === session.questions.length - 1}
-                        className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center space-x-2 ${currentQuestionIndex === session.questions.length - 1
-                            ? isDark
-                                ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            : 'gradient-bg-adaptive text-white hover:opacity-90'
-                            }`}
-                    >
-                        <span>Следующий</span>
-                        <ArrowRight className="w-5 h-5" />
-                    </button>
-                </div>
+                <Button onClick={handleNext} disabled={!canProceed()}>
+                    {currentStepIndex === totalSteps - 1 ? 'Завершить' : 'Далее'}
+                    <ArrowRight className="w-5 h-5" />
+                </Button>
             </div>
-        </div>
+        </PageTransition>
     )
 }

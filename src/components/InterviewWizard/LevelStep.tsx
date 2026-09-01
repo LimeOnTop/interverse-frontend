@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion'
-import { Star, TrendingUp, Users, Award, Crown } from 'lucide-react'
+import { Star, TrendingUp, Users, Award, Crown, Check } from 'lucide-react'
+import Card from '../ui/Card'
+import Button from '../ui/Button'
 
 interface LevelStepProps {
     selectedLevel: string
@@ -61,73 +63,53 @@ export default function LevelStep({
             className="max-w-4xl mx-auto"
         >
             <div className="text-center mb-6">
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-                    Выберите уровень кандидата
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                    Выберите грейд
                 </h2>
-                <p className="text-gray-600 dark:text-gray-400">
-                    Определите ожидаемый уровень кандидата
+                <p className="text-secondary text-sm">
+                    На каком уровне вы планируете тренироваться?
                 </p>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
                 {levels.map((level) => {
                     const Icon = level.icon
                     const isSelected = selectedLevel === level.id
 
                     return (
-                        <motion.div
+                        <Card
                             key={level.id}
-                            className={`card p-6 cursor-pointer transition-all duration-200 ${isSelected
-                                ? 'ring-2 ring-inter-verse-green bg-green-50 dark:ring-purple-500 dark:bg-purple-900/20'
-                                : 'hover:shadow-lg hover:border-gray-200 dark:hover:border-gray-600'
-                                }`}
+                            hover
+                            padding="md"
+                            className={`wizard-option-card ${isSelected ? 'wizard-option-card-selected' : ''}`}
                             onClick={() => onSelect(level.id)}
                         >
-                            <div className="w-12 h-12 rounded-xl mb-4 flex items-center justify-center bg-gray-100 dark:bg-gray-700">
-                                <Icon className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+                            <div className="wizard-option-icon">
+                                <Icon className="w-6 h-6" strokeWidth={1.75} />
                             </div>
-                            <h3 className={`text-lg font-semibold mb-2 ${isSelected ? 'text-inter-verse-green dark:text-purple-400' : 'text-gray-900 dark:text-gray-100'
-                                }`}>
+                            <h3 className={`text-lg font-semibold mb-2 ${isSelected ? 'text-inter-verse-green dark:text-purple-400' : 'text-gray-900 dark:text-gray-100'}`}>
                                 {level.name}
                             </h3>
-                            <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                            <p className="text-secondary text-sm mb-2">
                                 {level.description}
                             </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-500">
+                            <p className="text-xs text-secondary">
                                 {level.experience}
                             </p>
                             {isSelected && (
                                 <div className="mt-4 flex items-center text-inter-verse-green dark:text-purple-400 text-sm font-medium">
-                                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                        <path
-                                            fillRule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clipRule="evenodd"
-                                        />
-                                    </svg>
+                                    <Check className="w-4 h-4 mr-2" strokeWidth={2} />
                                     Выбрано
                                 </div>
                             )}
-                        </motion.div>
+                        </Card>
                     )
                 })}
             </div>
 
-            {/* Navigation */}
             <div className="flex justify-between">
-                <button
-                    onClick={onBack}
-                    className="btn-secondary"
-                >
-                    Назад
-                </button>
-                <button
-                    onClick={onNext}
-                    disabled={!selectedLevel}
-                    className="btn-primary-adaptive disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    Далее
-                </button>
+                <Button variant="secondary" onClick={onBack}>Назад</Button>
+                <Button onClick={onNext} disabled={!selectedLevel}>Далее</Button>
             </div>
         </motion.div>
     )

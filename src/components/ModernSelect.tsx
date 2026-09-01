@@ -14,6 +14,7 @@ interface ModernSelectProps {
     onChange: (value: string) => void
     placeholder: string
     className?: string
+    borderless?: boolean
 }
 
 export default function ModernSelect({
@@ -22,6 +23,7 @@ export default function ModernSelect({
     onChange,
     placeholder,
     className = '',
+    borderless = false,
 }: ModernSelectProps) {
     const [isOpen, setIsOpen] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
@@ -56,7 +58,11 @@ export default function ModernSelect({
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-left focus:outline-none focus:ring-2 gradient-ring-adaptive focus:border-transparent transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-500 flex items-center justify-between"
+                className={`w-full px-4 py-3 bg-white dark:bg-iv-dark-bg rounded-none text-left focus:outline-none focus:ring-2 gradient-ring-adaptive transition-all duration-200 flex items-center justify-between ${
+                    borderless
+                        ? 'border-0'
+                        : 'border border-gray-200 dark:border-gray-600 focus:border-transparent hover:border-gray-300 dark:hover:border-gray-500'
+                }`}
             >
                 <div className="flex items-center space-x-3">
                     {selectedOption?.icon}
@@ -85,7 +91,7 @@ export default function ModernSelect({
                                 placeholder="Поиск..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 gradient-ring-adaptive focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-none focus:outline-none focus:ring-2 gradient-ring-adaptive focus:border-transparent bg-white dark:bg-iv-dark-bg text-gray-900 dark:text-gray-100"
                                 onClick={(e) => e.stopPropagation()}
                             />
                         </div>

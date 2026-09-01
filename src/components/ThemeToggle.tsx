@@ -1,39 +1,33 @@
-import React from 'react'
 import { motion } from 'framer-motion'
 import { Sun, Moon } from 'lucide-react'
 import { useTheme } from '../contexts/ThemeContext'
 
-const ThemeToggle: React.FC = () => {
+interface ThemeToggleProps {
+    iconClassName?: string
+    className?: string
+}
+
+export default function ThemeToggle({ iconClassName = '', className = '' }: ThemeToggleProps) {
     const { isDark, toggleTheme } = useTheme()
 
     return (
-        <div className="flex items-center space-x-3">
-            <Sun className={`w-4 h-4 transition-colors duration-200 ${!isDark ? 'text-yellow-500' : 'text-gray-400'}`} />
-
-            <button
-                onClick={toggleTheme}
-                className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
-                style={{
-                    backgroundColor: isDark ? '#4c1d95' : '#e5e7eb'
-                }}
-                aria-label="Переключить тему"
+        <button
+            onClick={toggleTheme}
+            className={`btn-icon relative overflow-hidden min-w-[44px] min-h-[44px] ${className}`}
+            aria-label="Переключить тему"
+        >
+            <motion.div
+                key={isDark ? 'dark' : 'light'}
+                initial={{ rotate: -180, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
             >
-                <motion.div
-                    className="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-lg"
-                    animate={{
-                        x: isDark ? 20 : 4,
-                    }}
-                    transition={{
-                        type: "spring",
-                        stiffness: 500,
-                        damping: 30
-                    }}
-                />
-            </button>
-
-            <Moon className={`w-4 h-4 transition-colors duration-200 ${isDark ? 'text-purple-400' : 'text-gray-400'}`} />
-        </div>
+                {isDark ? (
+                    <Moon className={`w-5 h-5 ${iconClassName || 'text-purple-400'}`} strokeWidth={1.75} />
+                ) : (
+                    <Sun className={`w-5 h-5 ${iconClassName || 'text-inter-verse-green'}`} strokeWidth={1.75} />
+                )}
+            </motion.div>
+        </button>
     )
 }
-
-export default ThemeToggle

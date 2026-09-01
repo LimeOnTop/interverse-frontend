@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { Check } from 'lucide-react'
 import {
     Monitor,
     Server,
@@ -6,6 +7,7 @@ import {
     TestTube,
     Brain
 } from 'lucide-react'
+import Card from '../ui/Card'
 
 interface SpecializationStepProps {
     selectedSpecialization: string
@@ -60,63 +62,48 @@ export default function SpecializationStep({
             className="max-w-4xl mx-auto"
         >
             <div className="text-center mb-6">
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-                    Выберите специализацию
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                    Выберите направление
                 </h2>
-                <p className="text-gray-600 dark:text-gray-400">
-                    Выберите направление для проведения интервью
+                <p className="text-secondary text-sm">
+                    Какое направление вы хотите отработать на тренировке?
                 </p>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
                 {specializations.map((spec) => {
                     const Icon = spec.icon
                     const isSelected = selectedSpecialization === spec.id
 
                     return (
-                        <motion.div
+                        <Card
                             key={spec.id}
-                            className={`card p-6 cursor-pointer transition-all duration-200 ${isSelected
-                                ? 'ring-2 ring-inter-verse-green bg-green-50 dark:ring-purple-500 dark:bg-purple-900/20'
-                                : 'hover:shadow-lg hover:border-gray-200 dark:hover:border-gray-600'
-                                }`}
-                            onClick={() => onSelect(spec.id)}
+                            hover
+                            padding="md"
+                            className={`wizard-option-card ${isSelected ? 'wizard-option-card-selected' : ''}`}
+                            onClick={() => {
+                                onSelect(spec.id)
+                                onNext()
+                            }}
                         >
-                            <div className="w-12 h-12 rounded-xl mb-4 flex items-center justify-center bg-gray-100 dark:bg-gray-700">
-                                <Icon className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+                            <div className="wizard-option-icon">
+                                <Icon className="w-6 h-6" strokeWidth={1.75} />
                             </div>
-                            <h3 className={`text-lg font-semibold mb-2 ${isSelected ? 'text-inter-verse-green dark:text-purple-400' : 'text-gray-900 dark:text-gray-100'
-                                }`}>
+                            <h3 className={`text-lg font-semibold mb-2 ${isSelected ? 'text-inter-verse-green dark:text-purple-400' : 'text-gray-900 dark:text-gray-100'}`}>
                                 {spec.name}
                             </h3>
-                            <p className="text-gray-600 dark:text-gray-400 text-sm">
+                            <p className="text-secondary text-sm">
                                 {spec.description}
                             </p>
                             {isSelected && (
                                 <div className="mt-4 flex items-center text-inter-verse-green dark:text-purple-400 text-sm font-medium">
-                                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                        <path
-                                            fillRule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clipRule="evenodd"
-                                        />
-                                    </svg>
+                                    <Check className="w-4 h-4 mr-2" strokeWidth={2} />
                                     Выбрано
                                 </div>
                             )}
-                        </motion.div>
+                        </Card>
                     )
                 })}
-            </div>
-
-            <div className="text-center">
-                <button
-                    onClick={onNext}
-                    disabled={!selectedSpecialization}
-                    className="btn-primary-adaptive disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    Далее
-                </button>
             </div>
         </motion.div>
     )

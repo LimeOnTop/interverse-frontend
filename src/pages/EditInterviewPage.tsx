@@ -8,6 +8,10 @@ import SpecializationStep from '../components/InterviewWizard/SpecializationStep
 import TechStackStep from '../components/InterviewWizard/TechStackStep'
 import LevelStep from '../components/InterviewWizard/LevelStep'
 import ScheduleStep from '../components/InterviewWizard/ScheduleStep'
+import PageHeader from '../components/ui/PageHeader'
+import PageTransition from '../components/ui/PageTransition'
+import Card from '../components/ui/Card'
+import Spinner from '../components/ui/Spinner'
 
 const STEPS = {
     SPECIALIZATION: 1,
@@ -44,7 +48,6 @@ export default function EditInterviewPage() {
             setSelectedLevel(interview.level || '')
             setScheduledAt(interview.scheduled_at || '')
 
-            // Parse tech_stack
             if (interview.tech_stack) {
                 try {
                     const techStack = JSON.parse(interview.tech_stack)
@@ -146,42 +149,31 @@ export default function EditInterviewPage() {
         }
     }
 
-    if (isLoadingData) {
-        return (
-            <div className="flex items-center justify-center h-96">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-inter-verse-green"></div>
-            </div>
-        )
-    }
+    if (isLoadingData) return <Spinner size="lg" className="h-96" />
 
     return (
-        <div className="max-w-4xl mx-auto py-8">
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                    Редактирование интервью
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400">
-                    Обновите информацию об интервью
-                </p>
-            </div>
+        <PageTransition className="max-w-4xl mx-auto">
+            <PageHeader
+                title="Редактирование интервью"
+                description="Обновите информацию об интервью"
+            />
 
             <StepIndicator currentStep={currentStep} totalSteps={4} />
 
-            <AnimatePresence mode="wait">
-                <div className="mt-8">
+            <Card padding="lg" className="mt-6">
+                <AnimatePresence mode="wait">
                     {renderStep()}
-                </div>
-            </AnimatePresence>
+                </AnimatePresence>
+            </Card>
 
             {isLoading && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-inter-verse-green mx-auto"></div>
-                        <p className="mt-4 text-gray-600 dark:text-gray-400">Обновление интервью...</p>
-                    </div>
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <Card padding="lg" className="text-center">
+                        <Spinner size="lg" />
+                        <p className="text-secondary mt-4">Обновление интервью...</p>
+                    </Card>
                 </div>
             )}
-        </div>
+        </PageTransition>
     )
 }
-

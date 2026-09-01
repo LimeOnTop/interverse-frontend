@@ -1,199 +1,150 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowRight, CheckCircle, Users, FileText, BarChart3 } from 'lucide-react'
+import { ArrowRight, CheckCircle } from 'lucide-react'
+import PublicNav from '../components/PublicNav'
+import HeroSlider from '../components/HeroSlider'
+import ScrollDownIndicator from '../components/ScrollDownIndicator'
+import Card from '../components/ui/Card'
+import TestimonialsCarousel from '../components/TestimonialsCarousel'
+
+const features = [
+    {
+        step: '1',
+        title: 'Выбери направление',
+        description: 'Frontend, Backend, DevOps, QA или Data Science — тренируйся под ту роль, на которую идёшь',
+    },
+    {
+        step: '2',
+        title: 'Укажи свой стек',
+        description: 'React, Go, Python, Kubernetes — вопросы и задачи под технологии из твоего резюме',
+    },
+    {
+        step: '3',
+        title: 'Задай уровень',
+        description: 'Intern, Junior, Middle, Senior — сложность тренировки соответствует целевой позиции',
+    },
+]
+
+const benefits = [
+    'Симуляция реальных технических интервью',
+    'Вопросы под ваш стек и уровень',
+    'Разбор ошибок и слабых тем в отчёте',
+    'Отслеживание прогресса между тренировками',
+    'Подготовка к live-coding и system design',
+    'Тренируйтесь в удобном темпе, без давления',
+]
 
 export default function HomePage() {
     return (
-        <div className="min-h-screen bg-white dark:bg-gray-900">
-            {/* Header */}
-            <header className="px-8 py-6">
-                <div className="flex items-center justify-between">
-                    <div className="text-2xl font-bold gradient-text-adaptive">
-                        InterVerse
+        <div className="min-h-screen relative bg-gray-50 dark:bg-iv-dark-bg">
+            <PublicNav landing overlay />
+            <HeroSlider />
+
+            <div className="relative z-10">
+                {/* Features */}
+                <section id="landing-features" className="iv-landing-section iv-landing-section-glass bg-white dark:bg-iv-dark-surface/80 scroll-mt-0">
+                    <div className="h-[10vh] min-h-[48px] flex items-center justify-center">
+                        <ScrollDownIndicator targetId="landing-features-content" />
                     </div>
-                    <div className="flex items-center space-x-4">
-                        <Link
-                            to="/login"
-                            className="text-gray-600 dark:text-purple-300 hover:text-gray-900 dark:hover:text-purple-200 transition-colors duration-200"
+                    <div id="landing-features-content" className="max-w-content mx-auto px-6 lg:px-8 pb-20">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5 }}
+                            className="mb-12"
                         >
-                            Войти
-                        </Link>
-                        <Link
-                            to="/register"
-                            className="btn-primary-adaptive dark:hover:brightness-110"
-                        >
-                            Регистрация
-                        </Link>
+                            <h2 className="text-3xl font-bold tracking-tight mb-3">Как проходит тренировка</h2>
+                            <p className="text-secondary max-w-xl">Три шага — и вы уже отрабатываете навыки на симуляции интервью</p>
+                        </motion.div>
+
+                        <div className="grid md:grid-cols-3 gap-6">
+                            {features.map((feature, index) => (
+                                    <motion.div
+                                        key={feature.step}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ duration: 0.5, delay: index * 0.1 }}
+                                    >
+                                        <Card hover padding="lg" className="h-full">
+                                            <span className="text-3xl font-bold gradient-text-adaptive tabular-nums">{feature.step}</span>
+                                            <h3 className="text-lg font-semibold mt-3 mb-2">{feature.title}</h3>
+                                            <p className="text-secondary text-sm leading-relaxed">{feature.description}</p>
+                                        </Card>
+                                    </motion.div>
+                                ))}
+                        </div>
                     </div>
-                </div>
-            </header>
+                </section>
 
-            {/* Hero Section */}
-            <section className="px-8 py-20">
-                <div className="max-w-4xl mx-auto text-center">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
-                    >
-                        <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-6">
-                            Создай интервью за{' '}
-                            <span className="gradient-text-adaptive">3 шага</span>
-                        </h1>
-                        <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
-                            Платформа для стандартизации технических интервью.
-                            Создавайте структурированные интервью, оценивайте кандидатов
-                            и получайте подробные отчёты.
-                        </p>
-                        <Link
-                            to="/register"
-                            className="btn-primary-adaptive inline-flex items-center space-x-2 text-lg px-8 py-4"
+                {/* Testimonials */}
+                <section className="iv-landing-section bg-gray-50 dark:bg-iv-dark-bg overflow-hidden">
+                    <div className="max-w-content mx-auto px-6 lg:px-8 py-20">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5 }}
+                            className="mb-10"
                         >
-                            <span>Создать интервью</span>
-                            <ArrowRight className="w-5 h-5" />
-                        </Link>
-                    </motion.div>
-                </div>
-            </section>
+                            <h2 className="text-3xl font-bold tracking-tight mb-3">Отзывы о тренировках</h2>
+                            <p className="text-secondary max-w-xl">
+                                Разработчики делятся, как симуляции помогли им подготовиться к реальным собеседованиям
+                            </p>
+                        </motion.div>
+                    </div>
+                    <div className="pb-20">
+                        <TestimonialsCarousel />
+                    </div>
+                </section>
 
-            {/* Features Section */}
-            <section className="px-8 py-20 bg-gray-50 dark:bg-gray-800/50">
-                <div className="max-w-6xl mx-auto">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.2 }}
-                        className="text-center mb-16"
-                    >
-                        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                            Как это работает
-                        </h2>
-                        <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                            Простой и эффективный процесс создания технических интервью
-                        </p>
-                    </motion.div>
-
-                    <div className="grid md:grid-cols-3 gap-8">
-                        {[
-                            {
-                                step: '1',
-                                title: 'Выберите специализацию',
-                                description: 'Frontend, Backend, DevOps, QA или Data Science',
-                                icon: Users,
-                            },
-                            {
-                                step: '2',
-                                title: 'Выберите стек технологий',
-                                description: 'React, Vue, Angular, Golang, Node.js и другие',
-                                icon: FileText,
-                            },
-                            {
-                                step: '3',
-                                title: 'Выберите уровень кандидата',
-                                description: 'Intern, Junior, Middle, Senior или Lead',
-                                icon: BarChart3,
-                            },
-                        ].map((feature, index) => {
-                            const Icon = feature.icon
-                            return (
-                                <motion.div
-                                    key={feature.step}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.6, delay: 0.3 + index * 0.1 }}
-                                    className="card p-8 text-center"
+                {/* Benefits */}
+                <section className="iv-landing-section">
+                    <div className="max-w-content mx-auto px-6 lg:px-8 py-20">
+                        <div className="grid lg:grid-cols-2 gap-12 items-center">
+                            <div>
+                                <h2 className="text-3xl font-bold tracking-tight mb-3">Готовься как к настоящему интервью</h2>
+                                <p className="text-secondary mb-8">Системная практика вместо хаотичного зубрёжки перед собеседованием</p>
+                                <div className="grid sm:grid-cols-2 gap-4">
+                                    {benefits.map((benefit, index) => (
+                                        <motion.div
+                                            key={benefit}
+                                            initial={{ opacity: 0, x: -12 }}
+                                            whileInView={{ opacity: 1, x: 0 }}
+                                            viewport={{ once: true }}
+                                            transition={{ delay: index * 0.05 }}
+                                            className="flex items-start gap-3"
+                                        >
+                                            <CheckCircle className="w-5 h-5 text-inter-verse-green dark:text-purple-400 shrink-0 mt-0.5" strokeWidth={1.75} />
+                                            <span className="text-sm text-gray-700 dark:text-gray-300">{benefit}</span>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            </div>
+                            <Card padding="lg" className="gradient-bg-adaptive text-white border-0 shadow-iv-xl">
+                                <h3 className="text-2xl font-bold mb-3">Пора тренироваться?</h3>
+                                <p className="text-white/80 text-sm mb-6 leading-relaxed">
+                                    Зарегистрируйся и пройди первую симуляцию интервью за несколько минут — бесплатно.
+                                </p>
+                                <Link
+                                    to="/register"
+                                    className="inline-flex items-center gap-2 bg-white text-inter-verse-green dark:text-purple-700 px-6 py-3 font-medium hover:bg-gray-100 transition-iv"
                                 >
-                                    <div className="w-16 h-16 gradient-bg-adaptive rounded-full flex items-center justify-center mx-auto mb-6">
-                                        <Icon className="w-8 h-8 text-white" />
-                                    </div>
-                                    <div className="text-4xl font-bold gradient-text-adaptive mb-4">
-                                        {feature.step}
-                                    </div>
-                                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                                        {feature.title}
-                                    </h3>
-                                    <p className="text-gray-600 dark:text-gray-300">
-                                        {feature.description}
-                                    </p>
-                                </motion.div>
-                            )
-                        })}
+                                    Начать тренировку
+                                    <ArrowRight className="w-4 h-4" />
+                                </Link>
+                            </Card>
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            {/* Benefits Section */}
-            <section className="px-8 py-20">
-                <div className="max-w-4xl mx-auto">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.4 }}
-                        className="text-center mb-16"
-                    >
-                        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                            Преимущества InterVerse
-                        </h2>
-                        <p className="text-gray-600 dark:text-gray-300">
-                            Современные инструменты для эффективного проведения интервью
-                        </p>
-                    </motion.div>
-
-                    <div className="grid md:grid-cols-2 gap-8">
-                        {[
-                            'Структурированные интервью по специализациям',
-                            'Автоматическая генерация отчётов',
-                            'Система оценок по ключевым компетенциям',
-                            'Управление кандидатами и историей интервью',
-                            'Экспорт отчётов в PDF',
-                            'Адаптивный интерфейс для всех устройств',
-                        ].map((benefit, index) => (
-                            <motion.div
-                                key={benefit}
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ duration: 0.6, delay: 0.5 + index * 0.1 }}
-                                className="flex items-center space-x-3"
-                            >
-                                <CheckCircle className="w-6 h-6 text-green-500 flex-shrink-0" />
-                                <span className="text-gray-700 dark:text-gray-300">{benefit}</span>
-                            </motion.div>
-                        ))}
+                <footer className="iv-landing-section py-8 border-t border-gray-200 dark:border-gray-600">
+                    <div className="max-w-content mx-auto px-6 lg:px-8 text-center text-sm text-secondary">
+                        &copy; {new Date().getFullYear()} InterVerse. Все права защищены.
                     </div>
-                </div>
-            </section>
-
-            {/* CTA Section */}
-            <section className="px-8 py-20 gradient-bg-adaptive">
-                <div className="max-w-4xl mx-auto text-center">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.6 }}
-                    >
-                        <h2 className="text-3xl font-bold text-white mb-4">
-                            Готовы начать?
-                        </h2>
-                        <p className="text-green-100 dark:text-purple-200 mb-8 text-lg">
-                            Создайте свой первый интервью прямо сейчас
-                        </p>
-                        <Link
-                            to="/register"
-                            className="bg-white text-inter-verse-green dark:text-purple-600 px-8 py-4 rounded-xl font-medium hover:bg-gray-100 dark:hover:bg-gray-100 transition-all duration-200 inline-flex items-center space-x-2"
-                        >
-                            <span>Начать бесплатно</span>
-                            <ArrowRight className="w-5 h-5" />
-                        </Link>
-                    </motion.div>
-                </div>
-            </section>
-
-            {/* Footer */}
-            <footer className="px-8 py-12 border-t border-gray-200 dark:border-gray-700">
-                <div className="max-w-4xl mx-auto text-center text-gray-600 dark:text-gray-400">
-                    <p>&copy; 2024 InterVerse. Все права защищены.</p>
-                </div>
-            </footer>
+                </footer>
+            </div>
         </div>
     )
 }
