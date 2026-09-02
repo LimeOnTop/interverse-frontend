@@ -2,10 +2,10 @@ import { useState } from 'react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { useNavigate } from 'react-router-dom'
-import { User, Code, Play, Edit, Loader2 } from 'lucide-react'
+import { User, Code, Play, Edit, Loader2, Trash2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { api } from '../services/api'
-import { canStartInterview, startInterviewSession } from '../lib/interviewSession'
+import { canStartInterview, startInterviewSession, clearInterviewSessionCache } from '../lib/interviewSession'
 import Badge, { statusBadgeVariant } from './ui/Badge'
 import Card from './ui/Card'
 
@@ -24,6 +24,7 @@ interface InterviewCardProps {
         created_at: string
     }
     onClick?: () => void
+    onDelete?: (id: string) => void
 }
 
 const statusLabels: Record<string, string> = {
@@ -41,9 +42,10 @@ const specLabels: Record<string, string> = {
     frontend: 'Frontend', backend: 'Backend', devops: 'DevOps', qa: 'QA', data_science: 'Data Science',
 }
 
-export default function InterviewCard({ interview, onClick }: InterviewCardProps) {
+export default function InterviewCard({ interview, onClick, onDelete }: InterviewCardProps) {
     const navigate = useNavigate()
     const [starting, setStarting] = useState(false)
+    const [deleting, setDeleting] = useState(false)
 
     const handleClick = () => {
         if (onClick) onClick()
@@ -67,6 +69,27 @@ export default function InterviewCard({ interview, onClick }: InterviewCardProps
             toast.error('Не удалось запустить тренировку')
         } finally {
             setStarting(false)
+        }
+    }
+
+    const handleDelete = async (e: React.MouseEvent) => {
+        e.stopPropagation()
+
+        if (!window.confirm('Удалить эту тренировку?')) {
+            return
+        }
+
+        try {
+            setDeleting(true)
+            await api.delete(`/interviews/${interview.id}`)
+            clearInterviewSessionCache(interview.id)
+            toast.success('Тренировка удалена')
+            onDelete?.(interview.id)
+        } catch (error) {
+            console.error('Error deleting interview:', error)
+            toast.error('Не удалось удалить тренировку')
+        } finally {
+            setDeleting(false)
         }
     }
 
@@ -157,8 +180,26 @@ export default function InterviewCard({ interview, onClick }: InterviewCardProps
                             )}
                         </button>
                     )}
-                    <button onClick={(e) => { e.stopPropagation(); navigate(`/interviews/${interview.id}/edit-full`) }} className="btn-icon w-9 h-9">
+                    <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); navigate(`/interviews/${interview.id}/edit-full`) }}
+                        className="btn-icon w-9 h-9"
+                        aria-label="Редактировать тренировку"
+                    >
                         <Edit className="w-4 h-4" />
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleDelete}
+                        disabled={deleting}
+                        className="btn-icon w-9 h-9 hover:text-red-500 dark:hover:text-red-500 disabled:opacity-50"
+                        aria-label="Удалить тренировку"
+                    >
+                        {deleting ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                            <Trash2 className="w-4 h-4" />
+                        )}
                     </button>
                 </div>
             </div>

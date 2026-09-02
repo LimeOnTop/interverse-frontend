@@ -20,14 +20,23 @@ export interface ApiInterview {
     title: string
     description?: string
     scheduled_at?: string
+    scheduledAt?: string
     level?: string
     specialization?: string
     status?: string
     technologies?: string[]
 }
 
+function normalizeInterview(raw: ApiInterview): ApiInterview {
+    return {
+        ...raw,
+        scheduled_at: raw.scheduled_at || raw.scheduledAt,
+    }
+}
+
 export interface SessionStep {
     id: string
+    questionId: string
     type: SessionStepType
     label: string
     text: string
@@ -57,8 +66,26 @@ export function normalizeSessionItem(item: ApiSessionItem) {
         sortOrder: item.sortOrder ?? item.sort_order ?? 0,
         text: item.text,
         technology: item.technology || '',
-        options: item.options,
+        options: normalizeOptions(item.options),
     }
+}
+
+function normalizeOptions(raw: unknown): string[] | undefined {
+    if (!Array.isArray(raw) || raw.length === 0) {
+        return undefined
+    }
+
+    const options = raw.map((entry) => {
+        if (typeof entry === 'string') {
+            return entry
+        }
+        if (typeof entry === 'object' && entry !== null && 'text' in entry) {
+            return String((entry as { text?: unknown }).text ?? '')
+        }
+        return ''
+    }).filter(Boolean)
+
+    return options.length > 0 ? options : undefined
 }
 
 export function buildSessionSteps(questions: ApiSessionItem[], tasks: ApiSessionItem[]): SessionStep[] {
@@ -101,13 +128,12 @@ export function buildSessionSteps(questions: ApiSessionItem[], tasks: ApiSession
 function mapQuestionStep(question: ReturnType<typeof normalizeSessionItem>, questionNumber: number): SessionStep {
     return {
         id: question.id,
+        questionId: question.questionId,
         type: 'question',
         label: `Вопрос ${questionNumber}`,
         text: question.text,
         technology: question.technology,
-        options: question.options?.length === 4
-            ? question.options
-            : buildAnswerOptions(question.text, question.technology, question.id),
+        options: question.options,
         questionNumber,
     }
 }
@@ -115,36 +141,13 @@ function mapQuestionStep(question: ReturnType<typeof normalizeSessionItem>, ques
 function mapTaskStep(task: ReturnType<typeof normalizeSessionItem>, taskNumber: number): SessionStep {
     return {
         id: task.id,
+        questionId: task.questionId,
         type: 'task',
         label: `Задача ${taskNumber}`,
         text: task.text,
         technology: task.technology,
         taskNumber,
     }
-}
-
-export function buildAnswerOptions(_text: string, technology: string, seed: string): string[] {
-    const tech = technology || 'технологии'
-
-    const templates = [
-        `Структурированный ответ с акцентом на ${tech} и практический опыт`,
-        `Теоретически верный, но неполный ответ без примеров из production`,
-        `Ответ с типичной ошибкой при работе с ${tech}`,
-        `Неверная интерпретация вопроса и уход от темы`,
-    ]
-
-    const offset = hashString(seed) % templates.length
-
-    return Array.from({ length: 4 }, (_, index) => templates[(offset + index) % templates.length])
-}
-
-function hashString(value: string): number {
-    let hash = 0
-    for (let i = 0; i < value.length; i += 1) {
-        hash = (hash << 5) - hash + value.charCodeAt(i)
-        hash |= 0
-    }
-    return Math.abs(hash)
 }
 
 export function getSessionStorageKey(interviewId: string) {
@@ -155,16 +158,43 @@ export function getAnswersStorageKey(interviewId: string) {
     return `interview-answers-${interviewId}`
 }
 
+export function clearInterviewSessionCache(interviewId: string) {
+    localStorage.removeItem(getSessionStorageKey(interviewId))
+    localStorage.removeItem(getAnswersStorageKey(interviewId))
+}
+
+export function restoreAnswersForSession(
+    interviewId: string,
+    steps: SessionStep[],
+): Record<string, StepAnswer> {
+    const cachedAnswers = localStorage.getItem(getAnswersStorageKey(interviewId))
+    if (!cachedAnswers) {
+        return {}
+    }
+
+    try {
+        const parsed = JSON.parse(cachedAnswers) as Record<string, StepAnswer>
+        const stepIds = new Set(steps.map((step) => step.id))
+
+        return Object.fromEntries(
+            Object.entries(parsed).filter(([stepId]) => stepIds.has(stepId)),
+        )
+    } catch {
+        return {}
+    }
+}
+
 export function parseSessionResponse(data: {
     session_id?: string
     interview?: ApiInterview
     questions?: ApiSessionItem[]
     tasks?: ApiSessionItem[]
 }) {
-    const interview = data.interview
-    if (!interview?.id) {
+    if (!data.interview?.id) {
         throw new Error('Некорректный ответ сервера')
     }
+
+    const interview = normalizeInterview(data.interview)
 
     const questions = data.questions || []
     const tasks = data.tasks || []
@@ -226,13 +256,36 @@ export async function startInterviewSession(
     apiClient: { post: (url: string, data?: unknown) => Promise<{ data: unknown }> },
     interviewId: string,
 ): Promise<InterviewSessionData> {
+    clearInterviewSessionCache(interviewId)
+
     const responseData = await requestSessionStart(apiClient, interviewId)
     const sessionData = parseSessionResponse(responseData)
 
     localStorage.setItem(getSessionStorageKey(interviewId), JSON.stringify(sessionData))
-    localStorage.removeItem(getAnswersStorageKey(interviewId))
 
     return sessionData
+}
+
+export function formatSessionStartError(error: unknown): string {
+    const message = typeof error === 'object'
+        && error !== null
+        && 'response' in error
+        && typeof (error as { response?: { data?: { error?: unknown } } }).response?.data?.error === 'string'
+        ? (error as { response: { data: { error: string } } }).response.data.error
+        : ''
+
+    if (message.includes('not enough questions')) {
+        if (message.includes('Go')) {
+            return 'В банке пока есть вопросы только по Go. Выберите Go в стеке технологий или создайте новую тренировку с Go.'
+        }
+        return 'Недостаточно вопросов для выбранного стека. Попробуйте добавить Go или выберите уровень senior.'
+    }
+
+    if (message.includes('not enough tasks')) {
+        return 'Недостаточно практических задач для выбранного стека. Добавьте Go в технологии.'
+    }
+
+    return message || 'Ошибка при запуске тренировки'
 }
 
 export function canStartInterview(status: string) {

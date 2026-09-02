@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, Play } from 'lucide-react'
@@ -19,9 +19,12 @@ import {
     parseSessionResponse,
     getSessionStorageKey,
     getAnswersStorageKey,
+    clearInterviewSessionCache,
+    restoreAnswersForSession,
     type InterviewSessionData,
     type StepAnswer,
 } from '../lib/interviewSession'
+import { submitInterviewForAnalysis } from '../lib/reportAnalysis'
 
 const specLabels: Record<string, string> = {
     frontend: 'Frontend',
@@ -49,6 +52,10 @@ export default function InterviewPage() {
     const [loading, setLoading] = useState(true)
     const [starting, setStarting] = useState(false)
     const [isComplete, setIsComplete] = useState(false)
+    const [submitting, setSubmitting] = useState(false)
+    const [reportId, setReportId] = useState<string | null>(null)
+    const [submitError, setSubmitError] = useState<string | null>(null)
+    const submitStartedRef = useRef(false)
 
     const persistSession = useCallback((data: InterviewSessionData) => {
         if (!id) return
@@ -66,20 +73,6 @@ export default function InterviewPage() {
         try {
             setLoading(true)
 
-            const cached = localStorage.getItem(getSessionStorageKey(id))
-            if (cached) {
-                const parsed = JSON.parse(cached) as InterviewSessionData
-                if (parsed.interview?.id === id && parsed.steps?.length > 0) {
-                    setSession(parsed)
-                    const cachedAnswers = localStorage.getItem(getAnswersStorageKey(id))
-                    if (cachedAnswers) {
-                        setAnswers(JSON.parse(cachedAnswers))
-                    }
-                    setLoading(false)
-                    return
-                }
-            }
-
             const sessionResponse = await api.get(`/interviews/${id}/session`)
             const sessionData = parseSessionResponse(sessionResponse.data)
 
@@ -90,9 +83,33 @@ export default function InterviewPage() {
                     interview: interviewResponse.data.interview,
                     steps: [],
                 })
+                setAnswers({})
+                clearInterviewSessionCache(id)
             } else {
-                setSession(sessionData)
-                persistSession(sessionData)
+                const hasMissingOptions = sessionData.steps.some(
+                    (step) => step.type === 'question' && !step.options?.length,
+                )
+
+                if (hasMissingOptions && sessionData.interview.status !== 'completed') {
+                    clearInterviewSessionCache(id)
+
+                    if (sessionData.interview.status === 'scheduled') {
+                        const freshSession = await startInterviewSession(api, id)
+                        setSession(freshSession)
+                        persistSession(freshSession)
+                        setAnswers({})
+                    } else {
+                        const retryResponse = await api.post(`/interviews/${id}/start`, {})
+                        const freshSession = parseSessionResponse(retryResponse.data)
+                        setSession(freshSession)
+                        persistSession(freshSession)
+                        setAnswers(restoreAnswersForSession(id, freshSession.steps))
+                    }
+                } else {
+                    setSession(sessionData)
+                    persistSession(sessionData)
+                    setAnswers(restoreAnswersForSession(id, sessionData.steps))
+                }
             }
         } catch (error) {
             console.error('Error loading session:', error)
@@ -150,6 +167,7 @@ export default function InterviewPage() {
             setCurrentStepIndex(0)
             setAnswers({})
             setIsComplete(false)
+            persistSession(sessionData)
             toast.success('Тренировка начата')
         } catch (error) {
             console.error('Error starting session:', error)
@@ -198,6 +216,35 @@ export default function InterviewPage() {
         return Boolean(answer?.taskAnswer?.trim())
     }
 
+    const submitSession = useCallback(async () => {
+        if (!id || !session || submitStartedRef.current) {
+            return
+        }
+
+        submitStartedRef.current = true
+        setSubmitting(true)
+        setSubmitError(null)
+
+        try {
+            const report = await submitInterviewForAnalysis(id, session.steps, answers)
+            setReportId(report.id)
+            clearInterviewSessionCache(id)
+            toast.success('Отчёт сформирован')
+        } catch (error) {
+            console.error('Error generating report:', error)
+            const message = typeof error === 'object'
+                && error !== null
+                && 'response' in error
+                && typeof (error as { response?: { data?: { error?: unknown } } }).response?.data?.error === 'string'
+                ? (error as { response: { data: { error: string } } }).response.data.error
+                : 'Не удалось сформировать отчёт'
+            setSubmitError(message)
+            toast.error(message)
+        } finally {
+            setSubmitting(false)
+        }
+    }, [answers, id, session])
+
     const handleNext = () => {
         if (!session) return
 
@@ -207,6 +254,7 @@ export default function InterviewPage() {
         }
 
         setIsComplete(true)
+        void submitSession()
     }
 
     const handlePrevious = () => {
@@ -217,8 +265,7 @@ export default function InterviewPage() {
 
     const handleFinish = () => {
         if (id) {
-            localStorage.removeItem(getSessionStorageKey(id))
-            localStorage.removeItem(getAnswersStorageKey(id))
+            clearInterviewSessionCache(id)
         }
         navigate('/dashboard')
     }
@@ -271,6 +318,9 @@ export default function InterviewPage() {
                 <InterviewSessionComplete
                     answeredQuestions={stats.answeredQuestions}
                     completedTasks={stats.completedTasks}
+                    submitting={submitting}
+                    reportId={reportId}
+                    submitError={submitError}
                     onFinish={handleFinish}
                 />
             </PageTransition>
@@ -314,19 +364,25 @@ export default function InterviewPage() {
             </AnimatePresence>
 
             <div className="flex items-center justify-between gap-4">
-                <Button
-                    variant="secondary"
+                <button
+                    type="button"
                     onClick={handlePrevious}
                     disabled={currentStepIndex === 0}
+                    className="btn-nav-link disabled:opacity-50 disabled:pointer-events-none"
                 >
                     <ArrowLeft className="w-5 h-5" />
                     Назад
-                </Button>
+                </button>
 
-                <Button onClick={handleNext} disabled={!canProceed()}>
+                <button
+                    type="button"
+                    onClick={handleNext}
+                    disabled={!canProceed()}
+                    className="btn-nav-link disabled:opacity-50 disabled:pointer-events-none"
+                >
                     {currentStepIndex === totalSteps - 1 ? 'Завершить' : 'Далее'}
                     <ArrowRight className="w-5 h-5" />
-                </Button>
+                </button>
             </div>
         </PageTransition>
     )

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import { api } from '../services/api'
-import { startInterviewSession } from '../lib/interviewSession'
+import { startInterviewSession, formatSessionStartError } from '../lib/interviewSession'
 import toast from 'react-hot-toast'
 import StepIndicator from '../components/InterviewWizard/StepIndicator'
 import SpecializationStep from '../components/InterviewWizard/SpecializationStep'
@@ -70,7 +70,7 @@ export default function InterviewWizardPage() {
             toast.success(withSchedule ? 'Тренировка запланирована!' : 'Тренировка создана!')
             navigate('/dashboard')
         } catch (error: any) {
-            toast.error(error.response?.data?.error || 'Ошибка при создании тренировки')
+            toast.error(formatSessionStartError(error))
         } finally {
             setIsLoading(false)
         }

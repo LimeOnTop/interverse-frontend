@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowLeft } from 'lucide-react'
 import Badge from '../ui/Badge'
@@ -11,7 +12,7 @@ interface InterviewQuestionStepProps {
     onSelectOption: (index: number) => void
 }
 
-const optionLabels = ['A', 'B', 'C', 'D']
+const getOptionLabel = (index: number) => String.fromCharCode(65 + index)
 
 export default function InterviewQuestionStep({
     step,
@@ -56,7 +57,7 @@ export default function InterviewQuestionStep({
                                             : 'bg-gray-100 text-gray-700 dark:bg-iv-dark-bg dark:text-gray-300'
                                     }`}
                                 >
-                                    {optionLabels[index]}
+                                    {getOptionLabel(index)}
                                 </span>
                                 <span className="text-sm sm:text-base leading-relaxed text-gray-800 dark:text-gray-200">
                                     {option}
@@ -68,7 +69,7 @@ export default function InterviewQuestionStep({
             </div>
 
             {selectedOptionIndex === undefined && (
-                <p className="text-sm text-secondary">Выберите один из четырёх вариантов ответа</p>
+                <p className="text-sm text-secondary">Выберите один из вариантов ответа</p>
             )}
         </Card>
     )
@@ -165,22 +166,30 @@ export function InterviewSessionHeader({
 interface InterviewSessionCompleteProps {
     answeredQuestions: number
     completedTasks: number
+    submitting?: boolean
+    reportId?: string | null
+    submitError?: string | null
     onFinish: () => void
 }
 
 export function InterviewSessionComplete({
     answeredQuestions,
     completedTasks,
+    submitting = false,
+    reportId = null,
+    submitError = null,
     onFinish,
 }: InterviewSessionCompleteProps) {
     return (
         <Card padding="lg" className="text-center space-y-6">
             <div>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                    Тренировка завершена
+                    {submitting ? 'Анализируем ответы...' : 'Тренировка завершена'}
                 </h2>
                 <p className="text-secondary">
-                    Вы прошли все вопросы и практические задачи. Отчёт появится после обработки ответов.
+                    {submitting
+                        ? 'AI формирует отчёт по вашим ответам. Это может занять до минуты.'
+                        : 'Вы прошли все вопросы и практические задачи.'}
                 </p>
             </div>
 
@@ -195,7 +204,20 @@ export function InterviewSessionComplete({
                 </div>
             </div>
 
-            <Button onClick={onFinish}>Вернуться на дашборд</Button>
+            {submitError && (
+                <p className="text-sm text-red-600 dark:text-red-400">{submitError}</p>
+            )}
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                {reportId && !submitting && (
+                    <Link to={`/reports/${reportId}`}>
+                        <Button>Открыть отчёт</Button>
+                    </Link>
+                )}
+                <Button variant={reportId ? 'secondary' : 'primary'} onClick={onFinish} disabled={submitting}>
+                    {submitting ? 'Подождите...' : 'Вернуться на дашборд'}
+                </Button>
+            </div>
         </Card>
     )
 }

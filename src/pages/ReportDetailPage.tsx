@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Download, User, Calendar, MapPin, Clock } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { api } from '../services/api'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useTheme } from '../contexts/ThemeContext'
 import PageHeader from '../components/ui/PageHeader'
@@ -66,34 +67,13 @@ export default function ReportDetailPage() {
     const fetchReport = async (reportId: string) => {
         try {
             setLoading(true)
-            const mockReport: Report = {
-                id: reportId,
-                interview_id: 'interview-123',
-                overall_score: 82,
-                algorithm_score: 75,
-                architecture_score: 88,
-                coding_score: 80,
-                soft_skills_score: 85,
-                comments: 'Кандидат показал отличные результаты в области архитектуры и soft skills. Хорошо решал алгоритмические задачи, но есть потенциал для роста в области кодинга. В целом, кандидат подходит для позиции.',
-                recommendations: 'Рекомендуем к найму на позицию Senior Frontend разработчика. Предлагаем план развития в области кодинга и алгоритмов.',
-                created_at: '2024-01-15T10:00:00Z',
-                interview: {
-                    id: 'interview-123',
-                    title: 'Frontend интервью - Senior',
-                    candidate: {
-                        name: 'Алексей Петров',
-                        email: 'alexey.petrov@example.com',
-                        phone: '+7 (999) 123-45-67',
-                        experience: 5,
-                    },
-                    specialization: 'frontend',
-                    level: 'senior',
-                    scheduled_at: '2024-01-15T10:00:00Z',
-                    duration: 90,
-                }
+            const response = await api.get(`/reports/${reportId}`)
+            const reportData = response.data.report
+            if (!reportData) {
+                setReport(null)
+                return
             }
-
-            setReport(mockReport)
+            setReport(reportData)
         } catch (error: any) {
             toast.error('Ошибка при загрузке отчёта')
         } finally {
@@ -147,10 +127,10 @@ export default function ReportDetailPage() {
         <PageTransition className="space-y-8">
             <PageHeader
                 title="Отчёт по кандидату"
-                description={report.interview.title}
+                description={report.interview?.title || 'Тренировка'}
                 breadcrumbs={[
                     { label: 'Отчёты', href: '/reports' },
-                    { label: report.interview.candidate.name },
+                    { label: report.interview?.candidate?.name || 'Кандидат' },
                 ]}
                 action={
                     <Button>
@@ -237,22 +217,22 @@ export default function ReportDetailPage() {
                                         <User className="w-5 h-5 text-white" />
                                     </div>
                                     <div>
-                                        <p className="font-medium text-gray-900 dark:text-gray-100">{report.interview.candidate.name}</p>
-                                        <p className="text-sm text-secondary">{report.interview.candidate.email}</p>
+                                        <p className="font-medium text-gray-900 dark:text-gray-100">{report.interview?.candidate?.name || 'Кандидат'}</p>
+                                        <p className="text-sm text-secondary">{report.interview?.candidate?.email || ''}</p>
                                     </div>
                                 </div>
                                 <div className="space-y-3 text-sm text-secondary">
                                     <div className="flex items-center gap-2">
                                         <MapPin className="w-4 h-4" />
-                                        {getSpecializationLabel(report.interview.specialization)} • {getLevelLabel(report.interview.level)}
+                                        {getSpecializationLabel(report.interview?.specialization || '')} • {getLevelLabel(report.interview?.level || '')}
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Calendar className="w-4 h-4" />
-                                        Опыт: {report.interview.candidate.experience} лет
+                                        Опыт: {report.interview?.candidate?.experience || 0} лет
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Clock className="w-4 h-4" />
-                                        Длительность: {report.interview.duration} мин
+                                        Длительность: {report.interview?.duration || 0} мин
                                     </div>
                                 </div>
                             </div>
@@ -285,14 +265,16 @@ export default function ReportDetailPage() {
                                 <div>
                                     <p className="text-secondary mb-1">Дата проведения</p>
                                     <p className="text-gray-900 dark:text-gray-100">
-                                        {new Date(report.interview.scheduled_at).toLocaleDateString('ru-RU', {
-                                            year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
-                                        })}
+                                        {report.interview?.scheduled_at
+                                            ? new Date(report.interview.scheduled_at).toLocaleDateString('ru-RU', {
+                                                year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                                            })
+                                            : '—'}
                                     </p>
                                 </div>
                                 <div>
                                     <p className="text-secondary mb-1">ID интервью</p>
-                                    <p className="font-mono text-xs text-gray-900 dark:text-gray-100">{report.interview.id}</p>
+                                    <p className="font-mono text-xs text-gray-900 dark:text-gray-100">{report.interview?.id || report.interview_id}</p>
                                 </div>
                                 <div>
                                     <p className="text-secondary mb-1">ID отчёта</p>

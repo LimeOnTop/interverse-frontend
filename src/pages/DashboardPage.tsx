@@ -137,7 +137,10 @@ export default function DashboardPage() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.05, duration: 0.4 }}
                             >
-                                <InterviewCard interview={interview} />
+                                <InterviewCard
+                                    interview={interview}
+                                    onDelete={() => setInterviews((prev) => prev.filter((item) => item.id !== interview.id))}
+                                />
                             </motion.div>
                         ))}
                     </div>

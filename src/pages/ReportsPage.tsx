@@ -59,30 +59,9 @@ export default function ReportsPage() {
     const fetchReports = async () => {
         try {
             setLoading(true)
-            const response = await api.get('/interviews/')
-            const interviews = response.data.interviews || []
-
-            const reportsWithData = interviews.slice(0, 3).map((interview: any, index: number) => ({
-                id: `report-${interview.id}`,
-                interview_id: interview.id,
-                overall_score: 75 + index * 5,
-                algorithm_score: 70 + index * 8,
-                architecture_score: 80 + index * 3,
-                coding_score: 75 + index * 6,
-                soft_skills_score: 85 + index * 2,
-                comments: `Отличная работа кандидата в области ${interview.specialization}. Показал хорошие знания технологий.`,
-                recommendations: 'Рекомендуем к найму на позицию.',
-                created_at: interview.created_at,
-                interview: {
-                    id: interview.id,
-                    title: interview.title,
-                    candidate: interview.candidate,
-                    specialization: interview.specialization,
-                    level: interview.level,
-                }
-            }))
-
-            setReports(reportsWithData)
+            const response = await api.get('/reports/')
+            const reportsData = response.data.reports || []
+            setReports(reportsData)
         } catch (error: any) {
             toast.error('Ошибка при загрузке отчётов')
         } finally {
@@ -91,9 +70,9 @@ export default function ReportsPage() {
     }
 
     const filteredReports = reports.filter(report =>
-        report.interview.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        report.interview.candidate.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        report.interview.specialization.toLowerCase().includes(searchTerm.toLowerCase())
+        report.interview?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        report.interview?.candidate?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        report.interview?.specialization?.toLowerCase().includes(searchTerm.toLowerCase())
     )
 
     const getSpecializationLabel = (specialization: string) => {
@@ -174,12 +153,12 @@ export default function ReportsPage() {
                                     <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6">
                                         <div className="flex-1">
                                             <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                                                {report.interview.title}
+                                                {report.interview?.title || 'Тренировка'}
                                             </h3>
                                             <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-secondary">
-                                                <span>Кандидат: <span className="text-gray-900 dark:text-gray-100">{report.interview.candidate.name}</span></span>
-                                                <span>Специализация: {getSpecializationLabel(report.interview.specialization)}</span>
-                                                <span>Уровень: {getLevelLabel(report.interview.level)}</span>
+                                                <span>Кандидат: <span className="text-gray-900 dark:text-gray-100">{report.interview?.candidate?.name || 'Кандидат'}</span></span>
+                                                <span>Специализация: {getSpecializationLabel(report.interview?.specialization || '')}</span>
+                                                <span>Уровень: {getLevelLabel(report.interview?.level || '')}</span>
                                             </div>
                                         </div>
                                         <div className="text-right shrink-0">

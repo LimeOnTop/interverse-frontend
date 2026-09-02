@@ -5,6 +5,7 @@ import { Calendar, Clock, User, Play, ArrowRight } from 'lucide-react'
 import { api } from '../services/api'
 import {
     startInterviewSession,
+    formatSessionStartError,
 } from '../lib/interviewSession'
 import toast from 'react-hot-toast'
 import PageHeader from '../components/ui/PageHeader'
@@ -63,7 +64,7 @@ export default function InterviewServicePage() {
             navigate(`/interview/${interview.id}`)
         } catch (error: any) {
             console.error('Error starting session:', error)
-            toast.error(error.response?.data?.error || 'Ошибка при запуске тренировки')
+            toast.error(formatSessionStartError(error))
         } finally {
             setStartingId(null)
         }
