@@ -98,7 +98,7 @@ export default function ModernSelect({
                         <div className="max-h-60 overflow-y-auto">
                             {filteredOptions.map((option) => (
                                 <button
-                                    key={option.value}
+                                    key={option.value === '' ? '__all__' : option.value}
                                     type="button"
                                     onClick={() => handleSelect(option)}
                                     className="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 flex items-center justify-between group"

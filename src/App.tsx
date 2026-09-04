@@ -17,11 +17,19 @@ import CandidatesPage from './pages/CandidatesPage'
 import ReportsPage from './pages/ReportsPage'
 import ReportDetailPage from './pages/ReportDetailPage'
 import ProfilePage from './pages/ProfilePage'
+import SubscriptionPage from './pages/SubscriptionPage'
+import ContributeQuestionPage from './pages/ContributeQuestionPage'
 import OAuthCallbackPage from './pages/OAuthCallbackPage'
+import AdminStatsPage from './pages/admin/AdminStatsPage'
+import AdminQuestionsPage from './pages/admin/AdminQuestionsPage'
+import AdminQuestionDetailPage from './pages/admin/AdminQuestionDetailPage'
+import AdminModerationPage from './pages/admin/AdminModerationPage'
 
 // Components
 import ProtectedRoute from './components/ProtectedRoute'
+import AdminRoute from './components/AdminRoute'
 import Layout from './components/Layout'
+import AdminLayout from './components/AdminLayout'
 import { ThemeProvider } from './contexts/ThemeContext'
 
 function App() {
@@ -153,6 +161,26 @@ function App() {
                         }
                     />
                     <Route
+                        path="/subscription"
+                        element={
+                            <ProtectedRoute>
+                                <Layout>
+                                    <SubscriptionPage />
+                                </Layout>
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/contribute"
+                        element={
+                            <ProtectedRoute>
+                                <Layout>
+                                    <ContributeQuestionPage />
+                                </Layout>
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
                         path="/reports"
                         element={
                             <ProtectedRoute>
@@ -170,6 +198,57 @@ function App() {
                                     <ReportDetailPage />
                                 </Layout>
                             </ProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/admin"
+                        element={
+                            <AdminRoute>
+                                <AdminLayout>
+                                    <AdminStatsPage />
+                                </AdminLayout>
+                            </AdminRoute>
+                        }
+                    />
+                    <Route
+                        path="/admin/moderation"
+                        element={
+                            <AdminRoute>
+                                <AdminLayout>
+                                    <AdminModerationPage />
+                                </AdminLayout>
+                            </AdminRoute>
+                        }
+                    />
+                    <Route
+                        path="/admin/moderation/:id"
+                        element={
+                            <AdminRoute>
+                                <AdminLayout>
+                                    <AdminQuestionDetailPage />
+                                </AdminLayout>
+                            </AdminRoute>
+                        }
+                    />
+                    <Route
+                        path="/admin/questions"
+                        element={
+                            <AdminRoute>
+                                <AdminLayout>
+                                    <AdminQuestionsPage />
+                                </AdminLayout>
+                            </AdminRoute>
+                        }
+                    />
+                    <Route
+                        path="/admin/questions/:id"
+                        element={
+                            <AdminRoute>
+                                <AdminLayout>
+                                    <AdminQuestionDetailPage />
+                                </AdminLayout>
+                            </AdminRoute>
                         }
                     />
                 </Routes>

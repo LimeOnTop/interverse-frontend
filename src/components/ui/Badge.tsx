@@ -1,4 +1,4 @@
-type BadgeVariant = 'default' | 'success' | 'warning' | 'danger' | 'info' | 'accent'
+export type BadgeVariant = 'default' | 'success' | 'warning' | 'danger' | 'info' | 'accent'
 
 const variants: Record<BadgeVariant, string> = {
     default: 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-iv-dark-bg dark:text-gray-300 dark:border-gray-600',

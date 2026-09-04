@@ -12,8 +12,8 @@ import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 
 const loginSchema = z.object({
-    email: z.string().email('Некорректный email'),
-    password: z.string().min(6, 'Минимум 6 символов'),
+    email: z.string().min(1, 'Введите логин'),
+    password: z.string().min(1, 'Введите пароль'),
 })
 
 type LoginForm = z.infer<typeof loginSchema>
@@ -29,9 +29,9 @@ export default function LoginPage() {
 
     const onSubmit = async (data: LoginForm) => {
         try {
-            await login(data.email, data.password)
+            const user = await login(data.email, data.password)
             toast.success('Добро пожаловать!')
-            setTimeout(() => navigate('/dashboard'), 100)
+            navigate(user?.role === 'admin' ? '/admin' : '/dashboard')
         } catch (error: any) {
             toast.error(error.message)
         }
@@ -51,8 +51,8 @@ export default function LoginPage() {
 
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                         <Input
-                            label="Email"
-                            type="email"
+                            label="Логин"
+                            type="text"
                             variant="underlined"
                             placeholder="you@company.com"
                             error={errors.email?.message}

@@ -8,8 +8,12 @@ import {
     PlayCircle,
     Briefcase,
     UserCircle,
+    Crown,
+    Lightbulb,
     X,
 } from 'lucide-react'
+import { useAuthStore } from '../store/authStore'
+import { resolveSubscriptionPlan, subscriptionPlanLabel } from '../utils/subscription'
 
 const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -18,6 +22,7 @@ const navigation = [
     { name: 'Вакансии', href: '/vacancies', icon: Briefcase },
     { name: 'Отчёты', href: '/reports', icon: FileText },
     { name: 'Профиль', href: '/profile', icon: UserCircle },
+    { name: 'Предложить вопрос', href: '/contribute', icon: Lightbulb },
 ]
 
 interface SidebarProps {
@@ -26,6 +31,9 @@ interface SidebarProps {
 }
 
 function NavContent({ onNavigate }: { onNavigate?: () => void }) {
+    const user = useAuthStore((state) => state.user)
+    const planLabel = subscriptionPlanLabel(resolveSubscriptionPlan(user))
+
     return (
         <>
             <div className="px-3 pt-4 pb-3 border-b border-gray-200 dark:border-gray-600">
@@ -56,6 +64,17 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
                         </NavLink>
                     )
                 })}
+
+                <NavLink
+                    to="/subscription"
+                    onClick={onNavigate}
+                    className={({ isActive }) =>
+                        `iv-nav-item-subscription ${isActive ? 'iv-nav-item-subscription-active' : ''}`
+                    }
+                >
+                    <Crown className="w-5 h-5 shrink-0" strokeWidth={1.75} />
+                    <span>{planLabel}</span>
+                </NavLink>
             </nav>
         </>
     )

@@ -182,7 +182,7 @@ const TechnologySearch: React.FC<TechnologySearchProps> = ({
                 />
                 {isLoading && (
                     <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                        <div className="animate-spin rounded-none h-4 w-4 border-b-2 border-inter-verse-green"></div>
+                        <div className="iv-spinner h-4 w-4" />
                     </div>
                 )}
             </div>

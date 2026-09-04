@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Download, User, Calendar, MapPin, Clock } from 'lucide-react'
+import { ArrowLeft, Download, Calendar, MapPin, Sparkles } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { api } from '../services/api'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
@@ -12,51 +12,33 @@ import Card from '../components/ui/Card'
 import Spinner from '../components/ui/Spinner'
 import Badge from '../components/ui/Badge'
 import Button from '../components/ui/Button'
+import { isFallbackReport, reanalyzeReport, type GeneratedReport } from '../lib/reportAnalysis'
+import { buildReportSections, getScoreLabel, getScoreVariant } from '../lib/reportScores'
+import SectionScoreBadge from '../components/report/SectionScoreBadge'
+import ReportAnswerReviews from '../components/report/ReportAnswerReviews'
 
-interface Report {
-    id: string
-    interview_id: string
-    overall_score: number
-    algorithm_score: number
-    architecture_score: number
-    coding_score: number
-    soft_skills_score: number
-    comments: string
-    recommendations: string
-    created_at: string
+interface Report extends GeneratedReport {
+    algorithm_passed?: boolean
+    architecture_passed?: boolean
+    coding_passed?: boolean
+    soft_skills_passed?: boolean
     interview: {
         id: string
         title: string
-        candidate: {
-            name: string
-            email: string
-            phone: string
-            experience: number
-        }
         specialization: string
         level: string
         scheduled_at: string
-        duration: number
+        duration?: number
     }
-}
-
-const getScoreVariant = (score: number): 'success' | 'warning' | 'danger' => {
-    if (score >= 80) return 'success'
-    if (score >= 60) return 'warning'
-    return 'danger'
-}
-
-const getScoreLabel = (score: number) => {
-    if (score >= 80) return 'Отлично'
-    if (score >= 60) return 'Хорошо'
-    return 'Требует улучшения'
 }
 
 export default function ReportDetailPage() {
     const { id } = useParams()
+    const navigate = useNavigate()
     const { isDark } = useTheme()
     const [report, setReport] = useState<Report | null>(null)
     const [loading, setLoading] = useState(true)
+    const [analyzing, setAnalyzing] = useState(false)
 
     useEffect(() => {
         if (id) {
@@ -81,6 +63,38 @@ export default function ReportDetailPage() {
         }
     }
 
+    const handleAnalyze = async () => {
+        if (!report || !id) return
+
+        try {
+            setAnalyzing(true)
+            const updated = await reanalyzeReport(id)
+            setReport(updated as Report)
+
+            if (updated.id !== id) {
+                navigate(`/reports/${updated.id}`, { replace: true })
+            }
+
+            if (isFallbackReport(updated)) {
+                toast.error('AI-анализ не удался. Попробуйте позже.')
+            } else {
+                toast.success('Отчёт проанализирован')
+            }
+        } catch (error: unknown) {
+            const message = typeof error === 'object'
+                && error !== null
+                && 'response' in error
+                && typeof (error as { response?: { data?: { error?: unknown } } }).response?.data?.error === 'string'
+                ? (error as { response: { data: { error: string } } }).response.data.error
+                : 'Не удалось выполнить AI-анализ'
+            toast.error(message)
+        } finally {
+            setAnalyzing(false)
+        }
+    }
+
+    const needsAnalysis = report ? isFallbackReport(report) : false
+
     const getSpecializationLabel = (specialization: string) => {
         const labels: Record<string, string> = {
             frontend: 'Frontend',
@@ -103,12 +117,13 @@ export default function ReportDetailPage() {
         return labels[level] || level
     }
 
-    const chartData = [
-        { name: 'Алгоритмы', score: report?.algorithm_score || 0 },
-        { name: 'Архитектура', score: report?.architecture_score || 0 },
-        { name: 'Кодинг', score: report?.coding_score || 0 },
-        { name: 'Soft Skills', score: report?.soft_skills_score || 0 },
-    ]
+    const sections = report ? buildReportSections(report) : []
+    const chartData = sections
+        .filter((section) => !section.comingSoon)
+        .map((section) => ({
+            name: section.name,
+            score: section.passed === false && section.score === 0 ? 0 : section.score,
+        }))
 
     if (loading) return <Spinner size="lg" className="h-64" />
 
@@ -126,11 +141,11 @@ export default function ReportDetailPage() {
     return (
         <PageTransition className="space-y-8">
             <PageHeader
-                title="Отчёт по кандидату"
+                title="Отчёт по тренировке"
                 description={report.interview?.title || 'Тренировка'}
                 breadcrumbs={[
                     { label: 'Отчёты', href: '/reports' },
-                    { label: report.interview?.candidate?.name || 'Кандидат' },
+                    { label: report.interview?.title || 'Тренировка' },
                 ]}
                 action={
                     <Button>
@@ -194,9 +209,30 @@ export default function ReportDetailPage() {
 
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                         <Card padding="lg">
-                            <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Комментарии интервьюера</h2>
+                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+                                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Комментарии интервьюера</h2>
+                                {needsAnalysis && (
+                                    <Button
+                                        onClick={handleAnalyze}
+                                        loading={analyzing}
+                                        className="shrink-0"
+                                    >
+                                        <Sparkles className="w-4 h-4" />
+                                        Проанализировать
+                                    </Button>
+                                )}
+                            </div>
+                            {needsAnalysis && (
+                                <p className="text-sm text-secondary mb-4">
+                                    AI-анализ ещё не выполнен. Нажмите кнопку, чтобы получить развёрнутый фидбек.
+                                </p>
+                            )}
                             <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{report.comments}</p>
                         </Card>
+                    </motion.div>
+
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+                        <ReportAnswerReviews items={report.answer_reviews || []} />
                     </motion.div>
 
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
@@ -210,30 +246,19 @@ export default function ReportDetailPage() {
                 <div className="space-y-6">
                     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
                         <Card padding="md">
-                            <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Информация о кандидате</h3>
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 gradient-bg-adaptive flex items-center justify-center shrink-0">
-                                        <User className="w-5 h-5 text-white" />
-                                    </div>
-                                    <div>
-                                        <p className="font-medium text-gray-900 dark:text-gray-100">{report.interview?.candidate?.name || 'Кандидат'}</p>
-                                        <p className="text-sm text-secondary">{report.interview?.candidate?.email || ''}</p>
-                                    </div>
+                            <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">О тренировке</h3>
+                            <div className="space-y-3 text-sm text-secondary">
+                                <div className="flex items-center gap-2">
+                                    <MapPin className="w-4 h-4" />
+                                    {getSpecializationLabel(report.interview?.specialization || '')} • {getLevelLabel(report.interview?.level || '')}
                                 </div>
-                                <div className="space-y-3 text-sm text-secondary">
-                                    <div className="flex items-center gap-2">
-                                        <MapPin className="w-4 h-4" />
-                                        {getSpecializationLabel(report.interview?.specialization || '')} • {getLevelLabel(report.interview?.level || '')}
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <Calendar className="w-4 h-4" />
-                                        Опыт: {report.interview?.candidate?.experience || 0} лет
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <Clock className="w-4 h-4" />
-                                        Длительность: {report.interview?.duration || 0} мин
-                                    </div>
+                                <div className="flex items-center gap-2">
+                                    <Calendar className="w-4 h-4" />
+                                    {report.interview?.scheduled_at
+                                        ? new Date(report.interview.scheduled_at).toLocaleDateString('ru-RU', {
+                                            year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
+                                        })
+                                        : '—'}
                                 </div>
                             </div>
                         </Card>
@@ -243,15 +268,10 @@ export default function ReportDetailPage() {
                         <Card padding="md">
                             <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Оценки по критериям</h3>
                             <div className="space-y-4">
-                                {[
-                                    { name: 'Алгоритмы', score: report.algorithm_score },
-                                    { name: 'Архитектура', score: report.architecture_score },
-                                    { name: 'Кодинг', score: report.coding_score },
-                                    { name: 'Soft Skills', score: report.soft_skills_score },
-                                ].map((item) => (
-                                    <div key={item.name} className="flex items-center justify-between">
-                                        <span className="text-sm text-secondary">{item.name}</span>
-                                        <Badge variant={getScoreVariant(item.score)}>{item.score}%</Badge>
+                                {sections.map((section) => (
+                                    <div key={section.key} className="flex items-center justify-between gap-3">
+                                        <span className="text-sm text-secondary">{section.name}</span>
+                                        <SectionScoreBadge section={section} />
                                     </div>
                                 ))}
                             </div>

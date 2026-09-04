@@ -7,6 +7,9 @@ interface User {
     email: string
     name: string
     role: string
+    subscription_plan?: 'free' | 'paid' | string
+    subscription_active?: boolean
+    subscription_expires_at?: string
 }
 
 interface AuthState {
@@ -17,7 +20,7 @@ interface AuthState {
     isLoading: boolean
 
     // Actions
-    login: (email: string, password: string) => Promise<void>
+    login: (email: string, password: string) => Promise<User>
     register: (name: string, email: string, password: string) => Promise<void>
     setTokens: (accessToken: string, refreshToken: string) => Promise<void>
     logout: () => void
@@ -37,13 +40,9 @@ export const useAuthStore = create<AuthState>()(
             login: async (email: string, password: string) => {
                 set({ isLoading: true })
                 try {
-                    console.log('Attempting login with:', email)
                     const response = await api.post('/auth/login', { email, password })
-                    console.log('Login response:', response.data)
-
                     const { access_token, refresh_token, user } = response.data
 
-                    // Set token in axios defaults
                     api.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
 
                     set({
@@ -54,7 +53,7 @@ export const useAuthStore = create<AuthState>()(
                         isLoading: false,
                     })
 
-                    console.log('Login successful, user authenticated:', true)
+                    return user
                 } catch (error: any) {
                     console.error('Login error:', error)
                     set({ isLoading: false })

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import ThemeToggle from './ThemeToggle'
 
 interface PublicNavProps {
@@ -13,6 +13,14 @@ function getPastHeroThreshold() {
 
 export default function PublicNav({ landing = false, overlay = false }: PublicNavProps) {
     const [pastHero, setPastHero] = useState(false)
+    const location = useLocation()
+
+    const handleLogoClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+        if (location.pathname === '/') {
+            event.preventDefault()
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+        }
+    }
 
     useEffect(() => {
         if (!overlay) return
@@ -46,7 +54,11 @@ export default function PublicNav({ landing = false, overlay = false }: PublicNa
     return (
         <header className={headerClass}>
             <div className="max-w-content mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
-                <Link to="/" className="text-xl font-bold gradient-text-adaptive tracking-tight">
+                <Link
+                    to="/"
+                    onClick={handleLogoClick}
+                    className="text-xl font-bold gradient-text-adaptive tracking-tight hover:opacity-80 transition-iv"
+                >
                     InterVerse
                 </Link>
                 <div className="flex items-center gap-4">

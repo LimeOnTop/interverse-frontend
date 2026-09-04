@@ -140,8 +140,15 @@ export default function HomePage() {
                 </section>
 
                 <footer className="iv-landing-section py-8 border-t border-gray-200 dark:border-gray-600">
-                    <div className="max-w-content mx-auto px-6 lg:px-8 text-center text-sm text-secondary">
-                        &copy; {new Date().getFullYear()} InterVerse. Все права защищены.
+                    <div className="max-w-content mx-auto px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-sm text-secondary">
+                        <span>&copy; {new Date().getFullYear()} InterVerse. Все права защищены.</span>
+                        <a
+                            href="/legal/oferta.docx"
+                            className="font-medium text-inter-verse-green dark:text-purple-400 hover:underline"
+                            download
+                        >
+                            Публичная оферта
+                        </a>
                     </div>
                 </footer>
             </div>

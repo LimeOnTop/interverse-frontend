@@ -35,7 +35,7 @@ export default function OAuthCallbackPage() {
     return (
         <div className="min-h-screen iv-page flex items-center justify-center">
             <div className="text-center">
-                <div className="animate-spin rounded-none h-8 w-8 border-b-2 border-inter-verse-green dark:border-purple-500 mx-auto mb-4"></div>
+                <div className="iv-spinner h-8 w-8 mx-auto mb-4" />
                 <p className="text-gray-600 dark:text-gray-400">Завершение входа...</p>
             </div>
         </div>

@@ -82,6 +82,17 @@ export default function RegisterPage() {
                         </div>
 
                         <Button type="submit" loading={isLoading} className="w-full">Зарегистрироваться</Button>
+
+                        <p className="text-xs text-secondary text-center leading-relaxed">
+                            Регистрируясь, вы принимаете условия{' '}
+                            <a
+                                href="/legal/oferta.docx"
+                                className="font-medium text-inter-verse-green dark:text-purple-400 hover:underline"
+                                download
+                            >
+                                публичной оферты
+                            </a>
+                        </p>
                     </form>
 
                     <p className="mt-6 text-center text-sm text-secondary">

@@ -58,3 +58,10 @@ html.theme-transition *::after {
         color 300ms var(--iv-ease),
         fill 300ms var(--iv-ease) !important;
 }
+
+html.theme-transition .eq-visualizer,
+html.theme-transition .eq-visualizer *,
+html.theme-transition .eq-visualizer *::before,
+html.theme-transition .eq-visualizer *::after {
+    transition: none !important;
+}

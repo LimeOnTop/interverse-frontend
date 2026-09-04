@@ -14,6 +14,8 @@ const routeTitles: Record<string, string> = {
     '/candidates': 'Вакансии',
     '/reports': 'Отчёты',
     '/profile': 'Профиль',
+    '/contribute': 'Предложить вопрос',
+    '/subscription': 'Подписка',
     '/interviews/create': 'Новая тренировка',
 }
 
@@ -58,9 +60,12 @@ export default function Header({ onMenuClick }: HeaderProps) {
                     >
                         <Menu className="w-5 h-5" />
                     </button>
-                    <div className="hidden lg:block text-xl font-bold gradient-text-adaptive tracking-tight">
+                    <Link
+                        to="/dashboard"
+                        className="text-xl font-bold gradient-text-adaptive tracking-tight hover:opacity-80 transition-iv"
+                    >
                         InterVerse
-                    </div>
+                    </Link>
                     {pageTitle && (
                         <>
                             <span className="hidden sm:inline text-gray-300 dark:text-gray-600">/</span>

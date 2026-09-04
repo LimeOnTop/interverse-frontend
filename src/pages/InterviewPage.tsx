@@ -301,7 +301,7 @@ export default function InterviewPage() {
                 <EmptyState
                     icon={Play}
                     title="Сессия ещё не начата"
-                    description="Нажмите кнопку ниже, чтобы получить 20 вопросов и 2 практические задачи"
+                    description="Нажмите кнопку ниже, чтобы получить набор вопросов (10–20) и практических задач (1–3)"
                     action={
                         <Button onClick={handleStartSession} loading={starting}>
                             Начать тренировку

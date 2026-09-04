@@ -108,13 +108,13 @@ export default function InterviewCard({ interview, onClick, onDelete }: Intervie
 
     const techStack = interview.technologies?.length
         ? interview.technologies
-        : parseTechStack(interview.tech_stack)
+        : parseTechStack(interview.tech_stack || '')
 
     return (
         <Card hover padding="md" onClick={handleClick} className="group h-full flex flex-col">
             <div className="mb-4">
-                <Badge variant={statusBadgeVariant(interview.status)} className="mb-3">
-                    {statusLabels[interview.status] || interview.status}
+                <Badge variant={statusBadgeVariant(interview.status || '')} className="mb-3">
+                    {statusLabels[interview.status || ''] || interview.status}
                 </Badge>
                 <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 group-hover:text-inter-verse-green dark:group-hover:text-purple-400 transition-iv line-clamp-1">
                     {interview.title}

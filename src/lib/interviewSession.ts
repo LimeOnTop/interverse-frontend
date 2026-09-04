@@ -99,27 +99,28 @@ export function buildSessionSteps(questions: ApiSessionItem[], tasks: ApiSession
         .filter((item) => item.itemType === 'task')
         .sort((a, b) => a.sortOrder - b.sortOrder)
 
-    const firstBlock = normalizedQuestions.slice(0, 10)
-    const secondBlock = normalizedQuestions.slice(10, 20)
-    const taskOne = normalizedTasks[0]
-    const taskTwo = normalizedTasks[1]
-
     const steps: SessionStep[] = []
+    const taskCount = normalizedTasks.length
+    const chunkSize = taskCount > 0
+        ? Math.max(1, Math.ceil(normalizedQuestions.length / (taskCount + 1)))
+        : normalizedQuestions.length
 
-    firstBlock.forEach((question, index) => {
-        steps.push(mapQuestionStep(question, index + 1))
-    })
+    let questionIndex = 0
+    let taskIndex = 0
+    let questionNumber = 1
 
-    if (taskOne) {
-        steps.push(mapTaskStep(taskOne, 1))
-    }
+    while (questionIndex < normalizedQuestions.length || taskIndex < normalizedTasks.length) {
+        const chunkEnd = Math.min(questionIndex + chunkSize, normalizedQuestions.length)
+        while (questionIndex < chunkEnd) {
+            steps.push(mapQuestionStep(normalizedQuestions[questionIndex], questionNumber))
+            questionIndex += 1
+            questionNumber += 1
+        }
 
-    secondBlock.forEach((question, index) => {
-        steps.push(mapQuestionStep(question, index + 11))
-    })
-
-    if (taskTwo) {
-        steps.push(mapTaskStep(taskTwo, 2))
+        if (taskIndex < normalizedTasks.length) {
+            steps.push(mapTaskStep(normalizedTasks[taskIndex], taskIndex + 1))
+            taskIndex += 1
+        }
     }
 
     return steps
@@ -278,11 +279,11 @@ export function formatSessionStartError(error: unknown): string {
         if (message.includes('Go')) {
             return 'В банке пока есть вопросы только по Go. Выберите Go в стеке технологий или создайте новую тренировку с Go.'
         }
-        return 'Недостаточно вопросов для выбранного стека. Попробуйте добавить Go или выберите уровень senior.'
+        return 'Недостаточно вопросов для выбранного стека или уровня. Попробуйте добавить Go.'
     }
 
     if (message.includes('not enough tasks')) {
-        return 'Недостаточно практических задач для выбранного стека. Добавьте Go в технологии.'
+        return 'Недостаточно практических задач для выбранного стека или уровня. Добавьте Go в технологии.'
     }
 
     return message || 'Ошибка при запуске тренировки'

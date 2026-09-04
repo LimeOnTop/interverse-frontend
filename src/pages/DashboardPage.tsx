@@ -1,13 +1,17 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Plus, Calendar, Users, CheckCircle } from 'lucide-react'
+import { Plus, Calendar } from 'lucide-react'
 import { api } from '../services/api'
 import toast from 'react-hot-toast'
 import InterviewCard from '../components/InterviewCard'
 import ModernFilters from '../components/ModernFilters'
+import DailyActivityBlock, {
+    DEFAULT_DAILY_NORM,
+    countCompletedToday,
+    useLocalCalendarDay,
+} from '../components/DailyActivityBlock'
 import PageHeader from '../components/ui/PageHeader'
-import StatCard from '../components/ui/StatCard'
 import EmptyState from '../components/ui/EmptyState'
 import Spinner from '../components/ui/Spinner'
 import PageTransition from '../components/ui/PageTransition'
@@ -25,6 +29,7 @@ interface Interview {
     tech_stack?: string
     technologies?: string[]
     created_at: string
+    updated_at?: string
 }
 
 export default function DashboardPage() {
@@ -73,12 +78,11 @@ export default function DashboardPage() {
         }
     }
 
-    const stats = {
-        total: interviews.length,
-        scheduled: interviews.filter(i => i.status === 'scheduled').length,
-        completed: interviews.filter(i => i.status === 'completed').length,
-        inProgress: interviews.filter(i => i.status === 'in_progress').length,
-    }
+    const localDay = useLocalCalendarDay()
+    const completedToday = useMemo(
+        () => countCompletedToday(interviews),
+        [interviews, localDay],
+    )
 
     if (loading) return <Spinner size="lg" className="h-64" />
 
@@ -86,7 +90,7 @@ export default function DashboardPage() {
         <PageTransition className="space-y-8">
             <PageHeader
                 title="Dashboard"
-                description="Обзор интервью и ключевые метрики"
+                description="Обзор интервью и дневная активность"
                 action={
                     <Link to="/interviews/create">
                         <Button><Plus className="w-5 h-5" /> Начать тренировку</Button>
@@ -94,12 +98,10 @@ export default function DashboardPage() {
                 }
             />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-                <StatCard label="Всего" value={stats.total} icon={Calendar} delay={0} />
-                <StatCard label="Запланировано" value={stats.scheduled} icon={Calendar} delay={0.05} />
-                <StatCard label="В процессе" value={stats.inProgress} icon={Users} delay={0.1} />
-                <StatCard label="Завершено" value={stats.completed} icon={CheckCircle} delay={0.15} />
-            </div>
+            <DailyActivityBlock
+                completedToday={completedToday}
+                dailyNorm={DEFAULT_DAILY_NORM}
+            />
 
             <ModernFilters
                 searchTerm={searchTerm}

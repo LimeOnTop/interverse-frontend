@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { FileText, Search, Download, Eye } from 'lucide-react'
+import { FileText, Search, Download, Eye, Trash2, Loader2 } from 'lucide-react'
 import { api } from '../services/api'
 import toast from 'react-hot-toast'
 import { Link } from 'react-router-dom'
@@ -11,46 +11,24 @@ import EmptyState from '../components/ui/EmptyState'
 import Spinner from '../components/ui/Spinner'
 import Badge from '../components/ui/Badge'
 import Button from '../components/ui/Button'
+import SectionScoreBadge from '../components/report/SectionScoreBadge'
+import { buildReportSections, getScoreLabel, getScoreVariant } from '../lib/reportScores'
+import type { GeneratedReport } from '../lib/reportAnalysis'
 
-interface Report {
-    id: string
-    interview_id: string
-    overall_score: number
-    algorithm_score: number
-    architecture_score: number
-    coding_score: number
-    soft_skills_score: number
-    comments: string
-    recommendations: string
-    created_at: string
+interface Report extends GeneratedReport {
     interview: {
         id: string
         title: string
-        candidate: {
-            name: string
-            email: string
-        }
         specialization: string
         level: string
     }
-}
-
-const getScoreVariant = (score: number): 'success' | 'warning' | 'danger' => {
-    if (score >= 80) return 'success'
-    if (score >= 60) return 'warning'
-    return 'danger'
-}
-
-const getScoreLabel = (score: number) => {
-    if (score >= 80) return 'Отлично'
-    if (score >= 60) return 'Хорошо'
-    return 'Требует улучшения'
 }
 
 export default function ReportsPage() {
     const [reports, setReports] = useState<Report[]>([])
     const [loading, setLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState('')
+    const [deletingId, setDeletingId] = useState<string | null>(null)
 
     useEffect(() => {
         fetchReports()
@@ -69,9 +47,26 @@ export default function ReportsPage() {
         }
     }
 
+    const handleDelete = async (reportId: string) => {
+        if (!window.confirm('Удалить этот отчёт?')) {
+            return
+        }
+
+        try {
+            setDeletingId(reportId)
+            await api.delete(`/reports/${reportId}`)
+            setReports((prev) => prev.filter((report) => report.id !== reportId))
+            toast.success('Отчёт удалён')
+        } catch (error) {
+            console.error('Error deleting report:', error)
+            toast.error('Не удалось удалить отчёт')
+        } finally {
+            setDeletingId(null)
+        }
+    }
+
     const filteredReports = reports.filter(report =>
         report.interview?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        report.interview?.candidate?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         report.interview?.specialization?.toLowerCase().includes(searchTerm.toLowerCase())
     )
 
@@ -116,7 +111,7 @@ export default function ReportsPage() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" strokeWidth={1.75} />
                     <input
                         type="text"
-                        placeholder="Поиск по названию интервью, кандидату или специализации..."
+                        placeholder="Поиск по названию тренировки или специализации..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="input-field pl-10"
@@ -142,7 +137,10 @@ export default function ReportsPage() {
                     />
                 ) : (
                     <div className="grid gap-4">
-                        {filteredReports.map((report, index) => (
+                        {filteredReports.map((report, index) => {
+                            const sections = buildReportSections(report)
+
+                            return (
                             <motion.div
                                 key={report.id}
                                 initial={{ opacity: 0, y: 20 }}
@@ -156,7 +154,6 @@ export default function ReportsPage() {
                                                 {report.interview?.title || 'Тренировка'}
                                             </h3>
                                             <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-secondary">
-                                                <span>Кандидат: <span className="text-gray-900 dark:text-gray-100">{report.interview?.candidate?.name || 'Кандидат'}</span></span>
                                                 <span>Специализация: {getSpecializationLabel(report.interview?.specialization || '')}</span>
                                                 <span>Уровень: {getLevelLabel(report.interview?.level || '')}</span>
                                             </div>
@@ -172,15 +169,10 @@ export default function ReportsPage() {
                                     </div>
 
                                     <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                                        {[
-                                            { label: 'Алгоритмы', score: report.algorithm_score },
-                                            { label: 'Архитектура', score: report.architecture_score },
-                                            { label: 'Кодинг', score: report.coding_score },
-                                            { label: 'Soft Skills', score: report.soft_skills_score },
-                                        ].map(({ label, score }) => (
-                                            <div key={label} className="text-center">
-                                                <p className="text-xs font-medium uppercase tracking-wide text-secondary mb-1">{label}</p>
-                                                <Badge variant={getScoreVariant(score)}>{score}%</Badge>
+                                        {sections.map((section) => (
+                                            <div key={section.key} className="text-center">
+                                                <p className="text-xs font-medium uppercase tracking-wide text-secondary mb-1">{section.name}</p>
+                                                <SectionScoreBadge section={section} />
                                             </div>
                                         ))}
                                     </div>
@@ -210,11 +202,24 @@ export default function ReportsPage() {
                                                 <Download className="w-4 h-4" /> PDF
                                             </Button>
                                         </div>
-                                        <span className="text-xs text-secondary">ID: {report.interview_id}</span>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleDelete(report.id)}
+                                            disabled={deletingId === report.id}
+                                            className="btn-icon w-9 h-9 hover:text-red-500 dark:hover:text-red-500 disabled:opacity-50"
+                                            aria-label="Удалить отчёт"
+                                        >
+                                            {deletingId === report.id ? (
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                            ) : (
+                                                <Trash2 className="w-4 h-4" />
+                                            )}
+                                        </button>
                                     </div>
                                 </Card>
                             </motion.div>
-                        ))}
+                            )
+                        })}
                     </div>
                 )}
             </section>

@@ -10,9 +10,24 @@ export const api = axios.create({
     },
 })
 
+function setAuthHeader(config: { headers?: Record<string, unknown> }, token: string | null) {
+    if (!config.headers) {
+        config.headers = {}
+    }
+
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`
+    } else {
+        delete config.headers.Authorization
+    }
+}
+
 // Request interceptor
 api.interceptors.request.use(
     (config) => {
+        const { accessToken } = useAuthStore.getState()
+        setAuthHeader(config, accessToken)
+
         // Add timestamp to prevent caching
         if (config.method === 'get') {
             config.params = {
@@ -35,21 +50,20 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
             originalRequest._retry = true
 
-            // Try to refresh tokens
             const authStore = useAuthStore.getState()
             const refreshSuccess = await authStore.refreshTokens()
 
             if (refreshSuccess) {
-                // Retry the original request with new token
+                const { accessToken } = useAuthStore.getState()
+                setAuthHeader(originalRequest, accessToken)
                 return api(originalRequest)
-            } else {
-                // Refresh failed, redirect to login
-                authStore.logout()
-                window.location.href = '/login'
             }
+
+            authStore.logout()
+            window.location.href = '/login'
         }
 
         return Promise.reject(error)
