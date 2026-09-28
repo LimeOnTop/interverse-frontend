@@ -36,22 +36,24 @@ export default function SubscriptionPage() {
 
     return (
         <PageTransition>
-            <PageHeader
-                title="Подписка"
-                description={`Сейчас активен тариф ${subscriptionPlanLabel(currentPlan)}. Выберите подходящий вариант.`}
-            />
+            <PageHeader title="Подписка" />
 
-            <p className="text-sm text-secondary mb-6 max-w-4xl">
-                Оплата тарифа Pro означает согласие с условиями{' '}
-                <a
-                    href="/legal/oferta.docx"
-                    className="font-medium text-inter-verse-green dark:text-purple-400 hover:underline"
-                    download
-                >
-                    публичной оферты
-                </a>
-                .
-            </p>
+            <div className="mb-6 max-w-4xl space-y-1">
+                <p className="text-sm text-secondary leading-relaxed">
+                    Сейчас активен тариф {subscriptionPlanLabel(currentPlan)}. Выберите подходящий вариант.
+                </p>
+                <p className="text-sm text-secondary leading-relaxed">
+                    Оплата тарифа Pro означает согласие с условиями{' '}
+                    <a
+                        href="/legal/oferta.docx"
+                        className="font-medium text-inter-verse-green dark:text-purple-400 hover:underline"
+                        download
+                    >
+                        публичной оферты
+                    </a>
+                    .
+                </p>
+            </div>
 
             <div className="grid gap-6 lg:grid-cols-2 max-w-4xl">
                 {SUBSCRIPTION_PLANS.map((plan) => {
@@ -66,7 +68,9 @@ export default function SubscriptionPage() {
                                     : ''
                             }`}
                         >
-                            <div className="iv-form-card-shine" aria-hidden />
+                            <div className="iv-form-card-shine-clip" aria-hidden>
+                                <div className="iv-form-card-shine" />
+                            </div>
 
                             <div className="flex items-start justify-between gap-3 mb-2">
                                 <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">

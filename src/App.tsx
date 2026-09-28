@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 
 // Pages
 import HomePage from './pages/HomePage'
+import PricingPage from './pages/PricingPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import DashboardPage from './pages/DashboardPage'
@@ -45,6 +46,7 @@ function App() {
                 <Routes>
                     {/* Public routes */}
                     <Route path="/" element={<HomePage />} />
+                    <Route path="/pricing" element={<PricingPage />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/oauth/callback" element={<OAuthCallbackPage />} />

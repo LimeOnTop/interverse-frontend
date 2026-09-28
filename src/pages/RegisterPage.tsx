@@ -10,6 +10,7 @@ import AuthSplitLayout from '../components/AuthSplitLayout'
 import FormCard from '../components/ui/FormCard'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
+import { readFormDraft, usePersistedRhfValues } from '../hooks/usePersistedForm'
 
 const registerSchema = z.object({
     name: z.string().min(2, 'Минимум 2 символа'),
@@ -29,9 +30,20 @@ export default function RegisterPage() {
     const { register: registerUser, isLoading } = useAuthStore()
     const navigate = useNavigate()
 
-    const { register, handleSubmit, formState: { errors } } = useForm<RegisterForm>({
+    const saved = readFormDraft<Pick<RegisterForm, 'name' | 'email'>>('register')
+    const { register, handleSubmit, watch, formState: { errors } } = useForm<RegisterForm>({
         resolver: zodResolver(registerSchema),
+        defaultValues: {
+            name: saved?.name ?? '',
+            email: saved?.email ?? '',
+            password: '',
+            confirmPassword: '',
+        },
     })
+    usePersistedRhfValues('register', watch, (values) => ({
+        name: values.name ?? '',
+        email: values.email ?? '',
+    }))
 
     const onSubmit = async (data: RegisterForm) => {
         try {

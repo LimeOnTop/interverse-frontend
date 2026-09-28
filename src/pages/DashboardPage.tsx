@@ -16,6 +16,7 @@ import EmptyState from '../components/ui/EmptyState'
 import Spinner from '../components/ui/Spinner'
 import PageTransition from '../components/ui/PageTransition'
 import Button from '../components/ui/Button'
+import { usePersistedState } from '../hooks/usePersistedForm'
 
 interface Interview {
     id: string
@@ -35,9 +36,9 @@ interface Interview {
 export default function DashboardPage() {
     const [interviews, setInterviews] = useState<Interview[]>([])
     const [loading, setLoading] = useState(true)
-    const [searchTerm, setSearchTerm] = useState('')
-    const [statusFilter, setStatusFilter] = useState('')
-    const [levelFilter, setLevelFilter] = useState('')
+    const [searchTerm, setSearchTerm] = usePersistedState('dashboard-search', '')
+    const [statusFilter, setStatusFilter] = usePersistedState('dashboard-status', '')
+    const [levelFilter, setLevelFilter] = usePersistedState('dashboard-level', '')
     const location = useLocation()
 
     useEffect(() => { fetchInterviews() }, [location.pathname])

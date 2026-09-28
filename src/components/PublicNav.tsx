@@ -62,6 +62,16 @@ export default function PublicNav({ landing = false, overlay = false }: PublicNa
                     InterVerse
                 </Link>
                 <div className="flex items-center gap-4">
+                    <Link
+                        to="/pricing"
+                        className={
+                            overlay
+                                ? `text-sm font-medium transition-iv hover:opacity-80 ${overlayActionClass}`
+                                : 'btn-ghost text-sm'
+                        }
+                    >
+                        Тарифы
+                    </Link>
                     <ThemeToggle
                         iconClassName={overlay ? `${overlayActionClass} transition-iv` : ''}
                         className={overlay && !pastHero ? 'hover:bg-transparent dark:hover:bg-transparent' : ''}

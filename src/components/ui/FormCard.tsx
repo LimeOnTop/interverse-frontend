@@ -14,7 +14,9 @@ export default function FormCard({ children, className = '' }: FormCardProps) {
             transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
             className={`iv-form-card p-8 ${className}`}
         >
-            <div className="iv-form-card-shine" aria-hidden />
+            <div className="iv-form-card-shine-clip" aria-hidden>
+                <div className="iv-form-card-shine" />
+            </div>
             {children}
         </motion.div>
     )

@@ -14,6 +14,7 @@ import Button from '../components/ui/Button'
 import SectionScoreBadge from '../components/report/SectionScoreBadge'
 import { buildReportSections, getScoreLabel, getScoreVariant } from '../lib/reportScores'
 import type { GeneratedReport } from '../lib/reportAnalysis'
+import { usePersistedState } from '../hooks/usePersistedForm'
 
 interface Report extends GeneratedReport {
     interview: {
@@ -27,7 +28,7 @@ interface Report extends GeneratedReport {
 export default function ReportsPage() {
     const [reports, setReports] = useState<Report[]>([])
     const [loading, setLoading] = useState(true)
-    const [searchTerm, setSearchTerm] = useState('')
+    const [searchTerm, setSearchTerm] = usePersistedState('reports-search', '')
     const [deletingId, setDeletingId] = useState<string | null>(null)
 
     useEffect(() => {
@@ -141,83 +142,85 @@ export default function ReportsPage() {
                             const sections = buildReportSections(report)
 
                             return (
-                            <motion.div
-                                key={report.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.05, duration: 0.4 }}
-                            >
-                                <Card hover padding="md">
-                                    <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6">
-                                        <div className="flex-1">
-                                            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                                                {report.interview?.title || 'Тренировка'}
-                                            </h3>
-                                            <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-secondary">
-                                                <span>Специализация: {getSpecializationLabel(report.interview?.specialization || '')}</span>
-                                                <span>Уровень: {getLevelLabel(report.interview?.level || '')}</span>
+                                <motion.div
+                                    key={report.id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.05, duration: 0.4 }}
+                                >
+                                    <Card hover padding="md">
+                                        <Link to={`/reports/${report.id}`}>
+                                            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6">
+                                                <div className="flex-1">
+                                                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                                                        {report.interview?.title || 'Тренировка'}
+                                                    </h3>
+                                                    <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-secondary">
+                                                        <span>Специализация: {getSpecializationLabel(report.interview?.specialization || '')}</span>
+                                                        <span>Уровень: {getLevelLabel(report.interview?.level || '')}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right shrink-0">
+                                                    <Badge variant={getScoreVariant(report.overall_score)}>
+                                                        {report.overall_score}% — {getScoreLabel(report.overall_score)}
+                                                    </Badge>
+                                                    <p className="text-xs text-secondary mt-2">
+                                                        {new Date(report.created_at).toLocaleDateString('ru-RU')}
+                                                    </p>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div className="text-right shrink-0">
-                                            <Badge variant={getScoreVariant(report.overall_score)}>
-                                                {report.overall_score}% — {getScoreLabel(report.overall_score)}
-                                            </Badge>
-                                            <p className="text-xs text-secondary mt-2">
-                                                {new Date(report.created_at).toLocaleDateString('ru-RU')}
-                                            </p>
-                                        </div>
-                                    </div>
 
-                                    <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                                        {sections.map((section) => (
-                                            <div key={section.key} className="text-center">
-                                                <p className="text-xs font-medium uppercase tracking-wide text-secondary mb-1">{section.name}</p>
-                                                <SectionScoreBadge section={section} />
+                                            <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                                                {sections.map((section) => (
+                                                    <div key={section.key} className="text-center">
+                                                        <p className="text-xs font-medium uppercase tracking-wide text-secondary mb-1">{section.name}</p>
+                                                        <SectionScoreBadge section={section} />
+                                                    </div>
+                                                ))}
                                             </div>
-                                        ))}
-                                    </div>
 
-                                    {report.comments && (
-                                        <div className="mb-4">
-                                            <h4 className="text-xs font-medium uppercase tracking-wide text-secondary mb-2">Комментарии</h4>
-                                            <p className="text-sm text-gray-700 dark:text-gray-300">{report.comments}</p>
-                                        </div>
-                                    )}
-
-                                    {report.recommendations && (
-                                        <div className="mb-4">
-                                            <h4 className="text-xs font-medium uppercase tracking-wide text-secondary mb-2">Рекомендации</h4>
-                                            <p className="text-sm text-gray-700 dark:text-gray-300">{report.recommendations}</p>
-                                        </div>
-                                    )}
-
-                                    <div className="flex items-center justify-between pt-4 iv-divider">
-                                        <div className="flex items-center gap-3">
-                                            <Link to={`/reports/${report.id}`}>
-                                                <Button className="text-sm px-4 py-2">
-                                                    <Eye className="w-4 h-4" /> Подробнее
-                                                </Button>
-                                            </Link>
-                                            <Button variant="secondary" className="text-sm px-4 py-2">
-                                                <Download className="w-4 h-4" /> PDF
-                                            </Button>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            onClick={() => handleDelete(report.id)}
-                                            disabled={deletingId === report.id}
-                                            className="btn-icon w-9 h-9 hover:text-red-500 dark:hover:text-red-500 disabled:opacity-50"
-                                            aria-label="Удалить отчёт"
-                                        >
-                                            {deletingId === report.id ? (
-                                                <Loader2 className="w-4 h-4 animate-spin" />
-                                            ) : (
-                                                <Trash2 className="w-4 h-4" />
+                                            {report.comments && (
+                                                <div className="mb-4">
+                                                    <h4 className="text-xs font-medium uppercase tracking-wide text-secondary mb-2">Комментарии</h4>
+                                                    <p className="text-sm text-gray-700 dark:text-gray-300">{report.comments}</p>
+                                                </div>
                                             )}
-                                        </button>
-                                    </div>
-                                </Card>
-                            </motion.div>
+
+                                            {report.recommendations && (
+                                                <div className="mb-4">
+                                                    <h4 className="text-xs font-medium uppercase tracking-wide text-secondary mb-2">Рекомендации</h4>
+                                                    <p className="text-sm text-gray-700 dark:text-gray-300">{report.recommendations}</p>
+                                                </div>
+                                            )}
+
+                                            <div className="flex items-center justify-between pt-4 iv-divider">
+                                                <div className="flex items-center gap-3">
+                                                    <Link to={`/reports/${report.id}`}>
+                                                        <Button className="text-sm px-4 py-2">
+                                                            <Eye className="w-4 h-4" /> Подробнее
+                                                        </Button>
+                                                    </Link>
+                                                    <Button variant="secondary" className="text-sm px-4 py-2">
+                                                        <Download className="w-4 h-4" /> PDF
+                                                    </Button>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleDelete(report.id)}
+                                                    disabled={deletingId === report.id}
+                                                    className="btn-icon w-9 h-9 hover:text-red-500 dark:hover:text-red-500 disabled:opacity-50"
+                                                    aria-label="Удалить отчёт"
+                                                >
+                                                    {deletingId === report.id ? (
+                                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                                    ) : (
+                                                        <Trash2 className="w-4 h-4" />
+                                                    )}
+                                                </button>
+                                            </div>
+                                        </Link>
+                                    </Card>
+                                </motion.div>
                             )
                         })}
                     </div>

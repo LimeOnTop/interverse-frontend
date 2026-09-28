@@ -26,6 +26,7 @@ import Spinner from '../components/ui/Spinner'
 import Badge, { statusBadgeVariant } from '../components/ui/Badge'
 import Button from '../components/ui/Button'
 import ModernSelect from '../components/ModernSelect'
+import { usePersistedState } from '../hooks/usePersistedForm'
 
 interface Interview {
     id: string
@@ -97,10 +98,10 @@ const levelLabels: Record<string, string> = {
 export default function InterviewsPage() {
     const [interviews, setInterviews] = useState<Interview[]>([])
     const [loading, setLoading] = useState(true)
-    const [searchTerm, setSearchTerm] = useState('')
-    const [statusFilter, setStatusFilter] = useState('')
-    const [levelFilter, setLevelFilter] = useState('')
-    const [specializationFilter, setSpecializationFilter] = useState('')
+    const [searchTerm, setSearchTerm] = usePersistedState('interviews-search', '')
+    const [statusFilter, setStatusFilter] = usePersistedState('interviews-status', '')
+    const [levelFilter, setLevelFilter] = usePersistedState('interviews-level', '')
+    const [specializationFilter, setSpecializationFilter] = usePersistedState('interviews-specialization', '')
 
     useEffect(() => {
         fetchInterviews()

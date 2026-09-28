@@ -10,6 +10,7 @@ import AuthSplitLayout from '../components/AuthSplitLayout'
 import FormCard from '../components/ui/FormCard'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
+import { readFormDraft, usePersistedRhfValues } from '../hooks/usePersistedForm'
 
 const loginSchema = z.object({
     email: z.string().min(1, 'Введите логин'),
@@ -23,9 +24,15 @@ export default function LoginPage() {
     const { login, isLoading } = useAuthStore()
     const navigate = useNavigate()
 
-    const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>({
+    const saved = readFormDraft<Pick<LoginForm, 'email'>>('login')
+    const { register, handleSubmit, watch, formState: { errors } } = useForm<LoginForm>({
         resolver: zodResolver(loginSchema),
+        defaultValues: {
+            email: saved?.email ?? '',
+            password: '',
+        },
     })
+    usePersistedRhfValues('login', watch, (values) => ({ email: values.email ?? '' }))
 
     const onSubmit = async (data: LoginForm) => {
         try {
@@ -33,7 +40,9 @@ export default function LoginPage() {
             toast.success('Добро пожаловать!')
             navigate(user?.role === 'admin' ? '/admin' : '/dashboard')
         } catch (error: any) {
-            toast.error(error.message)
+            const raw = String(error?.message || '')
+            const isInvalid = /invalid credentials|login failed|неверн/i.test(raw)
+            toast.error(isInvalid ? 'Неверный логин или пароль' : (raw || 'Не удалось войти'))
         }
     }
 

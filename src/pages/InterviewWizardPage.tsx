@@ -14,6 +14,7 @@ import PageHeader from '../components/ui/PageHeader'
 import PageTransition from '../components/ui/PageTransition'
 import Card from '../components/ui/Card'
 import Spinner from '../components/ui/Spinner'
+import { clearFormDraft, usePersistedState } from '../hooks/usePersistedForm'
 
 const STEPS = {
     SPECIALIZATION: 1,
@@ -33,11 +34,14 @@ function getDisplayStep(step: number): number {
 }
 
 export default function InterviewWizardPage() {
-    const [currentStep, setCurrentStep] = useState(STEPS.SPECIALIZATION)
-    const [selectedSpecialization, setSelectedSpecialization] = useState('')
-    const [selectedTechStack, setSelectedTechStack] = useState<string[]>([])
-    const [selectedLevel, setSelectedLevel] = useState('')
-    const [scheduledAt, setScheduledAt] = useState('')
+    const [draft, setDraft] = usePersistedState('interview-wizard', {
+        currentStep: STEPS.SPECIALIZATION,
+        selectedSpecialization: '',
+        selectedTechStack: [] as string[],
+        selectedLevel: '',
+        scheduledAt: '',
+    })
+    const { currentStep, selectedSpecialization, selectedTechStack, selectedLevel, scheduledAt } = draft
     const [isLoading, setIsLoading] = useState(false)
 
     const navigate = useNavigate()
@@ -63,11 +67,13 @@ export default function InterviewWizardPage() {
             if (!withSchedule && interviewId) {
                 await startInterviewSession(api, interviewId)
                 toast.success('Тренировка запущена!')
+                clearFormDraft('interview-wizard')
                 navigate(`/interview/${interviewId}`)
                 return
             }
 
             toast.success(withSchedule ? 'Тренировка запланирована!' : 'Тренировка создана!')
+            clearFormDraft('interview-wizard')
             navigate('/dashboard')
         } catch (error: any) {
             toast.error(formatSessionStartError(error))
@@ -82,8 +88,8 @@ export default function InterviewWizardPage() {
                 return (
                     <SpecializationStep
                         selectedSpecialization={selectedSpecialization}
-                        onSelect={setSelectedSpecialization}
-                        onNext={() => setCurrentStep(STEPS.TECH_STACK)}
+                        onSelect={(value) => setDraft((prev) => ({ ...prev, selectedSpecialization: value }))}
+                        onNext={() => setDraft((prev) => ({ ...prev, currentStep: STEPS.TECH_STACK }))}
                     />
                 )
             case STEPS.TECH_STACK:
@@ -91,35 +97,35 @@ export default function InterviewWizardPage() {
                     <TechStackStep
                         selectedSpecialization={selectedSpecialization}
                         selectedTechStack={selectedTechStack}
-                        onUpdateTechStack={setSelectedTechStack}
-                        onNext={() => setCurrentStep(STEPS.LEVEL)}
-                        onBack={() => setCurrentStep(STEPS.SPECIALIZATION)}
+                        onUpdateTechStack={(value) => setDraft((prev) => ({ ...prev, selectedTechStack: value }))}
+                        onNext={() => setDraft((prev) => ({ ...prev, currentStep: STEPS.LEVEL }))}
+                        onBack={() => setDraft((prev) => ({ ...prev, currentStep: STEPS.SPECIALIZATION }))}
                     />
                 )
             case STEPS.LEVEL:
                 return (
                     <LevelStep
                         selectedLevel={selectedLevel}
-                        onSelect={setSelectedLevel}
-                        onNext={() => setCurrentStep(STEPS.SCHEDULE_PROMPT)}
-                        onBack={() => setCurrentStep(STEPS.TECH_STACK)}
+                        onSelect={(value) => setDraft((prev) => ({ ...prev, selectedLevel: value }))}
+                        onNext={() => setDraft((prev) => ({ ...prev, currentStep: STEPS.SCHEDULE_PROMPT }))}
+                        onBack={() => setDraft((prev) => ({ ...prev, currentStep: STEPS.TECH_STACK }))}
                     />
                 )
             case STEPS.SCHEDULE_PROMPT:
                 return (
                     <SchedulePromptStep
-                        onYes={() => setCurrentStep(STEPS.SCHEDULE)}
+                        onYes={() => setDraft((prev) => ({ ...prev, currentStep: STEPS.SCHEDULE }))}
                         onNo={() => handleSubmit(false)}
-                        onBack={() => setCurrentStep(STEPS.LEVEL)}
+                        onBack={() => setDraft((prev) => ({ ...prev, currentStep: STEPS.LEVEL }))}
                     />
                 )
             case STEPS.SCHEDULE:
                 return (
                     <ScheduleStep
                         scheduledAt={scheduledAt}
-                        onScheduleChange={setScheduledAt}
+                        onScheduleChange={(value) => setDraft((prev) => ({ ...prev, scheduledAt: value }))}
                         onNext={() => handleSubmit(true)}
-                        onBack={() => setCurrentStep(STEPS.SCHEDULE_PROMPT)}
+                        onBack={() => setDraft((prev) => ({ ...prev, currentStep: STEPS.SCHEDULE_PROMPT }))}
                     />
                 )
             default:

@@ -18,6 +18,7 @@ interface AuthState {
     refreshToken: string | null
     isAuthenticated: boolean
     isLoading: boolean
+    avatarUrl: string | null
 
     // Actions
     login: (email: string, password: string) => Promise<User>
@@ -26,6 +27,17 @@ interface AuthState {
     logout: () => void
     checkAuth: () => Promise<void>
     refreshTokens: () => Promise<boolean>
+    setAvatarUrl: (url: string | null) => void
+    loadAvatar: () => Promise<void>
+}
+
+async function fetchAvatarUrl(userId: string): Promise<string | null> {
+    try {
+        const { data } = await api.get(`/users/${userId}/profile`)
+        return data.profile?.avatar_url || null
+    } catch {
+        return null
+    }
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -36,6 +48,19 @@ export const useAuthStore = create<AuthState>()(
             refreshToken: null,
             isAuthenticated: false,
             isLoading: false,
+            avatarUrl: null,
+
+            setAvatarUrl: (url) => set({ avatarUrl: url }),
+
+            loadAvatar: async () => {
+                const userId = get().user?.id
+                if (!userId) {
+                    set({ avatarUrl: null })
+                    return
+                }
+                const avatarUrl = await fetchAvatarUrl(userId)
+                set({ avatarUrl })
+            },
 
             login: async (email: string, password: string) => {
                 set({ isLoading: true })
@@ -53,6 +78,7 @@ export const useAuthStore = create<AuthState>()(
                         isLoading: false,
                     })
 
+                    void get().loadAvatar()
                     return user
                 } catch (error: any) {
                     console.error('Login error:', error)
@@ -67,7 +93,6 @@ export const useAuthStore = create<AuthState>()(
                     const response = await api.post('/auth/register', { name, email, password })
                     const { access_token, refresh_token, user } = response.data
 
-                    // Set token in axios defaults
                     api.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
 
                     set({
@@ -76,6 +101,7 @@ export const useAuthStore = create<AuthState>()(
                         refreshToken: refresh_token,
                         isAuthenticated: true,
                         isLoading: false,
+                        avatarUrl: null,
                     })
                 } catch (error: any) {
                     set({ isLoading: false })
@@ -84,7 +110,6 @@ export const useAuthStore = create<AuthState>()(
             },
 
             setTokens: async (accessToken: string, refreshToken: string) => {
-                // Set token in axios defaults
                 api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`
 
                 set({
@@ -93,20 +118,17 @@ export const useAuthStore = create<AuthState>()(
                     isAuthenticated: true,
                 })
 
-                // Load user data after setting tokens
                 try {
-                    console.log('Loading user data...')
                     const response = await api.get('/auth/me')
-                    console.log('User data loaded:', response.data)
                     set({ user: response.data.user })
+                    void get().loadAvatar()
                 } catch (error) {
                     console.error('Failed to load user data:', error)
-                    throw error // Re-throw to handle in OAuthCallbackPage
+                    throw error
                 }
             },
 
             logout: () => {
-                // Clear token from axios defaults
                 delete api.defaults.headers.common['Authorization']
 
                 set({
@@ -115,6 +137,7 @@ export const useAuthStore = create<AuthState>()(
                     refreshToken: null,
                     isAuthenticated: false,
                     isLoading: false,
+                    avatarUrl: null,
                 })
             },
 
@@ -122,26 +145,32 @@ export const useAuthStore = create<AuthState>()(
                 const { accessToken, user } = get()
 
                 if (!accessToken) {
-                    set({ isAuthenticated: false })
+                    set({ isAuthenticated: false, avatarUrl: null })
                     return
                 }
 
-                // Always set auth header if we have a token
                 api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`
-
-                // Consider the user authenticated if we have a token.
-                // If user data is missing, load it lazily without flipping auth to false.
                 set({ isAuthenticated: true })
 
                 if (!user) {
                     try {
                         const response = await api.get('/auth/me')
                         set({ user: response.data.user })
-                    } catch (err) {
-                        // If token is invalid, mark as unauthenticated
-                        set({ user: null, isAuthenticated: false, accessToken: null, refreshToken: null })
+                    } catch {
+                        set({
+                            user: null,
+                            isAuthenticated: false,
+                            accessToken: null,
+                            refreshToken: null,
+                            avatarUrl: null,
+                        })
                         delete api.defaults.headers.common['Authorization']
+                        return
                     }
+                }
+
+                if (!get().avatarUrl) {
+                    void get().loadAvatar()
                 }
             },
 
@@ -155,24 +184,22 @@ export const useAuthStore = create<AuthState>()(
                     const response = await api.post('/auth/refresh', { refresh_token: refreshToken })
                     const { access_token, refresh_token } = response.data
 
-                    // Update tokens
                     set({
                         accessToken: access_token,
                         refreshToken: refresh_token,
                     })
 
-                    // Set new access token in axios defaults
                     api.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
 
                     return true
                 } catch (error) {
                     console.error('Token refresh failed:', error)
-                    // Clear tokens on refresh failure
                     set({
                         user: null,
                         accessToken: null,
                         refreshToken: null,
                         isAuthenticated: false,
+                        avatarUrl: null,
                     })
                     return false
                 }

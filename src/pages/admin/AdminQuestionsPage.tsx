@@ -9,6 +9,7 @@ import Badge from '../../components/ui/Badge'
 import EmptyState from '../../components/ui/EmptyState'
 import Spinner from '../../components/ui/Spinner'
 import ModernSelect from '../../components/ModernSelect'
+import { usePersistedState } from '../../hooks/usePersistedForm'
 import { api } from '../../services/api'
 import { HelpCircle } from 'lucide-react'
 
@@ -51,8 +52,8 @@ const difficultyBadge: Record<string, 'default' | 'success' | 'warning' | 'accen
 
 export default function AdminQuestionsPage() {
     const navigate = useNavigate()
-    const [technology, setTechnology] = useState('')
-    const [difficulty, setDifficulty] = useState('')
+    const [technology, setTechnology] = usePersistedState('admin-questions-technology', '')
+    const [difficulty, setDifficulty] = usePersistedState('admin-questions-difficulty', '')
     const [technologyOptions, setTechnologyOptions] = useState([{ value: '', label: 'Все направления' }])
     const [questions, setQuestions] = useState<AdminQuestion[]>([])
     const [page, setPage] = useState(1)

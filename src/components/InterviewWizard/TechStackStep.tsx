@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, X } from 'lucide-react'
+import { Search } from 'lucide-react'
 import Button from '../ui/Button'
+import { api } from '../../services/api'
 
 interface TechStackStepProps {
     selectedSpecialization: string
@@ -34,6 +35,11 @@ const techStacks = {
     ],
 }
 
+interface SearchHit {
+    id?: string
+    name: string
+}
+
 export default function TechStackStep({
     selectedSpecialization,
     selectedTechStack,
@@ -43,11 +49,51 @@ export default function TechStackStep({
 }: TechStackStepProps) {
     const [searchTerm, setSearchTerm] = useState('')
     const [isSearchOpen, setIsSearchOpen] = useState(false)
+    const [searchResults, setSearchResults] = useState<string[]>([])
+    const [isSearching, setIsSearching] = useState(false)
 
     const availableTechs = techStacks[selectedSpecialization as keyof typeof techStacks] || []
-    const filteredTechs = availableTechs.filter(tech =>
-        tech.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    const trimmedSearch = searchTerm.trim()
+    const isSearchActive = trimmedSearch.length >= 2
+    const displayedTechs = isSearchActive ? searchResults : availableTechs
+
+    useEffect(() => {
+        if (!isSearchActive) {
+            setSearchResults([])
+            setIsSearching(false)
+            return
+        }
+
+        const controller = new AbortController()
+        const timeoutId = window.setTimeout(async () => {
+            setIsSearching(true)
+            try {
+                const { data } = await api.get('/technologies/search', {
+                    params: { q: trimmedSearch, limit: 24, page: 1 },
+                    signal: controller.signal,
+                })
+                const hits: SearchHit[] = data?.technologies ?? []
+                const names = hits
+                    .map((item) => item.name)
+                    .filter((name): name is string => Boolean(name))
+                setSearchResults(Array.from(new Set(names)))
+            } catch (error) {
+                if ((error as { code?: string; name?: string })?.code === 'ERR_CANCELED' ||
+                    (error as { name?: string })?.name === 'CanceledError') {
+                    return
+                }
+                console.error('Technology search failed:', error)
+                setSearchResults([])
+            } finally {
+                setIsSearching(false)
+            }
+        }, 300)
+
+        return () => {
+            controller.abort()
+            window.clearTimeout(timeoutId)
+        }
+    }, [trimmedSearch, isSearchActive])
 
     const handleTechSelect = (tech: string) => {
         if (selectedTechStack.includes(tech)) {
@@ -55,10 +101,6 @@ export default function TechStackStep({
         } else {
             onUpdateTechStack([...selectedTechStack, tech])
         }
-    }
-
-    const removeTech = (tech: string) => {
-        onUpdateTechStack(selectedTechStack.filter(t => t !== tech))
     }
 
     return (
@@ -127,17 +169,15 @@ export default function TechStackStep({
                     <div className="wizard-stack-panel">
                         <div className="flex flex-wrap gap-2">
                             {selectedTechStack.map((tech) => (
-                                <span key={tech} className="wizard-stack-chip">
+                                <button
+                                    key={tech}
+                                    type="button"
+                                    onClick={() => handleTechSelect(tech)}
+                                    className="wizard-stack-chip cursor-pointer hover:opacity-70 transition-iv"
+                                    aria-label={`Убрать ${tech}`}
+                                >
                                     {tech}
-                                    <button
-                                        type="button"
-                                        onClick={() => removeTech(tech)}
-                                        className="hover:opacity-70 transition-iv"
-                                        aria-label={`Убрать ${tech}`}
-                                    >
-                                        <X className="w-3.5 h-3.5" />
-                                    </button>
-                                </span>
+                                </button>
                             ))}
                         </div>
                     </div>
@@ -150,25 +190,32 @@ export default function TechStackStep({
 
             <div className="mb-8">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
-                    Доступные технологии
+                    {isSearchActive ? 'Результаты поиска' : 'Доступные технологии'}
                 </h3>
-                <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-2">
-                    {filteredTechs.map((tech) => {
-                        const isSelected = selectedTechStack.includes(tech)
+                {isSearchActive && isSearching ? (
+                    <p className="text-sm text-secondary mb-3">Ищем технологии…</p>
+                ) : null}
+                {isSearchActive && !isSearching && displayedTechs.length === 0 ? (
+                    <p className="text-sm text-secondary">Ничего не найдено — попробуйте другой запрос</p>
+                ) : (
+                    <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-2">
+                        {displayedTechs.map((tech) => {
+                            const isSelected = selectedTechStack.includes(tech)
 
-                        return (
-                            <motion.button
-                                key={tech}
-                                type="button"
-                                onClick={() => handleTechSelect(tech)}
-                                whileTap={{ scale: 0.98 }}
-                                className={`wizard-tech-chip ${isSelected ? 'wizard-tech-chip-selected' : ''}`}
-                            >
-                                {tech}
-                            </motion.button>
-                        )
-                    })}
-                </div>
+                            return (
+                                <motion.button
+                                    key={tech}
+                                    type="button"
+                                    onClick={() => handleTechSelect(tech)}
+                                    whileTap={{ scale: 0.98 }}
+                                    className={`wizard-tech-chip ${isSelected ? 'wizard-tech-chip-selected' : ''}`}
+                                >
+                                    {tech}
+                                </motion.button>
+                            )
+                        })}
+                    </div>
+                )}
             </div>
 
             <div className="flex justify-between">

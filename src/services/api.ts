@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { type InternalAxiosRequestConfig } from 'axios'
 import { useAuthStore } from '../store/authStore'
 
 export const api = axios.create({
@@ -9,6 +9,11 @@ export const api = axios.create({
         'Pragma': 'no-cache',
     },
 })
+
+function isPublicAuthRequest(url?: string) {
+    if (!url) return false
+    return /\/auth\/(login|register|refresh)(?:\?|$)/.test(url)
+}
 
 function setAuthHeader(config: { headers?: Record<string, unknown> }, token: string | null) {
     if (!config.headers) {
@@ -22,13 +27,26 @@ function setAuthHeader(config: { headers?: Record<string, unknown> }, token: str
     }
 }
 
-// Request interceptor
+let refreshInFlight: Promise<boolean> | null = null
+
+function refreshOnce() {
+    if (!refreshInFlight) {
+        refreshInFlight = useAuthStore.getState().refreshTokens().finally(() => {
+            refreshInFlight = null
+        })
+    }
+    return refreshInFlight
+}
+
 api.interceptors.request.use(
     (config) => {
-        const { accessToken } = useAuthStore.getState()
-        setAuthHeader(config, accessToken)
+        if (isPublicAuthRequest(config.url)) {
+            setAuthHeader(config, null)
+        } else {
+            const { accessToken } = useAuthStore.getState()
+            setAuthHeader(config, accessToken)
+        }
 
-        // Add timestamp to prevent caching
         if (config.method === 'get') {
             config.params = {
                 ...config.params,
@@ -42,27 +60,34 @@ api.interceptors.request.use(
     }
 )
 
-// Response interceptor
 api.interceptors.response.use(
     (response) => {
         return response
     },
     async (error) => {
-        const originalRequest = error.config
+        const originalRequest = error.config as (InternalAxiosRequestConfig & { _retry?: boolean }) | undefined
 
-        if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
-            originalRequest._retry = true
+        if (
+            error.response?.status !== 401
+            || !originalRequest
+            || originalRequest._retry
+            || isPublicAuthRequest(originalRequest.url)
+        ) {
+            return Promise.reject(error)
+        }
 
-            const authStore = useAuthStore.getState()
-            const refreshSuccess = await authStore.refreshTokens()
+        originalRequest._retry = true
 
-            if (refreshSuccess) {
-                const { accessToken } = useAuthStore.getState()
-                setAuthHeader(originalRequest, accessToken)
-                return api(originalRequest)
-            }
+        const refreshSuccess = await refreshOnce()
 
-            authStore.logout()
+        if (refreshSuccess) {
+            const { accessToken } = useAuthStore.getState()
+            setAuthHeader(originalRequest, accessToken)
+            return api(originalRequest)
+        }
+
+        useAuthStore.getState().logout()
+        if (window.location.pathname !== '/login') {
             window.location.href = '/login'
         }
 

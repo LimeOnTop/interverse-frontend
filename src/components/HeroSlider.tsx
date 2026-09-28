@@ -3,15 +3,17 @@ import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 
-import workstationBg from '../../images/3d-rendering-computer.jpg'
-import reportBg from '../../images/clipboard-checklist.jpg'
+import workstationBg from '../../images/3d-rendering-computer.webp'
+import questionsBg from '../../images/hero-questions.webp'
+import progressBg from '../../images/hero-progress.webp'
+import reportBg from '../../images/hero-report.webp'
 
 type SlideImageKey = 'workstation' | 'stack' | 'progress' | 'report'
 
 const SLIDE_IMAGE_BACKGROUNDS: Record<SlideImageKey, string> = {
     workstation: workstationBg,
-    stack: workstationBg,
-    progress: reportBg,
+    stack: questionsBg,
+    progress: progressBg,
     report: reportBg,
 }
 
