@@ -14,6 +14,7 @@ import Button from '../components/ui/Button'
 import SectionScoreBadge from '../components/report/SectionScoreBadge'
 import { buildReportSections, getScoreLabel, getScoreVariant } from '../lib/reportScores'
 import type { GeneratedReport } from '../lib/reportAnalysis'
+import { downloadReportPdf } from '../lib/exportReportPdf'
 import { usePersistedState } from '../hooks/usePersistedForm'
 
 interface Report extends GeneratedReport {
@@ -30,6 +31,7 @@ export default function ReportsPage() {
     const [loading, setLoading] = useState(true)
     const [searchTerm, setSearchTerm] = usePersistedState('reports-search', '')
     const [deletingId, setDeletingId] = useState<string | null>(null)
+    const [exportingId, setExportingId] = useState<string | null>(null)
 
     useEffect(() => {
         fetchReports()
@@ -41,14 +43,16 @@ export default function ReportsPage() {
             const response = await api.get('/reports/')
             const reportsData = response.data.reports || []
             setReports(reportsData)
-        } catch (error: any) {
+        } catch {
             toast.error('Ошибка при загрузке отчётов')
         } finally {
             setLoading(false)
         }
     }
 
-    const handleDelete = async (reportId: string) => {
+    const handleDelete = async (reportId: string, event: React.MouseEvent) => {
+        event.preventDefault()
+        event.stopPropagation()
         if (!window.confirm('Удалить этот отчёт?')) {
             return
         }
@@ -66,9 +70,30 @@ export default function ReportsPage() {
         }
     }
 
-    const filteredReports = reports.filter(report =>
+    const handleExportPdf = async (report: Report, event: React.MouseEvent) => {
+        event.preventDefault()
+        event.stopPropagation()
+        try {
+            setExportingId(report.id)
+            // List endpoint may omit answer reviews — fetch full report when needed.
+            let payload: Report = report
+            if (!report.answer_reviews?.length) {
+                const { data } = await api.get(`/reports/${report.id}`)
+                if (data?.report) payload = data.report
+            }
+            await downloadReportPdf(payload)
+            toast.success('PDF скачан')
+        } catch (error) {
+            console.error('PDF export failed:', error)
+            toast.error('Не удалось сформировать PDF')
+        } finally {
+            setExportingId(null)
+        }
+    }
+
+    const filteredReports = reports.filter((report) =>
         report.interview?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        report.interview?.specialization?.toLowerCase().includes(searchTerm.toLowerCase())
+        report.interview?.specialization?.toLowerCase().includes(searchTerm.toLowerCase()),
     )
 
     const getSpecializationLabel = (specialization: string) => {
@@ -100,11 +125,6 @@ export default function ReportsPage() {
             <PageHeader
                 title="Отчёты"
                 description="Результаты проведённых интервью"
-                action={
-                    <Button variant="secondary">
-                        <Download className="w-5 h-5" /> Экспорт всех
-                    </Button>
-                }
             />
 
             <Card padding="md">
@@ -149,76 +169,80 @@ export default function ReportsPage() {
                                     transition={{ delay: index * 0.05, duration: 0.4 }}
                                 >
                                     <Card hover padding="md">
-                                        <Link to={`/reports/${report.id}`}>
-                                            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6">
-                                                <div className="flex-1">
-                                                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                                                        {report.interview?.title || 'Тренировка'}
-                                                    </h3>
-                                                    <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-secondary">
-                                                        <span>Специализация: {getSpecializationLabel(report.interview?.specialization || '')}</span>
-                                                        <span>Уровень: {getLevelLabel(report.interview?.level || '')}</span>
-                                                    </div>
-                                                </div>
-                                                <div className="text-right shrink-0">
-                                                    <Badge variant={getScoreVariant(report.overall_score)}>
-                                                        {report.overall_score}% — {getScoreLabel(report.overall_score)}
-                                                    </Badge>
-                                                    <p className="text-xs text-secondary mt-2">
-                                                        {new Date(report.created_at).toLocaleDateString('ru-RU')}
-                                                    </p>
+                                        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6">
+                                            <div className="flex-1">
+                                                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                                                    {report.interview?.title || 'Тренировка'}
+                                                </h3>
+                                                <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-secondary">
+                                                    <span>Специализация: {getSpecializationLabel(report.interview?.specialization || '')}</span>
+                                                    <span>Уровень: {getLevelLabel(report.interview?.level || '')}</span>
                                                 </div>
                                             </div>
-
-                                            <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                                                {sections.map((section) => (
-                                                    <div key={section.key} className="text-center">
-                                                        <p className="text-xs font-medium uppercase tracking-wide text-secondary mb-1">{section.name}</p>
-                                                        <SectionScoreBadge section={section} />
-                                                    </div>
-                                                ))}
+                                            <div className="text-right shrink-0">
+                                                <Badge variant={getScoreVariant(report.overall_score)}>
+                                                    {report.overall_score}% — {getScoreLabel(report.overall_score)}
+                                                </Badge>
+                                                <p className="text-xs text-secondary mt-2">
+                                                    {new Date(report.created_at).toLocaleDateString('ru-RU')}
+                                                </p>
                                             </div>
+                                        </div>
 
-                                            {report.comments && (
-                                                <div className="mb-4">
-                                                    <h4 className="text-xs font-medium uppercase tracking-wide text-secondary mb-2">Комментарии</h4>
-                                                    <p className="text-sm text-gray-700 dark:text-gray-300">{report.comments}</p>
+                                        <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                                            {sections.map((section) => (
+                                                <div key={section.key} className="text-center">
+                                                    <p className="text-xs font-medium uppercase tracking-wide text-secondary mb-1">{section.name}</p>
+                                                    <SectionScoreBadge section={section} />
                                                 </div>
-                                            )}
+                                            ))}
+                                        </div>
 
-                                            {report.recommendations && (
-                                                <div className="mb-4">
-                                                    <h4 className="text-xs font-medium uppercase tracking-wide text-secondary mb-2">Рекомендации</h4>
-                                                    <p className="text-sm text-gray-700 dark:text-gray-300">{report.recommendations}</p>
-                                                </div>
-                                            )}
+                                        {report.comments && (
+                                            <div className="mb-4">
+                                                <h4 className="text-xs font-medium uppercase tracking-wide text-secondary mb-2">Комментарии</h4>
+                                                <p className="text-sm text-gray-700 dark:text-gray-300">{report.comments}</p>
+                                            </div>
+                                        )}
 
-                                            <div className="flex items-center justify-between pt-4 iv-divider">
-                                                <div className="flex items-center gap-3">
-                                                    <Link to={`/reports/${report.id}`}>
-                                                        <Button className="text-sm px-4 py-2">
-                                                            <Eye className="w-4 h-4" /> Подробнее
-                                                        </Button>
-                                                    </Link>
-                                                    <Button variant="secondary" className="text-sm px-4 py-2">
-                                                        <Download className="w-4 h-4" /> PDF
+                                        {report.recommendations && (
+                                            <div className="mb-4">
+                                                <h4 className="text-xs font-medium uppercase tracking-wide text-secondary mb-2">Рекомендации</h4>
+                                                <p className="text-sm text-gray-700 dark:text-gray-300">{report.recommendations}</p>
+                                            </div>
+                                        )}
+
+                                        <div className="flex items-center justify-between pt-4 iv-divider">
+                                            <div className="flex items-center gap-3">
+                                                <Link to={`/reports/${report.id}`}>
+                                                    <Button className="text-sm px-4 py-2">
+                                                        <Eye className="w-4 h-4" /> Подробнее
                                                     </Button>
-                                                </div>
-                                                <button
+                                                </Link>
+                                                <Button
                                                     type="button"
-                                                    onClick={() => handleDelete(report.id)}
-                                                    disabled={deletingId === report.id}
-                                                    className="btn-icon w-9 h-9 hover:text-red-500 dark:hover:text-red-500 disabled:opacity-50"
-                                                    aria-label="Удалить отчёт"
+                                                    variant="secondary"
+                                                    className="text-sm px-4 py-2"
+                                                    loading={exportingId === report.id}
+                                                    onClick={(e) => void handleExportPdf(report, e)}
                                                 >
-                                                    {deletingId === report.id ? (
-                                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                                    ) : (
-                                                        <Trash2 className="w-4 h-4" />
-                                                    )}
-                                                </button>
+                                                    <Download className="w-4 h-4" /> PDF
+                                                </Button>
                                             </div>
-                                        </Link>
+                                            <button
+                                                type="button"
+                                                onClick={(e) => void handleDelete(report.id, e)}
+                                                disabled={deletingId === report.id}
+                                                className="btn-icon w-9 h-9 hover:text-red-500 dark:hover:text-red-500 disabled:opacity-50"
+                                                aria-label="Удалить отчёт"
+                                            >
+                                                {deletingId === report.id ? (
+                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                ) : (
+                                                    <Trash2 className="w-4 h-4" />
+                                                )}
+                                            </button>
+                                        </div>
                                     </Card>
                                 </motion.div>
                             )

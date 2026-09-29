@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, type ReactNode } from 'react'
-import { useSearchParams } from 'react-router-dom'
 import {
     User,
     Save,
@@ -9,9 +8,11 @@ import {
     Check,
     Plus,
 } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
 import { api } from '../services/api'
 import { useAuthStore } from '../store/authStore'
 import ModernSelect from '../components/ModernSelect'
+import ProfileSkillsEditor from '../components/ProfileSkillsEditor'
 import toast from 'react-hot-toast'
 import PageTransition from '../components/ui/PageTransition'
 import Button from '../components/ui/Button'
@@ -25,9 +26,15 @@ interface ProfileData {
     about_me: string
     higher_education: string
     english_level: string
+    skills: string[]
 }
 
 const MAX_WORK_EXPERIENCES = 5
+
+function hhImportErrorMessage(error: unknown, fallback: string): string {
+    const err = error as { response?: { data?: { error?: string; message?: string } }; message?: string }
+    return err?.response?.data?.error || err?.response?.data?.message || err?.message || fallback
+}
 
 function parseWorkExperiences(raw: unknown): string[] {
     if (Array.isArray(raw)) {
@@ -57,6 +64,28 @@ function serializeWorkExperiences(items: string[]): string {
     return JSON.stringify(filled)
 }
 
+function parseSkills(raw: unknown): string[] {
+    if (Array.isArray(raw)) {
+        return raw.map((item) => String(item ?? '').trim()).filter(Boolean)
+    }
+    if (typeof raw !== 'string' || !raw.trim()) return []
+    try {
+        const parsed = JSON.parse(raw)
+        if (Array.isArray(parsed)) {
+            return parsed.map((item) => String(item ?? '').trim()).filter(Boolean)
+        }
+    } catch {
+        /* comma-separated fallback */
+    }
+    return raw.split(',').map((item) => item.trim()).filter(Boolean)
+}
+
+function serializeSkills(items: string[]): string {
+    const filled = items.map((item) => item.trim()).filter(Boolean)
+    if (filled.length === 0) return ''
+    return JSON.stringify(filled)
+}
+
 const ENGLISH_LEVELS = [
     { value: '', label: 'Не указан' },
     { value: 'A1', label: 'A1 — Beginner' },
@@ -69,10 +98,10 @@ const ENGLISH_LEVELS = [
 ]
 
 const emptyProfile: ProfileData = {
-    work_experiences: [], avatar_url: '', about_me: '', higher_education: '', english_level: '',
+    work_experiences: [], avatar_url: '', about_me: '', higher_education: '', english_level: '', skills: [],
 }
 
-type ProfileBlockId = 'avatar' | 'about_me' | 'higher_education' | 'english_level'
+type ProfileBlockId = 'avatar' | 'about_me' | 'higher_education' | 'english_level' | 'skills'
 type OpenBlockId = ProfileBlockId | `work:${number}`
 
 const PROFILE_BLOCKS: {
@@ -83,6 +112,7 @@ const PROFILE_BLOCKS: {
 }[] = [
     { id: 'avatar', title: 'Аватар', span: 'profile-span-md', minHeight: 'min-h-[13rem]' },
     { id: 'about_me', title: 'О себе', span: 'profile-span-xl', minHeight: 'min-h-[11rem]' },
+    { id: 'skills', title: 'Навыки', span: 'profile-span-lg', minHeight: 'min-h-[11rem]' },
     { id: 'higher_education', title: 'Образование', span: 'profile-span-sm', minHeight: 'min-h-[11rem]' },
     { id: 'english_level', title: 'Английский', span: 'profile-span-lg', minHeight: 'min-h-[10rem]' },
 ]
@@ -96,6 +126,7 @@ const PROFILE_BLOCK_LAYOUT = {
 
 function isBlockFilled(id: ProfileBlockId, profile: ProfileData) {
     if (id === 'avatar') return Boolean(profile.avatar_url.trim())
+    if (id === 'skills') return profile.skills.length > 0
     return Boolean(profile[id].trim())
 }
 
@@ -107,7 +138,6 @@ const MAX_SOURCE_BYTES = 25 * 1024 * 1024
 const MAX_AVATAR_PAYLOAD_CHARS = 850_000
 const AVATAR_MAX_SIZE = 512
 const AVATAR_MIN_SIZE = 256
-const HH_OAUTH_STATE_KEY = 'hh-oauth-state'
 
 function dataUrlByteLength(dataUrl: string) {
     return dataUrl.length
@@ -211,12 +241,20 @@ export default function ProfilePage() {
     const [showHHModal, setShowHHModal] = useState(false)
     const [resumeURL, setResumeURL] = useState(() => readFormDraft<string>('hh-resume-url-input') ?? '')
     const fileInputRef = useRef<HTMLInputElement>(null)
-    const hhImportStartedRef = useRef(false)
     const persistProfileRef = useRef(false)
 
     const profileDraftKey = user?.id ? `profile:${user.id}` : ''
 
     useEffect(() => { if (user?.id) fetchProfile() }, [user?.id])
+
+    useEffect(() => {
+        const open = searchParams.get('open')
+        if (open !== 'skills') return
+        setOpenBlock('skills')
+        const next = new URLSearchParams(searchParams)
+        next.delete('open')
+        setSearchParams(next, { replace: true })
+    }, [searchParams, setSearchParams])
 
     useEffect(() => {
         if (!persistProfileRef.current || !profileDraftKey) return
@@ -225,35 +263,13 @@ export default function ProfilePage() {
             about_me: profile.about_me,
             higher_education: profile.higher_education,
             english_level: profile.english_level,
+            skills: profile.skills,
         })
-    }, [profile.work_experiences, profile.about_me, profile.higher_education, profile.english_level, profileDraftKey])
+    }, [profile.work_experiences, profile.about_me, profile.higher_education, profile.english_level, profile.skills, profileDraftKey])
 
     useEffect(() => {
         writeFormDraft('hh-resume-url-input', resumeURL)
     }, [resumeURL])
-
-    useEffect(() => {
-        const code = searchParams.get('code')
-        const state = searchParams.get('state')
-        if (!code || !user?.id || hhImportStartedRef.current) {
-            return
-        }
-
-        const savedState = sessionStorage.getItem(HH_OAUTH_STATE_KEY)
-        if (savedState && state && savedState !== state) {
-            toast.error('Некорректный OAuth state от hh.ru')
-            setSearchParams({}, { replace: true })
-            return
-        }
-
-        hhImportStartedRef.current = true
-        void importFromHH(code, resumeURL || sessionStorage.getItem('hh-resume-url') || '')
-            .finally(() => {
-                sessionStorage.removeItem(HH_OAUTH_STATE_KEY)
-                sessionStorage.removeItem('hh-resume-url')
-                setSearchParams({}, { replace: true })
-            })
-    }, [searchParams, user?.id])
 
     const fetchProfile = async () => {
         if (!user?.id) return
@@ -267,6 +283,7 @@ export default function ProfilePage() {
                     about_me: data.profile.about_me || '',
                     higher_education: data.profile.higher_education || '',
                     english_level: data.profile.english_level || '',
+                    skills: parseSkills(data.profile.skills),
                 }
                 const draft = user?.id ? readFormDraft<{
                     work_experiences?: string[]
@@ -274,6 +291,7 @@ export default function ProfilePage() {
                     about_me?: string
                     higher_education?: string
                     english_level?: string
+                    skills?: string[] | string
                 }>(`profile:${user.id}`) : null
                 setProfile({
                     ...loaded,
@@ -285,6 +303,7 @@ export default function ProfilePage() {
                     about_me: draft?.about_me ?? loaded.about_me,
                     higher_education: draft?.higher_education ?? loaded.higher_education,
                     english_level: draft?.english_level ?? loaded.english_level,
+                    skills: draft?.skills != null ? parseSkills(draft.skills) : loaded.skills,
                 })
                 persistProfileRef.current = true
                 setAvatarUrl(data.profile.avatar_url || null)
@@ -297,7 +316,7 @@ export default function ProfilePage() {
         }
     }
 
-    const handleChange = (field: Exclude<keyof ProfileData, 'work_experiences'>, value: string) => {
+    const handleChange = (field: Exclude<keyof ProfileData, 'work_experiences' | 'skills'>, value: string) => {
         setProfile((p) => ({ ...p, [field]: value }))
     }
 
@@ -358,14 +377,18 @@ export default function ProfilePage() {
         setAvatarError(false)
     }
 
-    const importFromHH = async (code: string, preferredResumeURL = '') => {
+    const importFromHH = async () => {
         if (!user?.id) return
+        const url = resumeURL.trim()
+        if (!url) {
+            toast.error('Вставьте ссылку на резюме hh.ru')
+            return
+        }
 
         try {
             setIsImportingHH(true)
             const { data } = await api.post(`/users/${user.id}/profile/import/hh`, {
-                code,
-                resume_url: preferredResumeURL || undefined,
+                resume_url: url,
             })
 
             const imported = data.profile
@@ -379,40 +402,15 @@ export default function ProfilePage() {
                 about_me: imported.about_me || '',
                 higher_education: imported.higher_education || '',
                 english_level: imported.english_level || '',
+                skills: parseSkills(imported.skills),
             })
             setAvatarUrl(imported.avatar_url || null)
             setAvatarError(false)
             setShowHHModal(false)
             toast.success(data.message || 'Данные из hh.ru загружены')
-        } catch (error: any) {
-            toast.error(error.response?.data?.error || error.response?.data?.message || 'Не удалось импортировать из hh.ru')
+        } catch (error: unknown) {
+            toast.error(hhImportErrorMessage(error, 'Не удалось импортировать из hh.ru'))
         } finally {
-            setIsImportingHH(false)
-        }
-    }
-
-    const handleStartHHImport = async () => {
-        if (!user?.id) return
-
-        try {
-            setIsImportingHH(true)
-            const { data } = await api.get(`/users/${user.id}/profile/hh/auth-url`)
-            if (!data.auth_url) {
-                throw new Error('Не получен URL авторизации hh.ru')
-            }
-
-            if (data.state) {
-                sessionStorage.setItem(HH_OAUTH_STATE_KEY, data.state)
-            }
-            if (resumeURL.trim()) {
-                sessionStorage.setItem('hh-resume-url', resumeURL.trim())
-            } else {
-                sessionStorage.removeItem('hh-resume-url')
-            }
-
-            window.location.href = data.auth_url
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || error.response?.data?.error || 'Импорт hh.ru недоступен')
             setIsImportingHH(false)
         }
     }
@@ -427,6 +425,7 @@ export default function ProfilePage() {
                 about_me: profile.about_me,
                 higher_education: profile.higher_education,
                 english_level: profile.english_level,
+                skills: serializeSkills(profile.skills),
             })
             setAvatarUrl(profile.avatar_url || null)
             writeFormDraft(`profile:${user.id}`, {
@@ -434,6 +433,7 @@ export default function ProfilePage() {
                 about_me: profile.about_me,
                 higher_education: profile.higher_education,
                 english_level: profile.english_level,
+                skills: profile.skills,
             })
             toast.success('Профиль сохранён')
         } catch (error: any) {
@@ -486,6 +486,15 @@ export default function ProfilePage() {
                 >
                     {title}
                 </motion.h2>
+
+                {!open && (
+                    <motion.p
+                        layout="position"
+                        className={`profile-block-hint mt-2 ${accented ? 'text-white/80' : 'text-secondary'}`}
+                    >
+                        Нажмите для редактирования
+                    </motion.p>
+                )}
 
                 {open && (
                     <motion.div
@@ -583,6 +592,15 @@ export default function ProfilePage() {
                     onChange={(e) => handleChange('higher_education', e.target.value)}
                     className={fieldClass}
                     placeholder="ВУЗ, специальность"
+                />
+            )
+        }
+
+        if (id === 'skills') {
+            return (
+                <ProfileSkillsEditor
+                    skills={profile.skills}
+                    onChange={(skills) => setProfile((p) => ({ ...p, skills }))}
                 />
             )
         }
@@ -721,7 +739,7 @@ export default function ProfilePage() {
                             <div>
                                 <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Импорт из hh.ru</h2>
                                 <p className="text-sm text-secondary mt-1">
-                                    Через официальный API HeadHunter (OAuth). Будут подтянуты аватар, опыт, о себе, образование и уровень английского.
+                                    Вставьте ссылку на резюме, открытое для просмотра. Подтянем должность, навыки, образование и английский — проверьте поля и сохраните профиль.
                                 </p>
                             </div>
                             <button
@@ -736,7 +754,7 @@ export default function ProfilePage() {
 
                         <div>
                             <label className="text-xs font-medium uppercase tracking-wide text-secondary mb-2 block">
-                                Ссылка на резюме (необязательно)
+                                Ссылка на резюме
                             </label>
                             <input
                                 type="url"
@@ -746,7 +764,7 @@ export default function ProfilePage() {
                                 placeholder="https://hh.ru/resume/..."
                             />
                             <p className="text-xs text-secondary mt-2">
-                                Если не указать, возьмём первое опубликованное резюме из вашего аккаунта.
+                                В hh.ru: резюме → «Открыть доступ по ссылке» / «Поделиться», затем вставьте URL сюда.
                             </p>
                         </div>
 
@@ -754,9 +772,9 @@ export default function ProfilePage() {
                             <Button type="button" variant="ghost" onClick={() => setShowHHModal(false)}>
                                 Отмена
                             </Button>
-                            <Button type="button" loading={isImportingHH} onClick={handleStartHHImport}>
+                            <Button type="button" loading={isImportingHH} onClick={() => void importFromHH()}>
                                 <Download className="w-4 h-4" />
-                                Войти через hh.ru
+                                Загрузить из ссылки
                             </Button>
                         </div>
                     </div>

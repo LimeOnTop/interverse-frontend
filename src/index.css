@@ -560,6 +560,10 @@
         transition: transform 400ms cubic-bezier(0.22, 1, 0.36, 1);
     }
 
+    .profile-block-hint {
+        @apply text-sm leading-snug;
+    }
+
     .profile-block-open .profile-block-title {
         transform: translateY(-2px);
     }

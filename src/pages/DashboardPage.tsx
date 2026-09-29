@@ -33,12 +33,30 @@ interface Interview {
     updated_at?: string
 }
 
+const HIDDEN_COMPLETED_KEY = 'dashboard-hidden-completed'
+
+function readHiddenCompletedIds(): string[] {
+    try {
+        const raw = localStorage.getItem(HIDDEN_COMPLETED_KEY)
+        if (!raw) return []
+        const parsed = JSON.parse(raw)
+        return Array.isArray(parsed) ? parsed.map(String) : []
+    } catch {
+        return []
+    }
+}
+
+function writeHiddenCompletedIds(ids: string[]) {
+    localStorage.setItem(HIDDEN_COMPLETED_KEY, JSON.stringify(ids))
+}
+
 export default function DashboardPage() {
     const [interviews, setInterviews] = useState<Interview[]>([])
     const [loading, setLoading] = useState(true)
     const [searchTerm, setSearchTerm] = usePersistedState('dashboard-search', '')
     const [statusFilter, setStatusFilter] = usePersistedState('dashboard-status', '')
     const [levelFilter, setLevelFilter] = usePersistedState('dashboard-level', '')
+    const [hiddenCompletedIds, setHiddenCompletedIds] = useState<string[]>(() => readHiddenCompletedIds())
     const location = useLocation()
 
     useEffect(() => { fetchInterviews() }, [location.pathname])
@@ -58,7 +76,23 @@ export default function DashboardPage() {
         }
     }
 
-    const filteredInterviews = interviews.filter(i => {
+    const hideCompletedCard = (id: string) => {
+        setHiddenCompletedIds((prev) => {
+            if (prev.includes(id)) return prev
+            const next = [...prev, id]
+            writeHiddenCompletedIds(next)
+            return next
+        })
+    }
+
+    const visibleInterviews = interviews.filter((interview) => {
+        if (interview.status === 'completed' && hiddenCompletedIds.includes(interview.id)) {
+            return false
+        }
+        return true
+    })
+
+    const filteredInterviews = visibleInterviews.filter(i => {
         const search = searchTerm.toLowerCase()
         const techList = i.technologies?.length
             ? i.technologies
@@ -142,7 +176,12 @@ export default function DashboardPage() {
                             >
                                 <InterviewCard
                                     interview={interview}
-                                    onDelete={() => setInterviews((prev) => prev.filter((item) => item.id !== interview.id))}
+                                    hideOnly={interview.status === 'completed'}
+                                    onDelete={
+                                        interview.status === 'completed'
+                                            ? hideCompletedCard
+                                            : (id) => setInterviews((prev) => prev.filter((item) => item.id !== id))
+                                    }
                                 />
                             </motion.div>
                         ))}

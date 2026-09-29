@@ -82,6 +82,29 @@ export default function HeroSlider() {
     const slide = SLIDES[index]
     const slideImageBg = SLIDE_IMAGE_BACKGROUNDS[slide.illustration]
 
+    // Preload active + next slide backgrounds so hero swaps stay snappy
+    useEffect(() => {
+        const urls = [
+            SLIDE_IMAGE_BACKGROUNDS[SLIDES[index].illustration],
+            SLIDE_IMAGE_BACKGROUNDS[SLIDES[(index + 1) % SLIDES.length].illustration],
+        ]
+        const links: HTMLLinkElement[] = []
+        for (const href of urls) {
+            const link = document.createElement('link')
+            link.rel = 'preload'
+            link.as = 'image'
+            link.type = 'image/webp'
+            link.href = href
+            document.head.appendChild(link)
+            links.push(link)
+        }
+        return () => {
+            for (const link of links) {
+                link.remove()
+            }
+        }
+    }, [index])
+
     return (
         <section
             className="relative h-[90vh] overflow-hidden"

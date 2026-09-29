@@ -25,7 +25,7 @@ export default function Card({ hover = false, padding = 'md', className = '', ch
                 onClick={onClick}
             >
                 <div className="iv-card-shine" aria-hidden />
-                <div className="relative z-[2]">{children}</div>
+                <div className="relative z-[2] flex h-full min-h-0 flex-col">{children}</div>
             </motion.div>
         )
     }

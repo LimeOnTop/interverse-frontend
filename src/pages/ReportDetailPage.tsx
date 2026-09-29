@@ -14,6 +14,7 @@ import Badge from '../components/ui/Badge'
 import Button from '../components/ui/Button'
 import { isFallbackReport, reanalyzeReport, type GeneratedReport } from '../lib/reportAnalysis'
 import { buildReportSections, getScoreLabel, getScoreVariant } from '../lib/reportScores'
+import { downloadReportPdf } from '../lib/exportReportPdf'
 import SectionScoreBadge from '../components/report/SectionScoreBadge'
 import ReportAnswerReviews from '../components/report/ReportAnswerReviews'
 
@@ -39,6 +40,7 @@ export default function ReportDetailPage() {
     const [report, setReport] = useState<Report | null>(null)
     const [loading, setLoading] = useState(true)
     const [analyzing, setAnalyzing] = useState(false)
+    const [exporting, setExporting] = useState(false)
 
     useEffect(() => {
         if (id) {
@@ -90,6 +92,20 @@ export default function ReportDetailPage() {
             toast.error(message)
         } finally {
             setAnalyzing(false)
+        }
+    }
+
+    const handleExportPdf = async () => {
+        if (!report) return
+        try {
+            setExporting(true)
+            await downloadReportPdf(report)
+            toast.success('PDF скачан')
+        } catch (error) {
+            console.error('PDF export failed:', error)
+            toast.error('Не удалось сформировать PDF')
+        } finally {
+            setExporting(false)
         }
     }
 
@@ -148,7 +164,7 @@ export default function ReportDetailPage() {
                     { label: report.interview?.title || 'Тренировка' },
                 ]}
                 action={
-                    <Button>
+                    <Button type="button" loading={exporting} onClick={() => void handleExportPdf()}>
                         <Download className="w-5 h-5" /> Экспорт PDF
                     </Button>
                 }

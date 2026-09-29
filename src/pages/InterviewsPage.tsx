@@ -37,10 +37,6 @@ interface Interview {
     duration: number
     level: string
     specialization: string
-    candidate: {
-        name: string
-        email: string
-    }
     created_at: string
 }
 
@@ -125,9 +121,7 @@ export default function InterviewsPage() {
     }
 
     const filteredInterviews = interviews.filter(interview => {
-        const matchesSearch = interview.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            interview.candidate.name.toLowerCase().includes(searchTerm.toLowerCase())
-        return matchesSearch
+        return interview.title.toLowerCase().includes(searchTerm.toLowerCase())
     })
 
     const formatDate = (dateString: string) => {
@@ -210,7 +204,7 @@ export default function InterviewsPage() {
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" strokeWidth={1.75} />
                         <input
                             type="text"
-                            placeholder="Поиск по названию или кандидату..."
+                            placeholder="Поиск по названию тренировки..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="input-field pl-10"
@@ -277,11 +271,7 @@ export default function InterviewsPage() {
 
                                             <p className="text-secondary text-sm mb-4">{interview.description}</p>
 
-                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-sm text-secondary">
-                                                <div className="flex items-center gap-2">
-                                                    <User className="w-4 h-4 shrink-0" />
-                                                    <span className="font-medium text-gray-900 dark:text-gray-100">{interview.candidate.name}</span>
-                                                </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-sm text-secondary">
                                                 <div className="flex items-center gap-2">
                                                     <Clock className="w-4 h-4 shrink-0" />
                                                     {interview.duration} мин

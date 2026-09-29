@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Calendar, Clock, User, Play, ArrowRight } from 'lucide-react'
+import { Calendar, Clock, Play, ArrowRight } from 'lucide-react'
 import { api } from '../services/api'
 import {
     startInterviewSession,
@@ -24,10 +24,6 @@ interface Interview {
     duration?: number
     level: string
     specialization: string
-    candidate?: {
-        name: string
-        email: string
-    }
 }
 
 export default function InterviewServicePage() {
@@ -147,18 +143,6 @@ export default function InterviewServicePage() {
                                         </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-secondary">
-                                            {interview.candidate && (
-                                                <div className="flex items-center gap-2">
-                                                    <User className="w-4 h-4 shrink-0" />
-                                                    <span className="font-medium text-gray-900 dark:text-gray-100">{interview.candidate.name || 'Не указан'}</span>
-                                                    {interview.candidate.email && (
-                                                        <>
-                                                            <span>•</span>
-                                                            <span>{interview.candidate.email}</span>
-                                                        </>
-                                                    )}
-                                                </div>
-                                            )}
                                             <div className="flex items-center gap-2">
                                                 <Clock className="w-4 h-4 shrink-0" />
                                                 {interview.duration || 60} минут

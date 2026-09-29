@@ -11,7 +11,6 @@ const routeTitles: Record<string, string> = {
     '/calendar': 'Активность',
     '/interview-service': 'Интервью',
     '/vacancies': 'Вакансии',
-    '/candidates': 'Вакансии',
     '/reports': 'Отчёты',
     '/profile': 'Профиль',
     '/contribute': 'Предложить вопрос',

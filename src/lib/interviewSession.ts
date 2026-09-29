@@ -267,13 +267,15 @@ export async function startInterviewSession(
     return sessionData
 }
 
-export function formatSessionStartError(error: unknown): string {
+export function formatUserFacingError(error: unknown, fallback: string): string {
     const message = typeof error === 'object'
         && error !== null
         && 'response' in error
         && typeof (error as { response?: { data?: { error?: unknown } } }).response?.data?.error === 'string'
         ? (error as { response: { data: { error: string } } }).response.data.error
-        : ''
+        : typeof error === 'string'
+            ? error
+            : ''
 
     if (message.includes('not enough questions')) {
         if (message.includes('Go')) {
@@ -286,7 +288,26 @@ export function formatSessionStartError(error: unknown): string {
         return 'Недостаточно практических задач для выбранного стека или уровня. Добавьте Go в технологии.'
     }
 
-    return message || 'Ошибка при запуске тренировки'
+    const lower = message.toLowerCase()
+    if (
+        lower.includes('not found')
+        || lower.includes('не найдена')
+        || lower.includes('load session:')
+        || lower.includes('get interview:')
+        || lower.includes('get session content:')
+    ) {
+        return 'Тренировка не найдена'
+    }
+
+    if (lower.includes('forbidden') || lower.includes('нет доступа')) {
+        return 'Нет доступа к тренировке'
+    }
+
+    return message || fallback
+}
+
+export function formatSessionStartError(error: unknown): string {
+    return formatUserFacingError(error, 'Ошибка при запуске тренировки')
 }
 
 export function canStartInterview(status: string) {

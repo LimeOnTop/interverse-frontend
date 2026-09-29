@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search } from 'lucide-react'
 import Button from '../ui/Button'
-import { api } from '../../services/api'
+import { useTechnologySearch } from '../../hooks/useTechnologySearch'
 
 interface TechStackStepProps {
     selectedSpecialization: string
@@ -35,11 +35,6 @@ const techStacks = {
     ],
 }
 
-interface SearchHit {
-    id?: string
-    name: string
-}
-
 export default function TechStackStep({
     selectedSpecialization,
     selectedTechStack,
@@ -49,51 +44,10 @@ export default function TechStackStep({
 }: TechStackStepProps) {
     const [searchTerm, setSearchTerm] = useState('')
     const [isSearchOpen, setIsSearchOpen] = useState(false)
-    const [searchResults, setSearchResults] = useState<string[]>([])
-    const [isSearching, setIsSearching] = useState(false)
+    const { isSearchActive, searchResults, isSearching } = useTechnologySearch(searchTerm)
 
     const availableTechs = techStacks[selectedSpecialization as keyof typeof techStacks] || []
-    const trimmedSearch = searchTerm.trim()
-    const isSearchActive = trimmedSearch.length >= 2
     const displayedTechs = isSearchActive ? searchResults : availableTechs
-
-    useEffect(() => {
-        if (!isSearchActive) {
-            setSearchResults([])
-            setIsSearching(false)
-            return
-        }
-
-        const controller = new AbortController()
-        const timeoutId = window.setTimeout(async () => {
-            setIsSearching(true)
-            try {
-                const { data } = await api.get('/technologies/search', {
-                    params: { q: trimmedSearch, limit: 24, page: 1 },
-                    signal: controller.signal,
-                })
-                const hits: SearchHit[] = data?.technologies ?? []
-                const names = hits
-                    .map((item) => item.name)
-                    .filter((name): name is string => Boolean(name))
-                setSearchResults(Array.from(new Set(names)))
-            } catch (error) {
-                if ((error as { code?: string; name?: string })?.code === 'ERR_CANCELED' ||
-                    (error as { name?: string })?.name === 'CanceledError') {
-                    return
-                }
-                console.error('Technology search failed:', error)
-                setSearchResults([])
-            } finally {
-                setIsSearching(false)
-            }
-        }, 300)
-
-        return () => {
-            controller.abort()
-            window.clearTimeout(timeoutId)
-        }
-    }, [trimmedSearch, isSearchActive])
 
     const handleTechSelect = (tech: string) => {
         if (selectedTechStack.includes(tech)) {

@@ -25,6 +25,8 @@ interface InterviewCardProps {
     }
     onClick?: () => void
     onDelete?: (id: string) => void
+    /** If true, remove from UI only — do not delete the interview on the server. */
+    hideOnly?: boolean
 }
 
 const statusLabels: Record<string, string> = {
@@ -42,7 +44,7 @@ const specLabels: Record<string, string> = {
     frontend: 'Frontend', backend: 'Backend', devops: 'DevOps', qa: 'QA', data_science: 'Data Science',
 }
 
-export default function InterviewCard({ interview, onClick, onDelete }: InterviewCardProps) {
+export default function InterviewCard({ interview, onClick, onDelete, hideOnly = false }: InterviewCardProps) {
     const navigate = useNavigate()
     const [starting, setStarting] = useState(false)
     const [deleting, setDeleting] = useState(false)
@@ -74,6 +76,15 @@ export default function InterviewCard({ interview, onClick, onDelete }: Intervie
 
     const handleDelete = async (e: React.MouseEvent) => {
         e.stopPropagation()
+
+        if (hideOnly) {
+            if (!window.confirm('Убрать эту карточку с дашборда? Тренировка сохранится.')) {
+                return
+            }
+            onDelete?.(interview.id)
+            toast.success('Карточка скрыта')
+            return
+        }
 
         if (!window.confirm('Удалить эту тренировку?')) {
             return
@@ -193,7 +204,7 @@ export default function InterviewCard({ interview, onClick, onDelete }: Intervie
                         onClick={handleDelete}
                         disabled={deleting}
                         className="btn-icon w-9 h-9 hover:text-red-500 dark:hover:text-red-500 disabled:opacity-50"
-                        aria-label="Удалить тренировку"
+                        aria-label={hideOnly ? 'Скрыть карточку' : 'Удалить тренировку'}
                     >
                         {deleting ? (
                             <Loader2 className="w-4 h-4 animate-spin" />

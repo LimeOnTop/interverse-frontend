@@ -21,6 +21,7 @@ import {
     getAnswersStorageKey,
     clearInterviewSessionCache,
     restoreAnswersForSession,
+    formatUserFacingError,
     type InterviewSessionData,
     type StepAnswer,
 } from '../lib/interviewSession'
@@ -232,12 +233,7 @@ export default function InterviewPage() {
             toast.success('Отчёт сформирован')
         } catch (error) {
             console.error('Error generating report:', error)
-            const message = typeof error === 'object'
-                && error !== null
-                && 'response' in error
-                && typeof (error as { response?: { data?: { error?: unknown } } }).response?.data?.error === 'string'
-                ? (error as { response: { data: { error: string } } }).response.data.error
-                : 'Не удалось сформировать отчёт'
+            const message = formatUserFacingError(error, 'Не удалось сформировать отчёт')
             setSubmitError(message)
             toast.error(message)
         } finally {

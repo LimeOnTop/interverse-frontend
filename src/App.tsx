@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './store/authStore'
 import { useEffect } from 'react'
 
@@ -14,7 +14,7 @@ import EditInterviewPage from './pages/EditInterviewPage'
 import EditInterviewFullPage from './pages/EditInterviewFullPage'
 import InterviewServicePage from './pages/InterviewServicePage'
 import InterviewPage from './pages/InterviewPage'
-import CandidatesPage from './pages/CandidatesPage'
+import VacanciesPage from './pages/VacanciesPage'
 import ReportsPage from './pages/ReportsPage'
 import ReportDetailPage from './pages/ReportDetailPage'
 import ProfilePage from './pages/ProfilePage'
@@ -137,21 +137,12 @@ function App() {
                         element={
                             <ProtectedRoute>
                                 <Layout>
-                                    <CandidatesPage />
+                                    <VacanciesPage />
                                 </Layout>
                             </ProtectedRoute>
                         }
                     />
-                    <Route
-                        path="/candidates"
-                        element={
-                            <ProtectedRoute>
-                                <Layout>
-                                    <CandidatesPage />
-                                </Layout>
-                            </ProtectedRoute>
-                        }
-                    />
+                    <Route path="/candidates" element={<Navigate to="/vacancies" replace />} />
                     <Route
                         path="/profile"
                         element={
