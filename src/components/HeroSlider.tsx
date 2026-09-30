@@ -4,17 +4,17 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 
 import workstationBg from '../../images/3d-rendering-computer.webp'
-import questionsBg from '../../images/hero-questions.webp'
-import progressBg from '../../images/hero-progress.webp'
-import reportBg from '../../images/hero-report.webp'
+import interviewBg from '../../images/hero-interview.png'
+import levelsBg from '../../images/hero-levels.png'
+import feedbackBg from '../../images/hero-feedback.png'
 
-type SlideImageKey = 'workstation' | 'stack' | 'progress' | 'report'
+type SlideImageKey = 'workstation' | 'interview' | 'progress' | 'report'
 
 const SLIDE_IMAGE_BACKGROUNDS: Record<SlideImageKey, string> = {
     workstation: workstationBg,
-    stack: questionsBg,
-    progress: progressBg,
-    report: reportBg,
+    interview: interviewBg,
+    progress: levelsBg,
+    report: feedbackBg,
 }
 
 interface Slide {
@@ -24,6 +24,7 @@ interface Slide {
     highlight: string
     description: string
     illustration: SlideImageKey
+    backgroundPosition: string
 }
 
 const SLIDES: Slide[] = [
@@ -34,6 +35,7 @@ const SLIDES: Slide[] = [
         highlight: 'настоящем собеседовании',
         description: 'Проходи реалистичные сценарии и снимай стресс до встречи с работодателем.',
         illustration: 'workstation',
+        backgroundPosition: 'right center',
     },
     {
         id: 1,
@@ -41,7 +43,8 @@ const SLIDES: Slide[] = [
         title: 'Вопросы под',
         highlight: 'твои технологии',
         description: 'React, Go, Python, Kubernetes — задачи формируются под навыки из резюме.',
-        illustration: 'stack',
+        illustration: 'interview',
+        backgroundPosition: 'center',
     },
     {
         id: 2,
@@ -50,6 +53,7 @@ const SLIDES: Slide[] = [
         highlight: 'до Senior',
         description: 'Подбирай глубину тренировки под целевую позицию и закрывай пробелы поэтапно.',
         illustration: 'progress',
+        backgroundPosition: 'center',
     },
     {
         id: 3,
@@ -58,6 +62,7 @@ const SLIDES: Slide[] = [
         highlight: 'каждой тренировки',
         description: 'Видишь слабые темы, отслеживаешь прогресс и готовишься точечно.',
         illustration: 'report',
+        backgroundPosition: 'center',
     },
 ]
 
@@ -82,7 +87,6 @@ export default function HeroSlider() {
     const slide = SLIDES[index]
     const slideImageBg = SLIDE_IMAGE_BACKGROUNDS[slide.illustration]
 
-    // Preload active + next slide backgrounds so hero swaps stay snappy
     useEffect(() => {
         const urls = [
             SLIDE_IMAGE_BACKGROUNDS[SLIDES[index].illustration],
@@ -93,7 +97,7 @@ export default function HeroSlider() {
             const link = document.createElement('link')
             link.rel = 'preload'
             link.as = 'image'
-            link.type = 'image/webp'
+            link.type = href.endsWith('.png') ? 'image/png' : 'image/webp'
             link.href = href
             document.head.appendChild(link)
             links.push(link)
@@ -123,22 +127,22 @@ export default function HeroSlider() {
                     className="absolute inset-0"
                 >
                     <div
-                        className="absolute inset-0 bg-gray-50 dark:bg-iv-dark-bg lg:left-[38%]"
+                        className="absolute inset-0 bg-gray-50 dark:bg-iv-dark-bg lg:left-[24%] xl:left-[20%]"
                         style={{
                             backgroundImage: `url(${slideImageBg})`,
                             backgroundSize: 'cover',
-                            backgroundPosition: 'center',
+                            backgroundPosition: slide.backgroundPosition,
                         }}
                     />
                     <div
-                        className="absolute inset-y-0 hidden lg:block pointer-events-none lg:left-[38%] w-24 xl:w-32 bg-gradient-to-r from-gray-50 to-transparent dark:from-iv-dark-bg"
+                        className="absolute inset-y-0 hidden lg:block pointer-events-none lg:left-[24%] xl:left-[20%] w-24 xl:w-32 bg-gradient-to-r from-gray-50 to-transparent dark:from-iv-dark-bg"
                         aria-hidden
                     />
                 </motion.div>
             </AnimatePresence>
 
-            <div className="absolute inset-y-0 left-0 z-10 w-full lg:w-[60%] hero-slider-text-panel">
-                <div className="h-full flex flex-col pt-20 pb-16 pl-6 pr-10 sm:pl-8 sm:pr-14 lg:pl-10 lg:pr-24 xl:pl-16 xl:pr-28">
+            <div className="absolute inset-y-0 left-0 z-10 w-full lg:w-[600px] xl:w-[clamp(620px,42vw,680px)] hero-slider-text-panel">
+                <div className="h-full flex flex-col pt-20 pb-16 pl-6 pr-10 sm:pl-8 sm:pr-14 lg:pl-10 lg:pr-16 xl:pl-16 xl:pr-20">
                     <div className="flex-1 flex flex-col justify-center">
                         <AnimatePresence mode="wait">
                             <motion.div
@@ -147,7 +151,7 @@ export default function HeroSlider() {
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: 24 }}
                                 transition={{ duration: 0.45, ease: [0.4, 0, 0.2, 1] }}
-                                className="w-full max-w-md xl:max-w-lg"
+                                className="w-full max-w-md"
                             >
                                 <p className="text-xs font-medium uppercase tracking-widest text-secondary mb-4">
                                     {slide.eyebrow}

@@ -1,6 +1,6 @@
 import { Check } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import PageHeader from '../components/ui/PageHeader'
 import PageTransition from '../components/ui/PageTransition'
 import Button from '../components/ui/Button'
@@ -12,9 +12,33 @@ import {
     subscriptionPlanLabel,
 } from '../utils/subscription'
 
+type PaymentFormPayload = {
+    action: string
+    method: string
+    fields: Record<string, string>
+}
+
+function submitRobokassaForm(payment: PaymentFormPayload) {
+    const form = document.createElement('form')
+    form.method = (payment.method || 'POST').toUpperCase() === 'GET' ? 'GET' : 'POST'
+    form.action = payment.action
+    form.acceptCharset = 'UTF-8'
+    form.style.display = 'none'
+    Object.entries(payment.fields || {}).forEach(([name, value]) => {
+        const input = document.createElement('input')
+        input.type = 'hidden'
+        input.name = name
+        input.value = String(value ?? '')
+        form.appendChild(input)
+    })
+    document.body.appendChild(form)
+    form.submit()
+}
+
 export default function SubscriptionPage() {
     const { user, accessToken } = useAuthStore()
     const currentPlan = resolveSubscriptionPlan(user)
+    const [buying, setBuying] = useState(false)
 
     useEffect(() => {
         if (!accessToken) return
@@ -30,8 +54,23 @@ export default function SubscriptionPage() {
             })
     }, [accessToken])
 
-    const handleBuy = () => {
-        toast('Оплата тарифа Pro скоро будет доступна')
+    const handleBuy = async () => {
+        try {
+            setBuying(true)
+            const { data } = await api.post('/payments/', { plan: 'paid' })
+            const payment = data?.payment as PaymentFormPayload | undefined
+            if (!payment?.action || !payment?.fields) {
+                throw new Error('Некорректный ответ платёжного сервиса')
+            }
+            submitRobokassaForm(payment)
+        } catch (error: unknown) {
+            const message =
+                (error as { response?: { data?: { error?: string } } })?.response?.data?.error ||
+                (error as Error)?.message ||
+                'Не удалось начать оплату'
+            toast.error(message)
+            setBuying(false)
+        }
     }
 
     return (
@@ -45,9 +84,10 @@ export default function SubscriptionPage() {
                 <p className="text-sm text-secondary leading-relaxed">
                     Оплата тарифа Pro означает согласие с условиями{' '}
                     <a
-                        href="/legal/oferta.docx"
+                        href="/legal/oferta.html"
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="font-medium text-inter-verse-green dark:text-purple-400 hover:underline"
-                        download
                     >
                         публичной оферты
                     </a>
@@ -117,7 +157,8 @@ export default function SubscriptionPage() {
                                 <Button
                                     type="button"
                                     className="w-full justify-center"
-                                    onClick={handleBuy}
+                                    loading={buying}
+                                    onClick={() => void handleBuy()}
                                 >
                                     Купить
                                 </Button>

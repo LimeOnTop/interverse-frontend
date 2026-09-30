@@ -1,0 +1,24 @@
+User-agent: *
+Allow: /
+Allow: /pricing
+Allow: /privacy
+Allow: /login
+Allow: /register
+Allow: /legal/
+
+Disallow: /dashboard
+Disallow: /activity
+Disallow: /calendar
+Disallow: /interviews
+Disallow: /vacancies
+Disallow: /reports
+Disallow: /profile
+Disallow: /subscription
+Disallow: /admin
+Disallow: /grafana
+Disallow: /metrics-login
+Disallow: /oauth/
+Disallow: /api/
+
+Sitemap: https://inter-verse.ru/sitemap.xml
+Host: https://inter-verse.ru

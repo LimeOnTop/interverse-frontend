@@ -114,113 +114,118 @@ export default function VacancyCard({ vacancy, fallbackSkills = [] }: VacancyCar
     }
 
     return (
-        <Card hover padding="md" className="h-full flex flex-col">
-            <div className="mb-4 flex items-start justify-between gap-3">
-                <div className="min-w-0 flex items-start gap-3">
-                    {vacancy.company_logo_url ? (
-                        <img
-                            src={vacancy.company_logo_url}
-                            alt=""
-                            className="w-10 h-10 object-contain shrink-0 border border-gray-200 dark:border-gray-600 bg-white dark:bg-iv-dark-bg p-1"
-                        />
-                    ) : null}
-                    <div className="min-w-0">
-                        <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 leading-snug line-clamp-2">
-                            {vacancy.title}
-                        </h3>
-                        {vacancy.company_name && (
-                            <p className="text-sm text-secondary mt-1 truncate">{vacancy.company_name}</p>
-                        )}
+        <Card hover padding="md" className="h-full">
+            <div className="flex h-full min-h-0 flex-1 flex-col">
+                <div className="flex min-h-0 flex-1 flex-col gap-4">
+                    <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex items-start gap-3">
+                            {vacancy.company_logo_url ? (
+                                <img
+                                    src={vacancy.company_logo_url}
+                                    alt=""
+                                    className="w-10 h-10 object-contain shrink-0 p-1"
+                                />
+                            ) : null}
+                            <div className="min-w-0">
+                                <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 leading-snug line-clamp-2">
+                                    {vacancy.title}
+                                </h3>
+                                {vacancy.company_name && (
+                                    <p className="text-sm text-secondary mt-1 truncate">{vacancy.company_name}</p>
+                                )}
+                            </div>
+                        </div>
+                        <Badge
+                            variant="default"
+                            className="shrink-0 !bg-transparent dark:!bg-transparent !border-0"
+                        >
+                            {vacancy.source_label || vacancy.source}
+                        </Badge>
                     </div>
-                </div>
-                <Badge variant="default" className="shrink-0">
-                    {vacancy.source_label || vacancy.source}
-                </Badge>
-            </div>
 
-            <div className="grid grid-cols-2 gap-2 mb-4 text-sm">
-                <div className="p-2 bg-gray-50 dark:bg-iv-dark-bg border border-gray-100 dark:border-gray-600">
-                    <div className="text-xs text-secondary mb-0.5">Локация</div>
-                    <div className="font-medium truncate flex items-center gap-1">
-                        {vacancy.area ? (
-                            <>
-                                <MapPin className="w-3.5 h-3.5 shrink-0 text-secondary" strokeWidth={1.75} />
-                                <span className="truncate">{vacancy.area}</span>
-                            </>
-                        ) : (
-                            <span className="text-secondary">—</span>
-                        )}
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div className="p-2 bg-gray-50 dark:bg-iv-dark-bg">
+                            <div className="text-xs text-secondary mb-0.5">Локация</div>
+                            <div className="font-medium truncate flex items-center gap-1">
+                                {vacancy.area ? (
+                                    <>
+                                        <MapPin className="w-3.5 h-3.5 shrink-0 text-secondary" strokeWidth={1.75} />
+                                        <span className="truncate">{vacancy.area}</span>
+                                    </>
+                                ) : (
+                                    <span className="text-secondary">—</span>
+                                )}
+                            </div>
+                        </div>
+                        <div className="p-2 bg-gray-50 dark:bg-iv-dark-bg">
+                            <div className="text-xs text-secondary mb-0.5">Зарплата</div>
+                            <div className="font-medium truncate">{salary || <span className="text-secondary">не указана</span>}</div>
+                        </div>
+                        <div className="p-2 bg-gray-50 dark:bg-iv-dark-bg">
+                            <div className="text-xs text-secondary mb-0.5">Опыт</div>
+                            <div className="font-medium truncate">
+                                {vacancy.experience || <span className="text-secondary">не указан</span>}
+                            </div>
+                        </div>
+                        <div className="p-2 bg-gray-50 dark:bg-iv-dark-bg">
+                            <div className="text-xs text-secondary mb-0.5">Опубликовано</div>
+                            <div className="font-medium truncate">
+                                {published || <span className="text-secondary">—</span>}
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div className="p-2 bg-gray-50 dark:bg-iv-dark-bg border border-gray-100 dark:border-gray-600">
-                    <div className="text-xs text-secondary mb-0.5">Зарплата</div>
-                    <div className="font-medium truncate">{salary || <span className="text-secondary">не указана</span>}</div>
-                </div>
-                <div className="p-2 bg-gray-50 dark:bg-iv-dark-bg border border-gray-100 dark:border-gray-600">
-                    <div className="text-xs text-secondary mb-0.5">Опыт</div>
-                    <div className="font-medium truncate">
-                        {vacancy.experience || <span className="text-secondary">не указан</span>}
-                    </div>
-                </div>
-                <div className="p-2 bg-gray-50 dark:bg-iv-dark-bg border border-gray-100 dark:border-gray-600">
-                    <div className="text-xs text-secondary mb-0.5">Опубликовано</div>
-                    <div className="font-medium truncate">
-                        {published || <span className="text-secondary">—</span>}
-                    </div>
-                </div>
-            </div>
 
-            {tags.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mb-4">
-                    {tags.map((item) => (
-                        <span key={item} className="iv-chip">
-                            {item}
-                        </span>
-                    ))}
+                    {tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5">
+                            {tags.map((item) => (
+                                <span key={item} className="iv-chip !bg-transparent dark:!bg-transparent !border-0">
+                                    {item}
+                                </span>
+                            ))}
+                        </div>
+                    )}
+
+                    {vacancy.snippet && (
+                        <p className="text-sm text-secondary line-clamp-3">{vacancy.snippet}</p>
+                    )}
+
+                    {skills.length > 0 && (
+                        <div>
+                            <div className="text-xs text-secondary mb-2">Технологии</div>
+                            <div className="flex flex-wrap gap-1.5">
+                                {skills.map((skill) => (
+                                    <span key={skill} className="iv-chip !bg-transparent dark:!bg-transparent !border-0">
+                                        {skill}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
-            )}
 
-            {vacancy.snippet && (
-                <p className="text-sm text-secondary line-clamp-3 mb-4">{vacancy.snippet}</p>
-            )}
-
-            {skills.length > 0 && (
-                <div className="mb-4">
-                    <div className="text-xs text-secondary mb-2">Технологии</div>
-                    <div className="flex flex-wrap gap-1.5">
-                        {skills.map((skill) => (
-                            <span key={skill} className="iv-chip">
-                                {skill}
-                            </span>
-                        ))}
-                    </div>
+                <div className="mt-auto shrink-0 pt-4 flex items-center justify-between gap-3">
+                    <a
+                        href={vacancy.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:text-inter-verse-green dark:hover:text-purple-400"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        Перейти на вакансию
+                        <ExternalLink className="w-3.5 h-3.5" strokeWidth={2} />
+                    </a>
+                    <Button
+                        type="button"
+                        className="text-sm px-4 py-2"
+                        loading={training}
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            void handleTrain()
+                        }}
+                    >
+                        Тренироваться
+                    </Button>
                 </div>
-            )}
-
-            <div className="flex-1" aria-hidden />
-
-            <div className="mt-auto pt-4 iv-divider flex items-center justify-between gap-3">
-                <a
-                    href={vacancy.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-secondary text-sm px-3 py-2 inline-flex items-center gap-1.5"
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    Перейти
-                    <ExternalLink className="w-3.5 h-3.5" strokeWidth={2} />
-                </a>
-                <Button
-                    type="button"
-                    className="text-sm px-4 py-2"
-                    loading={training}
-                    onClick={(e) => {
-                        e.stopPropagation()
-                        void handleTrain()
-                    }}
-                >
-                    Тренироваться
-                </Button>
             </div>
         </Card>
     )

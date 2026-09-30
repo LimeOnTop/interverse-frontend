@@ -49,7 +49,7 @@ export default function PublicNav({ landing = false, overlay = false }: PublicNa
 
     const overlayActionClass = pastHero
         ? 'text-inter-verse-green dark:text-purple-400'
-        : 'text-gray-50 dark:text-iv-dark-bg'
+        : 'text-gray-900 dark:text-gray-100'
 
     return (
         <header className={headerClass}>

@@ -6,6 +6,7 @@ const CONTACTS = {
     phoneDisplay: '+7 (999) 197-97-66',
     phoneHref: 'tel:+79991979766',
     inn: '772974697900',
+    city: 'г. Москва',
 } as const
 
 interface SiteFooterProps {
@@ -28,11 +29,26 @@ export default function SiteFooter({ className = '' }: SiteFooterProps) {
                             Тарифы
                         </Link>
                         <a
-                            href="/legal/oferta.docx"
+                            href="/legal/oferta.html"
                             className="font-medium text-inter-verse-green dark:text-purple-400 hover:underline"
-                            download
+                            target="_blank"
+                            rel="noopener noreferrer"
                         >
                             Публичная оферта
+                        </a>
+                        <a
+                            href="/privacy"
+                            className="font-medium text-inter-verse-green dark:text-purple-400 hover:underline"
+                        >
+                            Политика ПДн
+                        </a>
+                        <a
+                            href="/legal/refund.html"
+                            className="font-medium text-inter-verse-green dark:text-purple-400 hover:underline"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Возврат
                         </a>
                     </div>
                 </div>
@@ -41,6 +57,7 @@ export default function SiteFooter({ className = '' }: SiteFooterProps) {
                     <div className="flex flex-col sm:flex-row sm:flex-wrap gap-x-6 gap-y-1">
                         <span>{CONTACTS.legalName}</span>
                         <span>ИНН {CONTACTS.inn}</span>
+                        <span>{CONTACTS.city}</span>
                     </div>
                     <div className="flex flex-col sm:flex-row sm:flex-wrap gap-x-6 gap-y-1">
                         <a

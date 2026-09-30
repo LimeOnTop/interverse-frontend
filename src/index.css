@@ -317,6 +317,13 @@
         background: #2F2F2F;
     }
 
+    /* Steeper hero cut: top stays at the panel edge, bottom sits further left. */
+    @media (min-width: 1024px) {
+        .hero-slider-text-panel {
+            clip-path: polygon(0 0, 100% 0, 72% 100%, 0 100%);
+        }
+    }
+
     @media (max-width: 1023px) {
         .hero-slider-text-panel {
             clip-path: none;

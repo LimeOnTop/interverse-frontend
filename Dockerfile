@@ -1,41 +1,17 @@
-# Multi-stage Dockerfile for React application
-# Supports both development and production builds
+# syntax=docker/dockerfile:1.4
 
-# Base stage with Node.js and dependencies
-FROM node:18-alpine AS base
-
+FROM node:18-alpine AS builder
 WORKDIR /app
-
-# Install system dependencies
 RUN apk add --no-cache git
-
-# Copy package files
 COPY package*.json ./
-
-# Install dependencies
 RUN npm ci
-
-# Development stage
-FROM base AS development
-
-# Copy source code
 COPY . .
-
-# Expose port
-EXPOSE 3000
-
-# Start development server with hot reload
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
-
-# Builder stage for production
-FROM base AS builder
-
-# Copy source code
-COPY . .
-
-# Inject API URL at build time for Vite
 ARG VITE_API_URL
 ENV VITE_API_URL=${VITE_API_URL}
-
-# Build the application
 RUN npm run build
+
+# Tiny runtime image used only to copy static files into the nginx volume
+FROM alpine:3.19
+WORKDIR /app
+COPY --from=builder /app/dist ./dist
+CMD ["sh", "-c", "rm -rf /usr/share/nginx/html/* && cp -r /app/dist/* /usr/share/nginx/html/"]

@@ -20,9 +20,9 @@ export default function PricingPage() {
                             Выберите подходящий план для подготовки к техническим собеседованиям.
                             Оплата тарифа Pro означает согласие с условиями{' '}
                             <a
-                                href="/legal/oferta.docx"
+                                href="/legal/oferta.html" target="_blank" rel="noopener noreferrer"
                                 className="font-medium text-inter-verse-green dark:text-purple-400 hover:underline"
-                                download
+                               
                             >
                                 публичной оферты
                             </a>

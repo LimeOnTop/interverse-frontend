@@ -5,6 +5,7 @@ import { useEffect } from 'react'
 // Pages
 import HomePage from './pages/HomePage'
 import PricingPage from './pages/PricingPage'
+import PrivacyPage from './pages/PrivacyPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import DashboardPage from './pages/DashboardPage'
@@ -19,12 +20,15 @@ import ReportsPage from './pages/ReportsPage'
 import ReportDetailPage from './pages/ReportDetailPage'
 import ProfilePage from './pages/ProfilePage'
 import SubscriptionPage from './pages/SubscriptionPage'
+import PaymentSuccessPage from './pages/PaymentSuccessPage'
+import PaymentFailPage from './pages/PaymentFailPage'
 import ContributeQuestionPage from './pages/ContributeQuestionPage'
 import OAuthCallbackPage from './pages/OAuthCallbackPage'
 import AdminStatsPage from './pages/admin/AdminStatsPage'
 import AdminQuestionsPage from './pages/admin/AdminQuestionsPage'
 import AdminQuestionDetailPage from './pages/admin/AdminQuestionDetailPage'
 import AdminModerationPage from './pages/admin/AdminModerationPage'
+import GrafanaLoginPage from './pages/GrafanaLoginPage'
 
 // Components
 import ProtectedRoute from './components/ProtectedRoute'
@@ -32,6 +36,7 @@ import AdminRoute from './components/AdminRoute'
 import Layout from './components/Layout'
 import AdminLayout from './components/AdminLayout'
 import { ThemeProvider } from './contexts/ThemeContext'
+import SeoHead from './components/SeoHead'
 
 function App() {
     const { checkAuth } = useAuthStore()
@@ -42,14 +47,20 @@ function App() {
 
     return (
         <ThemeProvider>
+            <SeoHead />
             <div className="min-h-screen bg-gray-50 dark:bg-iv-dark-bg">
                 <Routes>
                     {/* Public routes */}
                     <Route path="/" element={<HomePage />} />
                     <Route path="/pricing" element={<PricingPage />} />
+                    <Route path="/privacy" element={<PrivacyPage />} />
+                    <Route path="/subscription/success" element={<PaymentSuccessPage />} />
+                    <Route path="/subscription/fail" element={<PaymentFailPage />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/oauth/callback" element={<OAuthCallbackPage />} />
+                    <Route path="/grafana" element={<GrafanaLoginPage />} />
+                    <Route path="/metrics-login" element={<GrafanaLoginPage />} />
 
                     {/* Protected routes */}
                     <Route

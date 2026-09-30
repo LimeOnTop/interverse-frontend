@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { Briefcase, Sparkles } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { api } from '../services/api'
+import { useAuthStore } from '../store/authStore'
+import { resolveSubscriptionPlan } from '../utils/subscription'
 import PageHeader from '../components/ui/PageHeader'
 import PageTransition from '../components/ui/PageTransition'
 import EmptyState from '../components/ui/EmptyState'
@@ -60,6 +62,8 @@ function mergeVacancyCards(prev: VacancyCardData[], next: VacancyCardData[]): {
 }
 
 export default function VacanciesPage() {
+    const user = useAuthStore((s) => s.user)
+    const hasPro = resolveSubscriptionPlan(user) === 'paid'
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [profileReady, setProfileReady] = useState(false)
@@ -71,6 +75,11 @@ export default function VacanciesPage() {
     const [polling, setPolling] = useState(false)
 
     useEffect(() => {
+        if (!hasPro) {
+            setLoading(false)
+            return
+        }
+
         let cancelled = false
         ;(async () => {
             setLoading(true)
@@ -100,10 +109,10 @@ export default function VacanciesPage() {
         return () => {
             cancelled = true
         }
-    }, [])
+    }, [hasPro])
 
     useEffect(() => {
-        if (!profileReady || loading || error) return
+        if (!hasPro || !profileReady || loading || error) return
 
         let cancelled = false
         const poll = async () => {
@@ -144,7 +153,7 @@ export default function VacanciesPage() {
             cancelled = true
             window.clearInterval(timer)
         }
-    }, [profileReady, loading, error])
+    }, [hasPro, profileReady, loading, error])
 
     const fallbackSkills = queryText
         .split(/\s+/)
@@ -158,13 +167,34 @@ export default function VacanciesPage() {
                 description="Актуальные вакансии по навыкам из вашего профиля"
             />
 
-            {loading && (
+            {!hasPro && (
+                <EmptyState
+                    icon={Briefcase}
+                    title="Поиск вакансий недоступен"
+                    description={
+                        <>
+                            Поиск вакансий недоступен в базовой версии. Перейдите на{' '}
+                            <span className="font-medium text-inter-verse-green dark:text-purple-400">
+                                Pro версию
+                            </span>
+                            , чтобы подбирать актуальные предложения по навыкам из профиля.
+                        </>
+                    }
+                    action={
+                        <Link to="/subscription">
+                            <Button variant="primary">Перейти на Pro версию</Button>
+                        </Link>
+                    }
+                />
+            )}
+
+            {hasPro && loading && (
                 <div className="flex justify-center py-16">
                     <Spinner />
                 </div>
             )}
 
-            {!loading && error && (
+            {hasPro && !loading && error && (
                 <EmptyState
                     icon={Briefcase}
                     title="Ошибка загрузки"
@@ -172,7 +202,7 @@ export default function VacanciesPage() {
                 />
             )}
 
-            {!loading && !error && !profileReady && (
+            {hasPro && !loading && !error && !profileReady && (
                 <EmptyState
                     icon={Sparkles}
                     title="Добавьте навыки в профиль"
@@ -185,7 +215,7 @@ export default function VacanciesPage() {
                 />
             )}
 
-            {!loading && !error && profileReady && items.length === 0 && (
+            {hasPro && !loading && !error && profileReady && items.length === 0 && (
                 <EmptyState
                     icon={Briefcase}
                     title="Вакансии не найдены"
@@ -202,7 +232,7 @@ export default function VacanciesPage() {
                 />
             )}
 
-            {!loading && !error && profileReady && items.length > 0 && (
+            {hasPro && !loading && !error && profileReady && items.length > 0 && (
                 <div className="space-y-4">
                     <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-secondary">
                         <p>
@@ -215,7 +245,7 @@ export default function VacanciesPage() {
                             <p>Источники: {sources.join(', ')}</p>
                         )}
                     </div>
-                    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 items-stretch">
                         {items.map((vacancy) => (
                             <VacancyCard
                                 key={vacancy.id}

@@ -98,9 +98,9 @@ export default function RegisterPage() {
                         <p className="text-xs text-secondary text-center leading-relaxed">
                             Регистрируясь, вы принимаете условия{' '}
                             <a
-                                href="/legal/oferta.docx"
+                                href="/legal/oferta.html" target="_blank" rel="noopener noreferrer"
                                 className="font-medium text-inter-verse-green dark:text-purple-400 hover:underline"
-                                download
+                               
                             >
                                 публичной оферты
                             </a>

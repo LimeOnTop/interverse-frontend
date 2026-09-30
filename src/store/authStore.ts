@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { api } from '../services/api'
+import { syncAccessCookie } from '../utils/accessCookie'
 
 interface User {
     id: string
@@ -69,6 +70,7 @@ export const useAuthStore = create<AuthState>()(
                     const { access_token, refresh_token, user } = response.data
 
                     api.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
+                    syncAccessCookie(access_token)
 
                     set({
                         user,
@@ -94,6 +96,7 @@ export const useAuthStore = create<AuthState>()(
                     const { access_token, refresh_token, user } = response.data
 
                     api.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
+                    syncAccessCookie(access_token)
 
                     set({
                         user,
@@ -111,6 +114,7 @@ export const useAuthStore = create<AuthState>()(
 
             setTokens: async (accessToken: string, refreshToken: string) => {
                 api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`
+                syncAccessCookie(accessToken)
 
                 set({
                     accessToken,
@@ -130,6 +134,7 @@ export const useAuthStore = create<AuthState>()(
 
             logout: () => {
                 delete api.defaults.headers.common['Authorization']
+                syncAccessCookie(null)
 
                 set({
                     user: null,
@@ -145,11 +150,13 @@ export const useAuthStore = create<AuthState>()(
                 const { accessToken, user } = get()
 
                 if (!accessToken) {
+                    syncAccessCookie(null)
                     set({ isAuthenticated: false, avatarUrl: null })
                     return
                 }
 
                 api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`
+                syncAccessCookie(accessToken)
                 set({ isAuthenticated: true })
 
                 if (!user) {
@@ -157,6 +164,7 @@ export const useAuthStore = create<AuthState>()(
                         const response = await api.get('/auth/me')
                         set({ user: response.data.user })
                     } catch {
+                        syncAccessCookie(null)
                         set({
                             user: null,
                             isAuthenticated: false,
@@ -190,10 +198,12 @@ export const useAuthStore = create<AuthState>()(
                     })
 
                     api.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
+                    syncAccessCookie(access_token)
 
                     return true
                 } catch (error) {
                     console.error('Token refresh failed:', error)
+                    syncAccessCookie(null)
                     set({
                         user: null,
                         accessToken: null,

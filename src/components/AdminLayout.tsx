@@ -1,7 +1,7 @@
 import { ReactNode, useState } from 'react'
 import { NavLink, Link } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { BarChart3, ClipboardCheck, HelpCircle, LogOut, Menu, X } from 'lucide-react'
+import { BarChart3, ClipboardCheck, HelpCircle, LineChart, LogOut, Menu, X } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import ThemeToggle from './ThemeToggle'
 
@@ -49,6 +49,14 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
                         </NavLink>
                     )
                 })}
+                <a
+                    href="/metrics-login"
+                    onClick={onNavigate}
+                    className="iv-nav-item"
+                >
+                    <LineChart className="w-5 h-5 shrink-0" strokeWidth={1.75} />
+                    <span>Grafana</span>
+                </a>
             </nav>
 
             <div className="px-3 py-4 border-t border-gray-200 dark:border-gray-600 space-y-2">
