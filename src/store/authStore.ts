@@ -13,6 +13,18 @@ interface User {
     subscription_expires_at?: string
 }
 
+export interface RegisterResult {
+    verificationRequired: boolean
+}
+
+// Thrown by login() when the password is right but the email is not confirmed yet.
+export class EmailNotVerifiedError extends Error {
+    constructor(public email: string) {
+        super('email not verified')
+        this.name = 'EmailNotVerifiedError'
+    }
+}
+
 interface AuthState {
     user: User | null
     accessToken: string | null
@@ -23,7 +35,9 @@ interface AuthState {
 
     // Actions
     login: (email: string, password: string) => Promise<User>
-    register: (name: string, email: string, password: string) => Promise<void>
+    register: (name: string, email: string, password: string) => Promise<RegisterResult>
+    verifyEmail: (email: string, code: string, password: string) => Promise<User>
+    resendVerification: (email: string) => Promise<number>
     setTokens: (accessToken: string, refreshToken: string) => Promise<void>
     logout: () => void
     checkAuth: () => Promise<void>
@@ -83,8 +97,11 @@ export const useAuthStore = create<AuthState>()(
                     void get().loadAvatar()
                     return user
                 } catch (error: any) {
-                    console.error('Login error:', error)
                     set({ isLoading: false })
+                    if (error.response?.data?.verification_required) {
+                        throw new EmailNotVerifiedError(error.response.data.email || email)
+                    }
+                    console.error('Login error:', error)
                     throw new Error(error.response?.data?.error || 'Login failed')
                 }
             },
@@ -93,6 +110,10 @@ export const useAuthStore = create<AuthState>()(
                 set({ isLoading: true })
                 try {
                     const response = await api.post('/auth/register', { name, email, password })
+                    if (response.data?.verification_required) {
+                        set({ isLoading: false })
+                        return { verificationRequired: true }
+                    }
                     const { access_token, refresh_token, user } = response.data
 
                     api.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
@@ -106,9 +127,47 @@ export const useAuthStore = create<AuthState>()(
                         isLoading: false,
                         avatarUrl: null,
                     })
+                    return { verificationRequired: false }
                 } catch (error: any) {
                     set({ isLoading: false })
                     throw new Error(error.response?.data?.error || 'Registration failed')
+                }
+            },
+
+            verifyEmail: async (email: string, code: string, password: string) => {
+                set({ isLoading: true })
+                try {
+                    const response = await api.post('/auth/verify-email', { email, code, password })
+                    const { access_token, refresh_token, user } = response.data
+
+                    api.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
+                    syncAccessCookie(access_token)
+
+                    set({
+                        user,
+                        accessToken: access_token,
+                        refreshToken: refresh_token,
+                        isAuthenticated: true,
+                        isLoading: false,
+                        avatarUrl: null,
+                    })
+                    return user
+                } catch (error: any) {
+                    set({ isLoading: false })
+                    throw new Error(error.response?.data?.error || 'Verification failed')
+                }
+            },
+
+            resendVerification: async (email: string) => {
+                try {
+                    const response = await api.post('/auth/verify-email/resend', { email })
+                    return Number(response.data?.retry_after_seconds) || 60
+                } catch (error: any) {
+                    const retry = Number(error.response?.data?.retry_after_seconds)
+                    if (error.response?.status === 429 && retry > 0) {
+                        return retry
+                    }
+                    throw new Error(error.response?.data?.error || 'Resend failed')
                 }
             },
 

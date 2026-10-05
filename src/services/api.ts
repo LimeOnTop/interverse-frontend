@@ -12,7 +12,7 @@ export const api = axios.create({
 
 function isPublicAuthRequest(url?: string) {
     if (!url) return false
-    return /\/auth\/(login|register|refresh)(?:\?|$)/.test(url)
+    return /\/auth\/(login|register|refresh|verify-email(?:\/resend)?)(?:\?|$)/.test(url)
 }
 
 function setAuthHeader(config: { headers?: Record<string, unknown> }, token: string | null) {

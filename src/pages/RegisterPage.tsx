@@ -47,11 +47,17 @@ export default function RegisterPage() {
 
     const onSubmit = async (data: RegisterForm) => {
         try {
-            await registerUser(data.name, data.email, data.password)
+            const { verificationRequired } = await registerUser(data.name, data.email, data.password)
+            if (verificationRequired) {
+                toast.success('Мы отправили код на вашу почту')
+                navigate('/verify-email', { state: { email: data.email, password: data.password } })
+                return
+            }
             toast.success('Регистрация успешна!')
             navigate('/dashboard')
         } catch (error: any) {
-            toast.error(error.message)
+            const raw = String(error?.message || '')
+            toast.error(/already exists/i.test(raw) ? 'Пользователь с таким email уже зарегистрирован' : raw)
         }
     }
 
@@ -93,18 +99,30 @@ export default function RegisterPage() {
                             {errors.confirmPassword && <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{errors.confirmPassword.message}</p>}
                         </div>
 
-                        <Button type="submit" loading={isLoading} className="w-full">Зарегистрироваться</Button>
-
                         <p className="text-xs text-secondary text-center leading-relaxed">
-                            Регистрируясь, вы принимаете условия{' '}
-                            <a
-                                href="/legal/oferta.html" target="_blank" rel="noopener noreferrer"
+                            Нажимая «Зарегистрироваться», вы подтверждаете, что вам исполнилось 18 лет,
+                            даёте согласие на обработку персональных данных в соответствии с{' '}
+                            <Link
+                                to="/privacy"
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="font-medium text-inter-verse-green dark:text-purple-400 hover:underline"
-                               
+                            >
+                                Политикой обработки персональных данных
+                            </Link>
+                            {' '}и принимаете условия{' '}
+                            <a
+                                href="/legal/oferta.html"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="font-medium text-inter-verse-green dark:text-purple-400 hover:underline"
                             >
                                 публичной оферты
                             </a>
+                            {' '}(пользовательского соглашения).
                         </p>
+
+                        <Button type="submit" loading={isLoading} className="w-full">Зарегистрироваться</Button>
                     </form>
 
                     <p className="mt-6 text-center text-sm text-secondary">
