@@ -1,31 +1,11 @@
-import { NavLink, Link } from 'react-router-dom'
+import { useEffect } from 'react'
+import { NavLink, Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-    LayoutDashboard,
-    FileText,
-    Plus,
-    BarChart3,
-    PlayCircle,
-    Briefcase,
-    UserCircle,
-    Crown,
-    Lightbulb,
-    Route,
-    X,
-} from 'lucide-react'
+import { Plus, Crown, X, LogOut, User } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { resolveSubscriptionPlan, subscriptionPlanLabel } from '../utils/subscription'
-
-const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Активность', href: '/activity', icon: BarChart3 },
-    { name: 'Интервью', href: '/interview-service', icon: PlayCircle },
-    { name: 'Вакансии', href: '/vacancies', icon: Briefcase },
-    { name: 'Траектории', href: '/tracks', icon: Route },
-    { name: 'Отчёты', href: '/reports', icon: FileText },
-    { name: 'Профиль', href: '/profile', icon: UserCircle },
-    { name: 'Предложить вопрос', href: '/contribute', icon: Lightbulb },
-]
+import { NAVIGATION as navigation } from './navigation'
+import ThemeToggle from './ThemeToggle'
 
 interface SidebarProps {
     mobileOpen?: boolean
@@ -75,7 +55,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
                     }
                 >
                     <Crown className="w-5 h-5 shrink-0" strokeWidth={1.75} />
-                    <span>{planLabel}</span>
+                    <span>{planLabel === 'Pro' ? 'Подписка Pro' : 'Перейти на Pro'}</span>
                 </NavLink>
             </nav>
         </>
@@ -92,33 +72,85 @@ export default function Sidebar({ mobileOpen = false, onClose }: SidebarProps) {
 
             {/* Mobile drawer */}
             <AnimatePresence>
-                {mobileOpen && (
-                    <>
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.2 }}
-                            className="fixed inset-0 bg-black/50 z-50 lg:hidden"
-                            onClick={onClose}
-                        />
-                        <motion.aside
-                            initial={{ x: '-100%' }}
-                            animate={{ x: 0 }}
-                            exit={{ x: '-100%' }}
-                            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-                            className="fixed inset-y-0 left-0 z-50 w-60 iv-sidebar flex flex-col lg:hidden"
-                        >
-                            <div className="flex items-center justify-end p-3">
-                                <button onClick={onClose} className="btn-icon" aria-label="Закрыть меню">
-                                    <X className="w-5 h-5" />
-                                </button>
-                            </div>
-                            <NavContent onNavigate={onClose} />
-                        </motion.aside>
-                    </>
-                )}
+                {mobileOpen && <MobileDrawer onClose={onClose} />}
             </AnimatePresence>
+        </>
+    )
+}
+
+function MobileDrawer({ onClose }: { onClose?: () => void }) {
+    const { user, avatarUrl, logout } = useAuthStore()
+    const navigate = useNavigate()
+    const planLabel = subscriptionPlanLabel(resolveSubscriptionPlan(user))
+
+    useEffect(() => {
+        const previous = document.body.style.overflow
+        document.body.style.overflow = 'hidden'
+        const onKey = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') onClose?.()
+        }
+        window.addEventListener('keydown', onKey)
+        return () => {
+            document.body.style.overflow = previous
+            window.removeEventListener('keydown', onKey)
+        }
+    }, [onClose])
+
+    const handleLogout = () => {
+        onClose?.()
+        logout()
+        navigate('/')
+    }
+
+    return (
+        <>
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 bg-black/50 z-50 lg:hidden"
+                onClick={onClose}
+            />
+            <motion.aside
+                initial={{ x: '-100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '-100%' }}
+                transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                className="fixed inset-y-0 left-0 z-50 w-[86vw] max-w-xs iv-sidebar flex flex-col lg:hidden iv-safe-top iv-safe-bottom"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Меню"
+            >
+                <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 dark:border-gray-600">
+                    <div className="w-10 h-10 bg-gray-100 dark:bg-iv-dark-bg border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden shrink-0">
+                        {avatarUrl ? (
+                            <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                            <User className="w-5 h-5 text-gray-500" strokeWidth={1.75} />
+                        )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold truncate text-gray-900 dark:text-gray-100">{user?.name || 'Профиль'}</p>
+                        <p className="text-xs text-secondary">Тариф {planLabel}</p>
+                    </div>
+                    <button onClick={onClose} className="btn-icon shrink-0" aria-label="Закрыть меню">
+                        <X className="w-5 h-5" />
+                    </button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                    <NavContent onNavigate={onClose} />
+                </div>
+
+                <div className="border-t border-gray-200 dark:border-gray-600 px-3 py-2 flex items-center justify-between">
+                    <button type="button" onClick={handleLogout} className="iv-nav-item flex-1">
+                        <LogOut className="w-5 h-5 shrink-0" strokeWidth={1.75} />
+                        <span>Выйти</span>
+                    </button>
+                    <ThemeToggle />
+                </div>
+            </motion.aside>
         </>
     )
 }

@@ -38,7 +38,7 @@ export default function AuthSplitLayout({
                         </motion.div>
                     </div>
 
-                    <div className="relative z-20 flex min-h-full items-center justify-center px-6 py-10 lg:absolute lg:inset-y-0 lg:left-[60%] lg:right-0 lg:min-h-0 lg:items-center lg:justify-start lg:px-8 lg:pl-6 xl:pl-10 xl:pr-12">
+                    <div className="relative z-20 flex min-h-full items-center justify-center px-4 py-6 sm:px-6 sm:py-10 lg:absolute lg:inset-y-0 lg:left-[60%] lg:right-0 lg:min-h-0 lg:items-center lg:justify-start lg:px-8 lg:pl-6 xl:pl-10 xl:pr-12">
                         <div className="w-full max-w-sm xl:max-w-md">
                             {children}
                         </div>

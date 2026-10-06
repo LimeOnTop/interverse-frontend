@@ -146,7 +146,7 @@ export default function InterviewWizardPage() {
 
             <StepIndicator currentStep={getDisplayStep(currentStep)} totalSteps={DISPLAY_STEPS} />
 
-            <Card padding="lg" className="min-h-[400px] mt-6">
+            <Card padding="lg" className="sm:min-h-[400px] mt-4 sm:mt-6 max-sm:!p-4">
                 <AnimatePresence mode="wait">
                     {renderStep()}
                 </AnimatePresence>

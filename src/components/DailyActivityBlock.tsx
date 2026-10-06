@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import Card from './ui/Card'
 import { useTheme } from '../contexts/ThemeContext'
@@ -16,6 +16,8 @@ const THEME_TICK_PAUSE_MS = 350
 interface DailyActivityBlockProps {
     completedToday: number
     dailyNorm?: number
+    /** Caption under the counter; defaults to the daily-progress text. */
+    caption?: ReactNode
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -110,6 +112,7 @@ function cubeColor(cubeIndex: number, isDark: boolean) {
 export default function DailyActivityBlock({
     completedToday,
     dailyNorm = DEFAULT_DAILY_NORM,
+    caption,
 }: DailyActivityBlockProps) {
     const { isDark } = useTheme()
     const visualizerRef = useRef<HTMLDivElement>(null)
@@ -210,7 +213,7 @@ export default function DailyActivityBlock({
             className="flex flex-col sm:flex-row sm:items-stretch gap-4 lg:gap-6 w-full"
         >
             <Card padding="md" className="sm:w-64 lg:w-72 shrink-0">
-                <div className="h-full flex flex-col justify-between gap-6">
+                <div className="h-full flex flex-col justify-between gap-4 sm:gap-6">
                     <div>
                         <p className="text-xs font-medium uppercase tracking-wide text-secondary">
                             Активность
@@ -220,7 +223,7 @@ export default function DailyActivityBlock({
                             <span className="text-secondary text-xl font-medium"> / {dailyNorm}</span>
                         </p>
                         <p className="text-sm text-secondary mt-2">
-                            Пройдено сегодня. Эквалайзер отображает твой прогресс. Заставь его играть на полную!
+                            {caption ?? 'Пройдено сегодня. Эквалайзер отображает твой прогресс. Заставь его играть на полную!'}
                         </p>
                     </div>
 
@@ -243,7 +246,7 @@ export default function DailyActivityBlock({
 
             <div
                 ref={visualizerRef}
-                className="eq-visualizer flex-1 w-full flex items-end justify-between min-w-0 self-center sm:self-stretch overflow-hidden"
+                className="eq-visualizer hidden sm:flex flex-1 w-full items-end justify-between min-w-0 self-center sm:self-stretch overflow-hidden"
                 style={{
                     minHeight: MAX_CUBES * (CUBE_SIZE_PX + CUBE_GAP_PX),
                 }}

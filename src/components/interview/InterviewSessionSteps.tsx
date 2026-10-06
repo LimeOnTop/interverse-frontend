@@ -20,7 +20,7 @@ export default function InterviewQuestionStep({
     onSelectOption,
 }: InterviewQuestionStepProps) {
     return (
-        <Card padding="lg" className="space-y-6">
+        <Card padding="lg" className="space-y-5 sm:space-y-6">
             <div className="space-y-3">
                 <div className="flex flex-wrap items-center gap-2">
                     <span className="text-xs font-semibold uppercase tracking-widest text-inter-verse-green dark:text-purple-400">
@@ -28,7 +28,7 @@ export default function InterviewQuestionStep({
                     </span>
                     {step.technology && <Badge variant="info">{step.technology}</Badge>}
                 </div>
-                <p className="text-lg leading-relaxed text-gray-900 dark:text-gray-100">
+                <p className="text-base sm:text-lg leading-relaxed text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
                     {step.text}
                 </p>
             </div>
@@ -83,7 +83,7 @@ interface InterviewTaskStepProps {
 
 export function InterviewTaskStep({ step, value, onChange }: InterviewTaskStepProps) {
     return (
-        <Card padding="lg" className="space-y-6">
+        <Card padding="lg" className="space-y-5 sm:space-y-6">
             <div className="space-y-3">
                 <div className="flex flex-wrap items-center gap-2">
                     <span className="text-xs font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-400">
@@ -91,7 +91,7 @@ export function InterviewTaskStep({ step, value, onChange }: InterviewTaskStepPr
                     </span>
                     {step.technology && <Badge variant="warning">{step.technology}</Badge>}
                 </div>
-                <p className="text-lg leading-relaxed text-gray-900 dark:text-gray-100">
+                <p className="text-base sm:text-lg leading-relaxed text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
                     {step.text}
                 </p>
             </div>
@@ -104,7 +104,7 @@ export function InterviewTaskStep({ step, value, onChange }: InterviewTaskStepPr
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
                     placeholder="Опишите подход, код или архитектурное решение..."
-                    className="input-field resize-y min-h-[220px] font-mono text-sm"
+                    className="input-field resize-y min-h-[45vh] sm:min-h-[220px] font-mono text-sm"
                 />
             </div>
         </Card>
@@ -133,18 +133,18 @@ export function InterviewSessionHeader({
     const progress = totalSteps > 0 ? (currentStep / totalSteps) * 100 : 0
 
     return (
-        <Card padding="md" className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                <div className="flex items-start gap-3">
-                    <Button variant="icon" onClick={onBack} aria-label="Назад">
+        <Card padding="md" className="space-y-3 sm:space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
+                <div className="flex items-start gap-2 sm:gap-3">
+                    <Button variant="icon" onClick={onBack} aria-label="Выйти из тренировки" className="-ml-2 sm:ml-0 shrink-0">
                         <ArrowLeft className="w-5 h-5" />
                     </Button>
-                    <div>
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{title}</h1>
-                        {description && <p className="text-secondary text-sm mt-1">{description}</p>}
+                    <div className="min-w-0">
+                        <h1 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100 leading-snug">{title}</h1>
+                        {description && <p className="hidden sm:block text-secondary text-sm mt-1">{description}</p>}
                     </div>
                 </div>
-                <div className="text-sm text-secondary">
+                <div className="hidden sm:block text-sm text-secondary">
                     {specialization && <p>{specialization}</p>}
                     {level && <p>{level}</p>}
                 </div>
@@ -185,7 +185,7 @@ export function InterviewSessionComplete({
     return (
         <Card padding="lg" className="text-center space-y-6">
             <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                     {submitting ? 'Анализируем ответы...' : 'Тренировка завершена'}
                 </h2>
                 <p className="text-secondary">

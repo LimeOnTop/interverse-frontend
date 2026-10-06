@@ -18,19 +18,19 @@ export default function SiteFooter({ className = '' }: SiteFooterProps) {
         <footer
             className={`iv-landing-section py-8 border-t border-gray-200 dark:border-gray-600 ${className}`}
         >
-            <div className="max-w-content mx-auto px-6 lg:px-8 flex flex-col gap-4 text-sm text-secondary">
+            <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-4 text-sm text-secondary">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <span>&copy; {new Date().getFullYear()} InterVerse. Все права защищены.</span>
                     <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
                         <Link
                             to="/pricing"
-                            className="font-medium text-inter-verse-green dark:text-purple-400 hover:underline"
+                            className="inline-flex items-center min-h-[44px] sm:min-h-0 font-medium text-inter-verse-green dark:text-purple-400 hover:underline"
                         >
                             Тарифы
                         </Link>
                         <a
                             href="/legal/oferta.html"
-                            className="font-medium text-inter-verse-green dark:text-purple-400 hover:underline"
+                            className="inline-flex items-center min-h-[44px] sm:min-h-0 font-medium text-inter-verse-green dark:text-purple-400 hover:underline"
                             target="_blank"
                             rel="noopener noreferrer"
                         >
@@ -38,13 +38,13 @@ export default function SiteFooter({ className = '' }: SiteFooterProps) {
                         </a>
                         <a
                             href="/privacy"
-                            className="font-medium text-inter-verse-green dark:text-purple-400 hover:underline"
+                            className="inline-flex items-center min-h-[44px] sm:min-h-0 font-medium text-inter-verse-green dark:text-purple-400 hover:underline"
                         >
                             Политика ПДн
                         </a>
                         <a
                             href="/legal/refund.html"
-                            className="font-medium text-inter-verse-green dark:text-purple-400 hover:underline"
+                            className="inline-flex items-center min-h-[44px] sm:min-h-0 font-medium text-inter-verse-green dark:text-purple-400 hover:underline"
                             target="_blank"
                             rel="noopener noreferrer"
                         >
@@ -62,13 +62,13 @@ export default function SiteFooter({ className = '' }: SiteFooterProps) {
                     <div className="flex flex-col sm:flex-row sm:flex-wrap gap-x-6 gap-y-1">
                         <a
                             href={`mailto:${CONTACTS.email}`}
-                            className="hover:text-inter-verse-green dark:hover:text-purple-400 transition-iv"
+                            className="inline-flex items-center min-h-[44px] sm:min-h-0 hover:text-inter-verse-green dark:hover:text-purple-400 transition-iv"
                         >
                             {CONTACTS.email}
                         </a>
                         <a
                             href={CONTACTS.phoneHref}
-                            className="hover:text-inter-verse-green dark:hover:text-purple-400 transition-iv"
+                            className="inline-flex items-center min-h-[44px] sm:min-h-0 hover:text-inter-verse-green dark:hover:text-purple-400 transition-iv"
                         >
                             {CONTACTS.phoneDisplay}
                         </a>

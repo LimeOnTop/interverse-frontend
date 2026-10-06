@@ -1,0 +1,55 @@
+import { NavLink, Link } from 'react-router-dom'
+import { Plus, LayoutDashboard, PlayCircle, FileText, UserCircle } from 'lucide-react'
+
+const TABS = [
+    { name: 'Главная', href: '/dashboard', icon: LayoutDashboard },
+    { name: 'Интервью', href: '/interview-service', icon: PlayCircle },
+    null,
+    { name: 'Отчёты', href: '/reports', icon: FileText },
+    { name: 'Профиль', href: '/profile', icon: UserCircle },
+] as const
+
+/** Bottom navigation for phones: the four main sections plus a central start action. */
+export default function MobileTabBar() {
+    return (
+        <nav
+            className="lg:hidden fixed inset-x-0 bottom-0 z-40 iv-surface border-t border-gray-200 dark:border-gray-600 iv-safe-bottom"
+            aria-label="Основная навигация"
+        >
+            <div className="grid grid-cols-5 h-16">
+                {TABS.map((tab) => {
+                    if (!tab) {
+                        return (
+                            <div key="start" className="flex items-center justify-center">
+                                <Link
+                                    to="/interviews/create"
+                                    aria-label="Начать тренировку"
+                                    className="w-12 h-12 -mt-5 flex items-center justify-center gradient-bg-adaptive text-white shadow-iv-lg rounded-full active:scale-95 transition-transform"
+                                >
+                                    <Plus className="w-6 h-6" strokeWidth={2} />
+                                </Link>
+                            </div>
+                        )
+                    }
+                    const Icon = tab.icon
+                    return (
+                        <NavLink
+                            key={tab.href}
+                            to={tab.href}
+                            className={({ isActive }) =>
+                                `flex flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors ${
+                                    isActive
+                                        ? 'text-inter-verse-green dark:text-purple-400'
+                                        : 'text-gray-500 dark:text-gray-400'
+                                }`
+                            }
+                        >
+                            <Icon className="w-5 h-5" strokeWidth={1.75} />
+                            <span>{tab.name}</span>
+                        </NavLink>
+                    )
+                })}
+            </div>
+        </nav>
+    )
+}

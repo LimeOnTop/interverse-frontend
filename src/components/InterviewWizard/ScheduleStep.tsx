@@ -71,7 +71,7 @@ export default function ScheduleStep({
             className="max-w-4xl mx-auto"
         >
             <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                     Планирование тренировки
                 </h2>
                 <p className="text-secondary text-sm">
@@ -151,7 +151,7 @@ export default function ScheduleStep({
                 )}
             </div>
 
-            <div className="flex justify-between mt-8">
+            <div className="wizard-actions mt-8">
                 <Button variant="ghost" onClick={onBack}>← Назад</Button>
                 <Button onClick={handleNext} disabled={isNextDisabled}>
                     Начать тренировку

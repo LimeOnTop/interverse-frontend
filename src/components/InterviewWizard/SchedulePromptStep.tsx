@@ -15,7 +15,7 @@ export default function SchedulePromptStep({ onYes, onNo, onBack }: ScheduleProm
             exit={{ opacity: 0, x: -20 }}
             className="max-w-2xl mx-auto text-center"
         >
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                 Запланировать тренировку?
             </h2>
             <p className="text-secondary text-sm mb-10">

@@ -27,7 +27,7 @@ export default function WeakPointsSection({
                 <div className="flex items-start gap-3 mb-4">
                     <Lock className="w-6 h-6 shrink-0 text-inter-verse-green dark:text-purple-400" />
                     <div>
-                        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
                             {count > 0 ? `Выявлено ${count} ${pluralWeak(count)}` : 'Детальный разбор ответов'}
                         </h2>
                         <p className="text-secondary mt-2 leading-relaxed">
@@ -66,7 +66,7 @@ export default function WeakPointsSection({
     if (points.length === 0) {
         return (
             <Card padding="lg">
-                <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-gray-100">Слабые места</h2>
+                <h2 className="text-xl sm:text-2xl font-bold mb-2 text-gray-900 dark:text-gray-100">Слабые места</h2>
                 <p className="text-secondary">Ошибок не найдено — все вопросы и задачи решены верно.</p>
             </Card>
         )
@@ -74,7 +74,7 @@ export default function WeakPointsSection({
 
     return (
         <Card padding="lg">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
                 Слабые места: {points.length}
             </h2>
             <p className="text-sm text-secondary mt-1 mb-6">

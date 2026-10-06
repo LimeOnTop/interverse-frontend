@@ -7,11 +7,11 @@ export default function StepIndicator({ currentStep, totalSteps }: StepIndicator
     const progress = ((currentStep - 1) / (totalSteps - 1)) * 100
 
     return (
-        <div className="mb-8">
-            <div className="wizard-progress mb-6">
+        <div className="mb-5 sm:mb-8">
+            <div className="wizard-progress mb-4 sm:mb-6">
                 <div className="wizard-progress-fill" style={{ width: `${progress}%` }} />
             </div>
-            <div className="flex items-center justify-center gap-2">
+            <div className="flex items-center justify-center gap-1 sm:gap-2">
                 {Array.from({ length: totalSteps }, (_, i) => {
                     const step = i + 1
                     const isActive = step === currentStep
@@ -26,7 +26,7 @@ export default function StepIndicator({ currentStep, totalSteps }: StepIndicator
                                 ) : step}
                             </div>
                             {step < totalSteps && (
-                                <div className={`w-12 h-0.5 mx-1 ${isCompleted ? 'bg-inter-verse-green dark:bg-purple-500' : 'bg-gray-200 dark:bg-gray-600'}`} />
+                                <div className={`w-8 sm:w-12 h-0.5 mx-1 ${isCompleted ? 'bg-inter-verse-green dark:bg-purple-500' : 'bg-gray-200 dark:bg-gray-600'}`} />
                             )}
                         </div>
                     )

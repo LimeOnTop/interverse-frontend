@@ -66,7 +66,7 @@ export default function TechStackStep({
             className="max-w-4xl mx-auto"
         >
             <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                     Выберите навыки
                 </h2>
                 <p className="text-secondary text-sm">
@@ -152,7 +152,7 @@ export default function TechStackStep({
                 {isSearchActive && !isSearching && displayedTechs.length === 0 ? (
                     <p className="text-sm text-secondary">Ничего не найдено — попробуйте другой запрос</p>
                 ) : (
-                    <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-2">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                         {displayedTechs.map((tech) => {
                             const isSelected = selectedTechStack.includes(tech)
 
@@ -172,7 +172,7 @@ export default function TechStackStep({
                 )}
             </div>
 
-            <div className="flex justify-between">
+            <div className="wizard-actions">
                 <Button variant="secondary" onClick={onBack}>Назад</Button>
                 <Button onClick={onNext} disabled={selectedTechStack.length === 0}>Далее</Button>
             </div>

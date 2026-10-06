@@ -6,17 +6,15 @@ import { api } from '../services/api'
 import toast from 'react-hot-toast'
 import InterviewCard from '../components/InterviewCard'
 import ModernFilters from '../components/ModernFilters'
-import DailyActivityBlock, {
-    DEFAULT_DAILY_NORM,
-    countCompletedToday,
-    useLocalCalendarDay,
-} from '../components/DailyActivityBlock'
+import DailyActivityBlock, { useLocalCalendarDay } from '../components/DailyActivityBlock'
 import PageHeader from '../components/ui/PageHeader'
 import EmptyState from '../components/ui/EmptyState'
 import Spinner from '../components/ui/Spinner'
 import PageTransition from '../components/ui/PageTransition'
 import Button from '../components/ui/Button'
 import { usePersistedState } from '../hooks/usePersistedForm'
+import { useAuthStore } from '../store/authStore'
+import { PRO_TRAININGS_PER_DAY, resolveSubscriptionPlan } from '../utils/subscription'
 
 interface Interview {
     id: string
@@ -113,19 +111,35 @@ export default function DashboardPage() {
         }
     }
 
+    // The counter mirrors the plan quota: Basic has one training in total,
+    // Pro a daily limit; both count created trainings, like the backend.
+    const isPro = resolveSubscriptionPlan(useAuthStore((state) => state.user)) === 'paid'
     const localDay = useLocalCalendarDay()
-    const completedToday = useMemo(
-        () => countCompletedToday(interviews),
-        [interviews, localDay],
+    const usedTrainings = useMemo(() => {
+        if (!isPro) return interviews.length
+        const start = new Date()
+        start.setHours(0, 0, 0, 0)
+        return interviews.filter((interview) => new Date(interview.created_at) >= start).length
+    }, [interviews, isPro, localDay])
+    const quota = isPro ? PRO_TRAININGS_PER_DAY : 1
+    const quotaCaption = isPro ? (
+        `Тренировок сегодня. В Pro доступно до ${PRO_TRAININGS_PER_DAY} в день.`
+    ) : (
+        <>
+            Бесплатная тренировка тарифа Basic.{' '}
+            <Link to="/subscription" className="font-medium text-inter-verse-green dark:text-purple-400 underline underline-offset-2">
+                Больше тренировок в Pro
+            </Link>
+        </>
     )
 
     if (loading) return <Spinner size="lg" className="h-64" />
 
     return (
-        <PageTransition className="space-y-8">
+        <PageTransition className="space-y-6 sm:space-y-8">
             <PageHeader
-                title="Dashboard"
-                description="Обзор интервью и дневная активность"
+                title="Главная"
+                description="Ваши тренировки и активность"
                 action={
                     <Link to="/interviews/create">
                         <Button><Plus className="w-5 h-5" /> Начать тренировку</Button>
@@ -134,8 +148,9 @@ export default function DashboardPage() {
             />
 
             <DailyActivityBlock
-                completedToday={completedToday}
-                dailyNorm={DEFAULT_DAILY_NORM}
+                completedToday={usedTrainings}
+                dailyNorm={quota}
+                caption={quotaCaption}
             />
 
             <ModernFilters

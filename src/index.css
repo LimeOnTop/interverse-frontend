@@ -396,6 +396,9 @@
 
     .iv-btn:active { transform: scale(0.98); }
 
+    /* Comfortable touch targets (≥44px) for every button style. */
+    .iv-btn { min-height: 44px; }
+
     .btn-primary, .btn-primary-adaptive, .iv-btn-primary {
         @apply iv-btn text-white px-6 py-3;
         @apply bg-gradient-to-r from-inter-verse-green to-inter-verse-green-light;
@@ -430,7 +433,7 @@
     }
 
     .btn-icon, .iv-btn-icon {
-        @apply iv-btn w-10 h-10 text-gray-600 dark:text-gray-400;
+        @apply iv-btn w-11 h-11 text-gray-600 dark:text-gray-400;
         @apply hover:text-inter-verse-green dark:hover:text-purple-400;
     }
 
@@ -487,7 +490,9 @@
     }
 
     .iv-header {
-        @apply iv-surface border-b border-gray-200 dark:border-gray-600 sticky top-0 z-40 h-16;
+        @apply iv-surface border-b border-gray-200 dark:border-gray-600 sticky top-0 z-40 shrink-0;
+        height: calc(4rem + env(safe-area-inset-top));
+        padding-top: env(safe-area-inset-top);
     }
 
     .iv-nav-item {
@@ -563,7 +568,7 @@
     }
 
     .profile-block-title {
-        @apply text-3xl sm:text-4xl font-bold tracking-tight leading-none;
+        @apply text-xl sm:text-4xl font-bold tracking-tight leading-none;
         transition: transform 400ms cubic-bezier(0.22, 1, 0.36, 1);
     }
 
@@ -632,6 +637,20 @@
         transition: width 300ms cubic-bezier(0.4, 0, 0.2, 1);
     }
 
+    /* Wizard step navigation: sticky above the tab bar on phones. */
+    .wizard-actions {
+        @apply flex justify-between gap-3;
+    }
+
+    @media (max-width: 639px) {
+        .wizard-actions {
+            @apply sticky z-10 -mx-4 px-4 py-3 mt-4 iv-surface border-t border-gray-200 dark:border-gray-600;
+            bottom: calc(4rem + env(safe-area-inset-bottom));
+            border-radius: 0;
+        }
+        .wizard-actions > * { flex: 1 1 0; }
+    }
+
     .wizard-option-card {
         @apply cursor-pointer transition-iv;
     }
@@ -665,7 +684,7 @@
     }
 
     .wizard-tech-chip {
-        @apply w-full justify-center text-sm py-2.5 cursor-pointer iv-chip;
+        @apply w-full justify-center text-sm py-2.5 min-h-[44px] cursor-pointer iv-chip;
     }
 
     .wizard-tech-chip-selected {
@@ -819,4 +838,42 @@
 @keyframes heroCtaShine {
     from { left: -35%; }
     to { left: 115%; }
+}
+
+/* ── Mobile ── */
+@layer utilities {
+    .iv-safe-top { padding-top: env(safe-area-inset-top); }
+    .iv-safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+}
+
+/* Phones: 16px inputs stop iOS from zooming the page on focus. */
+@media (max-width: 639px) {
+    input, select, textarea, .iv-input, .input-field, .input-field-underlined {
+        font-size: 16px;
+    }
+}
+
+/* Lift/scale hover effects only where a real pointer can hover; on touch
+   they stick after a tap and make cards jump. */
+@media (hover: none) {
+    .iv-form-card:hover,
+    .iv-card-hover:hover,
+    .btn-primary:hover, .btn-primary-adaptive:hover, .iv-btn-primary:hover {
+        transform: none;
+    }
+}
+
+/* Touch devices scroll with overlay indicators; a permanent coloured bar
+   only eats width on a phone. */
+@media (hover: none) and (max-width: 1023px) {
+    .custom-scrollbar { scrollbar-width: none; }
+    .custom-scrollbar::-webkit-scrollbar { display: none; }
+}
+
+/* Phones: profile tiles become a compact list of rows that expand on tap
+   instead of a mosaic of tall cards. */
+@media (max-width: 639px) {
+    .profile-mosaic { gap: 0.5rem; }
+    .profile-block:not(.profile-block-open) { min-height: 0 !important; }
+    .profile-block { padding: 1rem !important; }
 }

@@ -121,7 +121,7 @@ export default function ReportsPage() {
     if (loading) return <Spinner size="lg" className="h-64" />
 
     return (
-        <PageTransition className="space-y-8">
+        <PageTransition className="space-y-6 sm:space-y-8">
             <PageHeader
                 title="Отчёты"
                 description="Результаты проведённых интервью"
@@ -169,30 +169,30 @@ export default function ReportsPage() {
                                     transition={{ delay: index * 0.05, duration: 0.4 }}
                                 >
                                     <Card hover padding="md">
-                                        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6">
-                                            <div className="flex-1">
-                                                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                                        <div className="flex items-start gap-4 mb-5 sm:mb-6">
+                                            <div className="shrink-0 text-center w-16 sm:w-20">
+                                                <div className="text-3xl sm:text-4xl font-bold tabular-nums leading-none text-inter-verse-green dark:text-purple-400">
+                                                    {report.overall_score}%
+                                                </div>
+                                                <Badge variant={getScoreVariant(report.overall_score)} className="mt-2 text-[10px] px-1.5">
+                                                    {getScoreLabel(report.overall_score)}
+                                                </Badge>
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="text-base sm:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-1 sm:mb-2 leading-snug">
                                                     {report.interview?.title || 'Тренировка'}
                                                 </h3>
-                                                <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-secondary">
-                                                    <span>Специализация: {getSpecializationLabel(report.interview?.specialization || '')}</span>
-                                                    <span>Уровень: {getLevelLabel(report.interview?.level || '')}</span>
+                                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs sm:text-sm text-secondary">
+                                                    <span>{getSpecializationLabel(report.interview?.specialization || '')} · {getLevelLabel(report.interview?.level || '')}</span>
+                                                    <span>{new Date(report.created_at).toLocaleDateString('ru-RU')}</span>
                                                 </div>
-                                            </div>
-                                            <div className="text-right shrink-0">
-                                                <Badge variant={getScoreVariant(report.overall_score)}>
-                                                    {report.overall_score}% — {getScoreLabel(report.overall_score)}
-                                                </Badge>
-                                                <p className="text-xs text-secondary mt-2">
-                                                    {new Date(report.created_at).toLocaleDateString('ru-RU')}
-                                                </p>
                                             </div>
                                         </div>
 
-                                        <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-3 gap-y-3 mb-5 sm:mb-6">
                                             {sections.map((section) => (
-                                                <div key={section.key} className="text-center">
-                                                    <p className="text-xs font-medium uppercase tracking-wide text-secondary mb-1">{section.name}</p>
+                                                <div key={section.key} className="flex flex-col items-start sm:items-center">
+                                                    <p className="text-[11px] font-medium uppercase tracking-wide text-secondary mb-1">{section.name}</p>
                                                     <SectionScoreBadge section={section} />
                                                 </div>
                                             ))}
@@ -200,22 +200,22 @@ export default function ReportsPage() {
 
                                         {report.comments && (
                                             <div className="mb-4">
-                                                <h4 className="text-xs font-medium uppercase tracking-wide text-secondary mb-2">Комментарии</h4>
-                                                <p className="text-sm text-gray-700 dark:text-gray-300">{report.comments}</p>
+                                                <h4 className="text-xs font-medium uppercase tracking-wide text-secondary mb-2">{report.locked ? 'Общий отзыв' : 'Комментарии'}</h4>
+                                                <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3 sm:line-clamp-none">{report.comments}</p>
                                             </div>
                                         )}
 
                                         {report.recommendations && (
-                                            <div className="mb-4">
+                                            <div className="mb-4 hidden sm:block">
                                                 <h4 className="text-xs font-medium uppercase tracking-wide text-secondary mb-2">Рекомендации</h4>
                                                 <p className="text-sm text-gray-700 dark:text-gray-300">{report.recommendations}</p>
                                             </div>
                                         )}
 
-                                        <div className="flex items-center justify-between pt-4 iv-divider">
-                                            <div className="flex items-center gap-3">
-                                                <Link to={`/reports/${report.id}`}>
-                                                    <Button className="text-sm px-4 py-2">
+                                        <div className="flex items-center justify-between gap-2 pt-4 iv-divider">
+                                            <div className="flex items-center gap-2 sm:gap-3 flex-1 sm:flex-none">
+                                                <Link to={`/reports/${report.id}`} className="flex-1 sm:flex-none">
+                                                    <Button className="text-sm px-4 py-2 w-full">
                                                         <Eye className="w-4 h-4" /> Подробнее
                                                     </Button>
                                                 </Link>

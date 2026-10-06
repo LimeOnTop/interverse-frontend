@@ -69,7 +69,7 @@ export default function RegisterPage() {
             <div className="w-full">
                 <FormCard>
                     <div className="mb-8">
-                        <h1 className="text-2xl font-bold tracking-tight mb-2">Регистрация</h1>
+                        <h1 className="text-xl sm:text-2xl font-bold tracking-tight mb-2">Регистрация</h1>
                         <p className="text-secondary text-sm">Создайте аккаунт и начните подготовку</p>
                     </div>
 
@@ -127,7 +127,7 @@ export default function RegisterPage() {
 
                     <p className="mt-6 text-center text-sm text-secondary">
                         Уже есть аккаунт?{' '}
-                        <Link to="/login" className="font-medium text-inter-verse-green dark:text-purple-400 hover:underline">Войти</Link>
+                        <Link to="/login" className="inline-flex items-center min-h-[44px] px-1 font-medium text-inter-verse-green dark:text-purple-400 hover:underline">Войти</Link>
                     </p>
                 </FormCard>
             </div>

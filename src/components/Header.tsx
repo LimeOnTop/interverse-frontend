@@ -4,16 +4,11 @@ import { useAuthStore } from '../store/authStore'
 import { LogOut, User, Menu, ChevronDown } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 import { motion, AnimatePresence } from 'framer-motion'
+import { NAVIGATION } from './navigation'
 
 const routeTitles: Record<string, string> = {
-    '/dashboard': 'Dashboard',
-    '/activity': 'Активность',
+    ...Object.fromEntries(NAVIGATION.map((item) => [item.href, item.name])),
     '/calendar': 'Активность',
-    '/interview-service': 'Интервью',
-    '/vacancies': 'Вакансии',
-    '/reports': 'Отчёты',
-    '/profile': 'Профиль',
-    '/contribute': 'Предложить вопрос',
     '/subscription': 'Подписка',
     '/interviews/create': 'Новая тренировка',
 }
@@ -30,9 +25,9 @@ export default function Header({ onMenuClick }: HeaderProps) {
     const [avatarError, setAvatarError] = useState(false)
     const dropdownRef = useRef<HTMLDivElement>(null)
 
-    const pageTitle = Object.entries(routeTitles).find(([path]) =>
-        location.pathname.startsWith(path)
-    )?.[1]
+    const pageTitle = Object.entries(routeTitles)
+        .sort(([a], [b]) => b.length - a.length)
+        .find(([path]) => location.pathname.startsWith(path))?.[1]
 
     useEffect(() => {
         setAvatarError(false)
@@ -56,9 +51,9 @@ export default function Header({ onMenuClick }: HeaderProps) {
     const showAvatar = Boolean(avatarUrl) && !avatarError
 
     return (
-        <header className="iv-header px-4 lg:px-6">
-            <div className="h-full flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
+        <header className="iv-header px-2 sm:px-4 lg:px-6">
+            <div className="h-full flex items-center justify-between gap-2 sm:gap-4">
+                <div className="flex items-center gap-1 sm:gap-4 min-w-0">
                     <button
                         onClick={onMenuClick}
                         className="btn-icon lg:hidden"
@@ -68,7 +63,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                     </button>
                     <Link
                         to="/dashboard"
-                        className="text-xl font-bold gradient-text-adaptive tracking-tight hover:opacity-80 transition-iv"
+                        className="inline-flex items-center min-h-[44px] text-xl font-bold gradient-text-adaptive tracking-tight hover:opacity-80 transition-iv"
                     >
                         InterVerse
                     </Link>
@@ -80,13 +75,14 @@ export default function Header({ onMenuClick }: HeaderProps) {
                     )}
                 </div>
 
-                <div className="flex items-center gap-3">
-                    <ThemeToggle />
+                <div className="flex items-center gap-1 sm:gap-3">
+                    <ThemeToggle className="hidden sm:inline-flex" />
 
                     <div className="relative" ref={dropdownRef}>
                         <button
                             onClick={() => setDropdownOpen(!dropdownOpen)}
-                            className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 dark:hover:bg-iv-dark-bg transition-iv min-h-[44px]"
+                            aria-label="Меню профиля"
+                            className="flex items-center gap-2 px-2 sm:px-3 py-2 hover:bg-gray-50 dark:hover:bg-iv-dark-bg transition-iv min-h-[44px]"
                         >
                             <div className="w-8 h-8 bg-gray-100 dark:bg-iv-dark-bg border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden shrink-0">
                                 {showAvatar ? (

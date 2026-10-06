@@ -8,8 +8,8 @@ export default function PrivacyPage() {
         <PageTransition>
             <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-iv-dark-bg">
                 <PublicNav />
-                <main className="flex-1 max-w-3xl mx-auto px-6 lg:px-8 py-10">
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+                <main className="flex-1 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6">
                         Политика обработки персональных данных
                     </h1>
                     <div className="space-y-4 text-sm text-secondary leading-relaxed">

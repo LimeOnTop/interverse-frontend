@@ -61,8 +61,8 @@ export default function SpecializationStep({
             transition={{ duration: 0.3 }}
             className="max-w-4xl mx-auto"
         >
-            <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            <div className="text-center mb-4 sm:mb-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                     Выберите направление
                 </h2>
                 <p className="text-secondary text-sm">
@@ -70,7 +70,7 @@ export default function SpecializationStep({
                 </p>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-6">
                 {specializations.map((spec) => {
                     const Icon = spec.icon
                     const isSelected = selectedSpecialization === spec.id
@@ -86,17 +86,25 @@ export default function SpecializationStep({
                                 onNext()
                             }}
                         >
-                            <div className="wizard-option-icon">
-                                <Icon className="w-6 h-6" strokeWidth={1.75} />
+                            {/* Phones: compact row (icon + text); larger screens: tile. */}
+                            <div className="flex items-center gap-4 sm:block">
+                                <div className="wizard-option-icon shrink-0 !mb-0 sm:!mb-4">
+                                    <Icon className="w-6 h-6" strokeWidth={1.75} />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <h3 className={`text-base sm:text-lg font-semibold mb-0.5 sm:mb-2 ${isSelected ? 'text-inter-verse-green dark:text-purple-400' : 'text-gray-900 dark:text-gray-100'}`}>
+                                        {spec.name}
+                                    </h3>
+                                    <p className="text-secondary text-sm">
+                                        {spec.description}
+                                    </p>
+                                </div>
+                                {isSelected && (
+                                    <Check className="sm:hidden w-5 h-5 shrink-0 text-inter-verse-green dark:text-purple-400" strokeWidth={2} />
+                                )}
                             </div>
-                            <h3 className={`text-lg font-semibold mb-2 ${isSelected ? 'text-inter-verse-green dark:text-purple-400' : 'text-gray-900 dark:text-gray-100'}`}>
-                                {spec.name}
-                            </h3>
-                            <p className="text-secondary text-sm">
-                                {spec.description}
-                            </p>
                             {isSelected && (
-                                <div className="mt-4 flex items-center text-inter-verse-green dark:text-purple-400 text-sm font-medium">
+                                <div className="hidden sm:flex mt-4 items-center text-inter-verse-green dark:text-purple-400 text-sm font-medium">
                                     <Check className="w-4 h-4 mr-2" strokeWidth={2} />
                                     Выбрано
                                 </div>

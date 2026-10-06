@@ -59,7 +59,7 @@ export default function LoginPage() {
             <div className="w-full">
                 <FormCard>
                     <div className="mb-8">
-                        <h1 className="text-2xl font-bold tracking-tight mb-2">Вход</h1>
+                        <h1 className="text-xl sm:text-2xl font-bold tracking-tight mb-2">Вход</h1>
                         <p className="text-secondary text-sm">Войдите, чтобы продолжить тренировки</p>
                     </div>
 
@@ -119,7 +119,7 @@ export default function LoginPage() {
 
                     <p className="mt-6 text-center text-sm text-secondary">
                         Нет аккаунта?{' '}
-                        <Link to="/register" className="font-medium text-inter-verse-green dark:text-purple-400 hover:underline">
+                        <Link to="/register" className="inline-flex items-center min-h-[44px] px-1 font-medium text-inter-verse-green dark:text-purple-400 hover:underline">
                             Регистрация
                         </Link>
                     </p>

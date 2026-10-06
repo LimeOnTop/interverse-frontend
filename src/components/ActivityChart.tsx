@@ -106,22 +106,22 @@ export default function ActivityChart() {
 
     return (
         <div>
-            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="mb-4 sm:mb-6 flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                     <p className="text-xs font-medium uppercase tracking-wide text-secondary">За 12 месяцев</p>
                     <p className="text-sm text-secondary mt-1">Пройденные интервью по месяцам</p>
                 </div>
                 <div className="text-left sm:text-right">
                     <p className="text-xs text-secondary">Всего пройдено</p>
-                    <p className="text-3xl font-semibold tabular-nums">{totalCompleted}</p>
+                    <p className="text-2xl sm:text-3xl font-semibold tabular-nums">{totalCompleted}</p>
                 </div>
             </div>
 
-            <div className="h-[320px]">
+            <div className="h-[240px] sm:h-[320px]">
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
-                        <XAxis dataKey="label" tick={{ fill: axisColor, fontSize: 11 }} axisLine={{ stroke: gridColor }} tickLine={false} />
+                        <XAxis dataKey="label" tick={{ fill: axisColor, fontSize: 11 }} axisLine={{ stroke: gridColor }} tickLine={false} interval="preserveStartEnd" minTickGap={12} />
                         <YAxis allowDecimals={false} tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false} />
                         <Tooltip
                             cursor={{ fill: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)' }}

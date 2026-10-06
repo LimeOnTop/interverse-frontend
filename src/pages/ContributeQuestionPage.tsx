@@ -92,7 +92,7 @@ export default function ContributeQuestionPage() {
             <form onSubmit={handleSubmit} className="w-full">
                 <FormCard className="space-y-6">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
                             Предложить вопрос
                         </h1>
                         <p className="text-secondary mt-1 text-sm leading-relaxed">

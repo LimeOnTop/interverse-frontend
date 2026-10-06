@@ -82,7 +82,7 @@ export default function ProgressChart() {
 
     return (
         <div>
-            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="mb-4 sm:mb-6 flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                     <p className="text-xs font-medium uppercase tracking-wide text-secondary">Прогресс</p>
                     <p className="text-sm text-secondary mt-1">Средний результат всех тренировок за день</p>
@@ -90,7 +90,7 @@ export default function ProgressChart() {
                 {last && (
                     <div className="text-left sm:text-right">
                         <p className="text-xs text-secondary">Последний результат</p>
-                        <p className="text-3xl font-semibold tabular-nums">
+                        <p className="text-2xl sm:text-3xl font-semibold tabular-nums">
                             {last.score}%
                             {data.length > 1 && (
                                 <span className={`ml-2 text-base ${delta >= 0 ? 'text-inter-verse-green dark:text-purple-400' : 'text-red-500'}`}>
@@ -107,11 +107,11 @@ export default function ProgressChart() {
                     Пройдите тренировку, чтобы увидеть прогресс.
                 </p>
             ) : (
-                <div className="h-[320px]">
+                <div className="h-[240px] sm:h-[320px]">
                     <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={data} margin={{ top: 24, right: 24, left: 0, bottom: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
-                            <XAxis dataKey="label" tick={{ fill: axisColor, fontSize: 11 }} axisLine={{ stroke: gridColor }} tickLine={false} />
+                            <XAxis dataKey="label" tick={{ fill: axisColor, fontSize: 11 }} axisLine={{ stroke: gridColor }} tickLine={false} interval="preserveStartEnd" minTickGap={16} />
                             <YAxis domain={[0, 100]} tickFormatter={(value: number) => `${value}%`} tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false} />
                             <Tooltip
                                 contentStyle={{
