@@ -1,0 +1,62 @@
+import { Check } from 'lucide-react'
+import { PRO_TRACK_PLAN, formatRub } from '../utils/subscription'
+
+export default function ProTrackCard({ className = '' }: { className?: string }) {
+    return (
+        <section className={`iv-form-card p-8 flex flex-col ${className}`}>
+            <div className="iv-form-card-shine-clip" aria-hidden>
+                <div className="iv-form-card-shine" />
+            </div>
+
+            <div className="flex items-start justify-between gap-3 mb-2">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                    {PRO_TRACK_PLAN.name}
+                </h2>
+                <span className="text-xs font-semibold uppercase tracking-wide text-white bg-inter-verse-green dark:bg-purple-500 px-2.5 py-1 rounded-md">
+                    {PRO_TRACK_PLAN.badge}
+                </span>
+            </div>
+
+            <p className="text-sm text-secondary mb-6 leading-relaxed">
+                {PRO_TRACK_PLAN.description}
+            </p>
+
+            <div className="mb-6">
+                <div className="text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
+                    {formatRub(PRO_TRACK_PLAN.price)}
+                </div>
+                <div className="text-sm text-secondary mt-1">{PRO_TRACK_PLAN.priceHint}</div>
+                <div className="mt-2 text-xs font-medium text-inter-verse-green dark:text-purple-300">
+                    Платные курсы по одной профессии стоят около {formatRub(PRO_TRACK_PLAN.coursePrice)}
+                </div>
+            </div>
+
+            <ul className="space-y-3 mb-6 flex-1">
+                {PRO_TRACK_PLAN.features.map((feature) => (
+                    <li
+                        key={feature}
+                        className="flex items-start gap-3 text-sm text-gray-800 dark:text-gray-200"
+                    >
+                        <Check
+                            className="w-4 h-4 mt-0.5 shrink-0 text-inter-verse-green dark:text-purple-300"
+                            strokeWidth={2}
+                        />
+                        <span>{feature}</span>
+                    </li>
+                ))}
+            </ul>
+
+            <p className="text-xs text-secondary leading-relaxed mb-6">
+                {PRO_TRACK_PLAN.proUpgradeNote}
+            </p>
+
+            <button
+                type="button"
+                disabled
+                className="btn-primary-adaptive w-full text-center justify-center py-3 opacity-50 cursor-not-allowed"
+            >
+                Скоро
+            </button>
+        </section>
+    )
+}

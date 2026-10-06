@@ -17,6 +17,7 @@ import EditInterviewFullPage from './pages/EditInterviewFullPage'
 import InterviewServicePage from './pages/InterviewServicePage'
 import InterviewPage from './pages/InterviewPage'
 import VacanciesPage from './pages/VacanciesPage'
+import TracksPage from './pages/TracksPage'
 import ReportsPage from './pages/ReportsPage'
 import ReportDetailPage from './pages/ReportDetailPage'
 import ProfilePage from './pages/ProfilePage'
@@ -151,6 +152,16 @@ function App() {
                             <ProtectedRoute>
                                 <Layout>
                                     <VacanciesPage />
+                                </Layout>
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/tracks"
+                        element={
+                            <ProtectedRoute>
+                                <Layout>
+                                    <TracksPage />
                                 </Layout>
                             </ProtectedRoute>
                         }

@@ -5,6 +5,7 @@ import PublicNav from '../components/PublicNav'
 import SiteFooter from '../components/SiteFooter'
 import PageTransition from '../components/ui/PageTransition'
 import { api } from '../services/api'
+import ProTrackCard from '../components/ProTrackCard'
 import {
     FALLBACK_PAID_OFFERS,
     FREE_PLAN,
@@ -189,6 +190,8 @@ export default function PricingPage() {
                                 </Link>
                             </section>
                         ))}
+
+                        <ProTrackCard />
                     </div>
                 </section>
             </PageTransition>

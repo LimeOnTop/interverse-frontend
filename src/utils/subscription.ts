@@ -174,3 +174,23 @@ export function mapOffersResponse(data: OffersResponse): {
         earlyBirdLimit: data.early_bird_limit ?? 100,
     }
 }
+
+/** Pro Track: upcoming subscription with access to all specialization tracks. Not on sale yet. */
+export const PRO_TRACK_PLAN = {
+    id: 'pro_track' as const,
+    name: 'Pro Track',
+    price: '1890.00',
+    coursePrice: '90000.00',
+    priceHint: 'доступ ко всем траекториям сразу',
+    badge: 'Скоро',
+    description:
+        'Доступ к траекториям специальностей: осваивайте новые профессии и проверяйте свои навыки.',
+    features: [
+        'Все траектории специальностей в одной подписке',
+        'Освоение новых профессий шаг за шагом',
+        'Проверка навыков на каждом этапе траектории',
+        'Все возможности тарифа Pro',
+    ],
+    proUpgradeNote:
+        'Действующие подписчики Pro автоматически и бесплатно перейдут на Pro Track, а цена их подписки сохранится навсегда.',
+} as const

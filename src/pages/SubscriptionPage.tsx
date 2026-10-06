@@ -6,6 +6,7 @@ import PageTransition from '../components/ui/PageTransition'
 import Button from '../components/ui/Button'
 import { useAuthStore } from '../store/authStore'
 import { api } from '../services/api'
+import ProTrackCard from '../components/ProTrackCard'
 import {
     FALLBACK_PAID_OFFERS,
     FREE_PLAN,
@@ -279,6 +280,8 @@ export default function SubscriptionPage() {
                         </Button>
                     </section>
                 ))}
+
+                <ProTrackCard />
             </div>
         </PageTransition>
     )

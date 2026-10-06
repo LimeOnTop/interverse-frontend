@@ -10,6 +10,7 @@ import {
     UserCircle,
     Crown,
     Lightbulb,
+    Route,
     X,
 } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
@@ -20,6 +21,7 @@ const navigation = [
     { name: 'Активность', href: '/activity', icon: BarChart3 },
     { name: 'Интервью', href: '/interview-service', icon: PlayCircle },
     { name: 'Вакансии', href: '/vacancies', icon: Briefcase },
+    { name: 'Траектории', href: '/tracks', icon: Route },
     { name: 'Отчёты', href: '/reports', icon: FileText },
     { name: 'Профиль', href: '/profile', icon: UserCircle },
     { name: 'Предложить вопрос', href: '/contribute', icon: Lightbulb },
