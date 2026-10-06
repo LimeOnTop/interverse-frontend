@@ -236,6 +236,8 @@ export default function InterviewPage() {
             const message = formatUserFacingError(error, 'Не удалось сформировать отчёт')
             setSubmitError(message)
             toast.error(message)
+            // Allow a manual retry: answers are still in memory.
+            submitStartedRef.current = false
         } finally {
             setSubmitting(false)
         }
@@ -317,6 +319,7 @@ export default function InterviewPage() {
                     submitting={submitting}
                     reportId={reportId}
                     submitError={submitError}
+                    onRetry={() => void submitSession()}
                     onFinish={handleFinish}
                 />
             </PageTransition>

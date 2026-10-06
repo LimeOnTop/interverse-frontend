@@ -169,6 +169,7 @@ interface InterviewSessionCompleteProps {
     submitting?: boolean
     reportId?: string | null
     submitError?: string | null
+    onRetry?: () => void
     onFinish: () => void
 }
 
@@ -178,6 +179,7 @@ export function InterviewSessionComplete({
     submitting = false,
     reportId = null,
     submitError = null,
+    onRetry,
     onFinish,
 }: InterviewSessionCompleteProps) {
     return (
@@ -209,6 +211,9 @@ export function InterviewSessionComplete({
             )}
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                {submitError && !reportId && !submitting && onRetry && (
+                    <Button onClick={onRetry}>Повторить формирование отчёта</Button>
+                )}
                 {reportId && !submitting && (
                     <Link to={`/reports/${reportId}`}>
                         <Button>Открыть отчёт</Button>

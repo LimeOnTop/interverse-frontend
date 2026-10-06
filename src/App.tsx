@@ -39,6 +39,7 @@ import Layout from './components/Layout'
 import AdminLayout from './components/AdminLayout'
 import { ThemeProvider } from './contexts/ThemeContext'
 import SeoHead from './components/SeoHead'
+import TrainingLimitPromo from './components/TrainingLimitPromo'
 
 function App() {
     const { checkAuth } = useAuthStore()
@@ -269,6 +270,7 @@ function App() {
                         }
                     />
                 </Routes>
+                <TrainingLimitPromo />
             </div>
         </ThemeProvider>
     )

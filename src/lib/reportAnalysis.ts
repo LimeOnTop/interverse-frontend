@@ -18,6 +18,19 @@ export interface AnswerReviewItem {
     is_correct?: boolean | null
 }
 
+export interface WeakPoint {
+    step_id: string
+    item_type: 'question' | 'task' | string
+    label: string
+    prompt: string
+    technology?: string
+    user_answer: string
+    correct_answer: string
+    explanation?: string
+    topic: string
+    source_url: string
+}
+
 export interface GeneratedReport {
     id: string
     interview_id: string
@@ -35,6 +48,13 @@ export interface GeneratedReport {
     ai_analyzed?: boolean
     created_at: string
     answer_reviews?: AnswerReviewItem[]
+    strengths?: string
+    weaknesses?: string
+    /** Pro-only; empty for Basic, see `locked` and `weak_points_count`. */
+    weak_points?: WeakPoint[]
+    weak_points_count?: number
+    /** True when the report is shown with Basic restrictions. */
+    locked?: boolean
 }
 
 const FALLBACK_MARKER = 'AI-анализ временно недоступен'

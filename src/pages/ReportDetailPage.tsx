@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Download, Calendar, MapPin, Sparkles } from 'lucide-react'
+import { ArrowLeft, Download, Calendar, MapPin, Sparkles, Lock } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { api } from '../services/api'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { useTheme } from '../contexts/ThemeContext'
 import PageHeader from '../components/ui/PageHeader'
 import PageTransition from '../components/ui/PageTransition'
 import Card from '../components/ui/Card'
@@ -17,6 +15,8 @@ import { buildReportSections, getScoreLabel, getScoreVariant } from '../lib/repo
 import { downloadReportPdf } from '../lib/exportReportPdf'
 import SectionScoreBadge from '../components/report/SectionScoreBadge'
 import ReportAnswerReviews from '../components/report/ReportAnswerReviews'
+import WeakPointsSection from '../components/report/WeakPointsSection'
+import AccentList from '../components/report/AccentList'
 
 interface Report extends GeneratedReport {
     algorithm_passed?: boolean
@@ -36,7 +36,6 @@ interface Report extends GeneratedReport {
 export default function ReportDetailPage() {
     const { id } = useParams()
     const navigate = useNavigate()
-    const { isDark } = useTheme()
     const [report, setReport] = useState<Report | null>(null)
     const [loading, setLoading] = useState(true)
     const [analyzing, setAnalyzing] = useState(false)
@@ -134,12 +133,7 @@ export default function ReportDetailPage() {
     }
 
     const sections = report ? buildReportSections(report) : []
-    const chartData = sections
-        .filter((section) => !section.comingSoon)
-        .map((section) => ({
-            name: section.name,
-            score: section.passed === false && section.score === 0 ? 0 : section.score,
-        }))
+    const locked = Boolean(report?.locked)
 
     if (loading) return <Spinner size="lg" className="h-64" />
 
@@ -164,69 +158,47 @@ export default function ReportDetailPage() {
                     { label: report.interview?.title || 'Тренировка' },
                 ]}
                 action={
-                    <Button type="button" loading={exporting} onClick={() => void handleExportPdf()}>
-                        <Download className="w-5 h-5" /> Экспорт PDF
-                    </Button>
+                    locked ? (
+                        <Link to="/subscription" className="btn-secondary inline-flex items-center gap-2" title="Скачивание отчёта в PDF доступно в Pro">
+                            <Lock className="w-4 h-4" /> PDF в Pro
+                        </Link>
+                    ) : (
+                        <Button type="button" loading={exporting} onClick={() => void handleExportPdf()}>
+                            <Download className="w-5 h-5" /> Экспорт PDF
+                        </Button>
+                    )
                 }
             />
 
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                <Card padding="lg">
+                    <div className="text-center py-2">
+                        <p className="text-sm font-medium uppercase tracking-wide text-secondary mb-2">Итоговый результат</p>
+                        <div className="text-7xl sm:text-8xl font-bold tabular-nums leading-none text-inter-verse-green dark:text-purple-400">
+                            {report.overall_score}%
+                        </div>
+                        <Badge variant={getScoreVariant(report.overall_score)} className="text-base px-4 py-2 mt-5">
+                            {getScoreLabel(report.overall_score)}
+                        </Badge>
+                    </div>
+                </Card>
+            </motion.div>
+
             <div className="grid lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 space-y-6">
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                        <Card padding="lg">
-                            <div className="text-center">
-                                <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Общая оценка</h2>
-                                <div className="relative w-32 h-32 mx-auto mb-6">
-                                    <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 120 120">
-                                        <circle cx="60" cy="60" r="50" stroke="currentColor" strokeWidth="8" fill="none" className="text-gray-200 dark:text-gray-700" />
-                                        <circle
-                                            cx="60" cy="60" r="50" stroke="currentColor" strokeWidth="8" fill="none"
-                                            strokeDasharray={`${2 * Math.PI * 50}`}
-                                            strokeDashoffset={`${2 * Math.PI * 50 * (1 - report.overall_score / 100)}`}
-                                            className="text-inter-verse-green dark:text-purple-500"
-                                            strokeLinecap="round"
-                                        />
-                                    </svg>
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <span className="text-3xl font-bold tabular-nums text-gray-900 dark:text-gray-100">{report.overall_score}%</span>
-                                    </div>
-                                </div>
-                                <Badge variant={getScoreVariant(report.overall_score)} className="text-base px-4 py-2">
-                                    {getScoreLabel(report.overall_score)}
-                                </Badge>
-                            </div>
-                        </Card>
-                    </motion.div>
-
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-                        <Card padding="lg">
-                            <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100">Детальная оценка</h2>
-                            <div className="h-64">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart data={chartData}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#4b5563' : '#e5e7eb'} />
-                                        <XAxis dataKey="name" tick={{ fill: isDark ? '#d1d5db' : '#374151' }} stroke={isDark ? '#6b7280' : '#9ca3af'} />
-                                        <YAxis domain={[0, 100]} tick={{ fill: isDark ? '#d1d5db' : '#374151' }} stroke={isDark ? '#6b7280' : '#9ca3af'} />
-                                        <Tooltip
-                                            contentStyle={{
-                                                backgroundColor: isDark ? '#4A4A4A' : '#ffffff',
-                                                border: isDark ? '1px solid #6b7280' : '1px solid #e5e7eb',
-                                                borderRadius: '0',
-                                                color: isDark ? '#f3f4f6' : '#111827'
-                                            }}
-                                            labelStyle={{ color: isDark ? '#d1d5db' : '#6b7280' }}
-                                        />
-                                        <Bar dataKey="score" fill={isDark ? '#9333ea' : '#013220'} />
-                                    </BarChart>
-                                </ResponsiveContainer>
-                            </div>
-                        </Card>
+                        <WeakPointsSection
+                            locked={locked}
+                            count={report.weak_points_count ?? report.weak_points?.length ?? 0}
+                            points={report.weak_points || []}
+                        />
                     </motion.div>
 
+                    {(!locked || report.comments || needsAnalysis) && (
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                         <Card padding="lg">
                             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
-                                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Комментарии интервьюера</h2>
+                                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{locked ? 'Общий отзыв' : 'Комментарии интервьюера'}</h2>
                                 {needsAnalysis && (
                                     <Button
                                         onClick={handleAnalyze}
@@ -243,20 +215,37 @@ export default function ReportDetailPage() {
                                     AI-анализ ещё не выполнен. Нажмите кнопку, чтобы получить развёрнутый фидбек.
                                 </p>
                             )}
-                            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{report.comments}</p>
+                            {report.comments && <AccentList text={report.comments} />}
+                            {report.strengths && (
+                                <>
+                                    <h3 className="text-lg font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">Сильные стороны</h3>
+                                    <AccentList text={report.strengths} />
+                                </>
+                            )}
+                            {!locked && report.weaknesses && (
+                                <>
+                                    <h3 className="text-lg font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">Над чем поработать</h3>
+                                    <AccentList text={report.weaknesses} />
+                                </>
+                            )}
                         </Card>
                     </motion.div>
+                    )}
 
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-                        <ReportAnswerReviews items={report.answer_reviews || []} />
-                    </motion.div>
+                    {!locked && report.recommendations && (
+                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+                            <Card padding="lg">
+                                <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Рекомендации</h2>
+                                <AccentList text={report.recommendations} />
+                            </Card>
+                        </motion.div>
+                    )}
 
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-                        <Card padding="lg">
-                            <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Рекомендации</h2>
-                            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{report.recommendations}</p>
-                        </Card>
-                    </motion.div>
+                    {!locked && (
+                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+                            <ReportAnswerReviews items={report.answer_reviews || []} />
+                        </motion.div>
+                    )}
                 </div>
 
                 <div className="space-y-6">

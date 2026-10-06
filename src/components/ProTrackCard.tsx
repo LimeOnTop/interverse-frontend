@@ -1,7 +1,8 @@
 import { Check } from 'lucide-react'
 import { PRO_TRACK_PLAN, formatRub } from '../utils/subscription'
 
-export default function ProTrackCard({ className = '' }: { className?: string }) {
+/** Prices are shown only on /pricing and /subscription; elsewhere pass showPrice={false}. */
+export default function ProTrackCard({ className = '', showPrice = true }: { className?: string; showPrice?: boolean }) {
     return (
         <section className={`iv-form-card p-8 flex flex-col ${className}`}>
             <div className="iv-form-card-shine-clip" aria-hidden>
@@ -21,7 +22,7 @@ export default function ProTrackCard({ className = '' }: { className?: string })
                 {PRO_TRACK_PLAN.description}
             </p>
 
-            <div className="mb-6">
+            {showPrice && <div className="mb-6">
                 <div className="text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
                     {formatRub(PRO_TRACK_PLAN.price)}
                 </div>
@@ -29,7 +30,7 @@ export default function ProTrackCard({ className = '' }: { className?: string })
                 <div className="mt-2 text-xs font-medium text-inter-verse-green dark:text-purple-300">
                     Платные курсы по одной профессии стоят около {formatRub(PRO_TRACK_PLAN.coursePrice)}
                 </div>
-            </div>
+            </div>}
 
             <ul className="space-y-3 mb-6 flex-1">
                 {PRO_TRACK_PLAN.features.map((feature) => (

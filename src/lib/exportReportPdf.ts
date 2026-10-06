@@ -205,6 +205,22 @@ export async function downloadReportPdf(report: ReportPdfInput) {
     writeHeading('Рекомендации')
     writeWrapped(report.recommendations || '—')
 
+    const weakPoints = report.weak_points || []
+    if (weakPoints.length > 0) {
+        writeHeading('Слабые места')
+        weakPoints.forEach((point, index) => {
+            const lines = [
+                `${index + 1}. ${point.label}: ${point.prompt}`,
+                `Ваш ответ: ${point.user_answer || '—'}`,
+                `Правильный ответ: ${point.correct_answer || '—'}`,
+            ]
+            if (point.explanation) lines.push(`Объяснение: ${point.explanation}`)
+            lines.push(`Изучить тему «${point.topic}»: ${point.source_url}`)
+            writeWrapped(lines.join('\n'), { size: 9 })
+            writeWrapped(' ', { size: 6 })
+        })
+    }
+
     const reviews = [...(report.answer_reviews || [])].sort((a, b) => {
         const typeOrder = (type: string) => (type === 'task' ? 1 : 0)
         const byType = typeOrder(a.item_type) - typeOrder(b.item_type)
