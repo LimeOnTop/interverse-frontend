@@ -38,7 +38,7 @@ export default function TrainingLimitPromo() {
                         role="dialog"
                         aria-modal="true"
                         aria-labelledby="training-limit-promo-title"
-                        className="iv-form-card relative w-full max-w-lg p-8 text-left"
+                        className="iv-form-card relative w-full max-w-lg p-6 sm:p-8 text-left max-h-[90dvh] overflow-y-auto"
                         initial={{ opacity: 0, scale: 0.95, y: 12 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 12 }}
@@ -56,7 +56,7 @@ export default function TrainingLimitPromo() {
                         <div className="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-inter-verse-green dark:text-purple-400">
                             <Sparkles className="w-4 h-4" /> Pro
                         </div>
-                        <h2 id="training-limit-promo-title" className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
+                        <h2 id="training-limit-promo-title" className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
                             Вы достигли лимита тренировок
                         </h2>
                         <p className="text-secondary leading-relaxed mb-5">

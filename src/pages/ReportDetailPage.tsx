@@ -140,7 +140,7 @@ export default function ReportDetailPage() {
     if (!report) {
         return (
             <PageTransition className="text-center py-12">
-                <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Отчёт не найден</h2>
+                <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Отчёт не найден</h2>
                 <Link to="/reports">
                     <Button>Вернуться к отчётам</Button>
                 </Link>
@@ -149,7 +149,7 @@ export default function ReportDetailPage() {
     }
 
     return (
-        <PageTransition className="space-y-8">
+        <PageTransition className="space-y-5 sm:space-y-8">
             <PageHeader
                 title="Отчёт по тренировке"
                 description={report.interview?.title || 'Тренировка'}
@@ -180,11 +180,24 @@ export default function ReportDetailPage() {
                         <Badge variant={getScoreVariant(report.overall_score)} className="text-base px-4 py-2 mt-5">
                             {getScoreLabel(report.overall_score)}
                         </Badge>
+                        <p className="lg:hidden text-sm text-secondary mt-4">
+                            {getSpecializationLabel(report.interview?.specialization || '')} · {getLevelLabel(report.interview?.level || '')}
+                            {report.interview?.scheduled_at && ` · ${new Date(report.interview.scheduled_at).toLocaleDateString('ru-RU')}`}
+                        </p>
+                    </div>
+                    {/* Phones: section scores right under the result instead of a sidebar far below. */}
+                    <div className="lg:hidden grid grid-cols-2 gap-3 mt-6 pt-5 border-t border-gray-200 dark:border-gray-600">
+                        {sections.map((section) => (
+                            <div key={section.key} className="flex flex-col items-start gap-1">
+                                <span className="text-[11px] uppercase tracking-wide text-secondary">{section.name}</span>
+                                <SectionScoreBadge section={section} />
+                            </div>
+                        ))}
                     </div>
                 </Card>
             </motion.div>
 
-            <div className="grid lg:grid-cols-3 gap-6">
+            <div className="grid lg:grid-cols-3 gap-5 sm:gap-6">
                 <div className="lg:col-span-2 space-y-6">
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
                         <WeakPointsSection
@@ -198,7 +211,7 @@ export default function ReportDetailPage() {
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                         <Card padding="lg">
                             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
-                                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{locked ? 'Общий отзыв' : 'Комментарии интервьюера'}</h2>
+                                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">{locked ? 'Общий отзыв' : 'Комментарии интервьюера'}</h2>
                                 {needsAnalysis && (
                                     <Button
                                         onClick={handleAnalyze}
@@ -235,7 +248,7 @@ export default function ReportDetailPage() {
                     {!locked && report.recommendations && (
                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
                             <Card padding="lg">
-                                <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Рекомендации</h2>
+                                <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Рекомендации</h2>
                                 <AccentList text={report.recommendations} />
                             </Card>
                         </motion.div>
@@ -249,7 +262,7 @@ export default function ReportDetailPage() {
                 </div>
 
                 <div className="space-y-6">
-                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
+                    <motion.div className="hidden lg:block" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
                         <Card padding="md">
                             <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">О тренировке</h3>
                             <div className="space-y-3 text-sm text-secondary">
@@ -269,7 +282,7 @@ export default function ReportDetailPage() {
                         </Card>
                     </motion.div>
 
-                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
+                    <motion.div className="hidden lg:block" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
                         <Card padding="md">
                             <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Оценки по критериям</h3>
                             <div className="space-y-4">
@@ -283,7 +296,7 @@ export default function ReportDetailPage() {
                         </Card>
                     </motion.div>
 
-                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
+                    <motion.div className="hidden lg:block" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
                         <Card padding="md">
                             <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Детали интервью</h3>
                             <div className="space-y-3 text-sm">

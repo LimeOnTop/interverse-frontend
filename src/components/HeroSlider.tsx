@@ -176,7 +176,7 @@ export default function HeroSlider() {
                         </AnimatePresence>
                     </div>
 
-                    <div className="flex items-center gap-3 pt-6 lg:justify-start justify-center" role="tablist" aria-label="Слайды">
+                    <div className="flex items-center gap-0 pt-4 lg:justify-start justify-center" role="tablist" aria-label="Слайды">
                         {SLIDES.map((s, i) => (
                             <button
                                 key={s.id}
@@ -185,8 +185,10 @@ export default function HeroSlider() {
                                 aria-selected={i === index}
                                 aria-label={`Слайд ${i + 1}`}
                                 onClick={() => goTo(i)}
-                                className={`hero-slider-dot ${i === index ? 'hero-slider-dot-active' : ''}`}
-                            />
+                                className="w-11 h-11 flex items-center justify-center"
+                            >
+                                <span className={`block hero-slider-dot ${i === index ? 'hero-slider-dot-active' : ''}`} />
+                            </button>
                         ))}
                     </div>
                 </div>

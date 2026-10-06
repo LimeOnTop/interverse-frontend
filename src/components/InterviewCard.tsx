@@ -148,7 +148,7 @@ export default function InterviewCard({ interview, onClick, onDelete, hideOnly =
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 mb-4 text-sm">
+            <div className="hidden sm:grid grid-cols-2 gap-2 mb-4 text-sm">
                 <div className="p-2 bg-gray-50 dark:bg-iv-dark-bg border border-gray-100 dark:border-gray-600">
                     <div className="text-xs text-secondary mb-0.5">Специализация</div>
                     <div className="font-medium">{specLabels[interview.specialization] || interview.specialization}</div>

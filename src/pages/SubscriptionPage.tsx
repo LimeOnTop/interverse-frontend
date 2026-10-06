@@ -153,11 +153,11 @@ export default function SubscriptionPage() {
                 </p>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3 max-w-6xl">
+            <div className="grid gap-4 sm:gap-6 md:grid-cols-2 xl:grid-cols-3 max-w-6xl">
                 <section
-                    className={`iv-form-card p-8 flex flex-col ${
+                    className={`iv-form-card p-6 sm:p-8 flex flex-col ${
                         currentPlan === 'free'
-                            ? 'ring-2 ring-inter-verse-green dark:ring-purple-400'
+                            ? 'ring-2 ring-inter-verse-green dark:ring-purple-400 order-last md:order-none'
                             : ''
                     }`}
                 >
@@ -166,7 +166,7 @@ export default function SubscriptionPage() {
                     </div>
 
                     <div className="flex items-start justify-between gap-3 mb-2">
-                        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
                             {FREE_PLAN.name}
                         </h2>
                         {currentPlan === 'free' && (
@@ -216,7 +216,7 @@ export default function SubscriptionPage() {
                 {paidOffers.map((plan) => (
                     <section
                         key={plan.id}
-                        className={`iv-form-card p-8 flex flex-col ${
+                        className={`iv-form-card p-6 sm:p-8 flex flex-col ${
                             currentPlan === 'paid'
                                 ? 'ring-2 ring-inter-verse-green dark:ring-purple-400'
                                 : ''
@@ -227,7 +227,7 @@ export default function SubscriptionPage() {
                         </div>
 
                         <div className="flex items-start justify-between gap-3 mb-2">
-                            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
                                 {plan.name}
                             </h2>
                             <div className="flex items-center gap-2">

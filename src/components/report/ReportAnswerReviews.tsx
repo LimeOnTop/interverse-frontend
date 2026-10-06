@@ -51,7 +51,7 @@ export default function ReportAnswerReviews({ items }: ReportAnswerReviewsProps)
     if (reviews.length === 0) {
         return (
             <Card padding="lg">
-                <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-gray-100">Разбор ответов</h2>
+                <h2 className="text-xl sm:text-2xl font-bold mb-2 text-gray-900 dark:text-gray-100">Разбор ответов</h2>
                 <p className="text-sm text-secondary">
                     Для этого отчёта разбор ответов ещё не сохранён. Запустите AI-анализ заново, чтобы увидеть ответы и эталоны.
                 </p>
@@ -64,7 +64,7 @@ export default function ReportAnswerReviews({ items }: ReportAnswerReviewsProps)
     return (
         <Card padding="lg">
             <div className="mb-5">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Разбор ответов</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Разбор ответов</h2>
                 <p className="text-sm text-secondary mt-1">
                     Откройте вкладку, чтобы сравнить свой ответ с верным вариантом или эталонным решением.
                 </p>

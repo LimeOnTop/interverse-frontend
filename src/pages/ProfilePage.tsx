@@ -621,9 +621,9 @@ export default function ProfilePage() {
     return (
         <PageTransition>
             <div className="w-full">
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6 sm:mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
                             Профиль
                         </h1>
                         <p className="text-secondary mt-1 text-sm leading-relaxed">
@@ -634,7 +634,7 @@ export default function ProfilePage() {
                         type="button"
                         loading={isImportingHH}
                         onClick={() => setShowHHModal(true)}
-                        className="shrink-0 self-start"
+                        className="shrink-0 w-full sm:w-auto sm:self-start"
                     >
                         <Download className="w-5 h-5" />
                         Импортировать из hh.ru

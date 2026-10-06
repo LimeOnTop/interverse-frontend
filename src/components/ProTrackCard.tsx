@@ -4,13 +4,13 @@ import { PRO_TRACK_PLAN, formatRub } from '../utils/subscription'
 /** Prices are shown only on /pricing and /subscription; elsewhere pass showPrice={false}. */
 export default function ProTrackCard({ className = '', showPrice = true }: { className?: string; showPrice?: boolean }) {
     return (
-        <section className={`iv-form-card p-8 flex flex-col ${className}`}>
+        <section className={`iv-form-card p-6 sm:p-8 flex flex-col ${className}`}>
             <div className="iv-form-card-shine-clip" aria-hidden>
                 <div className="iv-form-card-shine" />
             </div>
 
             <div className="flex items-start justify-between gap-3 mb-2">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
                     {PRO_TRACK_PLAN.name}
                 </h2>
                 <span className="text-xs font-semibold uppercase tracking-wide text-white bg-inter-verse-green dark:bg-purple-500 px-2.5 py-1 rounded-md">

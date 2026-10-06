@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Menu, X, Tag, LogIn, UserPlus } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 
 interface PublicNavProps {
@@ -13,7 +15,12 @@ function getPastHeroThreshold() {
 
 export default function PublicNav({ landing = false, overlay = false }: PublicNavProps) {
     const [pastHero, setPastHero] = useState(false)
+    const [menuOpen, setMenuOpen] = useState(false)
     const location = useLocation()
+
+    useEffect(() => {
+        setMenuOpen(false)
+    }, [location.pathname])
 
     const handleLogoClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
         if (location.pathname === '/') {
@@ -53,15 +60,17 @@ export default function PublicNav({ landing = false, overlay = false }: PublicNa
 
     return (
         <header className={headerClass}>
-            <div className="max-w-content mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                 <Link
                     to="/"
                     onClick={handleLogoClick}
-                    className="text-xl font-bold gradient-text-adaptive tracking-tight hover:opacity-80 transition-iv"
+                    className="inline-flex items-center min-h-[44px] text-xl font-bold gradient-text-adaptive tracking-tight hover:opacity-80 transition-iv"
                 >
                     InterVerse
                 </Link>
-                <div className="flex items-center gap-4">
+
+                {/* Desktop / tablet actions */}
+                <div className="hidden md:flex items-center gap-4">
                     <Link
                         to="/pricing"
                         className={
@@ -90,7 +99,48 @@ export default function PublicNav({ landing = false, overlay = false }: PublicNa
                         Регистрация
                     </Link>
                 </div>
+
+                {/* Phones: theme + burger */}
+                <div className="flex md:hidden items-center gap-1">
+                    <ThemeToggle
+                        iconClassName={overlay ? `${overlayActionClass} transition-iv` : ''}
+                        className={overlay && !pastHero ? 'hover:bg-transparent dark:hover:bg-transparent' : ''}
+                    />
+                    <button
+                        type="button"
+                        onClick={() => setMenuOpen((open) => !open)}
+                        className={`btn-icon ${overlay ? overlayActionClass : ''}`}
+                        aria-label={menuOpen ? 'Закрыть меню' : 'Открыть меню'}
+                        aria-expanded={menuOpen}
+                    >
+                        {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                    </button>
+                </div>
             </div>
+
+            <AnimatePresence>
+                {menuOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        transition={{ duration: 0.18 }}
+                        className="md:hidden iv-surface border-b border-gray-200 dark:border-gray-600 shadow-iv-lg"
+                    >
+                        <nav className="px-4 py-3 flex flex-col gap-1">
+                            <Link to="/pricing" className="iv-nav-item text-base">
+                                <Tag className="w-5 h-5" strokeWidth={1.75} /> Тарифы
+                            </Link>
+                            <Link to="/login" className="iv-nav-item text-base">
+                                <LogIn className="w-5 h-5" strokeWidth={1.75} /> Войти
+                            </Link>
+                            <Link to="/register" className="btn-primary-adaptive w-full justify-center mt-2">
+                                <UserPlus className="w-5 h-5" strokeWidth={1.75} /> Регистрация
+                            </Link>
+                        </nav>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </header>
     )
 }

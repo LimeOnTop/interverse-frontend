@@ -47,7 +47,7 @@ export default function HomePage() {
                     <div className="h-[10vh] min-h-[48px] flex items-center justify-center">
                         <ScrollDownIndicator targetId="landing-features-content" />
                     </div>
-                    <div id="landing-features-content" className="max-w-content mx-auto px-6 lg:px-8 pb-20">
+                    <div id="landing-features-content" className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 pb-20">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
@@ -55,7 +55,7 @@ export default function HomePage() {
                             transition={{ duration: 0.5 }}
                             className="mb-12"
                         >
-                            <h2 className="text-3xl font-bold tracking-tight mb-3">Как проходит тренировка</h2>
+                            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">Как проходит тренировка</h2>
                             <p className="text-secondary max-w-xl">Три шага — и вы уже отрабатываете навыки на симуляции интервью</p>
                         </motion.div>
 
@@ -81,7 +81,7 @@ export default function HomePage() {
 
                 {/* Testimonials */}
                 <section className="iv-landing-section bg-gray-50 dark:bg-iv-dark-bg overflow-hidden">
-                    <div className="max-w-content mx-auto px-6 lg:px-8 py-20">
+                    <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 py-20">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
@@ -89,7 +89,7 @@ export default function HomePage() {
                             transition={{ duration: 0.5 }}
                             className="mb-10"
                         >
-                            <h2 className="text-3xl font-bold tracking-tight mb-3">Отзывы о тренировках</h2>
+                            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">Отзывы о тренировках</h2>
                             <p className="text-secondary max-w-xl">
                                 Разработчики делятся, как симуляции помогли им подготовиться к реальным собеседованиям
                             </p>
@@ -102,10 +102,10 @@ export default function HomePage() {
 
                 {/* Benefits */}
                 <section className="iv-landing-section">
-                    <div className="max-w-content mx-auto px-6 lg:px-8 py-20">
+                    <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 py-20">
                         <div className="grid lg:grid-cols-2 gap-12 items-center">
                             <div>
-                                <h2 className="text-3xl font-bold tracking-tight mb-3">Готовься как к настоящему интервью</h2>
+                                <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">Готовься как к настоящему интервью</h2>
                                 <p className="text-secondary mb-8">Системная практика вместо хаотичного зубрёжки перед собеседованием</p>
                                 <div className="grid sm:grid-cols-2 gap-4">
                                     {benefits.map((benefit, index) => (
@@ -124,7 +124,7 @@ export default function HomePage() {
                                 </div>
                             </div>
                             <Card padding="lg" className="gradient-bg-adaptive text-white border-0 shadow-iv-xl">
-                                <h3 className="text-2xl font-bold mb-3">Пора тренироваться?</h3>
+                                <h3 className="text-xl sm:text-2xl font-bold mb-3">Пора тренироваться?</h3>
                                 <p className="text-white/80 text-sm mb-6 leading-relaxed">
                                     Зарегистрируйся и пройди первую симуляцию интервью за несколько минут — бесплатно.
                                 </p>

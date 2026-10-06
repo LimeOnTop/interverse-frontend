@@ -74,7 +74,7 @@ export default function PricingPage() {
             <PublicNav landing />
 
             <PageTransition className="flex-1">
-                <section className="max-w-content mx-auto px-6 lg:px-8 py-12 lg:py-16">
+                <section className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
                     <div className="max-w-2xl mb-10">
                         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100 mb-3">
                             Тарифы
@@ -94,13 +94,13 @@ export default function PricingPage() {
                         </p>
                     </div>
 
-                    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3 max-w-6xl">
-                        <section className="iv-form-card p-8 flex flex-col">
+                    <div className="grid gap-4 sm:gap-6 md:grid-cols-2 xl:grid-cols-3 max-w-6xl">
+                        <section className="iv-form-card p-6 sm:p-8 flex flex-col">
                             <div className="iv-form-card-shine-clip" aria-hidden>
                                 <div className="iv-form-card-shine" />
                             </div>
 
-                            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                                 {FREE_PLAN.name}
                             </h2>
                             <p className="text-sm text-secondary mb-6 leading-relaxed">
@@ -140,14 +140,14 @@ export default function PricingPage() {
                         {paidOffers.map((plan) => (
                             <section
                                 key={plan.id}
-                                className="iv-form-card p-8 flex flex-col ring-2 ring-inter-verse-green dark:ring-purple-400"
+                                className="iv-form-card p-6 sm:p-8 flex flex-col ring-2 ring-inter-verse-green dark:ring-purple-400"
                             >
                                 <div className="iv-form-card-shine-clip" aria-hidden>
                                     <div className="iv-form-card-shine" />
                                 </div>
 
                                 <div className="flex items-start justify-between gap-3 mb-2">
-                                    <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
                                         {plan.name}
                                     </h2>
                                     {plan.badge && (

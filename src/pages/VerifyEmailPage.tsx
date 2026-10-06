@@ -89,7 +89,7 @@ export default function VerifyEmailPage() {
             <div className="w-full">
                 <FormCard>
                     <div className="mb-8">
-                        <h1 className="text-2xl font-bold tracking-tight mb-2">Подтверждение email</h1>
+                        <h1 className="text-xl sm:text-2xl font-bold tracking-tight mb-2">Подтверждение email</h1>
                         <p className="text-secondary text-sm">
                             Мы отправили 6-значный код на <span className="font-medium">{email}</span>. Если письма нет, проверьте папку «Спам».
                         </p>

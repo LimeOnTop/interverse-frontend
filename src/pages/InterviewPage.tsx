@@ -275,7 +275,7 @@ export default function InterviewPage() {
     if (!session) {
         return (
             <PageTransition className="text-center py-12">
-                <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Тренировка не найдена</h2>
+                <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Тренировка не найдена</h2>
                 <Button onClick={() => navigate('/dashboard')}>Вернуться на дашборд</Button>
             </PageTransition>
         )
@@ -290,7 +290,7 @@ export default function InterviewPage() {
                             <ArrowLeft className="w-5 h-5" />
                         </Button>
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{session.interview.title}</h1>
+                            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">{session.interview.title}</h1>
                             <p className="text-secondary text-sm mt-1">{session.interview.description}</p>
                         </div>
                     </div>
@@ -327,7 +327,7 @@ export default function InterviewPage() {
     }
 
     return (
-        <PageTransition className="max-w-3xl mx-auto space-y-6">
+        <PageTransition className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
             <InterviewSessionHeader
                 title={session.interview.title}
                 description={session.interview.description}
@@ -362,7 +362,29 @@ export default function InterviewPage() {
                 </motion.div>
             </AnimatePresence>
 
-            <div className="flex items-center justify-between gap-4">
+            {/* Phones: sticky thumb-reach action bar. */}
+            <div className="sm:hidden sticky bottom-0 z-10 -mx-4 px-4 py-3 iv-surface border-t border-gray-200 dark:border-gray-600 iv-safe-bottom grid grid-cols-[auto_1fr] gap-3">
+                <button
+                    type="button"
+                    onClick={handlePrevious}
+                    disabled={currentStepIndex === 0}
+                    aria-label="Предыдущий шаг"
+                    className="btn-secondary px-4 disabled:opacity-50 disabled:pointer-events-none"
+                >
+                    <ArrowLeft className="w-5 h-5" />
+                </button>
+                <button
+                    type="button"
+                    onClick={handleNext}
+                    disabled={!canProceed()}
+                    className="btn-primary-adaptive disabled:opacity-50 disabled:pointer-events-none"
+                >
+                    {currentStepIndex === totalSteps - 1 ? 'Завершить' : 'Далее'}
+                    <ArrowRight className="w-5 h-5" />
+                </button>
+            </div>
+
+            <div className="hidden sm:flex items-center justify-between gap-4">
                 <button
                     type="button"
                     onClick={handlePrevious}
