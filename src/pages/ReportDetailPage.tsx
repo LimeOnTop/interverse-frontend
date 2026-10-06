@@ -194,10 +194,11 @@ export default function ReportDetailPage() {
                         />
                     </motion.div>
 
+                    {(!locked || report.comments || needsAnalysis) && (
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                         <Card padding="lg">
                             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
-                                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Комментарии интервьюера</h2>
+                                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{locked ? 'Общий отзыв' : 'Комментарии интервьюера'}</h2>
                                 {needsAnalysis && (
                                     <Button
                                         onClick={handleAnalyze}
@@ -214,7 +215,7 @@ export default function ReportDetailPage() {
                                     AI-анализ ещё не выполнен. Нажмите кнопку, чтобы получить развёрнутый фидбек.
                                 </p>
                             )}
-                            <AccentList text={report.comments} />
+                            {report.comments && <AccentList text={report.comments} />}
                             {report.strengths && (
                                 <>
                                     <h3 className="text-lg font-semibold mt-6 mb-3 text-gray-900 dark:text-gray-100">Сильные стороны</h3>
@@ -229,13 +230,16 @@ export default function ReportDetailPage() {
                             )}
                         </Card>
                     </motion.div>
+                    )}
 
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-                        <Card padding="lg">
-                            <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Рекомендации</h2>
-                            <AccentList text={report.recommendations} />
-                        </Card>
-                    </motion.div>
+                    {!locked && report.recommendations && (
+                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+                            <Card padding="lg">
+                                <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Рекомендации</h2>
+                                <AccentList text={report.recommendations} />
+                            </Card>
+                        </motion.div>
+                    )}
 
                     {!locked && (
                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
