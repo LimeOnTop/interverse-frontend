@@ -3,15 +3,15 @@ import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 
-import workstationBg from '../../images/3d-rendering-computer.webp'
+import trainingBg from '../../images/hero-training.png'
 import interviewBg from '../../images/hero-interview.png'
 import levelsBg from '../../images/hero-levels.png'
 import feedbackBg from '../../images/hero-feedback.png'
 
-type SlideImageKey = 'workstation' | 'interview' | 'progress' | 'report'
+type SlideImageKey = 'training' | 'interview' | 'progress' | 'report'
 
 const SLIDE_IMAGE_BACKGROUNDS: Record<SlideImageKey, string> = {
-    workstation: workstationBg,
+    training: trainingBg,
     interview: interviewBg,
     progress: levelsBg,
     report: feedbackBg,
@@ -34,8 +34,8 @@ const SLIDES: Slide[] = [
         title: 'Тренируйся как на',
         highlight: 'настоящем собеседовании',
         description: 'Проходи реалистичные сценарии и снимай стресс до встречи с работодателем.',
-        illustration: 'workstation',
-        backgroundPosition: 'right center',
+        illustration: 'training',
+        backgroundPosition: 'center',
     },
     {
         id: 1,

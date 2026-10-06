@@ -16,7 +16,7 @@ const features = [
     },
     {
         step: '2',
-        title: 'Укажи свой стек',
+        title: 'Укажи свои навыки',
         description: 'React, Go, Python, Kubernetes — вопросы и задачи под технологии из твоего резюме',
     },
     {
