@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useAuthStore } from '../store/authStore'
+import { EmailNotVerifiedError, useAuthStore } from '../store/authStore'
 import toast from 'react-hot-toast'
 import { Eye, EyeOff } from 'lucide-react'
 import AuthSplitLayout from '../components/AuthSplitLayout'
@@ -40,6 +40,11 @@ export default function LoginPage() {
             toast.success('Добро пожаловать!')
             navigate(user?.role === 'admin' ? '/admin' : '/dashboard')
         } catch (error: any) {
+            if (error instanceof EmailNotVerifiedError) {
+                toast('Подтвердите email: мы отправили код на почту')
+                navigate('/verify-email', { state: { email: error.email, password: data.password } })
+                return
+            }
             const raw = String(error?.message || '')
             const isInvalid = /invalid credentials|login failed|неверн/i.test(raw)
             toast.error(isInvalid ? 'Неверный логин или пароль' : (raw || 'Не удалось войти'))

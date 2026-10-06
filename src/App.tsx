@@ -8,6 +8,7 @@ import PricingPage from './pages/PricingPage'
 import PrivacyPage from './pages/PrivacyPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
+import VerifyEmailPage from './pages/VerifyEmailPage'
 import DashboardPage from './pages/DashboardPage'
 import ActivityPage from './pages/ActivityPage'
 import InterviewWizardPage from './pages/InterviewWizardPage'
@@ -58,6 +59,7 @@ function App() {
                     <Route path="/subscription/fail" element={<PaymentFailPage />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
+                    <Route path="/verify-email" element={<VerifyEmailPage />} />
                     <Route path="/oauth/callback" element={<OAuthCallbackPage />} />
                     <Route path="/grafana" element={<GrafanaLoginPage />} />
                     <Route path="/metrics-login" element={<GrafanaLoginPage />} />
