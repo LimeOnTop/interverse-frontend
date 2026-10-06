@@ -1,3 +1,4 @@
+import { isTrainingLimitError } from '../store/promoStore'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
@@ -76,7 +77,10 @@ export default function InterviewWizardPage() {
             clearFormDraft('interview-wizard')
             navigate('/dashboard')
         } catch (error: any) {
-            toast.error(formatSessionStartError(error))
+            // The limit promo opens from the API interceptor.
+            if (!isTrainingLimitError(error)) {
+                toast.error(formatSessionStartError(error))
+            }
         } finally {
             setIsLoading(false)
         }

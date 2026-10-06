@@ -1,5 +1,6 @@
 import axios, { type InternalAxiosRequestConfig } from 'axios'
 import { useAuthStore } from '../store/authStore'
+import { isTrainingLimitError, usePromoStore } from '../store/promoStore'
 
 export const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL || '/api/v1',
@@ -65,6 +66,11 @@ api.interceptors.response.use(
         return response
     },
     async (error) => {
+        if (isTrainingLimitError(error)) {
+            usePromoStore.getState().openLimitPromo()
+            return Promise.reject(error)
+        }
+
         const originalRequest = error.config as (InternalAxiosRequestConfig & { _retry?: boolean }) | undefined
 
         if (

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { FileText, Search, Download, Eye, Trash2, Loader2 } from 'lucide-react'
+import { FileText, Search, Download, Eye, Trash2, Loader2, Lock } from 'lucide-react'
 import { api } from '../services/api'
 import toast from 'react-hot-toast'
 import { Link } from 'react-router-dom'
@@ -219,15 +219,25 @@ export default function ReportsPage() {
                                                         <Eye className="w-4 h-4" /> Подробнее
                                                     </Button>
                                                 </Link>
-                                                <Button
-                                                    type="button"
-                                                    variant="secondary"
-                                                    className="text-sm px-4 py-2"
-                                                    loading={exportingId === report.id}
-                                                    onClick={(e) => void handleExportPdf(report, e)}
-                                                >
-                                                    <Download className="w-4 h-4" /> PDF
-                                                </Button>
+                                                {report.locked ? (
+                                                    <Link
+                                                        to="/subscription"
+                                                        className="btn-secondary inline-flex items-center gap-2 text-sm px-4 py-2"
+                                                        title="Скачивание отчёта в PDF доступно в Pro"
+                                                    >
+                                                        <Lock className="w-4 h-4" /> PDF в Pro
+                                                    </Link>
+                                                ) : (
+                                                    <Button
+                                                        type="button"
+                                                        variant="secondary"
+                                                        className="text-sm px-4 py-2"
+                                                        loading={exportingId === report.id}
+                                                        onClick={(e) => void handleExportPdf(report, e)}
+                                                    >
+                                                        <Download className="w-4 h-4" /> PDF
+                                                    </Button>
+                                                )}
                                             </div>
                                             <button
                                                 type="button"

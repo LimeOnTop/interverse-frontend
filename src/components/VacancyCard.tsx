@@ -1,3 +1,4 @@
+import { isTrainingLimitError } from '../store/promoStore'
 import { ExternalLink, MapPin } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
@@ -107,7 +108,10 @@ export default function VacancyCard({ vacancy, fallbackSkills = [] }: VacancyCar
             toast.success('Тренировка запущена')
             navigate(`/interview/${interviewId}`)
         } catch (error) {
-            toast.error(formatSessionStartError(error))
+            // The limit promo opens from the API interceptor.
+            if (!isTrainingLimitError(error)) {
+                toast.error(formatSessionStartError(error))
+            }
         } finally {
             setTraining(false)
         }
