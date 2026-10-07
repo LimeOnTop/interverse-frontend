@@ -100,7 +100,8 @@ export default function DashboardPage() {
         <>Создано тренировок сегодня.<br />Дневной лимит Pro — {quota.limit}.</>
     ) : (
         <>
-            Тренировки тарифа Basic.{' '}
+            Тренировки тарифа Basic.
+            <br />
             <Link to="/subscription" className="font-medium text-inter-verse-green dark:text-purple-400 underline underline-offset-2">
                 Больше тренировок в Pro
             </Link>
