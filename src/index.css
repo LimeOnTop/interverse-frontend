@@ -521,14 +521,15 @@
     }
 
     .iv-nav-item {
-        @apply flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-400 rounded-lg;
+        @apply flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-400 rounded-lg border-2 border-transparent;
         @apply hover:bg-gray-50 hover:text-gray-900 dark:hover:bg-iv-dark-bg dark:hover:text-gray-100;
         transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .iv-nav-item-active {
-        @apply text-inter-verse-green dark:text-purple-300 bg-green-50 dark:bg-iv-dark-tint font-semibold;
-        @apply hover:bg-green-50 hover:text-inter-verse-green dark:hover:bg-iv-dark-tint dark:hover:text-purple-300;
+        /* Selected item: accent border only, no fill or colour change. */
+        @apply text-gray-900 dark:text-gray-100 font-semibold border-inter-verse-green dark:border-purple-400;
+        @apply hover:bg-transparent dark:hover:bg-transparent;
     }
 
     /* ── Profile mosaic ── */
