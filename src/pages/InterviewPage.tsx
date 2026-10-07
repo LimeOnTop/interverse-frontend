@@ -11,7 +11,7 @@ import Spinner from '../components/ui/Spinner'
 import Button from '../components/ui/Button'
 import InterviewQuestionStep, {
     InterviewTaskStep,
-    InterviewSessionHeader,
+    InterviewRouteMap,
     InterviewSessionComplete,
 } from '../components/interview/InterviewSessionSteps'
 import {
@@ -334,12 +334,28 @@ export default function InterviewPage() {
         )
     }
 
+    const questionTotal = session.steps.filter((step) => step.type === 'question').length
+    const taskTotal = session.steps.filter((step) => step.type === 'task').length
+    const isAnswered = (step: typeof session.steps[number]) => {
+        const answer = answers[step.id]
+        return step.type === 'question' ? answer?.selectedOptionIndex !== undefined : Boolean(answer?.taskAnswer?.trim())
+    }
+    const filled = session.steps.filter(isAnswered).length
+    const isLast = currentStepIndex === totalSteps - 1
+    const nextLabel = isLast ? 'Завершить' : currentStep?.type === 'task' ? 'Дальше' : 'Следующий вопрос'
+    const practiceTitle = [
+        session.steps.find((step) => step.technology)?.technology || specLabels[session.interview.specialization || ''] || '',
+        levelLabels[session.interview.level || ''] || session.interview.level,
+    ].filter(Boolean).join(' · ')
+
     if (isComplete) {
         return (
             <PageTransition className="max-w-3xl mx-auto">
                 <InterviewSessionComplete
                     answeredQuestions={stats.answeredQuestions}
+                    totalQuestions={questionTotal}
                     completedTasks={stats.completedTasks}
+                    totalTasks={taskTotal}
                     submitting={submitting}
                     reportId={reportId}
                     submitError={submitError}
@@ -351,49 +367,103 @@ export default function InterviewPage() {
     }
 
     return (
-        <PageTransition className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
-            <InterviewSessionHeader
-                title={session.interview.title}
-                description={session.interview.description}
-                currentStep={currentStepIndex + 1}
-                totalSteps={totalSteps}
-                level={levelLabels[session.interview.level || ''] || session.interview.level}
-                specialization={specLabels[session.interview.specialization || ''] || session.interview.specialization}
-                onBack={() => navigate('/interview-service')}
-            />
-
-            <AnimatePresence mode="wait">
-                <motion.div
-                    key={currentStep?.id}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.25 }}
+        <PageTransition className="max-w-5xl mx-auto">
+            <header className="flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                    <p className="iv-eyebrow">Режим фокуса</p>
+                    <h1 className="mt-1.5 text-xl sm:text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100 truncate">
+                        {practiceTitle ? `Практика ${practiceTitle}` : session.interview.title}
+                    </h1>
+                    <p className="mt-1 text-sm text-secondary">
+                        {questionTotal} {plural(questionTotal, ['вопрос', 'вопроса', 'вопросов'])}
+                        {taskTotal > 0 && ` + ${taskTotal} ${plural(taskTotal, ['задача', 'задачи', 'задач'])}`}
+                        {` · ${filled} из ${totalSteps} заполнено`}
+                    </p>
+                </div>
+                <button
+                    type="button"
+                    onClick={() => navigate('/interview-service')}
+                    className="shrink-0 inline-flex items-center gap-2 rounded-lg border border-gray-200 dark:border-iv-dark-line px-3 sm:px-4 py-2.5 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:border-gray-300 dark:hover:border-gray-500 transition-iv"
+                    aria-label="Выйти из тренировки"
                 >
-                    {currentStep?.type === 'question' ? (
-                        <InterviewQuestionStep
-                            step={currentStep}
-                            selectedOptionIndex={answers[currentStep.id]?.selectedOptionIndex}
-                            onSelectOption={handleSelectOption}
-                        />
-                    ) : currentStep ? (
-                        <InterviewTaskStep
-                            step={currentStep}
-                            value={answers[currentStep.id]?.taskAnswer || ''}
-                            onChange={handleTaskChange}
-                        />
-                    ) : null}
-                </motion.div>
-            </AnimatePresence>
+                    <ArrowLeft className="w-4 h-4" /> <span className="hidden sm:inline">Выйти</span>
+                </button>
+            </header>
+
+            <div className="mt-5 sm:mt-6 iv-track"><span style={{ width: `${totalSteps ? (filled / totalSteps) * 100 : 0}%` }} /></div>
+
+            <div className="mt-6 sm:mt-8 grid grid-cols-1 lg:grid-cols-[1fr_14rem] gap-6 lg:gap-8 items-start">
+                <section className="iv-panel rounded-2xl p-5 sm:p-9 min-w-0">
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={currentStep?.id}
+                            initial={{ opacity: 0, x: 14 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -14 }}
+                            transition={{ duration: 0.18 }}
+                        >
+                            {currentStep?.type === 'question' ? (
+                                <InterviewQuestionStep
+                                    step={currentStep}
+                                    total={questionTotal}
+                                    selectedOptionIndex={answers[currentStep.id]?.selectedOptionIndex}
+                                    onSelectOption={handleSelectOption}
+                                />
+                            ) : currentStep ? (
+                                <InterviewTaskStep
+                                    step={currentStep}
+                                    total={taskTotal}
+                                    value={answers[currentStep.id]?.taskAnswer || ''}
+                                    onChange={handleTaskChange}
+                                />
+                            ) : null}
+                        </motion.div>
+                    </AnimatePresence>
+
+                    <footer className="hidden sm:flex mt-8 pt-6 border-t border-gray-200 dark:border-iv-dark-line items-center justify-between gap-3">
+                        <button
+                            type="button"
+                            onClick={handlePrevious}
+                            disabled={currentStepIndex === 0}
+                            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 dark:border-iv-dark-line px-5 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100 disabled:opacity-40 disabled:pointer-events-none"
+                        >
+                            <ArrowLeft className="w-4 h-4" /> Назад
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleNext}
+                            disabled={!canProceed()}
+                            className="btn-primary-adaptive inline-flex items-center gap-2 rounded-lg px-5 py-3 text-sm disabled:opacity-50 disabled:pointer-events-none"
+                        >
+                            {nextLabel} <ArrowRight className="w-4 h-4" />
+                        </button>
+                    </footer>
+                </section>
+
+                <aside className="lg:sticky lg:top-0">
+                    <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Ваш маршрут</h3>
+                    <InterviewRouteMap
+                        steps={session.steps}
+                        currentIndex={currentStepIndex}
+                        isAnswered={isAnswered}
+                        onSelect={setCurrentStepIndex}
+                    />
+                    <div className="hidden lg:block mt-6 pt-6 border-t border-gray-200 dark:border-iv-dark-line text-sm text-secondary leading-relaxed">
+                        <p className="iv-eyebrow mb-2">В своём темпе</p>
+                        <p>Ответ можно изменить. Переключайтесь между вопросами, ваш выбор сохранится.</p>
+                        <p className="mt-3">Результат и разбор появятся после завершения.</p>
+                    </div>
+                </aside>
+            </div>
 
             {/* Phones: sticky thumb-reach action bar. */}
-            <div className="sm:hidden sticky bottom-0 z-10 -mx-4 px-4 py-3 iv-surface border-t border-gray-200 dark:border-iv-dark-line iv-safe-bottom grid grid-cols-[auto_1fr] gap-3">
+            <div className="sm:hidden sticky bottom-0 z-10 mt-6 -mx-4 px-4 py-3 iv-surface border-t border-gray-200 dark:border-iv-dark-line iv-safe-bottom grid grid-cols-[auto_1fr] gap-3">
                 <button
                     type="button"
                     onClick={handlePrevious}
                     disabled={currentStepIndex === 0}
                     aria-label="Предыдущий шаг"
-                    className="btn-secondary px-4 disabled:opacity-50 disabled:pointer-events-none"
+                    className="rounded-lg border border-gray-200 dark:border-iv-dark-line px-4 text-gray-900 dark:text-gray-100 disabled:opacity-40 disabled:pointer-events-none"
                 >
                     <ArrowLeft className="w-5 h-5" />
                 </button>
@@ -401,34 +471,19 @@ export default function InterviewPage() {
                     type="button"
                     onClick={handleNext}
                     disabled={!canProceed()}
-                    className="btn-primary-adaptive disabled:opacity-50 disabled:pointer-events-none"
+                    className="btn-primary-adaptive rounded-lg inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
                 >
-                    {currentStepIndex === totalSteps - 1 ? 'Завершить' : 'Далее'}
-                    <ArrowRight className="w-5 h-5" />
-                </button>
-            </div>
-
-            <div className="hidden sm:flex items-center justify-between gap-4">
-                <button
-                    type="button"
-                    onClick={handlePrevious}
-                    disabled={currentStepIndex === 0}
-                    className="btn-nav-link disabled:opacity-50 disabled:pointer-events-none"
-                >
-                    <ArrowLeft className="w-5 h-5" />
-                    Назад
-                </button>
-
-                <button
-                    type="button"
-                    onClick={handleNext}
-                    disabled={!canProceed()}
-                    className="btn-nav-link disabled:opacity-50 disabled:pointer-events-none"
-                >
-                    {currentStepIndex === totalSteps - 1 ? 'Завершить' : 'Далее'}
-                    <ArrowRight className="w-5 h-5" />
+                    {nextLabel} <ArrowRight className="w-5 h-5" />
                 </button>
             </div>
         </PageTransition>
     )
+}
+
+function plural(count: number, forms: [string, string, string]) {
+    const mod10 = count % 10
+    const mod100 = count % 100
+    if (mod10 === 1 && mod100 !== 11) return forms[0]
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return forms[1]
+    return forms[2]
 }

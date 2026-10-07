@@ -1,171 +1,155 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowLeft } from 'lucide-react'
-import Badge from '../ui/Badge'
-import Button from '../ui/Button'
-import Card from '../ui/Card'
+import { ArrowRight, Check } from 'lucide-react'
 import type { SessionStep } from '../../lib/interviewSession'
+
+const getOptionLabel = (index: number) => String.fromCharCode(65 + index)
+const pad = (value: number) => String(value).padStart(2, '0')
+
+/** "ВОПРОС 03 / 12" and the technology chip above a question or task. */
+function StepKicker({ step, total }: { step: SessionStep; total: number }) {
+    const isTask = step.type === 'task'
+    const number = (isTask ? step.taskNumber : step.questionNumber) ?? 1
+    return (
+        <div className="flex items-center justify-between gap-3">
+            <span className="iv-eyebrow">{isTask ? 'Задача' : 'Вопрос'} {pad(number)} / {pad(total)}</span>
+            {step.technology && (
+                <span className="rounded-md border border-gray-200 dark:border-iv-dark-line px-2.5 py-1 text-xs font-semibold text-secondary">
+                    {step.technology}
+                </span>
+            )}
+        </div>
+    )
+}
 
 interface InterviewQuestionStepProps {
     step: SessionStep
+    total: number
     selectedOptionIndex?: number
     onSelectOption: (index: number) => void
 }
 
-const getOptionLabel = (index: number) => String.fromCharCode(65 + index)
-
 export default function InterviewQuestionStep({
     step,
+    total,
     selectedOptionIndex,
     onSelectOption,
 }: InterviewQuestionStepProps) {
     return (
-        <Card padding="lg" className="space-y-5 sm:space-y-6">
-            <div className="space-y-3">
-                <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-semibold uppercase tracking-widest text-inter-verse-green dark:text-purple-400">
-                        {step.label}
-                    </span>
-                    {step.technology && <Badge variant="info">{step.technology}</Badge>}
-                </div>
-                <p className="text-base sm:text-lg leading-relaxed text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
-                    {step.text}
-                </p>
-            </div>
+        <div>
+            <StepKicker step={step} total={total} />
+            <h2 className="mt-5 text-xl sm:text-2xl font-bold leading-snug tracking-tight text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
+                {step.text}
+            </h2>
 
-            <div className="grid gap-3">
+            <div className="mt-6 grid gap-3" role="group" aria-label="Варианты ответа">
                 {step.options?.map((option, index) => {
                     const isSelected = selectedOptionIndex === index
-
                     return (
                         <motion.button
                             key={`${step.id}-${index}`}
                             type="button"
                             onClick={() => onSelectOption(index)}
-                            whileTap={{ scale: 0.99 }}
-                            className={`w-full text-left p-4 border transition-iv ${
+                            aria-pressed={isSelected}
+                            initial={{ opacity: 0, y: 6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.04 }}
+                            whileTap={{ scale: 0.995 }}
+                            className={`w-full text-left rounded-xl border px-4 py-3.5 sm:px-5 sm:py-4 flex items-center gap-4 transition-iv ${
                                 isSelected
-                                    ? 'border-inter-verse-green bg-green-50 dark:border-purple-400 dark:bg-purple-900/20'
-                                    : 'border-gray-200 dark:border-iv-dark-line hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-iv-dark-bg'
+                                    ? 'border-inter-verse-green bg-green-50/60 shadow-[inset_3px_0_0_0_#013220] dark:border-purple-400 dark:bg-iv-dark-tint dark:shadow-[inset_3px_0_0_0_#c084fc]'
+                                    : 'border-gray-200 dark:border-iv-dark-line hover:border-gray-300 dark:hover:border-gray-500'
                             }`}
                         >
-                            <div className="flex items-start gap-3">
-                                <span
-                                    className={`w-8 h-8 shrink-0 flex items-center justify-center text-sm font-bold ${
-                                        isSelected
-                                            ? 'gradient-bg-adaptive text-white'
-                                            : 'bg-gray-100 text-gray-700 dark:bg-iv-dark-bg dark:text-gray-300'
-                                    }`}
-                                >
-                                    {getOptionLabel(index)}
-                                </span>
-                                <span className="text-sm sm:text-base leading-relaxed text-gray-800 dark:text-gray-200">
-                                    {option}
-                                </span>
-                            </div>
+                            <span
+                                className={`w-8 h-8 shrink-0 rounded-md flex items-center justify-center text-xs font-bold ${
+                                    isSelected
+                                        ? 'gradient-bg-adaptive text-white'
+                                        : 'bg-gray-100 text-gray-600 dark:bg-iv-dark-bg dark:text-gray-400'
+                                }`}
+                            >
+                                {getOptionLabel(index)}
+                            </span>
+                            <span className="text-sm sm:text-base leading-relaxed text-gray-900 dark:text-gray-100">{option}</span>
                         </motion.button>
                     )
                 })}
             </div>
-
-            {selectedOptionIndex === undefined && (
-                <p className="text-sm text-secondary">Выберите один из вариантов ответа</p>
-            )}
-        </Card>
+        </div>
     )
 }
 
 interface InterviewTaskStepProps {
     step: SessionStep
+    total: number
     value: string
     onChange: (value: string) => void
 }
 
-export function InterviewTaskStep({ step, value, onChange }: InterviewTaskStepProps) {
+export function InterviewTaskStep({ step, total, value, onChange }: InterviewTaskStepProps) {
     return (
-        <Card padding="lg" className="space-y-5 sm:space-y-6">
-            <div className="space-y-3">
-                <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-400">
-                        {step.label}
-                    </span>
-                    {step.technology && <Badge variant="warning">{step.technology}</Badge>}
-                </div>
-                <p className="text-base sm:text-lg leading-relaxed text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
-                    {step.text}
-                </p>
-            </div>
-
-            <div>
-                <label className="block text-xs font-medium uppercase tracking-wide text-secondary mb-2">
-                    Ваше решение
-                </label>
+        <div>
+            <StepKicker step={step} total={total} />
+            <h2 className="mt-5 text-lg sm:text-xl font-bold leading-snug text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
+                {step.text}
+            </h2>
+            <p className="mt-3 text-sm text-secondary">Можно написать код или объяснить решение словами.</p>
+            <label className="mt-5 block">
+                <span className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Ваше решение</span>
                 <textarea
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
-                    placeholder="Опишите подход, код или архитектурное решение..."
-                    className="input-field resize-y min-h-[45vh] sm:min-h-[220px] font-mono text-sm"
+                    placeholder="// Опишите подход или напишите код…"
+                    spellCheck={false}
+                    className="input-field rounded-xl resize-y min-h-[45vh] sm:min-h-[260px] font-mono text-sm leading-relaxed dark:!bg-iv-dark-bg"
                 />
-            </div>
-        </Card>
+            </label>
+        </div>
     )
 }
 
-interface InterviewSessionHeaderProps {
-    title: string
-    description?: string
-    currentStep: number
-    totalSteps: number
-    level?: string
-    specialization?: string
-    onBack: () => void
+interface RouteMapProps {
+    steps: SessionStep[]
+    currentIndex: number
+    isAnswered: (step: SessionStep) => boolean
+    onSelect: (index: number) => void
 }
 
-export function InterviewSessionHeader({
-    title,
-    description,
-    currentStep,
-    totalSteps,
-    level,
-    specialization,
-    onBack,
-}: InterviewSessionHeaderProps) {
-    const progress = totalSteps > 0 ? (currentStep / totalSteps) * 100 : 0
-
+/** Grid of all steps: current, answered and empty; tasks are shown as "{ }". */
+export function InterviewRouteMap({ steps, currentIndex, isAnswered, onSelect }: RouteMapProps) {
     return (
-        <Card padding="md" className="space-y-3 sm:space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
-                <div className="flex items-start gap-2 sm:gap-3">
-                    <Button variant="icon" onClick={onBack} aria-label="Выйти из тренировки" className="-ml-2 sm:ml-0 shrink-0">
-                        <ArrowLeft className="w-5 h-5" />
-                    </Button>
-                    <div className="min-w-0">
-                        <h1 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100 leading-snug">{title}</h1>
-                        {description && <p className="hidden sm:block text-secondary text-sm mt-1">{description}</p>}
-                    </div>
-                </div>
-                <div className="hidden sm:block text-sm text-secondary">
-                    {specialization && <p>{specialization}</p>}
-                    {level && <p>{level}</p>}
-                </div>
-            </div>
-
-            <div>
-                <div className="flex items-center justify-between text-sm text-secondary mb-2">
-                    <span className="tabular-nums">Шаг {currentStep} из {totalSteps}</span>
-                    <span className="tabular-nums">{Math.round(progress)}%</span>
-                </div>
-                <div className="wizard-progress">
-                    <div className="wizard-progress-fill" style={{ width: `${progress}%` }} />
-                </div>
-            </div>
-        </Card>
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(2.75rem,1fr))] gap-2">
+            {steps.map((step, index) => {
+                const active = index === currentIndex
+                const answered = isAnswered(step)
+                return (
+                    <button
+                        key={step.id}
+                        type="button"
+                        onClick={() => onSelect(index)}
+                        aria-current={active ? 'step' : undefined}
+                        aria-label={`${step.label}${answered ? ', есть ответ' : ''}`}
+                        className={`h-11 rounded-lg border font-mono text-xs font-semibold transition-iv ${
+                            active
+                                ? 'border-inter-verse-green text-inter-verse-green bg-green-50/60 dark:border-purple-400 dark:text-purple-200 dark:bg-iv-dark-tint'
+                                : answered
+                                    ? 'border-inter-verse-green/40 text-inter-verse-green dark:border-purple-400/40 dark:text-purple-300'
+                                    : 'border-gray-200 dark:border-iv-dark-line text-secondary hover:border-gray-300 dark:hover:border-gray-500'
+                        }`}
+                    >
+                        {step.type === 'task' ? '{ }' : pad(step.questionNumber ?? index + 1)}
+                    </button>
+                )
+            })}
+        </div>
     )
 }
 
 interface InterviewSessionCompleteProps {
     answeredQuestions: number
+    totalQuestions: number
     completedTasks: number
+    totalTasks: number
     submitting?: boolean
     reportId?: string | null
     submitError?: string | null
@@ -175,7 +159,9 @@ interface InterviewSessionCompleteProps {
 
 export function InterviewSessionComplete({
     answeredQuestions,
+    totalQuestions,
     completedTasks,
+    totalTasks,
     submitting = false,
     reportId = null,
     submitError = null,
@@ -183,46 +169,53 @@ export function InterviewSessionComplete({
     onFinish,
 }: InterviewSessionCompleteProps) {
     return (
-        <Card padding="lg" className="text-center space-y-6">
-            <div>
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                    {submitting ? 'Анализируем ответы...' : 'Тренировка завершена'}
-                </h2>
-                <p className="text-secondary">
-                    {submitting
-                        ? 'Формируем отчёт по вашим ответам. Это может занять до минуты.'
-                        : 'Вы прошли все вопросы и практические задачи.'}
-                </p>
+        <section className="iv-panel rounded-2xl p-6 sm:p-12 text-center">
+            <div className="mx-auto w-16 h-16 rounded-full gradient-bg-adaptive text-white flex items-center justify-center">
+                {submitting ? <span className="w-6 h-6 rounded-full border-2 border-white/40 border-t-white animate-spin" /> : <Check className="w-7 h-7" strokeWidth={2.5} />}
+            </div>
+            <p className="iv-eyebrow mt-6">Практика завершена</p>
+            <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+                {submitting ? 'Формируем отчёт…' : 'Следующий шаг: разбор.'}
+            </h1>
+            <p className="mt-3 text-secondary max-w-md mx-auto">
+                {submitting
+                    ? 'Проверяем ответы и считаем результат. Это может занять до минуты.'
+                    : 'Ответы отправлены. В отчёте результат по теории и практике и то, что стоит подтянуть.'}
+            </p>
+
+            <div className="mt-8 grid grid-cols-2 max-w-sm mx-auto rounded-xl border border-gray-200 dark:border-iv-dark-line divide-x divide-gray-200 dark:divide-iv-dark-line">
+                <div className="p-4">
+                    <strong className="block text-2xl font-bold tabular-nums gradient-text-adaptive">{answeredQuestions} / {totalQuestions}</strong>
+                    <small className="text-xs text-secondary">Ответов на вопросы</small>
+                </div>
+                <div className="p-4">
+                    <strong className="block text-2xl font-bold tabular-nums gradient-text-adaptive">{completedTasks} / {totalTasks}</strong>
+                    <small className="text-xs text-secondary">Решений задач</small>
+                </div>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-4 max-w-md mx-auto">
-                <div className="iv-surface border border-gray-200 dark:border-iv-dark-line p-4">
-                    <div className="text-3xl font-bold gradient-text-adaptive tabular-nums">{answeredQuestions}</div>
-                    <div className="text-sm text-secondary mt-1">вопросов с ответом</div>
-                </div>
-                <div className="iv-surface border border-gray-200 dark:border-iv-dark-line p-4">
-                    <div className="text-3xl font-bold gradient-text-adaptive tabular-nums">{completedTasks}</div>
-                    <div className="text-sm text-secondary mt-1">решённых задач</div>
-                </div>
-            </div>
+            {submitError && <p className="mt-6 text-sm text-red-600 dark:text-red-400">{submitError}</p>}
 
-            {submitError && (
-                <p className="text-sm text-red-600 dark:text-red-400">{submitError}</p>
-            )}
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
                 {submitError && !reportId && !submitting && onRetry && (
-                    <Button onClick={onRetry}>Повторить формирование отчёта</Button>
+                    <button type="button" onClick={onRetry} className="btn-primary-adaptive rounded-lg px-6 py-3 text-sm">
+                        Повторить формирование отчёта
+                    </button>
                 )}
                 {reportId && !submitting && (
-                    <Link to={`/reports/${reportId}`} replace>
-                        <Button>Открыть отчёт</Button>
+                    <Link to={`/reports/${reportId}`} replace className="btn-primary-adaptive inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm">
+                        Открыть отчёт <ArrowRight className="w-4 h-4" />
                     </Link>
                 )}
-                <Button variant={reportId ? 'secondary' : 'primary'} onClick={onFinish} disabled={submitting}>
-                    {submitting ? 'Подождите...' : 'Вернуться на дашборд'}
-                </Button>
+                <button
+                    type="button"
+                    onClick={onFinish}
+                    disabled={submitting}
+                    className="rounded-lg border border-gray-200 dark:border-iv-dark-line px-6 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100 disabled:opacity-50"
+                >
+                    {submitting ? 'Подождите…' : 'Вернуться на главную'}
+                </button>
             </div>
-        </Card>
+        </section>
     )
 }
