@@ -33,7 +33,7 @@ export default function QuestionGrid({ items }: { items: AnswerReviewItem[] }) {
                     return (
                         <div
                             key={item.step_id}
-                            className={`iv-surface border transition-iv ${
+                            className={`iv-surface border rounded-xl overflow-hidden transition-iv ${
                                 open
                                     ? 'sm:col-span-2 border-inter-verse-green dark:border-purple-400'
                                     : 'border-gray-200 dark:border-iv-dark-line hover:border-inter-verse-green/60 dark:hover:border-purple-400/60'

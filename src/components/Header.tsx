@@ -84,7 +84,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                             aria-label="Меню профиля"
                             className="flex items-center gap-2 px-2 sm:px-3 py-2 hover:bg-gray-50 dark:hover:bg-iv-dark-bg transition-iv min-h-[44px]"
                         >
-                            <div className="w-8 h-8 bg-gray-100 dark:bg-iv-dark-bg border border-gray-200 dark:border-iv-dark-line flex items-center justify-center overflow-hidden shrink-0">
+                            <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-iv-dark-bg border border-gray-200 dark:border-iv-dark-line flex items-center justify-center overflow-hidden shrink-0">
                                 {showAvatar ? (
                                     <img
                                         src={avatarUrl!}

@@ -134,7 +134,7 @@ function MobileDrawer({ onClose }: { onClose?: () => void }) {
                 aria-label="Меню"
             >
                 <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 dark:border-iv-dark-line">
-                    <div className="w-10 h-10 bg-gray-100 dark:bg-iv-dark-bg border border-gray-200 dark:border-iv-dark-line flex items-center justify-center overflow-hidden shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-iv-dark-bg border border-gray-200 dark:border-iv-dark-line flex items-center justify-center overflow-hidden shrink-0">
                         {avatarUrl ? (
                             <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
                         ) : (
