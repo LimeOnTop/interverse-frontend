@@ -463,6 +463,28 @@
         box-shadow: none;
     }
 
+    /* ── Redesign panels ── */
+    .iv-panel {
+        @apply iv-surface border border-gray-200 dark:border-gray-600 rounded-xl;
+    }
+
+    .iv-eyebrow {
+        @apply text-[11px] font-semibold uppercase tracking-[0.16em] text-secondary;
+    }
+
+    .iv-track {
+        @apply h-1.5 rounded-full bg-gray-100 dark:bg-iv-dark-bg overflow-hidden;
+    }
+
+    .iv-track > span {
+        @apply block h-full rounded-full gradient-bg-adaptive;
+    }
+
+    .iv-pill {
+        @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold;
+        @apply border border-inter-verse-green/30 text-inter-verse-green dark:border-purple-400/40 dark:text-purple-300;
+    }
+
     /* ── Badges & Chips ── */
     .iv-badge {
         @apply inline-flex items-center text-xs font-semibold;
@@ -494,20 +516,19 @@
         padding-top: env(safe-area-inset-top);
     }
 
+    .iv-nav-group {
+        @apply px-3 mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500;
+    }
+
     .iv-nav-item {
-        @apply flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-400;
+        @apply flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-400 rounded-lg;
         @apply hover:bg-gray-50 hover:text-gray-900 dark:hover:bg-iv-dark-bg dark:hover:text-gray-100;
-        border-radius: var(--iv-radius);
         transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .iv-nav-item-active {
-        @apply text-inter-verse-green dark:text-purple-400 bg-green-50 dark:bg-purple-900/20;
-        box-shadow: inset 3px 0 0 0 #013220;
-    }
-
-    .dark .iv-nav-item-active {
-        box-shadow: inset 3px 0 0 0 #C084FC;
+        @apply text-inter-verse-green dark:text-purple-300 bg-green-50 dark:bg-purple-900/30 font-semibold;
+        @apply hover:bg-green-50 hover:text-inter-verse-green dark:hover:bg-purple-900/30 dark:hover:text-purple-300;
     }
 
     /* ── Profile mosaic ── */
@@ -691,7 +712,7 @@
     }
 
     .iv-sidebar-cta {
-        @apply btn-primary-adaptive w-full text-sm px-4 py-3;
+        @apply btn-primary-adaptive w-full text-sm px-4 py-3 rounded-lg;
     }
 
     .iv-nav-item-subscription {

@@ -1,6 +1,5 @@
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
-import Card from './ui/Card'
 import { useTheme } from '../contexts/ThemeContext'
 
 export const DEFAULT_DAILY_NORM = 5
@@ -210,76 +209,76 @@ export default function DailyActivityBlock({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-            className="flex flex-col sm:flex-row sm:items-stretch gap-4 lg:gap-6 w-full"
+            className="iv-panel p-5 sm:p-6 grid gap-6 sm:grid-cols-[15rem_1fr] lg:grid-cols-[16rem_1fr] sm:items-end w-full"
         >
-            <Card padding="md" className="sm:w-64 lg:w-72 shrink-0">
-                <div className="h-full flex flex-col justify-between gap-4 sm:gap-6">
-                    <div>
-                        <p className="text-xs font-medium uppercase tracking-wide text-secondary">
-                            Активность
-                        </p>
-                        <p className="text-3xl font-semibold tabular-nums text-gray-900 dark:text-gray-100 mt-2">
-                            {completedToday}
-                            <span className="text-secondary text-xl font-medium"> / {dailyNorm}</span>
-                        </p>
-                        <p className="text-sm text-secondary mt-2">
-                            {caption ?? 'Пройдено сегодня. Эквалайзер отображает твой прогресс. Заставь его играть на полную!'}
-                        </p>
-                    </div>
+            <div className="flex flex-col gap-4">
+                <div>
+                    <p className="iv-eyebrow">Ваш ритм подготовки</p>
+                    <h2 className="mt-2 text-lg font-semibold text-gray-900 dark:text-gray-100">Дневная активность</h2>
+                    <p className="text-4xl font-semibold tabular-nums text-gray-900 dark:text-gray-100 mt-3">
+                        {completedToday}
+                        <span className="text-secondary text-xl font-medium"> / {dailyNorm}</span>
+                    </p>
+                    <p className="text-sm text-secondary mt-2">
+                        {caption ?? 'Пройдено сегодня. Эквалайзер отображает твой прогресс. Заставь его играть на полную!'}
+                    </p>
+                </div>
 
-                    <div>
-                        <div className="flex items-center justify-between text-xs text-secondary mb-2">
-                            <span>Прогресс</span>
-                            <span className="tabular-nums font-medium text-gray-900 dark:text-gray-100">{percent}%</span>
-                        </div>
-                        <div className="h-1.5 bg-gray-100 dark:bg-iv-dark-bg border border-gray-200 dark:border-gray-600 overflow-hidden">
-                            <motion.div
-                                className="h-full gradient-bg-adaptive"
-                                initial={{ width: 0 }}
-                                animate={{ width: `${percent}%` }}
-                                transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-                            />
-                        </div>
+                <div>
+                    <div className="flex items-center justify-between text-xs text-secondary mb-2">
+                        <span>Прогресс за день</span>
+                        <span className="tabular-nums font-semibold text-gray-900 dark:text-gray-100">{percent}%</span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-gray-100 dark:bg-iv-dark-bg overflow-hidden">
+                        <motion.div
+                            className="h-full rounded-full gradient-bg-adaptive"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${percent}%` }}
+                            transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+                        />
                     </div>
                 </div>
-            </Card>
+            </div>
 
-            <div
-                ref={visualizerRef}
-                className="eq-visualizer hidden sm:flex flex-1 w-full items-end justify-between min-w-0 self-center sm:self-stretch overflow-hidden"
-                style={{
-                    minHeight: MAX_CUBES * (CUBE_SIZE_PX + CUBE_GAP_PX),
-                }}
-                role="img"
-                aria-label={`Дневная активность ${completedToday} из ${dailyNorm}`}
-            >
-                {heights.map((litCubes, index) => (
-                    <div
-                        key={index}
-                        className="eq-bar flex flex-col-reverse shrink-0"
-                        style={{
-                            width: CUBE_SIZE_PX,
-                            gap: CUBE_GAP_PX,
-                            height: MAX_CUBES * (CUBE_SIZE_PX + CUBE_GAP_PX) - CUBE_GAP_PX,
-                        }}
-                        aria-hidden
-                    >
-                        {Array.from({ length: MAX_CUBES }, (_, cubeIndex) => {
-                            const lit = cubeIndex < litCubes
-                            return (
-                                <span
-                                    key={cubeIndex}
-                                    className={`eq-cube block shrink-0 ${lit ? 'eq-cube-lit' : 'eq-cube-dim'}`}
-                                    style={{
-                                        width: CUBE_SIZE_PX,
-                                        height: CUBE_SIZE_PX,
-                                        backgroundColor: lit ? cubeColor(cubeIndex, isDark) : 'transparent',
-                                    }}
-                                />
-                            )
-                        })}
-                    </div>
-                ))}
+            <div className="hidden sm:block min-w-0">
+                <div
+                    ref={visualizerRef}
+                    className="eq-visualizer flex w-full items-end justify-between min-w-0 overflow-hidden"
+                    style={{
+                        minHeight: MAX_CUBES * (CUBE_SIZE_PX + CUBE_GAP_PX),
+                    }}
+                    role="img"
+                    aria-label={`Дневная активность ${completedToday} из ${dailyNorm}`}
+                >
+                    {heights.map((litCubes, index) => (
+                        <div
+                            key={index}
+                            className="eq-bar flex flex-col-reverse shrink-0"
+                            style={{
+                                width: CUBE_SIZE_PX,
+                                gap: CUBE_GAP_PX,
+                                height: MAX_CUBES * (CUBE_SIZE_PX + CUBE_GAP_PX) - CUBE_GAP_PX,
+                            }}
+                            aria-hidden
+                        >
+                            {Array.from({ length: MAX_CUBES }, (_, cubeIndex) => {
+                                const lit = cubeIndex < litCubes
+                                return (
+                                    <span
+                                        key={cubeIndex}
+                                        className={`eq-cube block shrink-0 ${lit ? 'eq-cube-lit' : 'eq-cube-dim'}`}
+                                        style={{
+                                            width: CUBE_SIZE_PX,
+                                            height: CUBE_SIZE_PX,
+                                            backgroundColor: lit ? cubeColor(cubeIndex, isDark) : 'transparent',
+                                        }}
+                                    />
+                                )
+                            })}
+                        </div>
+                    ))}
+                </div>
+                <p className="mt-2 text-xs text-secondary">Чем больше тренировок за день, тем выше звучит ваш эквалайзер.</p>
             </div>
         </motion.div>
     )
