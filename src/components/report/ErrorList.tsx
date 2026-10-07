@@ -33,7 +33,7 @@ export default function ErrorList({ points }: { points: WeakPoint[] }) {
                     const open = point.step_id === openId
                     const number = point.label.match(/\d+/)?.[0] ?? ''
                     return (
-                        <div key={point.step_id} className="border-b last:border-b-0 border-gray-200 dark:border-gray-600">
+                        <div key={point.step_id} className="border-b last:border-b-0 border-gray-200 dark:border-iv-dark-line">
                             <button
                                 type="button"
                                 onClick={() => setOpenId(open ? null : point.step_id)}
@@ -53,7 +53,7 @@ export default function ErrorList({ points }: { points: WeakPoint[] }) {
                             {open && (
                                 <div className="pb-5 sm:pl-10 space-y-4">
                                     <div className="grid gap-3 md:grid-cols-2">
-                                        <div className="rounded-lg border border-gray-200 dark:border-gray-600 p-3">
+                                        <div className="rounded-lg border border-gray-200 dark:border-iv-dark-line p-3">
                                             <p className="iv-eyebrow mb-1.5">Ваш ответ</p>
                                             <p className="text-sm whitespace-pre-wrap break-words text-red-600 dark:text-red-400">{point.user_answer}</p>
                                         </div>

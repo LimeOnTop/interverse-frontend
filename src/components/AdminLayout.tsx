@@ -20,7 +20,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
 
     return (
         <>
-            <div className="px-4 pt-5 pb-4 border-b border-gray-200 dark:border-gray-600">
+            <div className="px-4 pt-5 pb-4 border-b border-gray-200 dark:border-iv-dark-line">
                 <Link
                     to="/admin"
                     onClick={onNavigate}
@@ -59,7 +59,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
                 </a>
             </nav>
 
-            <div className="px-3 py-4 border-t border-gray-200 dark:border-gray-600 space-y-2">
+            <div className="px-3 py-4 border-t border-gray-200 dark:border-iv-dark-line space-y-2">
                 <div className="flex items-center justify-between px-2">
                     <span className="text-xs text-secondary">Тема</span>
                     <ThemeToggle />
@@ -90,7 +90,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             </aside>
 
             <div className="flex-1 flex flex-col min-w-0 min-h-0">
-                <header className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-600 bg-white dark:bg-iv-dark-surface">
+                <header className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-iv-dark-line bg-white dark:bg-iv-dark-surface">
                     <button
                         type="button"
                         onClick={() => setMobileOpen(true)}

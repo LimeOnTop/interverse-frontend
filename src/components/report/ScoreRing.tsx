@@ -16,7 +16,7 @@ export default function ScoreRing({ score, size = 160 }: { score: number; size?:
                         <stop offset="100%" className="[stop-color:#01784a] dark:[stop-color:#9333ea]" />
                     </linearGradient>
                 </defs>
-                <circle cx="80" cy="80" r={radius} fill="none" strokeWidth="8" className="stroke-gray-200 dark:stroke-gray-600" />
+                <circle cx="80" cy="80" r={radius} fill="none" strokeWidth="8" className="stroke-gray-200 dark:stroke-iv-dark-line" />
                 <circle
                     cx="80"
                     cy="80"

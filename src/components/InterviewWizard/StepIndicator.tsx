@@ -26,7 +26,7 @@ export default function StepIndicator({ currentStep, totalSteps }: StepIndicator
                                 ) : step}
                             </div>
                             {step < totalSteps && (
-                                <div className={`w-8 sm:w-12 h-0.5 mx-1 ${isCompleted ? 'bg-inter-verse-green dark:bg-purple-500' : 'bg-gray-200 dark:bg-gray-600'}`} />
+                                <div className={`w-8 sm:w-12 h-0.5 mx-1 ${isCompleted ? 'bg-inter-verse-green dark:bg-purple-500' : 'bg-gray-200 dark:bg-iv-dark-line'}`} />
                             )}
                         </div>
                     )

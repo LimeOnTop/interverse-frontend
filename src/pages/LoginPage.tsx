@@ -106,7 +106,7 @@ export default function LoginPage() {
 
                     <a
                         href="/api/v1/auth/google/login"
-                        className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-gray-200 dark:border-gray-600 bg-white/80 dark:bg-iv-dark-bg/80 text-sm font-medium hover:bg-gray-50 dark:hover:bg-iv-dark-surface transition-iv"
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-gray-200 dark:border-iv-dark-line bg-white/80 dark:bg-iv-dark-bg/80 text-sm font-medium hover:bg-gray-50 dark:hover:bg-iv-dark-surface transition-iv"
                     >
                         <svg className="w-5 h-5" viewBox="0 0 24 24">
                             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />

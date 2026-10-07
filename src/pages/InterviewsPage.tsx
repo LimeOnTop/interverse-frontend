@@ -301,7 +301,7 @@ export default function InterviewsPage() {
                                                 <button className="btn-icon">
                                                     <MoreVertical className="w-5 h-5" />
                                                 </button>
-                                                <div className="absolute right-0 top-full mt-2 w-48 iv-surface border border-gray-200 dark:border-gray-600 shadow-iv-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
+                                                <div className="absolute right-0 top-full mt-2 w-48 iv-surface border border-gray-200 dark:border-iv-dark-line shadow-iv-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
                                                     <div className="py-1">
                                                         <Link to={`/interviews/${interview.id}`} className="iv-nav-item">
                                                             <Eye className="w-4 h-4" /> Просмотр

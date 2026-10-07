@@ -6,7 +6,7 @@
 
 @layer base {
     * {
-        @apply border-gray-200 dark:border-gray-600;
+        @apply border-gray-200 dark:border-iv-dark-line;
     }
 
     html {
@@ -65,7 +65,7 @@
     }
 
     .iv-card {
-        @apply iv-surface border border-gray-200 dark:border-gray-600 shadow-iv-md;
+        @apply iv-surface border border-gray-200 dark:border-iv-dark-line shadow-iv-md;
         border-radius: var(--iv-radius);
         transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1),
             box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -84,7 +84,7 @@
 
     /* ── Form cards (auth, profile forms) ── */
     .iv-form-card {
-        @apply iv-surface border border-gray-200 dark:border-gray-600 shadow-iv-md;
+        @apply iv-surface border border-gray-200 dark:border-iv-dark-line shadow-iv-md;
         position: relative;
         overflow: visible;
         border-radius: var(--iv-radius);
@@ -156,7 +156,7 @@
 
     /* ── Landing sections on image background ── */
     .iv-landing-section {
-        @apply relative border-t border-gray-200/80 dark:border-gray-600/40;
+        @apply relative border-t border-gray-200/80 dark:border-iv-dark-line/40;
     }
 
     .dark .iv-landing-section-glass {
@@ -314,7 +314,7 @@
     }
 
     .dark .hero-slider-text-panel {
-        background: #2F2F2F;
+        background: #14161B;
     }
 
     /* Steeper hero cut: top stays at the panel edge, bottom sits further left. */
@@ -440,7 +440,7 @@
     /* ── Inputs ── */
     .iv-input, .input-field {
         @apply w-full px-4 py-3 bg-white border border-gray-200 text-gray-900;
-        @apply dark:bg-iv-dark-bg dark:border-gray-600 dark:text-gray-100;
+        @apply dark:bg-iv-dark-bg dark:border-iv-dark-line dark:text-gray-100;
         border-radius: var(--iv-radius);
         transition: box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1),
             border-color 200ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -453,7 +453,7 @@
 
     .input-field-underlined {
         @apply w-full px-0 py-3 bg-transparent border-0 border-b border-gray-300;
-        @apply dark:border-gray-600 dark:text-gray-100;
+        @apply dark:border-iv-dark-line dark:text-gray-100;
         border-radius: var(--iv-radius);
         transition: border-color 200ms cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -465,7 +465,7 @@
 
     /* ── Redesign panels ── */
     .iv-panel {
-        @apply iv-surface border border-gray-200 dark:border-gray-600 rounded-xl;
+        @apply iv-surface border border-gray-200 dark:border-iv-dark-line rounded-xl;
     }
 
     .iv-eyebrow {
@@ -492,7 +492,7 @@
 
     .iv-chip {
         @apply inline-flex items-center px-3 py-1 text-xs font-medium bg-gray-100 text-gray-700;
-        @apply dark:bg-iv-dark-bg dark:text-gray-300 border border-gray-200 dark:border-gray-600;
+        @apply dark:bg-iv-dark-bg dark:text-gray-300 border border-gray-200 dark:border-iv-dark-line;
         border-radius: var(--iv-radius);
         transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -506,12 +506,12 @@
 
     /* ── Navigation ── */
     .iv-sidebar {
-        @apply iv-surface border-r border-gray-200 dark:border-gray-600 w-60 shrink-0;
+        @apply iv-surface border-r border-gray-200 dark:border-iv-dark-line w-60 shrink-0;
         height: 100%;
     }
 
     .iv-header {
-        @apply iv-surface border-b border-gray-200 dark:border-gray-600 sticky top-0 z-40 shrink-0;
+        @apply iv-surface border-b border-gray-200 dark:border-iv-dark-line sticky top-0 z-40 shrink-0;
         height: calc(4rem + env(safe-area-inset-top));
         padding-top: env(safe-area-inset-top);
     }
@@ -527,8 +527,8 @@
     }
 
     .iv-nav-item-active {
-        @apply text-inter-verse-green dark:text-purple-300 bg-green-50 dark:bg-purple-900/30 font-semibold;
-        @apply hover:bg-green-50 hover:text-inter-verse-green dark:hover:bg-purple-900/30 dark:hover:text-purple-300;
+        @apply text-inter-verse-green dark:text-purple-300 bg-green-50 dark:bg-iv-dark-tint font-semibold;
+        @apply hover:bg-green-50 hover:text-inter-verse-green dark:hover:bg-iv-dark-tint dark:hover:text-purple-300;
     }
 
     /* ── Profile mosaic ── */
@@ -540,7 +540,7 @@
     }
 
     .profile-block {
-        @apply relative iv-surface border border-gray-200 dark:border-gray-600 text-left;
+        @apply relative iv-surface border border-gray-200 dark:border-iv-dark-line text-left;
         flex: 1 1 100%;
         min-width: 0;
         max-width: 100%;
@@ -568,7 +568,7 @@
     }
 
     .profile-block:hover:not(.profile-block-open):not(.profile-block-filled) {
-        @apply border-gray-300 dark:border-gray-500;
+        @apply border-gray-300 dark:border-iv-dark-line;
     }
 
     .profile-block-open {
@@ -648,7 +648,7 @@
     }
 
     .wizard-progress {
-        @apply h-1 bg-gray-200 dark:bg-gray-600 overflow-hidden;
+        @apply h-1 bg-gray-200 dark:bg-iv-dark-line overflow-hidden;
         border-radius: var(--iv-radius);
     }
 
@@ -664,7 +664,7 @@
 
     @media (max-width: 639px) {
         .wizard-actions {
-            @apply sticky z-10 -mx-4 px-4 py-3 mt-4 iv-surface border-t border-gray-200 dark:border-gray-600;
+            @apply sticky z-10 -mx-4 px-4 py-3 mt-4 iv-surface border-t border-gray-200 dark:border-iv-dark-line;
             bottom: calc(4rem + env(safe-area-inset-bottom));
             border-radius: 0;
         }
@@ -683,7 +683,7 @@
     .wizard-option-icon {
         @apply w-12 h-12 mb-4 flex items-center justify-center;
         @apply bg-gray-100 text-gray-700 border border-gray-200;
-        @apply dark:bg-iv-dark-bg dark:text-gray-300 dark:border-gray-600;
+        @apply dark:bg-iv-dark-bg dark:text-gray-300 dark:border-iv-dark-line;
         border-radius: var(--iv-radius);
         transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -693,7 +693,7 @@
     }
 
     .wizard-stack-panel {
-        @apply iv-surface border border-gray-200 dark:border-gray-600 p-4 min-h-[3.5rem];
+        @apply iv-surface border border-gray-200 dark:border-iv-dark-line p-4 min-h-[3.5rem];
         border-radius: var(--iv-radius);
     }
 
@@ -746,7 +746,7 @@
 
     /* ── Dropdown ── */
     .iv-dropdown, .modern-select-dropdown {
-        @apply w-full mt-1 iv-surface border border-gray-200 dark:border-gray-600 shadow-iv-lg overflow-hidden;
+        @apply w-full mt-1 iv-surface border border-gray-200 dark:border-iv-dark-line shadow-iv-lg overflow-hidden;
         backdrop-filter: blur(10px);
         border-radius: var(--iv-radius);
     }
@@ -774,7 +774,7 @@
 
     /* ── Skeleton ── */
     .iv-skeleton {
-        @apply bg-gray-200 dark:bg-gray-600;
+        @apply bg-gray-200 dark:bg-iv-dark-line;
         background: linear-gradient(90deg, #E5E7EB 25%, #F3F4F6 50%, #E5E7EB 75%);
         background-size: 200% 100%;
         animation: shimmer 1.5s ease-in-out infinite;
@@ -782,7 +782,7 @@
     }
 
     .dark .iv-skeleton {
-        background: linear-gradient(90deg, #4B5563 25%, #6B7280 50%, #4B5563 75%);
+        background: linear-gradient(90deg, #262A33 25%, #343843 50%, #262A33 75%);
         background-size: 200% 100%;
     }
 
@@ -820,7 +820,7 @@
 
     /* ── Divider ── */
     .iv-divider {
-        @apply border-t border-gray-200 dark:border-gray-600;
+        @apply border-t border-gray-200 dark:border-iv-dark-line;
     }
 
     /* ── Hero noise overlay ── */

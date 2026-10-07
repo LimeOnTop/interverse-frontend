@@ -46,7 +46,7 @@ export default function InterviewQuestionStep({
                             className={`w-full text-left p-4 border transition-iv ${
                                 isSelected
                                     ? 'border-inter-verse-green bg-green-50 dark:border-purple-400 dark:bg-purple-900/20'
-                                    : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-iv-dark-bg'
+                                    : 'border-gray-200 dark:border-iv-dark-line hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-iv-dark-bg'
                             }`}
                         >
                             <div className="flex items-start gap-3">
@@ -196,11 +196,11 @@ export function InterviewSessionComplete({
             </div>
 
             <div className="grid sm:grid-cols-2 gap-4 max-w-md mx-auto">
-                <div className="iv-surface border border-gray-200 dark:border-gray-600 p-4">
+                <div className="iv-surface border border-gray-200 dark:border-iv-dark-line p-4">
                     <div className="text-3xl font-bold gradient-text-adaptive tabular-nums">{answeredQuestions}</div>
                     <div className="text-sm text-secondary mt-1">вопросов с ответом</div>
                 </div>
-                <div className="iv-surface border border-gray-200 dark:border-gray-600 p-4">
+                <div className="iv-surface border border-gray-200 dark:border-iv-dark-line p-4">
                     <div className="text-3xl font-bold gradient-text-adaptive tabular-nums">{completedTasks}</div>
                     <div className="text-sm text-secondary mt-1">решённых задач</div>
                 </div>

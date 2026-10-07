@@ -154,7 +154,7 @@ export default function ReportDetailPage() {
                     <p className="mt-2 text-secondary">{subtitle}</p>
                 </div>
                 {locked ? (
-                    <Link to="/subscription" className="shrink-0 inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 dark:border-gray-600 px-4 py-2.5 text-sm font-semibold text-gray-900 dark:text-gray-100" title="Скачивание отчёта в PDF доступно в Pro">
+                    <Link to="/subscription" className="shrink-0 inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 dark:border-iv-dark-line px-4 py-2.5 text-sm font-semibold text-gray-900 dark:text-gray-100" title="Скачивание отчёта в PDF доступно в Pro">
                         <Lock className="w-4 h-4" /> PDF в Pro
                     </Link>
                 ) : (
@@ -207,7 +207,7 @@ export default function ReportDetailPage() {
                 </div>
             </motion.section>
 
-            <div className="flex gap-6 overflow-x-auto border-b border-gray-200 dark:border-gray-600" role="tablist">
+            <div className="flex gap-6 overflow-x-auto border-b border-gray-200 dark:border-iv-dark-line" role="tablist">
                 {tabs.map((item) => (
                     <button
                         key={item.key}

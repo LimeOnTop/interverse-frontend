@@ -109,7 +109,7 @@ export default function ScheduleStep({
                                     onClick={() => handleTimeChange(time)}
                                     className={`px-3 py-2 text-xs font-medium border-2 transition-iv ${selectedTime === time
                                         ? 'gradient-bg-adaptive text-white border-transparent'
-                                        : 'bg-white dark:bg-iv-dark-surface text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-inter-verse-green dark:hover:border-purple-500 hover:bg-green-50 dark:hover:bg-purple-900/20'
+                                        : 'bg-white dark:bg-iv-dark-surface text-gray-700 dark:text-gray-300 border-gray-200 dark:border-iv-dark-line hover:border-inter-verse-green dark:hover:border-purple-500 hover:bg-green-50 dark:hover:bg-purple-900/20'
                                         }`}
                                 >
                                     {time}

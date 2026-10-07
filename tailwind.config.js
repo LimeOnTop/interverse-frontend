@@ -15,8 +15,11 @@ export default {
                     'purple-darker': '#9333ea',
                 },
                 'iv-dark': {
-                    bg: '#2F2F2F',
-                    surface: '#4A4A4A',
+                    // Night palette from design-review/interverse-redesign.html.
+                    bg: '#14161B',
+                    surface: '#1D2027',
+                    line: '#343843',
+                    tint: '#30263F',
                 },
             },
             fontFamily: {

@@ -292,7 +292,7 @@ export default function AdminQuestionDetailPage() {
                                 {options.map((option, index) => (
                                     <div
                                         key={option.id || index}
-                                        className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center border border-gray-200 dark:border-gray-600 p-3"
+                                        className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center border border-gray-200 dark:border-iv-dark-line p-3"
                                     >
                                         <input
                                             type="text"

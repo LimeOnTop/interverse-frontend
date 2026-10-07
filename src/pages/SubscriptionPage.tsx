@@ -180,7 +180,7 @@ export default function SubscriptionPage() {
                     {payments.length > 0 && (
                         <div className="mt-5">
                             <p className="iv-eyebrow mb-2">История оплат</p>
-                            <ul className="divide-y divide-gray-200 dark:divide-gray-600">
+                            <ul className="divide-y divide-gray-200 dark:divide-iv-dark-line">
                                 {payments.map((payment) => (
                                     <li key={payment.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
                                         <span className="min-w-0">

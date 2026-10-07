@@ -134,7 +134,7 @@ export default function DashboardPage() {
             )}
 
             {summary && (
-                <div className="iv-panel grid sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-gray-200 dark:divide-gray-600">
+                <div className="iv-panel grid sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-gray-200 dark:divide-iv-dark-line">
                     <Metric label="Завершено тренировок" value={summary.trainings.completed} hint="За всё время" />
                     <Metric label="Тренировок в процессе" value={summary.trainings.in_progress} hint="Можно продолжить" />
                     <Metric
@@ -147,7 +147,7 @@ export default function DashboardPage() {
 
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.65fr_1fr] items-start">
                 <section className="iv-panel p-5 sm:p-6">
-                    <div className="flex items-center justify-between gap-3 pb-4 border-b border-gray-200 dark:border-gray-600">
+                    <div className="flex items-center justify-between gap-3 pb-4 border-b border-gray-200 dark:border-iv-dark-line">
                         <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Ваши тренировки</h2>
                         <Link to="/interview-service" className="text-sm font-semibold text-inter-verse-green dark:text-purple-400 hover:underline">
                             Все тренировки →
@@ -300,8 +300,8 @@ function TrainingRow({ interview, reportId }: { interview: Interview; reportId?:
     else if (interview.status === 'scheduled') action = { label: 'Начать', to: `/interview/${interview.id}` }
 
     return (
-        <div className="flex items-center gap-4 py-4 border-b last:border-b-0 border-gray-200 dark:border-gray-600">
-            <span className="w-10 h-10 shrink-0 rounded-lg border border-gray-200 dark:border-gray-600 flex items-center justify-center text-inter-verse-green dark:text-purple-400">
+        <div className="flex items-center gap-4 py-4 border-b last:border-b-0 border-gray-200 dark:border-iv-dark-line">
+            <span className="w-10 h-10 shrink-0 rounded-lg border border-gray-200 dark:border-iv-dark-line flex items-center justify-center text-inter-verse-green dark:text-purple-400">
                 {completed ? <Check className="w-4 h-4" /> : <Code2 className="w-4 h-4" />}
             </span>
             <div className="min-w-0 flex-1">
@@ -314,7 +314,7 @@ function TrainingRow({ interview, reportId }: { interview: Interview; reportId?:
             {action && (
                 <Link
                     to={action.to}
-                    className="shrink-0 inline-flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-gray-600 px-3 sm:px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:border-inter-verse-green dark:hover:border-purple-400 transition-iv"
+                    className="shrink-0 inline-flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-iv-dark-line px-3 sm:px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:border-inter-verse-green dark:hover:border-purple-400 transition-iv"
                 >
                     {action.label} <ArrowRight className="w-4 h-4" />
                 </Link>
