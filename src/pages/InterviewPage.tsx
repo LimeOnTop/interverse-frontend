@@ -68,6 +68,26 @@ export default function InterviewPage() {
         localStorage.setItem(getAnswersStorageKey(id), JSON.stringify(nextAnswers))
     }, [id])
 
+    // A finished training is never shown again (e.g. after "back" from the
+    // report): send the user to its report instead.
+    const leaveCompletedTraining = useCallback(async () => {
+        if (!id) return
+        clearInterviewSessionCache(id)
+        try {
+            const response = await api.get('/reports/')
+            const reports: { id: string; interview_id: string }[] = response.data.reports || []
+            const report = reports.find((item) => item.interview_id === id)
+            if (report) {
+                navigate(`/reports/${report.id}`, { replace: true })
+                return
+            }
+        } catch (error) {
+            console.error('Error loading reports:', error)
+        }
+        toast('Тренировка уже завершена')
+        navigate('/reports', { replace: true })
+    }, [id, navigate])
+
     const loadSession = useCallback(async () => {
         if (!id) return
 
@@ -76,6 +96,10 @@ export default function InterviewPage() {
 
             const sessionResponse = await api.get(`/interviews/${id}/session`)
             const sessionData = parseSessionResponse(sessionResponse.data)
+            if (sessionData.interview?.status === 'completed') {
+                await leaveCompletedTraining()
+                return
+            }
 
             if (sessionData.steps.length === 0) {
                 const interviewResponse = await api.get(`/interviews/${id}`)
@@ -119,7 +143,7 @@ export default function InterviewPage() {
         } finally {
             setLoading(false)
         }
-    }, [id, navigate, persistSession])
+    }, [id, navigate, persistSession, leaveCompletedTraining])
 
     useEffect(() => {
         loadSession()
@@ -265,7 +289,7 @@ export default function InterviewPage() {
         if (id) {
             clearInterviewSessionCache(id)
         }
-        navigate('/dashboard')
+        navigate('/dashboard', { replace: true })
     }
 
     if (loading) {

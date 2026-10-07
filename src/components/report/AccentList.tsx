@@ -1,6 +1,8 @@
+import GradientDash from './GradientDash'
+
 const MARKER = /^\s*(?:[-–—•*]|\d+[.)])\s+/
 
-/** Renders LLM text as a list whose dashes use the accent colour. */
+/** Renders LLM text as a list with gradient dashes. */
 export default function AccentList({ text, className = '' }: { text?: string; className?: string }) {
     const lines = (text || '')
         .split('\n')
@@ -20,7 +22,7 @@ export default function AccentList({ text, className = '' }: { text?: string; cl
         <ul className={`space-y-2 ${className}`}>
             {lines.map((line, index) => (
                 <li key={index} className="flex items-start gap-3 text-gray-700 dark:text-gray-300 leading-relaxed">
-                    <span className="font-bold text-inter-verse-green dark:text-purple-400 shrink-0" aria-hidden>—</span>
+                    <GradientDash />
                     <span>{line.replace(MARKER, '')}</span>
                 </li>
             ))}

@@ -190,7 +190,7 @@ export function InterviewSessionComplete({
                 </h2>
                 <p className="text-secondary">
                     {submitting
-                        ? 'AI формирует отчёт по вашим ответам. Это может занять до минуты.'
+                        ? 'Формируем отчёт по вашим ответам. Это может занять до минуты.'
                         : 'Вы прошли все вопросы и практические задачи.'}
                 </p>
             </div>
@@ -215,7 +215,7 @@ export function InterviewSessionComplete({
                     <Button onClick={onRetry}>Повторить формирование отчёта</Button>
                 )}
                 {reportId && !submitting && (
-                    <Link to={`/reports/${reportId}`}>
+                    <Link to={`/reports/${reportId}`} replace>
                         <Button>Открыть отчёт</Button>
                     </Link>
                 )}
