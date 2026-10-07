@@ -6,7 +6,7 @@ import { MOBILE_TABS } from './navigation'
 export default function MobileTabBar() {
     return (
         <nav
-            className="lg:hidden fixed inset-x-0 bottom-0 z-40 iv-surface border-t border-gray-200 dark:border-gray-600 iv-safe-bottom"
+            className="lg:hidden fixed inset-x-0 bottom-0 z-40 iv-surface border-t border-gray-200 dark:border-iv-dark-line iv-safe-bottom"
             aria-label="Основная навигация"
         >
             <div className="grid grid-cols-5 h-16">

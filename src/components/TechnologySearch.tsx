@@ -188,7 +188,7 @@ const TechnologySearch: React.FC<TechnologySearchProps> = ({
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="absolute z-50 w-full mt-2 bg-white dark:bg-iv-dark-surface border border-gray-200 dark:border-gray-700 rounded-none shadow-lg max-h-60 overflow-y-auto"
+                        className="absolute z-50 w-full mt-2 bg-white dark:bg-iv-dark-surface border border-gray-200 dark:border-iv-dark-line rounded-none shadow-lg max-h-60 overflow-y-auto"
                     >
                         {technologies.length === 0 && !isLoading ? (
                             <div className="p-4 text-center text-gray-500">

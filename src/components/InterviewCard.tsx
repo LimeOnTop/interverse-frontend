@@ -133,8 +133,8 @@ export default function InterviewCard({ interview, onClick, onDelete, hideOnly =
                 <p className="text-secondary text-sm mt-1 line-clamp-2">{interview.description}</p>
             </div>
 
-            <div className="flex items-center gap-3 mb-4 p-3 bg-gray-50 dark:bg-iv-dark-bg border border-gray-100 dark:border-gray-600">
-                <div className="w-9 h-9 flex items-center justify-center bg-white dark:bg-iv-dark-surface border border-gray-200 dark:border-gray-600 shrink-0">
+            <div className="flex items-center gap-3 mb-4 p-3 bg-gray-50 dark:bg-iv-dark-bg border border-gray-100 dark:border-iv-dark-line">
+                <div className="w-9 h-9 flex items-center justify-center bg-white dark:bg-iv-dark-surface border border-gray-200 dark:border-iv-dark-line shrink-0">
                     <User className="w-4 h-4 text-gray-500" strokeWidth={1.75} />
                 </div>
                 <div className="min-w-0">
@@ -149,11 +149,11 @@ export default function InterviewCard({ interview, onClick, onDelete, hideOnly =
             </div>
 
             <div className="hidden sm:grid grid-cols-2 gap-2 mb-4 text-sm">
-                <div className="p-2 bg-gray-50 dark:bg-iv-dark-bg border border-gray-100 dark:border-gray-600">
+                <div className="p-2 bg-gray-50 dark:bg-iv-dark-bg border border-gray-100 dark:border-iv-dark-line">
                     <div className="text-xs text-secondary mb-0.5">Специализация</div>
                     <div className="font-medium">{specLabels[interview.specialization] || interview.specialization}</div>
                 </div>
-                <div className="p-2 bg-gray-50 dark:bg-iv-dark-bg border border-gray-100 dark:border-gray-600">
+                <div className="p-2 bg-gray-50 dark:bg-iv-dark-bg border border-gray-100 dark:border-iv-dark-line">
                     <div className="text-xs text-secondary mb-0.5">Уровень</div>
                     <span className="iv-chip text-xs">{levelLabels[interview.level] || interview.level}</span>
                 </div>

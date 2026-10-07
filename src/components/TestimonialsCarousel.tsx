@@ -74,7 +74,7 @@ export default function TestimonialsCarousel() {
                         <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
                             «{item.text}»
                         </p>
-                        <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
+                        <div className="border-t border-gray-200 dark:border-iv-dark-line pt-4">
                             <p className="font-semibold text-gray-900 dark:text-gray-100">{item.name}</p>
                             <p className="text-xs text-secondary mt-1">{item.role}</p>
                         </div>

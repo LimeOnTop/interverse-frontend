@@ -74,7 +74,7 @@ export default function FocusPlan({ locked, groups, count, title = 'Следую
 
 function PlanStep({ index, title, subtitle, blurred = false }: { index: number; title: string; subtitle: string; blurred?: boolean }) {
     return (
-        <li className="flex gap-3 py-3.5 border-b last:border-b-0 border-gray-200 dark:border-gray-600">
+        <li className="flex gap-3 py-3.5 border-b last:border-b-0 border-gray-200 dark:border-iv-dark-line">
             <span className="font-mono text-xs font-semibold pt-1 gradient-text-adaptive">{String(index + 1).padStart(2, '0')}</span>
             <div className={`min-w-0 ${blurred ? 'blur-[6px] pointer-events-none' : ''}`}>
                 <h3 className="font-semibold text-gray-900 dark:text-gray-100">{title}</h3>

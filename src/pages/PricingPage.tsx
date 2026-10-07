@@ -131,7 +131,7 @@ export default function PricingPage() {
 
                             <Link
                                 to="/register"
-                                className="w-full text-center py-3 text-sm font-medium text-secondary border border-gray-200 dark:border-gray-600 rounded-lg hover:border-inter-verse-green dark:hover:border-purple-400 transition-iv"
+                                className="w-full text-center py-3 text-sm font-medium text-secondary border border-gray-200 dark:border-iv-dark-line rounded-lg hover:border-inter-verse-green dark:hover:border-purple-400 transition-iv"
                             >
                                 Зарегистрироваться бесплатно
                             </Link>

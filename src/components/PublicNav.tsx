@@ -52,7 +52,7 @@ export default function PublicNav({ landing = false, overlay = false }: PublicNa
           }`
         : landing
             ? 'iv-landing-nav sticky top-0 z-40'
-            : 'sticky top-0 z-40 iv-surface border-b border-gray-200 dark:border-gray-600'
+            : 'sticky top-0 z-40 iv-surface border-b border-gray-200 dark:border-iv-dark-line'
 
     const overlayActionClass = pastHero
         ? 'text-inter-verse-green dark:text-purple-400'
@@ -125,7 +125,7 @@ export default function PublicNav({ landing = false, overlay = false }: PublicNa
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -8 }}
                         transition={{ duration: 0.18 }}
-                        className="md:hidden iv-surface border-b border-gray-200 dark:border-gray-600 shadow-iv-lg"
+                        className="md:hidden iv-surface border-b border-gray-200 dark:border-iv-dark-line shadow-iv-lg"
                     >
                         <nav className="px-4 py-3 flex flex-col gap-1">
                             <Link to="/pricing" className="iv-nav-item text-base">

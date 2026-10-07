@@ -387,7 +387,7 @@ export default function InterviewPage() {
             </AnimatePresence>
 
             {/* Phones: sticky thumb-reach action bar. */}
-            <div className="sm:hidden sticky bottom-0 z-10 -mx-4 px-4 py-3 iv-surface border-t border-gray-200 dark:border-gray-600 iv-safe-bottom grid grid-cols-[auto_1fr] gap-3">
+            <div className="sm:hidden sticky bottom-0 z-10 -mx-4 px-4 py-3 iv-surface border-t border-gray-200 dark:border-iv-dark-line iv-safe-bottom grid grid-cols-[auto_1fr] gap-3">
                 <button
                     type="button"
                     onClick={handlePrevious}

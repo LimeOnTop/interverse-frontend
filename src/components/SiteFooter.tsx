@@ -16,7 +16,7 @@ interface SiteFooterProps {
 export default function SiteFooter({ className = '' }: SiteFooterProps) {
     return (
         <footer
-            className={`iv-landing-section py-8 border-t border-gray-200 dark:border-gray-600 ${className}`}
+            className={`iv-landing-section py-8 border-t border-gray-200 dark:border-iv-dark-line ${className}`}
         >
             <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-4 text-sm text-secondary">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">

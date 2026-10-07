@@ -64,7 +64,7 @@ export default function ProgressChart() {
 
     const data = useMemo(() => buildDailyProgress(reports), [reports])
     const accentColor = isDark ? '#9333EA' : '#013220'
-    const gridColor = isDark ? '#4B5563' : '#E5E7EB'
+    const gridColor = isDark ? '#343843' : '#E5E7EB'
     const axisColor = isDark ? '#9CA3AF' : '#6B7280'
     const labelColor = isDark ? '#E5E7EB' : '#111827'
 
@@ -115,7 +115,7 @@ export default function ProgressChart() {
                             <YAxis domain={[0, 100]} tickFormatter={(value: number) => `${value}%`} tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false} />
                             <Tooltip
                                 contentStyle={{
-                                    backgroundColor: isDark ? '#4A4A4A' : '#FFFFFF',
+                                    backgroundColor: isDark ? '#1D2027' : '#FFFFFF',
                                     border: `1px solid ${gridColor}`,
                                     borderRadius: 0,
                                     fontSize: 13,

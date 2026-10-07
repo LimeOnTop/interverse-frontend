@@ -87,7 +87,7 @@ export default function ActivityPage() {
                             )}
                             <Link
                                 to={`/reports/${report.id}`}
-                                className="mt-5 inline-flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-600 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:border-inter-verse-green dark:hover:border-purple-400 transition-iv"
+                                className="mt-5 inline-flex items-center gap-2 rounded-lg border border-gray-200 dark:border-iv-dark-line px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:border-inter-verse-green dark:hover:border-purple-400 transition-iv"
                             >
                                 Разобрать результат <ArrowRight className="w-4 h-4" />
                             </Link>

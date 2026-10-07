@@ -111,7 +111,7 @@ export default function ModernSelect({
                 className={`w-full px-4 py-3 bg-white dark:bg-iv-dark-bg rounded-none text-left focus:outline-none focus:ring-2 gradient-ring-adaptive transition-all duration-200 flex items-center justify-between ${
                     borderless
                         ? 'border-0'
-                        : 'border border-gray-200 dark:border-gray-600 focus:border-transparent hover:border-gray-300 dark:hover:border-gray-500'
+                        : 'border border-gray-200 dark:border-iv-dark-line focus:border-transparent hover:border-gray-300 dark:hover:border-gray-600'
                 }`}
             >
                 <div className="flex items-center space-x-3 min-w-0">
@@ -139,13 +139,13 @@ export default function ModernSelect({
                             className="modern-select-dropdown modern-select-dropdown-portal"
                         >
                             {showSearch && (
-                                <div className="p-3 border-b border-gray-100 dark:border-gray-700 shrink-0">
+                                <div className="p-3 border-b border-gray-100 dark:border-iv-dark-line shrink-0">
                                     <input
                                         type="text"
                                         placeholder="Поиск..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-none focus:outline-none focus:ring-2 gradient-ring-adaptive focus:border-transparent bg-white dark:bg-iv-dark-bg text-gray-900 dark:text-gray-100"
+                                        className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-iv-dark-line rounded-none focus:outline-none focus:ring-2 gradient-ring-adaptive focus:border-transparent bg-white dark:bg-iv-dark-bg text-gray-900 dark:text-gray-100"
                                         onClick={(e) => e.stopPropagation()}
                                         autoFocus
                                     />

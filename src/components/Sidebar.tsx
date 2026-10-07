@@ -57,7 +57,7 @@ function AccountCard() {
     const initial = (user?.name || user?.email || '?').trim().charAt(0).toUpperCase()
 
     return (
-        <Link to="/profile" className="mx-3 mb-3 mt-auto flex items-center gap-3 p-3 border-t border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-iv-dark-bg transition-iv">
+        <Link to="/profile" className="mx-3 mb-3 mt-auto flex items-center gap-3 p-3 border-t border-gray-200 dark:border-iv-dark-line hover:bg-gray-50 dark:hover:bg-iv-dark-bg transition-iv">
             <span className="w-9 h-9 shrink-0 rounded-full overflow-hidden flex items-center justify-center bg-green-50 dark:bg-purple-900/30 text-sm font-semibold text-inter-verse-green dark:text-purple-300">
                 {avatarUrl ? <img src={avatarUrl} alt="" className="w-full h-full object-cover" /> : initial}
             </span>
@@ -133,8 +133,8 @@ function MobileDrawer({ onClose }: { onClose?: () => void }) {
                 aria-modal="true"
                 aria-label="Меню"
             >
-                <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 dark:border-gray-600">
-                    <div className="w-10 h-10 bg-gray-100 dark:bg-iv-dark-bg border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden shrink-0">
+                <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 dark:border-iv-dark-line">
+                    <div className="w-10 h-10 bg-gray-100 dark:bg-iv-dark-bg border border-gray-200 dark:border-iv-dark-line flex items-center justify-center overflow-hidden shrink-0">
                         {avatarUrl ? (
                             <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
                         ) : (
@@ -154,7 +154,7 @@ function MobileDrawer({ onClose }: { onClose?: () => void }) {
                     <NavContent onNavigate={onClose} />
                 </div>
 
-                <div className="border-t border-gray-200 dark:border-gray-600 px-3 py-2 flex items-center justify-between">
+                <div className="border-t border-gray-200 dark:border-iv-dark-line px-3 py-2 flex items-center justify-between">
                     <button type="button" onClick={handleLogout} className="iv-nav-item flex-1">
                         <LogOut className="w-5 h-5 shrink-0" strokeWidth={1.75} />
                         <span>Выйти</span>

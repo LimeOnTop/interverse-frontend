@@ -36,7 +36,7 @@ export default function QuestionGrid({ items }: { items: AnswerReviewItem[] }) {
                             className={`iv-surface border transition-iv ${
                                 open
                                     ? 'sm:col-span-2 border-inter-verse-green dark:border-purple-400'
-                                    : 'border-gray-200 dark:border-gray-600 hover:border-inter-verse-green/60 dark:hover:border-purple-400/60'
+                                    : 'border-gray-200 dark:border-iv-dark-line hover:border-inter-verse-green/60 dark:hover:border-purple-400/60'
                             }`}
                         >
                             <button
@@ -60,7 +60,7 @@ export default function QuestionGrid({ items }: { items: AnswerReviewItem[] }) {
                                 </p>
                             </button>
                             {open && (
-                                <div className="mx-4 mb-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+                                <div className="mx-4 mb-4 pt-4 border-t border-gray-200 dark:border-iv-dark-line">
                                     <p className="text-xs uppercase tracking-wide text-secondary mb-2">{isTask ? 'Ваше решение' : 'Ваш ответ'}</p>
                                     {isTask ? (
                                         <pre className="text-xs sm:text-sm font-mono whitespace-pre-wrap break-words text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-iv-dark-bg p-3 overflow-x-auto max-h-80">
