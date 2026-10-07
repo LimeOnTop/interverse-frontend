@@ -130,15 +130,9 @@ const TechnologySearch: React.FC<TechnologySearchProps> = ({
     }
 
     const getCategoryColor = (category: string) => {
-        const colors = {
-            frontend: 'bg-blue-100 text-blue-800',
-            backend: 'bg-green-100 text-green-800',
-            database: 'bg-purple-100 text-purple-800',
-            devops: 'bg-orange-100 text-orange-800',
-            qa: 'bg-pink-100 text-pink-800',
-            data_science: 'bg-indigo-100 text-indigo-800'
-        }
-        return colors[category as keyof typeof colors] || 'bg-gray-100 text-gray-800'
+        return category
+            ? 'font-semibold text-inter-verse-green dark:text-purple-400'
+            : 'text-secondary'
     }
 
     return (

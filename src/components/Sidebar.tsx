@@ -1,10 +1,10 @@
 import { useEffect } from 'react'
 import { NavLink, Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, Crown, X, LogOut, User } from 'lucide-react'
+import { Plus, X, LogOut, User } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { resolveSubscriptionPlan, subscriptionPlanLabel } from '../utils/subscription'
-import { NAVIGATION as navigation } from './navigation'
+import { PREPARATION_NAV, ACCOUNT_NAV, type NavItem } from './navigation'
 import ThemeToggle from './ThemeToggle'
 
 interface SidebarProps {
@@ -12,53 +12,63 @@ interface SidebarProps {
     onClose?: () => void
 }
 
-function NavContent({ onNavigate }: { onNavigate?: () => void }) {
-    const user = useAuthStore((state) => state.user)
-    const planLabel = subscriptionPlanLabel(resolveSubscriptionPlan(user))
-
+function NavGroup({ title, items, onNavigate }: { title: string; items: NavItem[]; onNavigate?: () => void }) {
     return (
-        <>
-            <div className="px-3 pt-4 pb-3 border-b border-gray-200 dark:border-gray-600">
-                <Link
-                    to="/interviews/create"
-                    onClick={onNavigate}
-                    className="iv-sidebar-cta"
-                >
-                    <Plus className="w-5 h-5 shrink-0" strokeWidth={1.75} />
-                    <span>Начать тренировку</span>
-                </Link>
-            </div>
-
-            <nav className="px-3 py-4 space-y-1">
-                {navigation.map((item) => {
+        <div>
+            <p className="iv-nav-group">{title}</p>
+            <div className="space-y-0.5">
+                {items.map((item) => {
                     const Icon = item.icon
                     return (
                         <NavLink
-                            key={item.name}
+                            key={item.href}
                             to={item.href}
                             onClick={onNavigate}
-                            className={({ isActive }) =>
-                                `iv-nav-item ${isActive ? 'iv-nav-item-active' : ''}`
-                            }
+                            className={({ isActive }) => `iv-nav-item ${isActive ? 'iv-nav-item-active' : ''}`}
                         >
-                            <Icon className="w-5 h-5 shrink-0" strokeWidth={1.75} />
-                            <span>{item.name}</span>
+                            <Icon className="w-[18px] h-[18px] shrink-0" strokeWidth={1.75} />
+                            <span className="flex-1 min-w-0 truncate">{item.name}</span>
+                            {item.soon && <span className="text-[10px] font-semibold tracking-wider text-secondary">СКОРО</span>}
                         </NavLink>
                     )
                 })}
+            </div>
+        </div>
+    )
+}
 
-                <NavLink
-                    to="/subscription"
-                    onClick={onNavigate}
-                    className={({ isActive }) =>
-                        `iv-nav-item-subscription ${isActive ? 'iv-nav-item-subscription-active' : ''}`
-                    }
-                >
-                    <Crown className="w-5 h-5 shrink-0" strokeWidth={1.75} />
-                    <span>{planLabel === 'Pro' ? 'Подписка Pro' : 'Перейти на Pro'}</span>
-                </NavLink>
-            </nav>
-        </>
+function NavContent({ onNavigate }: { onNavigate?: () => void }) {
+    return (
+        <div className="flex flex-col gap-6 px-3 pt-4 pb-4">
+            <Link to="/interviews/create" onClick={onNavigate} className="iv-sidebar-cta">
+                <Plus className="w-[18px] h-[18px] shrink-0" strokeWidth={2} />
+                <span>Новая тренировка</span>
+            </Link>
+            <NavGroup title="Подготовка" items={PREPARATION_NAV} onNavigate={onNavigate} />
+            <NavGroup title="Аккаунт" items={ACCOUNT_NAV} onNavigate={onNavigate} />
+        </div>
+    )
+}
+
+/** Name, avatar and plan at the bottom of the desktop sidebar. */
+function AccountCard() {
+    const { user, avatarUrl } = useAuthStore()
+    const plan = resolveSubscriptionPlan(user)
+    const initial = (user?.name || user?.email || '?').trim().charAt(0).toUpperCase()
+
+    return (
+        <Link to="/profile" className="mx-3 mb-3 mt-auto flex items-center gap-3 p-3 border-t border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-iv-dark-bg transition-iv">
+            <span className="w-9 h-9 shrink-0 rounded-full overflow-hidden flex items-center justify-center bg-green-50 dark:bg-purple-900/30 text-sm font-semibold text-inter-verse-green dark:text-purple-300">
+                {avatarUrl ? <img src={avatarUrl} alt="" className="w-full h-full object-cover" /> : initial}
+            </span>
+            <span className="min-w-0 flex-1">
+                <span className="block text-sm font-semibold truncate text-gray-900 dark:text-gray-100">{user?.name || 'Профиль'}</span>
+                <span className="block text-xs text-secondary truncate">{user?.email}</span>
+            </span>
+            <span className={`text-[11px] font-semibold ${plan === 'paid' ? 'gradient-text-adaptive' : 'text-secondary'}`}>
+                {subscriptionPlanLabel(plan)}
+            </span>
+        </Link>
     )
 }
 
@@ -68,6 +78,7 @@ export default function Sidebar({ mobileOpen = false, onClose }: SidebarProps) {
             {/* Desktop sidebar */}
             <aside className="iv-sidebar hidden lg:flex flex-col shrink-0 h-full overflow-y-auto custom-scrollbar">
                 <NavContent />
+                <AccountCard />
             </aside>
 
             {/* Mobile drawer */}

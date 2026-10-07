@@ -20,9 +20,7 @@ export function isSectionPassed(score: number, passed?: boolean): boolean {
 }
 
 export function getScoreVariant(score: number): BadgeVariant {
-    if (score >= 80) return 'success'
-    if (score >= PASS_SCORE_THRESHOLD) return 'warning'
-    return 'danger'
+    return score >= PASS_SCORE_THRESHOLD ? 'success' : 'danger'
 }
 
 export function getScoreLabel(score: number) {

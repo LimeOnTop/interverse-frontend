@@ -1,15 +1,18 @@
 import { Check } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useEffect, useState } from 'react'
-import PageHeader from '../components/ui/PageHeader'
 import PageTransition from '../components/ui/PageTransition'
 import Button from '../components/ui/Button'
 import { useAuthStore } from '../store/authStore'
 import { api } from '../services/api'
-import ProTrackCard from '../components/ProTrackCard'
+import { Link } from 'react-router-dom'
+import { formatDay, useDashboardSummary } from '../lib/dashboard'
 import {
     FALLBACK_PAID_OFFERS,
     FREE_PLAN,
+    PRO_FEATURES,
+    PRO_TRACK_PLAN,
+    PRO_TRAININGS_PER_DAY,
     formatRub,
     mapOffersResponse,
     resolveSubscriptionPlan,
@@ -21,6 +24,13 @@ type PaymentFormPayload = {
     action: string
     method: string
     fields: Record<string, string>
+}
+
+type PaymentHistoryItem = {
+    id: number
+    name: string
+    amount: string
+    paid_at: string
 }
 
 function submitRobokassaForm(payment: PaymentFormPayload) {
@@ -55,7 +65,7 @@ function PriceBlock({
         offer.regularPrice !== offer.price
 
     return (
-        <div className="mb-6">
+        <div className="mb-5">
             <div className="flex items-baseline gap-3 flex-wrap">
                 {showStrike && (
                     <span className="text-xl text-secondary line-through decoration-2">
@@ -83,6 +93,14 @@ export default function SubscriptionPage() {
     const [paidOffers, setPaidOffers] = useState<PaidOffer[]>(FALLBACK_PAID_OFFERS)
     const [earlyBirdRemaining, setEarlyBirdRemaining] = useState(100)
     const [earlyBirdLimit, setEarlyBirdLimit] = useState(100)
+    const [payments, setPayments] = useState<PaymentHistoryItem[]>([])
+    const { summary } = useDashboardSummary()
+
+    useEffect(() => {
+        api.get('/payments/history')
+            .then((response) => setPayments(response.data.payments || []))
+            .catch(() => setPayments([]))
+    }, [])
 
     useEffect(() => {
         api
@@ -131,15 +149,81 @@ export default function SubscriptionPage() {
         }
     }
 
-    return (
-        <PageTransition>
-            <PageHeader title="Подписка" />
+    const expiresAt = user?.subscription_expires_at ? formatDay(user.subscription_expires_at) : ''
+    const quota = summary?.quota
 
-            <div className="mb-6 max-w-6xl space-y-1">
-                <p className="text-sm text-secondary leading-relaxed">
-                    Сейчас активен тариф {subscriptionPlanLabel(currentPlan)}. Выберите подходящий вариант.
+    return (
+        <PageTransition className="space-y-6 sm:space-y-8">
+            <div>
+                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Ваш план подготовки</h1>
+                <p className="mt-2 text-secondary">
+                    {currentPlan === 'paid'
+                        ? (expiresAt ? `Pro активен до ${expiresAt}` : 'Pro активен.')
+                        : 'Сейчас активен тариф Basic.'}
                 </p>
-                <p className="text-sm text-secondary leading-relaxed">
+            </div>
+
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+                <section className="iv-panel p-5 sm:p-6">
+                    <span className="iv-pill">Текущий тариф</span>
+                    <h2 className="mt-3 text-2xl font-bold text-gray-900 dark:text-gray-100">{subscriptionPlanLabel(currentPlan)}</h2>
+                    <p className="mt-2 text-sm text-secondary leading-relaxed">
+                        {currentPlan === 'paid'
+                            ? `До ${quota?.limit ?? PRO_TRAININGS_PER_DAY} тренировок в день, подробный разбор ошибок, подбор вакансий и экспорт отчёта.`
+                            : FREE_PLAN.description}
+                    </p>
+                    {currentPlan === 'paid' && expiresAt && (
+                        <p className="mt-4 text-sm text-gray-900 dark:text-gray-100">
+                            Действует до <b>{expiresAt}</b>
+                        </p>
+                    )}
+                    {payments.length > 0 && (
+                        <div className="mt-5">
+                            <p className="iv-eyebrow mb-2">История оплат</p>
+                            <ul className="divide-y divide-gray-200 dark:divide-gray-600">
+                                {payments.map((payment) => (
+                                    <li key={payment.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
+                                        <span className="min-w-0">
+                                            <span className="block truncate text-gray-900 dark:text-gray-100">{payment.name}</span>
+                                            <span className="text-xs text-secondary">{formatDay(payment.paid_at)}</span>
+                                        </span>
+                                        <b className="tabular-nums text-gray-900 dark:text-gray-100">{formatRub(payment.amount)}</b>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                </section>
+
+                <section className="iv-panel p-5 sm:p-6">
+                    <p className="iv-eyebrow">{quota?.period === 'day' ? 'Лимит на сегодня' : 'Лимит тарифа'}</p>
+                    {quota ? (
+                        <>
+                            <p className="mt-3 text-4xl font-bold tabular-nums text-gray-900 dark:text-gray-100">
+                                {quota.used} <span className="text-lg font-medium text-secondary">/ {quota.limit} создано</span>
+                            </p>
+                            <div className="iv-track mt-4">
+                                <span style={{ width: `${quota.limit > 0 ? Math.min(100, (quota.used / quota.limit) * 100) : 0}%` }} />
+                            </div>
+                            <p className="mt-3 text-xs text-secondary">
+                                {quota.period === 'day'
+                                    ? `Осталось ${quota.remaining}. Лимит обновится в полночь по Москве.`
+                                    : quota.remaining > 0
+                                        ? 'Бесплатная тренировка ещё доступна.'
+                                        : 'Бесплатная тренировка использована. Больше тренировок в Pro.'}
+                            </p>
+                        </>
+                    ) : (
+                        <p className="mt-3 text-secondary">Не удалось загрузить лимит.</p>
+                    )}
+                </section>
+            </div>
+
+            <section>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
+                    {currentPlan === 'paid' ? 'Продлить Pro' : 'Выберите период Pro'}
+                </h2>
+                <p className="mt-1 text-sm text-secondary">
                     Оплата тарифа Pro означает согласие с условиями{' '}
                     <a
                         href="/legal/oferta.html"
@@ -151,138 +235,50 @@ export default function SubscriptionPage() {
                     </a>
                     .
                 </p>
-            </div>
-
-            <div className="grid gap-4 sm:gap-6 md:grid-cols-2 xl:grid-cols-3 max-w-6xl">
-                <section
-                    className={`iv-form-card p-6 sm:p-8 flex flex-col ${
-                        currentPlan === 'free'
-                            ? 'ring-2 ring-inter-verse-green dark:ring-purple-400 order-last md:order-none'
-                            : ''
-                    }`}
-                >
-                    <div className="iv-form-card-shine-clip" aria-hidden>
-                        <div className="iv-form-card-shine" />
-                    </div>
-
-                    <div className="flex items-start justify-between gap-3 mb-2">
-                        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
-                            {FREE_PLAN.name}
-                        </h2>
-                        {currentPlan === 'free' && (
-                            <span className="text-xs font-medium text-inter-verse-green dark:text-purple-300 bg-inter-verse-green/10 dark:bg-purple-500/15 px-2.5 py-1 rounded-md">
-                                Активен
-                            </span>
-                        )}
-                    </div>
-
-                    <p className="text-sm text-secondary mb-6 leading-relaxed">
-                        {FREE_PLAN.description}
-                    </p>
-
-                    <div className="mb-6">
-                        <div className="text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
-                            {FREE_PLAN.price}
-                        </div>
-                        <div className="text-sm text-secondary mt-1">{FREE_PLAN.priceHint}</div>
-                    </div>
-
-                    <ul className="space-y-3 mb-8 flex-1">
-                        {FREE_PLAN.features.map((feature) => (
-                            <li
-                                key={feature}
-                                className="flex items-start gap-3 text-sm text-gray-800 dark:text-gray-200"
-                            >
-                                <Check
-                                    className="w-4 h-4 mt-0.5 shrink-0 text-inter-verse-green dark:text-purple-300"
-                                    strokeWidth={2}
-                                />
-                                <span>{feature}</span>
-                            </li>
-                        ))}
-                    </ul>
-
-                    {currentPlan === 'free' ? (
-                        <div className="w-full text-center py-3 text-sm font-medium text-secondary border border-gray-200 dark:border-gray-600 rounded-lg">
-                            Текущий вариант
-                        </div>
-                    ) : (
-                        <div className="w-full text-center py-3 text-sm text-secondary">
-                            Доступен без оплаты
-                        </div>
-                    )}
-                </section>
-
-                {paidOffers.map((plan) => (
-                    <section
-                        key={plan.id}
-                        className={`iv-form-card p-6 sm:p-8 flex flex-col ${
-                            currentPlan === 'paid'
-                                ? 'ring-2 ring-inter-verse-green dark:ring-purple-400'
-                                : ''
-                        }`}
-                    >
-                        <div className="iv-form-card-shine-clip" aria-hidden>
-                            <div className="iv-form-card-shine" />
-                        </div>
-
-                        <div className="flex items-start justify-between gap-3 mb-2">
-                            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
-                                {plan.name}
-                            </h2>
-                            <div className="flex items-center gap-2">
-                                {plan.badge && (
-                                    <span className="text-xs font-semibold uppercase tracking-wide text-white bg-inter-verse-green dark:bg-purple-500 px-2.5 py-1 rounded-md">
-                                        {plan.badge}
-                                    </span>
-                                )}
-                                {currentPlan === 'paid' && (
-                                    <span className="text-xs font-medium text-inter-verse-green dark:text-purple-300 bg-inter-verse-green/10 dark:bg-purple-500/15 px-2.5 py-1 rounded-md">
-                                        Pro
-                                    </span>
-                                )}
+                <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    {paidOffers.map((plan) => (
+                        <div key={plan.id} className="iv-panel p-5 flex flex-col">
+                            <div className="flex items-start justify-between gap-2">
+                                <h3 className="font-semibold text-gray-900 dark:text-gray-100">{plan.name.replace(/^Pro · /, '')}</h3>
+                                {plan.badge && <span className="iv-pill">{plan.badge}</span>}
                             </div>
+                            <div className="mt-3 flex-1">
+                                <PriceBlock offer={plan} earlyBirdRemaining={earlyBirdRemaining} earlyBirdLimit={earlyBirdLimit} />
+                            </div>
+                            <Button
+                                type="button"
+                                variant={plan.badge ? 'primary' : 'secondary'}
+                                className="w-full justify-center"
+                                loading={buyingPlan === plan.id}
+                                disabled={buyingPlan !== null && buyingPlan !== plan.id}
+                                onClick={() => void handleBuy(plan.id)}
+                            >
+                                {currentPlan === 'paid' ? 'Продлить' : 'Выбрать период'}
+                            </Button>
                         </div>
+                    ))}
+                </div>
+            </section>
 
-                        <p className="text-sm text-secondary mb-6 leading-relaxed">
-                            {plan.description}
-                        </p>
+            <section className="iv-panel p-5 sm:p-6">
+                <p className="iv-eyebrow mb-3">Что входит в Pro</p>
+                <ul className="grid gap-2.5 sm:grid-cols-2">
+                    {PRO_FEATURES.map((feature) => (
+                        <li key={feature} className="flex items-start gap-3 text-sm text-gray-800 dark:text-gray-200">
+                            <Check className="w-4 h-4 mt-0.5 shrink-0 text-inter-verse-green dark:text-purple-300" strokeWidth={2} />
+                            <span>{feature}</span>
+                        </li>
+                    ))}
+                </ul>
+            </section>
 
-                        <PriceBlock
-                            offer={plan}
-                            earlyBirdRemaining={earlyBirdRemaining}
-                            earlyBirdLimit={earlyBirdLimit}
-                        />
-
-                        <ul className="space-y-3 mb-8 flex-1">
-                            {plan.features.map((feature) => (
-                                <li
-                                    key={feature}
-                                    className="flex items-start gap-3 text-sm text-gray-800 dark:text-gray-200"
-                                >
-                                    <Check
-                                        className="w-4 h-4 mt-0.5 shrink-0 text-inter-verse-green dark:text-purple-300"
-                                        strokeWidth={2}
-                                    />
-                                    <span>{feature}</span>
-                                </li>
-                            ))}
-                        </ul>
-
-                        <Button
-                            type="button"
-                            className="w-full justify-center"
-                            loading={buyingPlan === plan.id}
-                            disabled={buyingPlan !== null && buyingPlan !== plan.id}
-                            onClick={() => void handleBuy(plan.id)}
-                        >
-                            {currentPlan === 'paid' ? 'Продлить' : 'Купить'}
-                        </Button>
-                    </section>
-                ))}
-
-                <ProTrackCard />
-            </div>
+            <Link to="/tracks" className="iv-panel p-5 sm:p-6 flex items-start gap-4 hover:border-inter-verse-green dark:hover:border-purple-400 transition-iv">
+                <span className="font-mono text-xs font-semibold pt-1 gradient-text-adaptive">СКОРО</span>
+                <span>
+                    <span className="block font-semibold text-gray-900 dark:text-gray-100">{PRO_TRACK_PLAN.name}</span>
+                    <span className="block text-sm text-secondary mt-1">{PRO_TRACK_PLAN.description}</span>
+                </span>
+            </Link>
         </PageTransition>
     )
 }

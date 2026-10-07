@@ -1,15 +1,8 @@
 import { NavLink, Link } from 'react-router-dom'
-import { Plus, LayoutDashboard, PlayCircle, FileText, UserCircle } from 'lucide-react'
+import { Plus } from 'lucide-react'
+import { MOBILE_TABS } from './navigation'
 
-const TABS = [
-    { name: 'Главная', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Интервью', href: '/interview-service', icon: PlayCircle },
-    null,
-    { name: 'Отчёты', href: '/reports', icon: FileText },
-    { name: 'Профиль', href: '/profile', icon: UserCircle },
-] as const
-
-/** Bottom navigation for phones: the four main sections plus a central start action. */
+/** Bottom navigation for phones: four main sections plus a central start action. */
 export default function MobileTabBar() {
     return (
         <nav
@@ -17,16 +10,16 @@ export default function MobileTabBar() {
             aria-label="Основная навигация"
         >
             <div className="grid grid-cols-5 h-16">
-                {TABS.map((tab) => {
+                {MOBILE_TABS.map((tab) => {
                     if (!tab) {
                         return (
                             <div key="start" className="flex items-center justify-center">
                                 <Link
                                     to="/interviews/create"
-                                    aria-label="Начать тренировку"
-                                    className="w-12 h-12 -mt-5 flex items-center justify-center gradient-bg-adaptive text-white shadow-iv-lg rounded-full active:scale-95 transition-transform"
+                                    aria-label="Новая тренировка"
+                                    className="w-11 h-11 flex items-center justify-center gradient-bg-adaptive text-white rounded-xl shadow-iv-md active:scale-95 transition-transform"
                                 >
-                                    <Plus className="w-6 h-6" strokeWidth={2} />
+                                    <Plus className="w-5 h-5" strokeWidth={2.25} />
                                 </Link>
                             </div>
                         )

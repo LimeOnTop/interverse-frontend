@@ -55,6 +55,21 @@ export interface GeneratedReport {
     weak_points_count?: number
     /** True when the report is shown with Basic restrictions. */
     locked?: boolean
+    /** Two-line verdict from the section scores ("\n" between lines). */
+    headline?: string
+    theory_correct?: number
+    theory_total?: number
+    task_total?: number
+    technologies?: string[]
+    /** Weak topics grouped by technology; Pro only. */
+    focus?: FocusGroup[]
+    focus_count?: number
+}
+
+export interface FocusGroup {
+    title: string
+    count: number
+    topics: string[]
 }
 
 const FALLBACK_MARKER = 'AI-анализ временно недоступен'

@@ -1,8 +1,7 @@
 import { Link } from 'react-router-dom'
-import { ExternalLink, Lock } from 'lucide-react'
-import Card from '../ui/Card'
-import Badge from '../ui/Badge'
+import { ExternalLink } from 'lucide-react'
 import type { WeakPoint } from '../../lib/reportAnalysis'
+import GradientDash from './GradientDash'
 
 function pluralWeak(count: number) {
     const mod10 = count % 10
@@ -11,6 +10,16 @@ function pluralWeak(count: number) {
     if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'слабых места'
     return 'слабых мест'
 }
+
+// Placeholder lines behind the blur: never the user's real weak points.
+const PLACEHOLDER_LINES = [
+    'Путаница в порядке выполнения асинхронных операций и обработке ошибок внутри цепочки вызовов',
+    'Неточное понимание того, как устроено хранение данных и когда выбирать каждую структуру',
+    'Пробел в теме изоляции состояния и побочных эффектов при повторном использовании кода',
+    'Решение задачи не учитывает граничные случаи и пустые входные данные',
+    'Ошибка в оценке сложности алгоритма при росте объёма входных данных',
+    'Неуверенное владение инструментами отладки и чтением сообщений об ошибках',
+]
 
 export default function WeakPointsSection({
     locked,
@@ -22,99 +31,92 @@ export default function WeakPointsSection({
     points: WeakPoint[]
 }) {
     if (locked) {
+        const lines = PLACEHOLDER_LINES.slice(0, Math.min(Math.max(count, 3), PLACEHOLDER_LINES.length))
         return (
-            <Card padding="lg">
-                <div className="flex items-start gap-3 mb-4">
-                    <Lock className="w-6 h-6 shrink-0 text-inter-verse-green dark:text-purple-400" />
-                    <div>
-                        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
-                            {count > 0 ? `Выявлено ${count} ${pluralWeak(count)}` : 'Детальный разбор ответов'}
-                        </h2>
-                        <p className="text-secondary mt-2 leading-relaxed">
-                            {count > 0
-                                ? 'Мы нашли вопросы и задачи, на которых вы ошиблись, и подготовили объяснение правильных ответов с материалами для изучения каждой темы. Разбор доступен в подписке Pro.'
-                                : 'Разбор каждого ответа с объяснениями и материалами для изучения тем доступен в подписке Pro.'}
-                        </p>
-                    </div>
-                </div>
-
-                <div className="relative mb-6 select-none" aria-hidden>
-                    <div className="space-y-3 blur-sm opacity-60">
-                        {[0, 1, 2].map((index) => (
-                            <div key={index} className="border border-gray-200 dark:border-gray-600 p-4">
-                                <div className="h-3 w-24 bg-gray-300 dark:bg-gray-600 mb-3" />
-                                <div className="h-3 w-full bg-gray-200 dark:bg-gray-700 mb-2" />
-                                <div className="h-3 w-2/3 bg-gray-200 dark:bg-gray-700" />
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                <p className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-                    Сделайте свои слабые стороны сильными с подпиской{' '}
-                    <Link to="/subscription" className="text-inter-verse-green dark:text-purple-400 underline underline-offset-4">
-                        Pro
-                    </Link>
+            <section>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
+                    {count > 0 ? `Выявлено ${count} ${pluralWeak(count)}` : 'Разбор ошибок'}
+                </h2>
+                <p className="text-secondary mt-2 leading-relaxed">
+                    {count > 0
+                        ? 'Мы разобрали каждую ошибку: почему ответ неверный, какой правильный и что изучить по теме.'
+                        : 'Разбор каждого ответа с объяснениями и материалами для изучения тем.'}
                 </p>
-                <Link to="/subscription" className="btn-primary-adaptive inline-flex justify-center px-6 py-3">
-                    Перейти на Pro
-                </Link>
-            </Card>
+
+                <ul className="mt-5 space-y-3 select-none" aria-hidden>
+                    {lines.map((line) => (
+                        <li key={line} className="flex items-start gap-3 leading-relaxed">
+                            <GradientDash />
+                            <span className="blur-[6px] text-gray-700 dark:text-gray-300 pointer-events-none">{line}</span>
+                        </li>
+                    ))}
+                </ul>
+
+                <div className="mt-6 flex flex-col sm:flex-row sm:items-center gap-4">
+                    <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                        Сделайте слабые стороны сильными с{' '}
+                        <span className="gradient-text-adaptive">Pro</span>
+                    </p>
+                    <Link to="/subscription" className="btn-primary-adaptive inline-flex justify-center px-6 py-3 sm:ml-auto">
+                        Открыть разбор
+                    </Link>
+                </div>
+            </section>
         )
     }
 
     if (points.length === 0) {
         return (
-            <Card padding="lg">
+            <section>
                 <h2 className="text-xl sm:text-2xl font-bold mb-2 text-gray-900 dark:text-gray-100">Слабые места</h2>
-                <p className="text-secondary">Ошибок не найдено — все вопросы и задачи решены верно.</p>
-            </Card>
+                <p className="text-secondary">Ошибок не найдено: все вопросы и задачи решены верно.</p>
+            </section>
         )
     }
 
     return (
-        <Card padding="lg">
+        <section>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
-                Слабые места: {points.length}
+                Выявлено {points.length} {pluralWeak(points.length)}
             </h2>
             <p className="text-sm text-secondary mt-1 mb-6">
-                Вопросы и задачи с ошибками, объяснение правильного ответа и материалы для изучения темы.
+                Вопросы и задачи с ошибками, объяснение правильного ответа и материалы по теме.
             </p>
-            <ol className="space-y-5">
+            <ul className="space-y-6">
                 {points.map((point) => (
-                    <li key={point.step_id} className="border border-gray-200 dark:border-gray-600 p-4 sm:p-5 space-y-3">
-                        <div className="flex flex-wrap items-center gap-2">
-                            <Badge variant={point.item_type === 'task' ? 'info' : 'danger'}>{point.label}</Badge>
-                            {point.technology && <span className="text-xs text-secondary">{point.technology}</span>}
+                    <li key={point.step_id} className="flex items-start gap-3">
+                        <GradientDash />
+                        <div className="min-w-0 flex-1 space-y-3">
+                            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-xs font-semibold uppercase tracking-wide">
+                                <span className="text-inter-verse-green dark:text-purple-400">{point.label}</span>
+                                {point.technology && <span className="text-secondary">{point.technology}</span>}
+                            </div>
+                            <p className="text-gray-900 dark:text-gray-100 leading-relaxed whitespace-pre-wrap">{point.prompt}</p>
+                            <div className="grid md:grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                                <div>
+                                    <p className="text-xs uppercase tracking-wide text-secondary mb-1">Ваш ответ</p>
+                                    <p className="whitespace-pre-wrap break-words text-red-600 dark:text-red-400">{point.user_answer}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs uppercase tracking-wide text-secondary mb-1">Правильный ответ</p>
+                                    <p className="whitespace-pre-wrap break-words text-inter-verse-green dark:text-purple-400 max-h-60 overflow-auto">{point.correct_answer}</p>
+                                </div>
+                            </div>
+                            {point.explanation && (
+                                <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">{point.explanation}</p>
+                            )}
+                            <a
+                                href={point.source_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 text-sm font-medium text-inter-verse-green dark:text-purple-400 hover:underline"
+                            >
+                                <ExternalLink className="w-4 h-4" /> Изучить тему «{point.topic}» на Хабре
+                            </a>
                         </div>
-                        <p className="text-gray-900 dark:text-gray-100 leading-relaxed whitespace-pre-wrap">{point.prompt}</p>
-                        <div className="grid md:grid-cols-2 gap-3 text-sm">
-                            <div className="border border-red-300 dark:border-red-500/40 p-3">
-                                <p className="text-xs uppercase tracking-wide text-secondary mb-1">Ваш ответ</p>
-                                <p className="whitespace-pre-wrap break-words text-gray-900 dark:text-gray-100">{point.user_answer}</p>
-                            </div>
-                            <div className="border border-inter-verse-green/40 dark:border-purple-500/40 p-3">
-                                <p className="text-xs uppercase tracking-wide text-secondary mb-1">Правильный ответ</p>
-                                <p className="whitespace-pre-wrap break-words text-gray-900 dark:text-gray-100 max-h-60 overflow-auto">{point.correct_answer}</p>
-                            </div>
-                        </div>
-                        {point.explanation && (
-                            <div className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-                                <span className="font-semibold text-inter-verse-green dark:text-purple-400">Объяснение: </span>
-                                {point.explanation}
-                            </div>
-                        )}
-                        <a
-                            href={point.source_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 text-sm font-medium text-inter-verse-green dark:text-purple-400 hover:underline"
-                        >
-                            <ExternalLink className="w-4 h-4" /> Изучить тему «{point.topic}» на Хабре
-                        </a>
                     </li>
                 ))}
-            </ol>
-        </Card>
+            </ul>
+        </section>
     )
 }

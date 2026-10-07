@@ -8,7 +8,7 @@ import { NAVIGATION } from './navigation'
 
 const routeTitles: Record<string, string> = {
     ...Object.fromEntries(NAVIGATION.map((item) => [item.href, item.name])),
-    '/calendar': 'Активность',
+    '/calendar': 'Прогресс',
     '/subscription': 'Подписка',
     '/interviews/create': 'Новая тренировка',
 }
