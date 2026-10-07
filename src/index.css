@@ -473,7 +473,7 @@
     }
 
     .iv-track {
-        @apply h-1.5 rounded-full bg-gray-100 dark:bg-iv-dark-bg overflow-hidden;
+        @apply h-1.5 rounded-full bg-gray-100 dark:bg-iv-dark-line overflow-hidden;
     }
 
     .iv-track > span {
