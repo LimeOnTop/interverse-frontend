@@ -1,7 +1,9 @@
 /* InterVerse Design Tokens */
 
 :root {
-    --iv-radius: 0;
+    /* Cards and panels; controls use the small radius. */
+    --iv-radius: 0.75rem;
+    --iv-radius-sm: 0.5rem;
     --iv-ease: cubic-bezier(0.4, 0, 0.2, 1);
     --iv-duration-fast: 150ms;
     --iv-duration: 200ms;

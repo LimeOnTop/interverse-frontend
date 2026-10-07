@@ -525,11 +525,11 @@ export default function ProfilePage() {
                         <img
                             src={profile.avatar_url}
                             alt="Аватар"
-                            className="w-24 h-24 object-cover border border-gray-200 dark:border-iv-dark-line"
+                            className="w-24 h-24 rounded-full object-cover border border-gray-200 dark:border-iv-dark-line"
                             onError={() => setAvatarError(true)}
                         />
                     ) : (
-                        <div className="w-24 h-24 flex items-center justify-center border border-gray-200 dark:border-iv-dark-line bg-gray-100 dark:bg-iv-dark-bg">
+                        <div className="w-24 h-24 rounded-full flex items-center justify-center border border-gray-200 dark:border-iv-dark-line bg-gray-100 dark:bg-iv-dark-bg">
                             <User className="w-8 h-8 text-gray-400" strokeWidth={1.5} />
                         </div>
                     )}
@@ -734,7 +734,7 @@ export default function ProfilePage() {
 
             {showHHModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-                    <div className="w-full max-w-md iv-surface border border-gray-200 dark:border-iv-dark-line p-6 space-y-4">
+                    <div className="w-full max-w-md iv-surface rounded-xl border border-gray-200 dark:border-iv-dark-line p-6 space-y-4">
                         <div className="flex items-start justify-between gap-3">
                             <div>
                                 <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Импорт из hh.ru</h2>

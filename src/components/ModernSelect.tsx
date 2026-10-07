@@ -108,7 +108,7 @@ export default function ModernSelect({
                 onClick={() => setIsOpen(!isOpen)}
                 aria-haspopup="listbox"
                 aria-expanded={isOpen}
-                className={`w-full px-4 py-3 bg-white dark:bg-iv-dark-bg rounded-none text-left focus:outline-none focus:ring-2 gradient-ring-adaptive transition-all duration-200 flex items-center justify-between ${
+                className={`w-full px-4 py-3 bg-white dark:bg-iv-dark-bg rounded-lg text-left focus:outline-none focus:ring-2 gradient-ring-adaptive transition-all duration-200 flex items-center justify-between ${
                     borderless
                         ? 'border-0'
                         : 'border border-gray-200 dark:border-iv-dark-line focus:border-transparent hover:border-gray-300 dark:hover:border-gray-600'
@@ -145,7 +145,7 @@ export default function ModernSelect({
                                         placeholder="Поиск..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-iv-dark-line rounded-none focus:outline-none focus:ring-2 gradient-ring-adaptive focus:border-transparent bg-white dark:bg-iv-dark-bg text-gray-900 dark:text-gray-100"
+                                        className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-iv-dark-line rounded-lg focus:outline-none focus:ring-2 gradient-ring-adaptive focus:border-transparent bg-white dark:bg-iv-dark-bg text-gray-900 dark:text-gray-100"
                                         onClick={(e) => e.stopPropagation()}
                                         autoFocus
                                     />

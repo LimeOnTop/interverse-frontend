@@ -59,9 +59,9 @@
         @apply bg-gray-50 dark:bg-iv-dark-bg min-h-screen;
     }
 
+    /* Surface colour only: full-height bars (sidebar, header) stay square. */
     .iv-surface {
         @apply bg-white dark:bg-iv-dark-surface;
-        border-radius: var(--iv-radius);
     }
 
     .iv-card {
@@ -94,9 +94,9 @@
     }
 
     .dark .iv-form-card {
-        background: rgba(74, 74, 74, 0.85);
+        background: rgba(29, 32, 39, 0.9);
         backdrop-filter: blur(12px);
-        border-color: rgba(75, 85, 99, 0.6);
+        border-color: #343843;
     }
 
     .iv-form-card:hover {
@@ -388,7 +388,7 @@
     /* ── Buttons ── */
     .iv-btn {
         @apply inline-flex items-center justify-center gap-2 font-medium;
-        border-radius: var(--iv-radius);
+        border-radius: var(--iv-radius-sm);
         transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1),
             box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1),
             opacity 200ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -441,7 +441,7 @@
     .iv-input, .input-field {
         @apply w-full px-4 py-3 bg-white border border-gray-200 text-gray-900;
         @apply dark:bg-iv-dark-bg dark:border-iv-dark-line dark:text-gray-100;
-        border-radius: var(--iv-radius);
+        border-radius: var(--iv-radius-sm);
         transition: box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1),
             border-color 200ms cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -454,7 +454,7 @@
     .input-field-underlined {
         @apply w-full px-0 py-3 bg-transparent border-0 border-b border-gray-300;
         @apply dark:border-iv-dark-line dark:text-gray-100;
-        border-radius: var(--iv-radius);
+        border-radius: 0;
         transition: border-color 200ms cubic-bezier(0.4, 0, 0.2, 1);
     }
 
@@ -493,7 +493,7 @@
     .iv-chip {
         @apply inline-flex items-center px-3 py-1 text-xs font-medium bg-gray-100 text-gray-700;
         @apply dark:bg-iv-dark-bg dark:text-gray-300 border border-gray-200 dark:border-iv-dark-line;
-        border-radius: var(--iv-radius);
+        border-radius: var(--iv-radius-sm);
         transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
     }
 
@@ -630,13 +630,13 @@
 
     .profile-block-check {
         @apply absolute bottom-3 right-3 w-8 h-8 flex items-center justify-center bg-white/20;
-        border-radius: var(--iv-radius);
+        border-radius: var(--iv-radius-sm);
     }
 
     /* ── Wizard ── */
     .step-indicator {
         @apply w-10 h-10 flex items-center justify-center text-sm font-semibold;
-        border-radius: var(--iv-radius);
+        border-radius: var(--iv-radius-sm);
         transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
     }
 
@@ -685,7 +685,7 @@
         @apply w-12 h-12 mb-4 flex items-center justify-center;
         @apply bg-gray-100 text-gray-700 border border-gray-200;
         @apply dark:bg-iv-dark-bg dark:text-gray-300 dark:border-iv-dark-line;
-        border-radius: var(--iv-radius);
+        border-radius: var(--iv-radius-sm);
         transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
     }
 
@@ -701,7 +701,7 @@
     .wizard-stack-chip {
         @apply inline-flex items-center gap-2 px-1 py-0.5 text-sm font-medium bg-transparent border-0;
         @apply text-inter-verse-green dark:text-purple-400;
-        border-radius: var(--iv-radius);
+        border-radius: var(--iv-radius-sm);
     }
 
     .wizard-tech-chip {
@@ -719,7 +719,7 @@
     .iv-nav-item-subscription {
         @apply flex items-center gap-3 px-4 py-3 text-sm font-medium text-white;
         @apply gradient-bg-adaptive hover:opacity-90;
-        border-radius: var(--iv-radius);
+        border-radius: var(--iv-radius-sm);
         transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
     }
 
@@ -730,7 +730,7 @@
     .iv-play-btn {
         @apply inline-flex items-center justify-center w-10 h-10 shrink-0;
         @apply gradient-bg-adaptive text-white;
-        border-radius: var(--iv-radius);
+        border-radius: var(--iv-radius-sm);
         transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1),
             box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1),
             opacity 200ms cubic-bezier(0.4, 0, 0.2, 1);

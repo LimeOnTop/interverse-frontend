@@ -129,7 +129,7 @@ export default function ScheduleStep({
                                 <h4 className="text-base font-semibold text-gray-900 dark:text-gray-100">Тренировка запланирована</h4>
                             </div>
                             <div className="space-y-2">
-                                <div className="flex items-center justify-center p-2 iv-surface border border-green-200 dark:border-purple-500/30">
+                                <div className="flex items-center justify-center p-2 iv-surface rounded-lg border border-green-200 dark:border-purple-500/30">
                                     <Calendar className="w-4 h-4 text-inter-verse-green dark:text-purple-400 mr-2" />
                                     <div className="text-center">
                                         <p className="text-xs text-secondary">Дата</p>
@@ -138,7 +138,7 @@ export default function ScheduleStep({
                                         </p>
                                     </div>
                                 </div>
-                                <div className="flex items-center justify-center p-2 iv-surface border border-green-200 dark:border-purple-500/30">
+                                <div className="flex items-center justify-center p-2 iv-surface rounded-lg border border-green-200 dark:border-purple-500/30">
                                     <Clock className="w-4 h-4 text-inter-verse-green dark:text-purple-400 mr-2" />
                                     <div className="text-center">
                                         <p className="text-xs text-secondary">Время</p>
