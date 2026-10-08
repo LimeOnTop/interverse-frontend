@@ -27,7 +27,7 @@ export function getScoreLabel(score: number) {
     if (score >= 80) return 'Отлично'
     if (score >= PASS_SCORE_THRESHOLD) return 'Хорошо'
     if (score === 0) return 'Не пройдено'
-    return 'Требует улучшения'
+    return 'Есть над чем поработать'
 }
 
 export function buildReportSections(report: {

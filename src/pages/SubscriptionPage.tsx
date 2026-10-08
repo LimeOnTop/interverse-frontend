@@ -91,7 +91,7 @@ export default function SubscriptionPage() {
     const currentPlan = resolveSubscriptionPlan(user)
     const [buyingPlan, setBuyingPlan] = useState<string | null>(null)
     const [paidOffers, setPaidOffers] = useState<PaidOffer[]>(FALLBACK_PAID_OFFERS)
-    const [earlyBirdRemaining, setEarlyBirdRemaining] = useState(100)
+    const [earlyBirdRemaining, setEarlyBirdRemaining] = useState(27)
     const [earlyBirdLimit, setEarlyBirdLimit] = useState(100)
     const [payments, setPayments] = useState<PaymentHistoryItem[]>([])
     const { summary } = useDashboardSummary()

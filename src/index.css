@@ -4,6 +4,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Toast colours follow the theme; the dark class sits on <html>. */
+:root {
+    --iv-surface: #ffffff;
+    --iv-text: #111827;
+    --iv-accent-border: #013220;
+}
+
+.dark {
+    --iv-surface: #1D2027;
+    --iv-text: #f3f4f6;
+    --iv-accent-border: #c084fc;
+}
+
 @layer base {
     * {
         @apply border-gray-200 dark:border-iv-dark-line;

@@ -53,8 +53,8 @@ export default function ProTrackCard({ className = '', showPrice = true }: { cla
 
             <button
                 type="button"
-                disabled
-                className="btn-primary-adaptive w-full text-center justify-center py-3 opacity-50 cursor-not-allowed"
+                aria-disabled
+                className="w-full py-3 text-center text-sm font-semibold rounded-lg border-2 border-inter-verse-green text-inter-verse-green dark:border-purple-400 dark:text-purple-300 cursor-default"
             >
                 Скоро
             </button>
