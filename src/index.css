@@ -468,6 +468,52 @@
         @apply iv-surface border border-gray-200 dark:border-iv-dark-line rounded-xl;
     }
 
+    /* Accent slider: filled track up to the thumb (--iv-range-fill). */
+    .iv-range {
+        @apply w-full h-6 bg-transparent cursor-pointer appearance-none;
+    }
+    .iv-range::-webkit-slider-runnable-track {
+        height: 6px;
+        border-radius: 9999px;
+        background: linear-gradient(to right, var(--iv-gradient-from) var(--iv-range-fill, 0%), rgb(229 231 235) var(--iv-range-fill, 0%));
+    }
+    .dark .iv-range::-webkit-slider-runnable-track {
+        background: linear-gradient(to right, var(--iv-gradient-from) var(--iv-range-fill, 0%), #343843 var(--iv-range-fill, 0%));
+    }
+    .iv-range::-moz-range-track {
+        height: 6px;
+        border-radius: 9999px;
+        @apply bg-gray-200 dark:bg-iv-dark-line;
+    }
+    .iv-range::-moz-range-progress {
+        height: 6px;
+        border-radius: 9999px;
+        background: var(--iv-gradient-from);
+    }
+    .iv-range::-webkit-slider-thumb {
+        @apply appearance-none bg-white dark:bg-iv-dark-surface;
+        width: 22px;
+        height: 22px;
+        margin-top: -8px;
+        border-radius: 9999px;
+        border: 2px solid var(--iv-gradient-from);
+        box-shadow: 0 1px 3px rgb(0 0 0 / 0.2);
+    }
+    .iv-range::-moz-range-thumb {
+        @apply bg-white dark:bg-iv-dark-surface;
+        width: 18px;
+        height: 18px;
+        border-radius: 9999px;
+        border: 2px solid var(--iv-gradient-from);
+        box-shadow: 0 1px 3px rgb(0 0 0 / 0.2);
+    }
+    .iv-range:focus-visible {
+        outline: none;
+    }
+    .iv-range:focus-visible::-webkit-slider-thumb {
+        box-shadow: 0 0 0 4px var(--iv-focus-ring);
+    }
+
     .iv-eyebrow {
         @apply text-[11px] font-semibold uppercase tracking-[0.16em] text-secondary;
     }

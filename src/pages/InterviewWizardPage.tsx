@@ -11,6 +11,7 @@ import Spinner from '../components/ui/Spinner'
 import { clearFormDraft, usePersistedState } from '../hooks/usePersistedForm'
 import { useTechnologySearch } from '../hooks/useTechnologySearch'
 import { LEVELS, SPECIALIZATIONS, TECH_STACKS } from '../components/InterviewWizard/options'
+import SchedulePicker from '../components/InterviewWizard/SchedulePicker'
 
 const STEPS = [
     { title: 'Направление', description: 'Ваша специализация' },
@@ -160,11 +161,7 @@ export default function InterviewWizardPage() {
                             )
                         })}
                     </ol>
-                    <div className="mt-12 mx-auto w-28 h-20 rounded-[50%] border border-gray-300 dark:border-iv-dark-line flex items-center justify-center relative">
-                        <span className="absolute inset-x-6 -inset-y-3 rounded-[50%] border border-gray-200 dark:border-iv-dark-line" aria-hidden />
-                        <span className="font-mono text-xl gradient-text-adaptive">{`{ ${(selectedTechStack[0] || 'iv').toLowerCase().slice(0, 6)} }`}</span>
-                    </div>
-                    <p className="mt-8 text-xs text-secondary leading-relaxed">Хорошая подготовка начинается<br />с понятной цели.</p>
+                    <p className="mt-12 text-xs text-secondary leading-relaxed">Хорошая подготовка начинается<br />с понятной цели.</p>
                 </aside>
 
                 <section className="iv-panel rounded-2xl p-5 sm:p-9 shadow-iv-md min-w-0">
@@ -244,16 +241,7 @@ export default function InterviewWizardPage() {
                                         />
                                     </div>
                                     {startMode === 'later' ? (
-                                        <label className="mt-5 block">
-                                            <span className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Дата и время</span>
-                                            <input
-                                                type="datetime-local"
-                                                value={scheduledAt}
-                                                min={localDateTime()}
-                                                onChange={(event) => update({ scheduledAt: event.target.value })}
-                                                className="input-field max-w-xs rounded-lg"
-                                            />
-                                        </label>
+                                        <SchedulePicker value={scheduledAt} onChange={(value) => update({ scheduledAt: value })} />
                                     ) : (
                                         <p className="mt-5 text-sm text-secondary">Вопросы и практические задачи подберём под выбранный стек и уровень.</p>
                                     )}
@@ -317,14 +305,14 @@ function OptionCard({ glyph, title, description, selected, onClick }: {
             type="button"
             onClick={onClick}
             aria-pressed={selected}
-            className={`relative text-left rounded-xl border p-5 transition-iv ${
+            className={`relative text-left rounded-xl border-2 p-5 transition-iv ${
                 selected
-                    ? 'border-inter-verse-green bg-green-50/60 dark:border-purple-400 dark:bg-iv-dark-tint'
+                    ? 'border-inter-verse-green dark:border-purple-400'
                     : 'border-gray-200 dark:border-iv-dark-line hover:border-gray-300 dark:hover:border-gray-500'
             }`}
         >
             <span className={`absolute top-5 right-5 w-5 h-5 rounded-full border flex items-center justify-center ${
-                selected ? 'gradient-bg-adaptive border-transparent text-white' : 'border-gray-300 dark:border-iv-dark-line'
+                selected ? 'border-inter-verse-green text-inter-verse-green dark:border-purple-400 dark:text-purple-300' : 'border-gray-300 dark:border-iv-dark-line'
             }`}
             >
                 {selected && <Check className="w-3 h-3" strokeWidth={3} />}
@@ -394,9 +382,11 @@ function TechStep({ specialization, specializationName, selected, onChange }: {
             )}
             <div className="mt-6 rounded-xl border border-gray-200 dark:border-iv-dark-line p-4">
                 <p className="iv-eyebrow">Выбрано</p>
-                <p className="mt-1.5 font-semibold text-gray-900 dark:text-gray-100">
-                    {selected.length ? selected.join(' · ') : 'Выберите хотя бы одну технологию'}
-                </p>
+                {selected.length ? (
+                    <p className="mt-1.5 text-lg sm:text-xl font-bold text-inter-verse-green dark:text-purple-300">{selected.join(' · ')}</p>
+                ) : (
+                    <p className="mt-1.5 font-semibold text-gray-900 dark:text-gray-100">Выберите хотя бы одну технологию</p>
+                )}
             </div>
         </StepBody>
     )
