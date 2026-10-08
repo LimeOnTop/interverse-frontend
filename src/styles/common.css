@@ -23,6 +23,9 @@
     --iv-border: #E5E7EB;
     --iv-border-hover: #D1D5DB;
 
+    /* Accent (borders of highlighted elements, e.g. toasts) */
+    --iv-accent: #013220;
+
     /* Focus */
     --iv-focus-ring: rgba(1, 50, 32, 0.4);
 
@@ -33,6 +36,8 @@
 
 .dark {
     color-scheme: dark;
+
+    --iv-accent: #a855f7;
 
     --iv-gradient-from: #c084fc;
     --iv-gradient-to: #9333ea;

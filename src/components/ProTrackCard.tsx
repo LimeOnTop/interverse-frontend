@@ -13,7 +13,7 @@ export default function ProTrackCard({ className = '', showPrice = true }: { cla
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
                     {PRO_TRACK_PLAN.name}
                 </h2>
-                <span className="text-xs font-semibold uppercase tracking-wide text-white bg-inter-verse-green dark:bg-purple-500 px-2.5 py-1 rounded-md">
+                <span className="iv-pill shrink-0">
                     {PRO_TRACK_PLAN.badge}
                 </span>
             </div>
@@ -56,7 +56,7 @@ export default function ProTrackCard({ className = '', showPrice = true }: { cla
                 disabled
                 className="btn-primary-adaptive w-full text-center justify-center py-3 opacity-50 cursor-not-allowed"
             >
-                Скоро
+                Скоро в продаже
             </button>
         </section>
     )

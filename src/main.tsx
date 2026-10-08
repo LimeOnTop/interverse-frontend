@@ -16,8 +16,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                     style: {
                         background: 'var(--iv-surface)',
                         color: 'var(--iv-text)',
-                        border: '1px solid var(--iv-border)',
-                        borderRadius: '0',
+                        border: '1px solid var(--iv-accent)',
+                        borderRadius: 'var(--iv-radius)',
                         boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.08)',
                     },
                 }}
