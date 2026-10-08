@@ -498,6 +498,13 @@
         @apply border border-inter-verse-green/30 text-inter-verse-green dark:border-purple-400/40 dark:text-purple-300;
     }
 
+    /* Solid accent plate (e.g. «Скоро»): theme accent fill, surface-coloured text. */
+    .iv-pill-accent {
+        @apply inline-flex items-center shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide whitespace-nowrap;
+        background-color: var(--iv-brand-accent);
+        color: var(--iv-surface);
+    }
+
     /* Range slider: track filled with the accent gradient up to the thumb. */
     .iv-range {
         @apply appearance-none h-2 rounded-full bg-gray-200 dark:bg-iv-dark-line cursor-pointer;

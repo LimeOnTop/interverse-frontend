@@ -273,7 +273,7 @@ export default function SubscriptionPage() {
             </section>
 
             <Link to="/tracks" className="iv-panel p-5 sm:p-6 flex items-start gap-4 hover:border-inter-verse-green dark:hover:border-purple-400 transition-iv">
-                <span className="font-mono text-xs font-semibold pt-1 gradient-text-adaptive">СКОРО</span>
+                <span className="iv-pill-accent mt-0.5">{PRO_TRACK_PLAN.badge}</span>
                 <span>
                     <span className="block font-semibold text-gray-900 dark:text-gray-100">{PRO_TRACK_PLAN.name}</span>
                     <span className="block text-sm text-secondary mt-1">{PRO_TRACK_PLAN.description}</span>
