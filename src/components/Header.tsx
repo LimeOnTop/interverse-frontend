@@ -6,6 +6,7 @@ import ThemeToggle from './ThemeToggle'
 import { motion, AnimatePresence } from 'framer-motion'
 import { NAVIGATION } from './navigation'
 import BrandWordmark from './BrandWordmark'
+import UserAvatar from './UserAvatar'
 
 const routeTitles: Record<string, string> = {
     ...Object.fromEntries(NAVIGATION.map((item) => [item.href, item.name])),
@@ -19,20 +20,15 @@ interface HeaderProps {
 }
 
 export default function Header({ onMenuClick }: HeaderProps) {
-    const { user, logout, avatarUrl } = useAuthStore()
+    const { user, logout } = useAuthStore()
     const navigate = useNavigate()
     const location = useLocation()
     const [dropdownOpen, setDropdownOpen] = useState(false)
-    const [avatarError, setAvatarError] = useState(false)
     const dropdownRef = useRef<HTMLDivElement>(null)
 
     const pageTitle = Object.entries(routeTitles)
         .sort(([a], [b]) => b.length - a.length)
         .find(([path]) => location.pathname.startsWith(path))?.[1]
-
-    useEffect(() => {
-        setAvatarError(false)
-    }, [avatarUrl])
 
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
@@ -48,8 +44,6 @@ export default function Header({ onMenuClick }: HeaderProps) {
         logout()
         navigate('/')
     }
-
-    const showAvatar = Boolean(avatarUrl) && !avatarError
 
     return (
         <header className="iv-header px-2 sm:px-4 lg:px-6">
@@ -85,18 +79,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                             aria-label="Меню профиля"
                             className="flex items-center gap-2 px-2 sm:px-3 py-2 hover:bg-gray-50 dark:hover:bg-iv-dark-bg transition-iv min-h-[44px]"
                         >
-                            <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-iv-dark-bg border border-gray-200 dark:border-iv-dark-line flex items-center justify-center overflow-hidden shrink-0">
-                                {showAvatar ? (
-                                    <img
-                                        src={avatarUrl!}
-                                        alt={user?.name || 'Аватар'}
-                                        className="w-full h-full object-cover"
-                                        onError={() => setAvatarError(true)}
-                                    />
-                                ) : (
-                                    <User className="w-4 h-4 text-gray-600 dark:text-gray-400" strokeWidth={1.75} />
-                                )}
-                            </div>
+                            <UserAvatar size="sm" />
                             <span className="hidden sm:inline text-sm font-medium text-gray-700 dark:text-gray-300 max-w-[120px] truncate">
                                 {user?.name}
                             </span>

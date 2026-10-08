@@ -1,11 +1,12 @@
 import { useEffect } from 'react'
 import { NavLink, Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, X, LogOut, User } from 'lucide-react'
+import { Plus, X, LogOut, ChevronRight } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { resolveSubscriptionPlan, subscriptionPlanLabel } from '../utils/subscription'
 import { PREPARATION_NAV, ACCOUNT_NAV, type NavItem } from './navigation'
 import ThemeToggle from './ThemeToggle'
+import UserAvatar from './UserAvatar'
 
 interface SidebarProps {
     mobileOpen?: boolean
@@ -52,23 +53,24 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
 
 /** Name, avatar and plan at the bottom of the desktop sidebar. */
 function AccountCard() {
-    const { user, avatarUrl } = useAuthStore()
-    const plan = resolveSubscriptionPlan(user)
-    const initial = (user?.name || user?.email || '?').trim().charAt(0).toUpperCase()
+    const user = useAuthStore((state) => state.user)
+    const planLabel = subscriptionPlanLabel(resolveSubscriptionPlan(user))
+    const name = user?.name || 'Профиль'
 
     return (
-        <Link to="/profile" className="mx-3 mb-3 mt-auto flex items-center gap-3 p-3 border-t border-gray-200 dark:border-iv-dark-line hover:bg-gray-50 dark:hover:bg-iv-dark-bg transition-iv">
-            <span className="w-9 h-9 shrink-0 rounded-full overflow-hidden flex items-center justify-center bg-green-50 dark:bg-purple-900/30 text-sm font-semibold text-inter-verse-green dark:text-purple-300">
-                {avatarUrl ? <img src={avatarUrl} alt="" className="w-full h-full object-cover" /> : initial}
-            </span>
-            <span className="min-w-0 flex-1">
-                <span className="block text-sm font-semibold truncate text-gray-900 dark:text-gray-100">{user?.name || 'Профиль'}</span>
-                <span className="block text-xs text-secondary truncate">{user?.email}</span>
-            </span>
-            <span className={`text-[11px] font-semibold ${plan === 'paid' ? 'gradient-text-adaptive' : 'text-secondary'}`}>
-                {subscriptionPlanLabel(plan)}
-            </span>
-        </Link>
+        <div className="mt-auto px-3 pt-6 pb-4">
+            <Link to="/profile" className="sidebar-profile" aria-label={`Открыть профиль ${name}, тариф ${planLabel}`}>
+                <UserAvatar />
+                <span className="sidebar-profile-info">
+                    <span className="sidebar-profile-name">
+                        <strong>{name}</strong>
+                        <span className="sidebar-profile-plan">{planLabel}</span>
+                    </span>
+                    {user?.email && <span className="sidebar-profile-role">{user.email}</span>}
+                </span>
+                <ChevronRight className="sidebar-profile-chevron" strokeWidth={1.6} aria-hidden="true" />
+            </Link>
+        </div>
     )
 }
 
@@ -90,7 +92,7 @@ export default function Sidebar({ mobileOpen = false, onClose }: SidebarProps) {
 }
 
 function MobileDrawer({ onClose }: { onClose?: () => void }) {
-    const { user, avatarUrl, logout } = useAuthStore()
+    const { user, logout } = useAuthStore()
     const navigate = useNavigate()
     const planLabel = subscriptionPlanLabel(resolveSubscriptionPlan(user))
 
@@ -134,17 +136,21 @@ function MobileDrawer({ onClose }: { onClose?: () => void }) {
                 aria-label="Меню"
             >
                 <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 dark:border-iv-dark-line">
-                    <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-iv-dark-bg border border-gray-200 dark:border-iv-dark-line flex items-center justify-center overflow-hidden shrink-0">
-                        {avatarUrl ? (
-                            <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
-                        ) : (
-                            <User className="w-5 h-5 text-gray-500" strokeWidth={1.75} />
-                        )}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold truncate text-gray-900 dark:text-gray-100">{user?.name || 'Профиль'}</p>
-                        <p className="text-xs text-secondary">Тариф {planLabel}</p>
-                    </div>
+                    <Link
+                        to="/profile"
+                        onClick={onClose}
+                        className="flex items-center gap-3 min-w-0 flex-1 min-h-[44px]"
+                        aria-label={`Открыть профиль, тариф ${planLabel}`}
+                    >
+                        <UserAvatar size="lg" />
+                        <span className="min-w-0 flex-1">
+                            <span className="sidebar-profile-name">
+                                <strong className="text-sm text-gray-900 dark:text-gray-100">{user?.name || 'Профиль'}</strong>
+                                <span className="sidebar-profile-plan">{planLabel}</span>
+                            </span>
+                            {user?.email && <span className="sidebar-profile-role text-xs">{user.email}</span>}
+                        </span>
+                    </Link>
                     <button onClick={onClose} className="btn-icon shrink-0" aria-label="Закрыть меню">
                         <X className="w-5 h-5" />
                     </button>
