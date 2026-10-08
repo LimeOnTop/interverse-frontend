@@ -8,6 +8,7 @@ import {
     Crown,
     Plus,
     Route,
+    LifeBuoy,
     type LucideIcon,
 } from 'lucide-react'
 
@@ -32,6 +33,7 @@ export const ACCOUNT_NAV: NavItem[] = [
     { name: 'Профиль', href: '/profile', icon: UserRound },
     { name: 'Подписка', href: '/subscription', icon: Crown },
     { name: 'Предложить вопрос', href: '/contribute', icon: Plus },
+    { name: 'Поддержка', href: '/support', icon: LifeBuoy },
 ]
 
 /** Single source for sidebar, mobile drawer and header titles. */

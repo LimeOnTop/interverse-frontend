@@ -247,7 +247,7 @@ export default function SubscriptionPage() {
                             </div>
                             <Button
                                 type="button"
-                                variant={plan.badge ? 'primary' : 'secondary'}
+                                variant="primary"
                                 className="w-full justify-center"
                                 loading={buyingPlan === plan.id}
                                 disabled={buyingPlan !== null && buyingPlan !== plan.id}
