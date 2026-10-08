@@ -218,11 +218,14 @@ export const useAuthStore = create<AuthState>()(
                 syncAccessCookie(accessToken)
                 set({ isAuthenticated: true })
 
-                if (!user) {
-                    try {
-                        const response = await api.get('/auth/me')
-                        set({ user: response.data.user })
-                    } catch {
+                // Always refetch: the cached user carries the subscription, which changes
+                // after a payment (return from Robokassa) or when the period ends.
+                try {
+                    const response = await api.get('/auth/me')
+                    set({ user: response.data.user })
+                } catch {
+                    // A cached user survives a failed refresh; without one there is nothing to show.
+                    if (!user) {
                         syncAccessCookie(null)
                         set({
                             user: null,
