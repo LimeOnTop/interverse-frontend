@@ -71,13 +71,13 @@ export default function Header({ onMenuClick }: HeaderProps) {
                 </div>
 
                 <div className="flex items-center gap-1 sm:gap-3">
-                    <ThemeToggle className="hidden sm:inline-flex" />
+                    <ThemeToggle className="hidden sm:inline-flex iv-header-frame is-icon" />
 
                     <div className="relative" ref={dropdownRef}>
                         <button
                             onClick={() => setDropdownOpen(!dropdownOpen)}
                             aria-label="Меню профиля"
-                            className="flex items-center gap-2 px-2 sm:px-3 py-2 hover:bg-gray-50 dark:hover:bg-iv-dark-bg transition-iv min-h-[44px]"
+                            className="iv-header-frame flex items-center gap-2 pl-1.5 pr-2 sm:pr-3 py-1 min-h-[44px]"
                         >
                             <UserAvatar size="sm" />
                             <span className="hidden sm:inline text-sm font-medium text-gray-700 dark:text-gray-300 max-w-[120px] truncate">

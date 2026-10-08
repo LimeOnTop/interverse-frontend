@@ -294,3 +294,20 @@
     .session-card, .sidebar-profile, .sidebar-profile-chevron { transition: none; }
     .session-card:hover { transform: none; }
 }
+
+/* ── Header buttons framed like the sidebar profile card ── */
+.iv-header-frame {
+    border: 1px solid var(--lib-line);
+    border-radius: 14px;
+    background: var(--lib-bg);
+    color: var(--lib-ink);
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.iv-header-frame:hover { background: var(--lib-tint); border-color: var(--lib-accent); }
+.iv-header-frame:focus-visible { outline: 2px solid var(--lib-accent); outline-offset: 3px; }
+.iv-header-frame.is-icon { width: 44px; height: 44px; padding: 0; justify-content: center; }
+
+@media (prefers-reduced-motion: reduce) {
+    .iv-header-frame { transition: none; }
+}
