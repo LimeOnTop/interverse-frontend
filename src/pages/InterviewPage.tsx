@@ -145,9 +145,14 @@ export default function InterviewPage() {
         }
     }, [id, navigate, persistSession, leaveCompletedTraining])
 
+    // One load per training: a repeated effect run (StrictMode, re-render) must not
+    // flash the spinner and redraw the form a second time.
+    const loadedForRef = useRef<string | null>(null)
     useEffect(() => {
+        if (!id || loadedForRef.current === id) return
+        loadedForRef.current = id
         loadSession()
-    }, [loadSession])
+    }, [id, loadSession])
 
     const currentStep = session?.steps[currentStepIndex]
     const totalSteps = session?.steps.length ?? 0
@@ -394,7 +399,8 @@ export default function InterviewPage() {
 
             <div className="mt-6 sm:mt-8 grid grid-cols-1 lg:grid-cols-[1fr_14rem] gap-6 lg:gap-8 items-start">
                 <section className="iv-panel rounded-2xl p-5 sm:p-9 min-w-0">
-                    <AnimatePresence mode="wait">
+                    {/* initial={false}: the first step appears with the page, not in a second fade after it. */}
+                    <AnimatePresence mode="wait" initial={false}>
                         <motion.div
                             key={currentStep?.id}
                             initial={{ opacity: 0, x: 14 }}

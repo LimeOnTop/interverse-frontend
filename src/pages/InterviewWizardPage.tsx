@@ -176,7 +176,7 @@ export default function InterviewWizardPage() {
                             className="mt-6"
                         >
                             {currentStep === 1 && (
-                                <StepBody title="В каком направлении растём?" copy="Выберите роль. Следующий шаг подстроится под ваш стек.">
+                                <StepBody title="Для начала выберем направление." copy="Выберите специализацию: от неё зависят технологии на следующем шаге.">
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         {SPECIALIZATIONS.map((item) => (
                                             <OptionCard
@@ -203,7 +203,7 @@ export default function InterviewWizardPage() {
                                 />
                             )}
                             {currentStep === 3 && (
-                                <StepBody title="На какой уровень нацелены?" copy="Ориентир сложности: выбирайте задачи, которые помогут сделать следующий шаг.">
+                                <StepBody title="Какой уровень будет у тренировки?" copy="От уровня зависит сложность вопросов и задач.">
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         {LEVELS.map((item) => (
                                             <OptionCard
@@ -219,7 +219,7 @@ export default function InterviewWizardPage() {
                                 </StepBody>
                             )}
                             {currentStep === 4 && (
-                                <StepBody title="Всё готово к практике." copy="Проверьте параметры и выберите удобный момент для старта.">
+                                <StepBody title="Всё готово к практике." copy="Проверьте параметры и выберите время старта.">
                                     <div className="mb-5 rounded-xl border border-gray-200 dark:border-iv-dark-line p-4 flex flex-wrap items-center gap-x-4 gap-y-2">
                                         <strong className="text-gray-900 dark:text-gray-100">
                                             {[specialization?.name, level?.name].filter(Boolean).join(' · ')}
@@ -339,8 +339,8 @@ function TechStep({ specialization, specializationName, selected, onChange }: {
 
     return (
         <StepBody
-            title="Соберите свой стек."
-            copy={`Выберите одну или несколько технологий${specializationName ? ` для ${specializationName}` : ''}. Их можно изменить, вернувшись на этот шаг.`}
+            title="Теперь выберем технологии."
+            copy={`Отметьте одну или несколько технологий${specializationName ? ` для ${specializationName}` : ''}: по ним подберём вопросы.`}
         >
             <label className="relative block mb-5 max-w-sm">
                 <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-secondary" />
