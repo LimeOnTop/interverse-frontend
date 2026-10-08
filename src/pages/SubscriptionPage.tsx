@@ -79,7 +79,7 @@ function PriceBlock({
             <div className="text-sm text-secondary mt-1">{offer.priceHint}</div>
             {offer.earlyBird && earlyBirdRemaining > 0 && (
                 <div className="mt-2 text-xs font-medium text-inter-verse-green dark:text-purple-300">
-                    Осталось {earlyBirdRemaining} из {earlyBirdLimit} мест по спеццене
+                    Осталось {earlyBirdRemaining} из {earlyBirdLimit} мест по скидке
                 </div>
             )}
         </div>
@@ -207,7 +207,7 @@ export default function SubscriptionPage() {
                             </div>
                             <p className="mt-3 text-xs text-secondary">
                                 {quota.period === 'day'
-                                    ? `Осталось ${quota.remaining}. Лимит обновится в полночь по Москве.`
+                                    ? `Осталось ${quota.remaining}. Лимит обновится в 12:00 по Москве.`
                                     : quota.remaining > 0
                                         ? 'Бесплатная тренировка ещё доступна.'
                                         : 'Бесплатная тренировка использована. Больше тренировок в Pro.'}

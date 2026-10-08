@@ -51,13 +51,9 @@ export default function ProTrackCard({ className = '', showPrice = true }: { cla
                 {PRO_TRACK_PLAN.proUpgradeNote}
             </p>
 
-            <button
-                type="button"
-                aria-disabled
-                className="w-full py-3 text-center text-sm font-semibold rounded-lg border-2 border-inter-verse-green text-inter-verse-green dark:border-purple-400 dark:text-purple-300 cursor-default"
-            >
+            <div className="w-full py-3 text-center text-xs font-semibold uppercase tracking-wide rounded-lg text-white bg-inter-verse-green dark:bg-purple-500">
                 Скоро
-            </button>
+            </div>
         </section>
     )
 }
