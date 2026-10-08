@@ -52,7 +52,7 @@ function PriceBlock({
 
 export default function PricingPage() {
     const [paidOffers, setPaidOffers] = useState<PaidOffer[]>(FALLBACK_PAID_OFFERS)
-    const [earlyBirdRemaining, setEarlyBirdRemaining] = useState(100)
+    const [earlyBirdRemaining, setEarlyBirdRemaining] = useState(27)
     const [earlyBirdLimit, setEarlyBirdLimit] = useState(100)
 
     useEffect(() => {

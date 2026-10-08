@@ -30,7 +30,7 @@ export default function ScoreRing({ score, size = 160 }: { score: number; size?:
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <strong className="text-4xl font-bold tabular-nums tracking-tight gradient-text-adaptive">{score}%</strong>
-                <small className="text-[11px] text-secondary mt-0.5">Итоговый результат</small>
+                <small className="text-[11px] text-secondary mt-0.5">результат</small>
             </div>
         </div>
     )

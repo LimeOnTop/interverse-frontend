@@ -20,7 +20,7 @@ export default function Layout({ children }: LayoutProps) {
     }, [location.pathname])
 
     return (
-        <div className="h-[100dvh] iv-page flex flex-col overflow-hidden">
+        <div className="fixed inset-0 iv-page flex flex-col overflow-hidden">
             <Header onMenuClick={() => setSidebarOpen(true)} />
             <div className="flex flex-1 min-h-0 overflow-hidden">
                 <Sidebar mobileOpen={sidebarOpen} onClose={closeSidebar} />

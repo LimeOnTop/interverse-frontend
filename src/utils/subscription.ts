@@ -174,7 +174,7 @@ export function mapOffersResponse(data: OffersResponse): {
 
     return {
         paidOffers: paidOffers.length > 0 ? paidOffers : FALLBACK_PAID_OFFERS,
-        earlyBirdRemaining: data.early_bird_remaining ?? 100,
+        earlyBirdRemaining: data.early_bird_remaining ?? 27,
         earlyBirdLimit: data.early_bird_limit ?? 100,
     }
 }
