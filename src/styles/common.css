@@ -33,6 +33,10 @@
     --iv-gradient-to: #315d46;
     --iv-gradient: linear-gradient(135deg, #234936 0%, #315d46 100%);
 
+    /* Wordmark accent (the "V" in INTERVERSE) — light */
+    --iv-brand-accent: #315D46;
+    --iv-brand-glow: 0 0 7px rgba(49, 93, 70, 0.22), 0 0 16px rgba(49, 93, 70, 0.12);
+
     /* Neutrals — light */
     --iv-bg: #F5F2EA;
     --iv-surface: #FFFDF8;
@@ -71,6 +75,9 @@
     --iv-gradient-to: #9333ea;
     --iv-gradient: linear-gradient(to right, #c084fc 0%, #9333ea 100%);
 
+    --iv-brand-accent: #C49AF4;
+    --iv-brand-glow: 0 0 7px rgba(189, 137, 251, 0.63), 0 0 18px rgba(164, 107, 234, 0.33);
+
     --iv-bg: #14161B;
     --iv-surface: #1D2027;
     --iv-text: #EEEEF2;
@@ -81,6 +88,28 @@
     --iv-focus-ring: rgba(168, 85, 247, 0.4);
     --iv-scrollbar-track: #14161B;
     --iv-scrollbar-thumb: #9333EA;
+}
+
+/* Text wordmark (design-review/interverse-wordmark.css) */
+.iv-wordmark {
+    display: inline-flex;
+    align-items: baseline;
+    color: var(--iv-text);
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 21px;
+    font-weight: 300;
+    line-height: 1.2;
+    letter-spacing: 0.26em;
+    white-space: nowrap;
+}
+.iv-wordmark > span:last-child { margin-right: -0.26em; }
+.iv-wordmark-v {
+    color: var(--iv-brand-accent);
+    text-shadow: var(--iv-brand-glow);
+}
+@media (max-width: 600px) {
+    .iv-wordmark { font-size: 17px; letter-spacing: 0.22em; }
+    .iv-wordmark > span:last-child { margin-right: -0.22em; }
 }
 
 /* Theme transition */
