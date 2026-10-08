@@ -11,6 +11,7 @@ import Spinner from '../components/ui/Spinner'
 import { clearFormDraft, usePersistedState } from '../hooks/usePersistedForm'
 import { useTechnologySearch } from '../hooks/useTechnologySearch'
 import { LEVELS, SPECIALIZATIONS, TECH_STACKS } from '../components/InterviewWizard/options'
+import SchedulePicker, { nextSlot } from '../components/InterviewWizard/SchedulePicker'
 
 const STEPS = [
     { title: 'Направление', description: 'Ваша специализация' },
@@ -21,10 +22,6 @@ const STEPS = [
 
 type StartMode = 'now' | 'later'
 
-/** Local "YYYY-MM-DDTHH:mm" for a datetime-local input. */
-function localDateTime(date = new Date()) {
-    return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16)
-}
 
 export default function InterviewWizardPage() {
     const [draft, setDraft] = usePersistedState('interview-wizard', {
@@ -160,11 +157,7 @@ export default function InterviewWizardPage() {
                             )
                         })}
                     </ol>
-                    <div className="mt-12 mx-auto w-28 h-20 rounded-[50%] border border-gray-300 dark:border-iv-dark-line flex items-center justify-center relative">
-                        <span className="absolute inset-x-6 -inset-y-3 rounded-[50%] border border-gray-200 dark:border-iv-dark-line" aria-hidden />
-                        <span className="font-mono text-xl gradient-text-adaptive">{`{ ${(selectedTechStack[0] || 'iv').toLowerCase().slice(0, 6)} }`}</span>
-                    </div>
-                    <p className="mt-8 text-xs text-secondary leading-relaxed">Хорошая подготовка начинается<br />с понятной цели.</p>
+                    <p className="mt-10 text-xs text-secondary leading-relaxed">Хорошая подготовка начинается<br />с понятной цели.</p>
                 </aside>
 
                 <section className="iv-panel rounded-2xl p-5 sm:p-9 shadow-iv-md min-w-0">
@@ -240,20 +233,13 @@ export default function InterviewWizardPage() {
                                             title="Запланировать"
                                             description="Выбрать дату и время"
                                             selected={startMode === 'later'}
-                                            onClick={() => update({ startMode: 'later', scheduledAt: scheduledAt || localDateTime(new Date(Date.now() + 3600_000)) })}
+                                            onClick={() => update({ startMode: 'later', scheduledAt: scheduledAt || nextSlot() })}
                                         />
                                     </div>
                                     {startMode === 'later' ? (
-                                        <label className="mt-5 block">
-                                            <span className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Дата и время</span>
-                                            <input
-                                                type="datetime-local"
-                                                value={scheduledAt}
-                                                min={localDateTime()}
-                                                onChange={(event) => update({ scheduledAt: event.target.value })}
-                                                className="input-field max-w-xs rounded-lg"
-                                            />
-                                        </label>
+                                        <div className="mt-6">
+                                            <SchedulePicker value={scheduledAt} onChange={(value) => update({ scheduledAt: value })} />
+                                        </div>
                                     ) : (
                                         <p className="mt-5 text-sm text-secondary">Вопросы и практические задачи подберём под выбранный стек и уровень.</p>
                                     )}
@@ -317,9 +303,9 @@ function OptionCard({ glyph, title, description, selected, onClick }: {
             type="button"
             onClick={onClick}
             aria-pressed={selected}
-            className={`relative text-left rounded-xl border p-5 transition-iv ${
+            className={`relative text-left rounded-xl border-2 p-5 transition-iv ${
                 selected
-                    ? 'border-inter-verse-green bg-green-50/60 dark:border-purple-400 dark:bg-iv-dark-tint'
+                    ? 'border-inter-verse-green dark:border-purple-400'
                     : 'border-gray-200 dark:border-iv-dark-line hover:border-gray-300 dark:hover:border-gray-500'
             }`}
         >
@@ -379,10 +365,10 @@ function TechStep({ specialization, specializationName, selected, onChange }: {
                                 type="button"
                                 onClick={() => toggle(tech)}
                                 aria-pressed={isSelected}
-                                className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-iv ${
+                                className={`inline-flex items-center gap-2 rounded-full border-2 px-4 py-2 transition-iv ${
                                     isSelected
-                                        ? 'border-inter-verse-green text-inter-verse-green bg-green-50/60 dark:border-purple-400 dark:text-purple-200 dark:bg-iv-dark-tint'
-                                        : 'border-gray-200 dark:border-iv-dark-line text-gray-800 dark:text-gray-200 hover:border-gray-300 dark:hover:border-gray-500'
+                                        ? 'border-inter-verse-green text-base font-semibold text-inter-verse-green dark:border-purple-400 dark:text-purple-300'
+                                        : 'border-gray-200 dark:border-iv-dark-line text-sm font-medium text-gray-800 dark:text-gray-200 hover:border-gray-300 dark:hover:border-gray-500'
                                 }`}
                             >
                                 {tech}
@@ -394,7 +380,7 @@ function TechStep({ specialization, specializationName, selected, onChange }: {
             )}
             <div className="mt-6 rounded-xl border border-gray-200 dark:border-iv-dark-line p-4">
                 <p className="iv-eyebrow">Выбрано</p>
-                <p className="mt-1.5 font-semibold text-gray-900 dark:text-gray-100">
+                <p className={`mt-1.5 font-semibold ${selected.length ? 'text-lg text-inter-verse-green dark:text-purple-300' : 'text-gray-900 dark:text-gray-100'}`}>
                     {selected.length ? selected.join(' · ') : 'Выберите хотя бы одну технологию'}
                 </p>
             </div>

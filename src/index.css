@@ -485,6 +485,28 @@
         @apply border border-inter-verse-green/30 text-inter-verse-green dark:border-purple-400/40 dark:text-purple-300;
     }
 
+    /* Range slider: track filled with the accent gradient up to the thumb. */
+    .iv-range {
+        @apply appearance-none h-2 rounded-full bg-gray-200 dark:bg-iv-dark-line cursor-pointer;
+        background-image: linear-gradient(to right, var(--iv-gradient-from), var(--iv-gradient-to));
+        background-size: var(--iv-range-fill, 0%) 100%;
+        background-repeat: no-repeat;
+    }
+
+    .iv-range::-webkit-slider-thumb {
+        @apply appearance-none w-5 h-5 rounded-full bg-white border-2 shadow-iv-md;
+        border-color: var(--iv-gradient-from);
+    }
+
+    .iv-range::-moz-range-thumb {
+        @apply w-5 h-5 rounded-full bg-white border-2 shadow-iv-md;
+        border-color: var(--iv-gradient-from);
+    }
+
+    .iv-range:focus-visible {
+        @apply outline-none ring-2 ring-offset-2 ring-inter-verse-green dark:ring-purple-400 dark:ring-offset-iv-dark-surface;
+    }
+
     /* ── Badges & Chips ── */
     .iv-badge {
         @apply inline-flex items-center text-xs font-semibold;
