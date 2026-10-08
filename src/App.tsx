@@ -25,11 +25,15 @@ import SubscriptionPage from './pages/SubscriptionPage'
 import PaymentSuccessPage from './pages/PaymentSuccessPage'
 import PaymentFailPage from './pages/PaymentFailPage'
 import ContributeQuestionPage from './pages/ContributeQuestionPage'
+import SupportPage from './pages/SupportPage'
+import SupportTicketPage from './pages/SupportTicketPage'
 import OAuthCallbackPage from './pages/OAuthCallbackPage'
 import AdminStatsPage from './pages/admin/AdminStatsPage'
 import AdminQuestionsPage from './pages/admin/AdminQuestionsPage'
 import AdminQuestionDetailPage from './pages/admin/AdminQuestionDetailPage'
 import AdminModerationPage from './pages/admin/AdminModerationPage'
+import AdminSupportPage from './pages/admin/AdminSupportPage'
+import AdminSupportTicketPage from './pages/admin/AdminSupportTicketPage'
 import GrafanaLoginPage from './pages/GrafanaLoginPage'
 
 // Components
@@ -199,6 +203,26 @@ function App() {
                         }
                     />
                     <Route
+                        path="/support"
+                        element={
+                            <ProtectedRoute>
+                                <Layout>
+                                    <SupportPage />
+                                </Layout>
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/support/:id"
+                        element={
+                            <ProtectedRoute>
+                                <Layout>
+                                    <SupportTicketPage />
+                                </Layout>
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
                         path="/reports"
                         element={
                             <ProtectedRoute>
@@ -265,6 +289,26 @@ function App() {
                             <AdminRoute>
                                 <AdminLayout>
                                     <AdminQuestionDetailPage />
+                                </AdminLayout>
+                            </AdminRoute>
+                        }
+                    />
+                    <Route
+                        path="/admin/support"
+                        element={
+                            <AdminRoute>
+                                <AdminLayout>
+                                    <AdminSupportPage />
+                                </AdminLayout>
+                            </AdminRoute>
+                        }
+                    />
+                    <Route
+                        path="/admin/support/:id"
+                        element={
+                            <AdminRoute>
+                                <AdminLayout>
+                                    <AdminSupportTicketPage />
                                 </AdminLayout>
                             </AdminRoute>
                         }
