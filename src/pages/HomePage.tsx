@@ -106,7 +106,7 @@ export default function HomePage() {
                         <div className="grid lg:grid-cols-2 gap-12 items-center">
                             <div>
                                 <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">Готовься как к настоящему интервью</h2>
-                                <p className="text-secondary mb-8">Системная практика вместо хаотичного зубрёжки перед собеседованием</p>
+                                <p className="text-secondary mb-8">Регулярные тренировки в дополнение к самостоятельному изучению перед собеседованием</p>
                                 <div className="grid sm:grid-cols-2 gap-4">
                                     {benefits.map((benefit, index) => (
                                         <motion.div
