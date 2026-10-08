@@ -13,7 +13,8 @@ export default function ProTrackCard({ className = '', showPrice = true }: { cla
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
                     {PRO_TRACK_PLAN.name}
                 </h2>
-                <span className="text-xs font-semibold uppercase tracking-wide text-white bg-inter-verse-green dark:bg-purple-500 px-2.5 py-1 rounded-md">
+                {/* Same "soon" marker as Траектории in the sidebar. */}
+                <span className="shrink-0 mt-2 text-[10px] font-semibold uppercase tracking-wider text-secondary">
                     {PRO_TRACK_PLAN.badge}
                 </span>
             </div>
