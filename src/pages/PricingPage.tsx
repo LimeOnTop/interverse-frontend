@@ -43,7 +43,7 @@ function PriceBlock({
             <div className="text-sm text-secondary mt-1">{offer.priceHint}</div>
             {offer.earlyBird && earlyBirdRemaining > 0 && (
                 <div className="mt-2 text-xs font-medium text-inter-verse-green dark:text-purple-300">
-                    Осталось {earlyBirdRemaining} из {earlyBirdLimit} мест по спеццене
+                    Осталось {earlyBirdRemaining} из {earlyBirdLimit} мест по скидке
                 </div>
             )}
         </div>

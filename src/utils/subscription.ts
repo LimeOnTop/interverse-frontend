@@ -44,7 +44,7 @@ export const FREE_PLAN = {
 }
 
 /** Must match paidTrainingsPerDay in interverse-interview. */
-export const PRO_TRAININGS_PER_DAY = 5
+export const PRO_TRAININGS_PER_DAY = 15
 
 export const PRO_FEATURES = [
     `До ${PRO_TRAININGS_PER_DAY} тренировок в день`,
@@ -79,7 +79,7 @@ export const FALLBACK_PAID_OFFERS: PaidOffer[] = [
         name: 'Pro · 1 месяц',
         price: '390.00',
         regularPrice: '690.00',
-        priceHint: 'спеццена для первых 100 пользователей',
+        priceHint: 'скидка для первых 100 пользователей',
         description: 'Расширенный лимит для интенсивной подготовки к собеседованиям.',
         earlyBird: true,
         durationDays: 30,
