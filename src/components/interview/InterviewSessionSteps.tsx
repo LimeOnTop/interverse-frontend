@@ -51,11 +51,8 @@ export default function InterviewQuestionStep({
                             type="button"
                             onClick={() => onSelectOption(index)}
                             aria-pressed={isSelected}
-                            initial={{ opacity: 0, y: 6 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.04 }}
                             whileTap={{ scale: 0.995 }}
-                            className={`w-full text-left rounded-xl border px-4 py-3.5 sm:px-5 sm:py-4 flex items-center gap-4 transition-iv ${
+                            className={`w-full text-left rounded-xl border px-4 py-3.5 sm:px-5 sm:py-4 flex items-center gap-4 transition-[color,background-color,border-color,box-shadow] duration-200 ${
                                 isSelected
                                     ? 'border-inter-verse-green bg-green-50/60 shadow-[inset_3px_0_0_0_#013220] dark:border-purple-400 dark:bg-iv-dark-tint dark:shadow-[inset_3px_0_0_0_#c084fc]'
                                     : 'border-gray-200 dark:border-iv-dark-line hover:border-gray-300 dark:hover:border-gray-500'

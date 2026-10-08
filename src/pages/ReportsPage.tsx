@@ -127,18 +127,16 @@ export default function ReportsPage() {
                 description="Результаты проведённых интервью"
             />
 
-            <Card padding="md">
-                <div className="relative">
+            <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" strokeWidth={1.75} />
                     <input
                         type="text"
                         placeholder="Поиск по названию тренировки или специализации..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="input-field pl-10"
+                        className="iv-search"
                     />
-                </div>
-            </Card>
+            </div>
 
             <section>
                 <h2 className="text-lg font-semibold mb-4 tabular-nums">

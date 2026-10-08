@@ -545,6 +545,13 @@
         height: 100%;
     }
 
+    /* Search field that is itself the block: panel colour, no extra card around it. */
+    .iv-search {
+        @apply iv-surface w-full border border-gray-200 dark:border-iv-dark-line rounded-xl pl-10 pr-4 py-3 text-sm;
+        @apply text-gray-900 dark:text-gray-100 placeholder:text-gray-400 outline-none transition-iv;
+        @apply focus:border-inter-verse-green dark:focus:border-purple-400;
+    }
+
     .iv-header {
         @apply iv-surface border-b border-gray-200 dark:border-iv-dark-line sticky top-0 z-40 shrink-0;
         height: calc(4rem + env(safe-area-inset-top));

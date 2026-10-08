@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Search, Filter, X, SlidersHorizontal } from 'lucide-react'
 import ModernSelect from './ModernSelect'
-import Card from './ui/Card'
 import Button from './ui/Button'
 
 interface FilterOption { value: string; label: string }
@@ -43,7 +42,7 @@ export default function ModernFilters({
     const [expanded, setExpanded] = useState(false)
 
     return (
-        <Card padding="md">
+        <div>
             <div className="flex flex-col lg:flex-row gap-3">
                 <div className="flex gap-2 flex-1">
                 <div className="flex-1 relative">
@@ -53,7 +52,7 @@ export default function ModernFilters({
                         placeholder="Поиск..."
                         value={searchTerm}
                         onChange={(e) => onSearchChange(e.target.value)}
-                        className="input-field pl-10"
+                        className="iv-search"
                     />
                 </div>
                 <button
@@ -80,6 +79,6 @@ export default function ModernFilters({
                     )}
                 </div>
             </div>
-        </Card>
+        </div>
     )
 }

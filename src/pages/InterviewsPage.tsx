@@ -198,7 +198,7 @@ export default function InterviewsPage() {
                 <StatCard label="Отменено" value={statusCounts.cancelled} icon={Calendar} delay={0.2} />
             </div>
 
-            <Card padding="md">
+            <div>
                 <div className="flex flex-col lg:flex-row gap-3">
                     <div className="flex-1 relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" strokeWidth={1.75} />
@@ -207,7 +207,7 @@ export default function InterviewsPage() {
                             placeholder="Поиск по названию тренировки..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="input-field pl-10"
+                            className="iv-search"
                         />
                     </div>
                     <div className="flex flex-col sm:flex-row gap-2">
@@ -224,7 +224,7 @@ export default function InterviewsPage() {
                         )}
                     </div>
                 </div>
-            </Card>
+            </div>
 
             <section>
                 <h2 className="text-lg font-semibold mb-4 tabular-nums">

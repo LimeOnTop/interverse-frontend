@@ -108,7 +108,7 @@ export default function ModernSelect({
                 onClick={() => setIsOpen(!isOpen)}
                 aria-haspopup="listbox"
                 aria-expanded={isOpen}
-                className={`w-full px-4 py-3 bg-white dark:bg-iv-dark-bg rounded-lg text-left focus:outline-none focus:ring-2 gradient-ring-adaptive transition-all duration-200 flex items-center justify-between ${
+                className={`w-full px-4 py-3 iv-surface border border-gray-200 dark:border-iv-dark-line rounded-xl text-left focus:outline-none focus:ring-2 gradient-ring-adaptive transition-[color,background-color,border-color,box-shadow] duration-200 flex items-center justify-between ${
                     borderless
                         ? 'border-0'
                         : 'border border-gray-200 dark:border-iv-dark-line focus:border-transparent hover:border-gray-300 dark:hover:border-gray-600'
