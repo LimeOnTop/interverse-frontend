@@ -6,6 +6,7 @@ import App from './App.tsx'
 import './index.css'
 import './styles/library.css'
 import './styles/sessions.css'
+import './styles/updates.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>

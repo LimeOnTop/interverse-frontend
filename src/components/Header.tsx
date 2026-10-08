@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { NAVIGATION } from './navigation'
 import BrandWordmark from './BrandWordmark'
 import UserAvatar from './UserAvatar'
+import UpcomingUpdates from './UpcomingUpdates'
 
 const routeTitles: Record<string, string> = {
     ...Object.fromEntries(NAVIGATION.map((item) => [item.href, item.name])),
@@ -71,6 +72,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                 </div>
 
                 <div className="flex items-center gap-1 sm:gap-3">
+                    <UpcomingUpdates />
                     <ThemeToggle className="hidden sm:inline-flex iv-header-frame is-icon" />
 
                     <div className="relative" ref={dropdownRef}>

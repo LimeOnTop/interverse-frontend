@@ -1,0 +1,18 @@
+.iv-updates { position: relative; }
+.iv-updates-trigger { display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:8px 11px; font-size:12px; white-space:nowrap; }
+.iv-updates-dot { width:6px; height:6px; border-radius:50%; background:var(--iv-brand-accent); box-shadow:0 0 0 3px var(--iv-tint); }
+.iv-updates-panel { position:absolute; top:calc(100% + 13px); right:0; width:370px; max-height:min(640px,calc(100dvh - 100px)); overflow:auto; z-index:60; border:1px solid var(--iv-border); border-radius:18px; background:var(--iv-surface); box-shadow:0 18px 60px #0002; color:var(--iv-text); }
+.iv-updates-heading { padding:22px 22px 18px; border-bottom:1px solid var(--iv-border); }
+.iv-updates-eyebrow { font-size:10px; letter-spacing:1.6px; text-transform:uppercase; font-weight:650; color:var(--iv-text-secondary); }
+.iv-updates-heading h2 { font-size:19px; font-weight:650; letter-spacing:-.5px; margin-top:10px; }
+.iv-updates-heading p { color:var(--iv-text-secondary); font-size:12px; line-height:1.6; margin-top:8px; }
+.iv-updates-close { display:grid; place-items:center; width:26px; height:26px; border-radius:7px; color:var(--iv-text-secondary); }
+.iv-updates-close:hover { background:var(--iv-tint); color:var(--iv-text); }
+.iv-updates-list { list-style:none; margin:0; padding:6px 22px; }
+.iv-updates-item { display:grid; grid-template-columns:30px minmax(0,1fr); gap:12px; padding:16px 0; }
+.iv-updates-item + .iv-updates-item { border-top:1px solid var(--iv-border); }
+.iv-updates-number { display:grid; place-items:center; width:30px; height:30px; background:var(--iv-tint); color:var(--iv-brand-accent); border-radius:9px; font:500 11px monospace; }
+.iv-updates-item h3 { font-size:13px; font-weight:600; line-height:1.5; }
+.iv-updates-item p { font-size:12px; color:var(--iv-text-secondary); line-height:1.6; margin-top:5px; }
+.iv-updates-footer { padding:14px 22px; border-top:1px solid var(--iv-border); background:var(--iv-bg); color:var(--iv-text-secondary); font-size:11px; line-height:1.6; }
+@media(max-width:600px) { .iv-updates-trigger { font-size:11px; padding:7px 9px; } .iv-updates-panel { position:fixed; top:70px; right:12px; width:min(370px,calc(100vw - 24px)); max-height:calc(100dvh - 155px); } }
