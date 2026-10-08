@@ -1,19 +1,57 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Briefcase, Sparkles } from 'lucide-react'
+import { ArrowRight, Search } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { api } from '../services/api'
 import { useAuthStore } from '../store/authStore'
 import { resolveSubscriptionPlan } from '../utils/subscription'
-import PageHeader from '../components/ui/PageHeader'
 import PageTransition from '../components/ui/PageTransition'
-import EmptyState from '../components/ui/EmptyState'
 import Spinner from '../components/ui/Spinner'
-import Button from '../components/ui/Button'
-import VacancyCard, { type VacancyCardData } from '../components/VacancyCard'
+import VacancyCard, {
+    inferLevel,
+    normalizeSkill,
+    vacancyRequirements,
+    workMode,
+    type VacancyCardData,
+} from '../components/VacancyCard'
+import { formatDay, levelLabel } from '../lib/dashboard'
+import { usePersistedState } from '../hooks/usePersistedForm'
 
 const PROFILE_SKILLS_HREF = '/profile?open=skills'
 const POLL_INTERVAL_MS = 20_000
+
+type SortMode = 'match' | 'recent' | 'salary'
+
+interface JobFilters {
+    query: string
+    level: string
+    mode: string
+    scope: 'all' | 'saved'
+    sort: SortMode
+}
+
+const DEFAULT_FILTERS: JobFilters = { query: '', level: 'all', mode: 'all', scope: 'all', sort: 'match' }
+
+function parseSkills(raw: unknown): string[] {
+    if (Array.isArray(raw)) return raw.map((item) => String(item ?? '').trim()).filter(Boolean)
+    if (typeof raw !== 'string' || !raw.trim()) return []
+    try {
+        const parsed = JSON.parse(raw)
+        if (Array.isArray(parsed)) return parsed.map((item) => String(item ?? '').trim()).filter(Boolean)
+    } catch {
+        /* comma-separated fallback */
+    }
+    return raw.split(',').map((item) => item.trim()).filter(Boolean)
+}
+
+function readSaved(key: string): Set<string> {
+    try {
+        const raw = localStorage.getItem(key)
+        return new Set(raw ? (JSON.parse(raw) as string[]) : [])
+    } catch {
+        return new Set()
+    }
+}
 
 interface VacanciesResponse {
     profile_ready: boolean
@@ -73,6 +111,29 @@ export default function VacanciesPage() {
     const [sources, setSources] = useState<string[]>([])
     const [providerErrors, setProviderErrors] = useState<string[]>([])
     const [polling, setPolling] = useState(false)
+    const [checkedAt, setCheckedAt] = useState<Date | null>(null)
+    const [profileSkills, setProfileSkills] = useState<string[]>([])
+    const [filters, setFilters] = usePersistedState<JobFilters>('vacancies-filters', DEFAULT_FILTERS)
+    const savedKey = `vacancies-saved:${user?.id ?? 'anon'}`
+    const [saved, setSaved] = useState<Set<string>>(() => readSaved(savedKey))
+
+    const setFilter = <K extends keyof JobFilters>(key: K, value: JobFilters[K]) =>
+        setFilters((prev) => ({ ...DEFAULT_FILTERS, ...prev, [key]: value }))
+
+    useEffect(() => {
+        if (!hasPro || !user?.id) return
+        let cancelled = false
+        api.get(`/users/${user.id}/profile`)
+            .then(({ data }) => {
+                if (!cancelled) setProfileSkills(parseSkills(data?.profile?.skills))
+            })
+            .catch(() => {
+                /* the stack row falls back to the search query */
+            })
+        return () => {
+            cancelled = true
+        }
+    }, [hasPro, user?.id])
 
     useEffect(() => {
         if (!hasPro) {
@@ -96,6 +157,7 @@ export default function VacanciesPage() {
                 setTotal(data.total ?? list.length)
                 setSources(data.sources ?? [])
                 setProviderErrors(data.errors ?? [])
+                setCheckedAt(new Date())
             } catch (err: unknown) {
                 if (cancelled) return
                 const message =
@@ -128,6 +190,7 @@ export default function VacanciesPage() {
                 setTotal(data.total ?? list.length)
                 setSources(data.sources ?? [])
                 setProviderErrors(data.errors ?? [])
+                setCheckedAt(new Date())
                 setItems((prev) => {
                     const { items: merged, added } = mergeVacancyCards(prev, list)
                     if (added > 0) {
@@ -155,106 +218,220 @@ export default function VacanciesPage() {
         }
     }, [hasPro, profileReady, loading, error])
 
-    const fallbackSkills = queryText
-        .split(/\s+/)
-        .map((item) => item.trim())
-        .filter(Boolean)
+    const fallbackSkills = useMemo(
+        () => queryText.split(/\s+/).map((item) => item.trim()).filter(Boolean),
+        [queryText],
+    )
+    const stack = profileSkills.length > 0 ? profileSkills : fallbackSkills
+    const stackSet = useMemo(() => new Set(stack.map(normalizeSkill)), [stack])
+
+    const toggleSaved = (id: string) => {
+        setSaved((prev) => {
+            const next = new Set(prev)
+            if (next.has(id)) next.delete(id)
+            else next.add(id)
+            try {
+                localStorage.setItem(savedKey, JSON.stringify([...next]))
+            } catch {
+                /* favourites stay for this visit only */
+            }
+            return next
+        })
+    }
+
+    const f = { ...DEFAULT_FILTERS, ...filters }
+    const visible = useMemo(() => {
+        const query = f.query.toLowerCase().trim()
+        const matchRatio = (v: VacancyCardData) => {
+            const { complete, required, matched } = vacancyRequirements(v, stackSet, fallbackSkills)
+            return (complete ? 1 : 0) + (required.length ? matched.length / required.length : 0)
+        }
+        const salary = (v: VacancyCardData) => v.salary_from ?? v.salary_to ?? -1
+        const published = (v: VacancyCardData) => (v.published_at ? new Date(v.published_at).getTime() || 0 : 0)
+        return items
+            .filter((v) => {
+                if (f.scope === 'saved' && !saved.has(v.id)) return false
+                if (f.level !== 'all' && inferLevel(v.experience) !== f.level) return false
+                if (f.mode !== 'all' && workMode(v.schedule) !== f.mode) return false
+                if (!query) return true
+                return [v.title, v.company_name, v.area, ...(v.skills ?? [])].join(' ').toLowerCase().includes(query)
+            })
+            .map((v, order) => ({ v, order }))
+            .sort((a, b) => {
+                if (f.sort === 'recent') return published(b.v) - published(a.v) || a.order - b.order
+                if (f.sort === 'salary') return salary(b.v) - salary(a.v) || a.order - b.order
+                return matchRatio(b.v) - matchRatio(a.v) || a.order - b.order
+            })
+            .map(({ v }) => v)
+    }, [items, saved, stackSet, fallbackSkills, f.query, f.level, f.mode, f.scope, f.sort])
+
+    const head = (
+        <header className="library-head">
+            <div>
+                <span className="lib-eyebrow">Карьера / следующий шаг</span>
+                <h1>Вакансии и подготовка</h1>
+                <p>Посмотрите требования. Выберите, к какой роли готовиться дальше.</p>
+            </div>
+            {hasPro && checkedAt && (
+                <span className="lib-chip">{polling ? 'Обновляем…' : `Проверено ${formatDay(checkedAt.toISOString(), false)}`}</span>
+            )}
+        </header>
+    )
+
+    if (!hasPro) {
+        return (
+            <PageTransition>
+                {head}
+                <section className="collection-empty">
+                    <h3>Подбор вакансий доступен в Pro</h3>
+                    <p>В Pro мы собираем актуальные вакансии по навыкам из вашего профиля, показываем совпадение стека и запускаем тренировку по требованиям конкретной роли.</p>
+                    <div className="actions">
+                        <Link to="/subscription" className="lib-btn is-primary">Перейти на Pro <ArrowRight /></Link>
+                    </div>
+                </section>
+            </PageTransition>
+        )
+    }
 
     return (
-        <PageTransition className="space-y-8">
-            <PageHeader
-                title="Вакансии"
-                description="Актуальные вакансии по навыкам из вашего профиля"
-            />
+        <PageTransition>
+            {head}
 
-            {!hasPro && (
-                <EmptyState
-                    icon={Briefcase}
-                    title="Поиск вакансий недоступен"
-                    description={
-                        <>
-                            Поиск вакансий недоступен в базовой версии. Перейдите на{' '}
-                            <span className="font-medium text-inter-verse-green dark:text-purple-400">
-                                Pro версию
-                            </span>
-                            , чтобы подбирать актуальные предложения по навыкам из профиля.
-                        </>
-                    }
-                    action={
-                        <Link to="/subscription">
-                            <Button variant="primary">Перейти на Pro версию</Button>
-                        </Link>
-                    }
-                />
-            )}
-
-            {hasPro && loading && (
+            {loading && (
                 <div className="flex justify-center py-16">
                     <Spinner />
                 </div>
             )}
 
-            {hasPro && !loading && error && (
-                <EmptyState
-                    icon={Briefcase}
-                    title="Ошибка загрузки"
-                    description={error}
-                />
-            )}
-
-            {hasPro && !loading && !error && !profileReady && (
-                <EmptyState
-                    icon={Sparkles}
-                    title="Добавьте навыки в профиль"
-                    description="Вакансии подбираются по технологиям из формы «Навыки». Укажите стек — и мы найдём подходящие предложения."
-                    action={
-                        <Link to={PROFILE_SKILLS_HREF}>
-                            <Button variant="primary">Указать навыки</Button>
-                        </Link>
-                    }
-                />
-            )}
-
-            {hasPro && !loading && !error && profileReady && items.length === 0 && (
-                <EmptyState
-                    icon={Briefcase}
-                    title="Вакансии не найдены"
-                    description={
-                        queryText
-                            ? `По навыкам «${queryText}» ничего не нашлось${providerErrors.length ? ` (${providerErrors.join('; ')})` : ''}. Обновите навыки или попробуйте позже.`
-                            : 'По навыкам из профиля вакансии пока не найдены.'
-                    }
-                    action={
-                        <Link to={PROFILE_SKILLS_HREF}>
-                            <Button variant="secondary">Изменить навыки</Button>
-                        </Link>
-                    }
-                />
-            )}
-
-            {hasPro && !loading && !error && profileReady && items.length > 0 && (
-                <div className="space-y-4">
-                    <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-secondary">
-                        <p>
-                            Найдено по навыкам{' '}
-                            <span className="font-medium text-gray-800 dark:text-gray-200">«{queryText}»</span>
-                            {total > 0 ? ` · ${total.toLocaleString('ru-RU')}` : ''}
-                            {polling ? ' · обновление…' : ''}
-                        </p>
-                        {sources.length > 0 && (
-                            <p>Источники: {sources.join(', ')}</p>
-                        )}
+            {!loading && error && (
+                <section className="collection-empty">
+                    <h3>Не удалось загрузить вакансии</h3>
+                    <p>{error}</p>
+                    <div className="actions">
+                        <button type="button" className="lib-btn" onClick={() => window.location.reload()}>Повторить</button>
                     </div>
-                    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 items-stretch">
-                        {items.map((vacancy) => (
-                            <VacancyCard
-                                key={vacancy.id}
-                                vacancy={vacancy}
-                                fallbackSkills={fallbackSkills}
-                            />
-                        ))}
+                </section>
+            )}
+
+            {!loading && !error && !profileReady && (
+                <section className="collection-empty">
+                    <h3>Добавьте навыки в профиль</h3>
+                    <p>Вакансии подбираются по технологиям из формы «Навыки». Укажите стек — и мы найдём подходящие предложения.</p>
+                    <div className="actions">
+                        <Link to={PROFILE_SKILLS_HREF} className="lib-btn is-primary">Указать навыки <ArrowRight /></Link>
                     </div>
-                </div>
+                </section>
+            )}
+
+            {!loading && !error && profileReady && (
+                <>
+                    <section className="opportunity-profile">
+                        <div className="profile-stack">
+                            <span className="lib-eyebrow">Ваш стек</span>
+                            {stack.slice(0, 12).map((skill) => (
+                                <span key={skill} className="lib-chip">{skill}</span>
+                            ))}
+                        </div>
+                        <Link to={PROFILE_SKILLS_HREF} className="lib-textbtn">Изменить навыки →</Link>
+                    </section>
+
+                    {items.length === 0 ? (
+                        <section className="collection-empty">
+                            <h3>Вакансии не найдены</h3>
+                            <p>
+                                {queryText
+                                    ? `По навыкам «${queryText}» ничего не нашлось${providerErrors.length ? ` (${providerErrors.join('; ')})` : ''}. Обновите навыки или попробуйте позже.`
+                                    : 'По навыкам из профиля вакансии пока не найдены.'}
+                            </p>
+                            <div className="actions">
+                                <Link to={PROFILE_SKILLS_HREF} className="lib-btn">Изменить навыки</Link>
+                            </div>
+                        </section>
+                    ) : (
+                        <>
+                            <div className="list-controls">
+                                <div className="search-wrap">
+                                    <Search aria-hidden="true" strokeWidth={1.75} />
+                                    <input
+                                        type="search"
+                                        aria-label="Поиск вакансий"
+                                        placeholder="Роль, технология, компания или город"
+                                        value={f.query}
+                                        onChange={(e) => setFilter('query', e.target.value)}
+                                    />
+                                </div>
+                                <select aria-label="Уровень вакансий" value={f.level} onChange={(e) => setFilter('level', e.target.value)}>
+                                    <option value="all">Все уровни</option>
+                                    {['intern', 'junior', 'middle', 'senior'].map((level) => (
+                                        <option key={level} value={level}>{levelLabel(level)}</option>
+                                    ))}
+                                </select>
+                                <select aria-label="Формат работы" value={f.mode} onChange={(e) => setFilter('mode', e.target.value)}>
+                                    <option value="all">Любой формат</option>
+                                    <option value="remote">Удалённо</option>
+                                    <option value="hybrid">Гибрид</option>
+                                    <option value="office">Офис</option>
+                                </select>
+                            </div>
+
+                            <div className="collection-heading">
+                                <h2>Подборка <span>· {visible.length}</span></h2>
+                                <div className="row">
+                                    <button
+                                        type="button"
+                                        className="lib-textbtn"
+                                        aria-pressed={f.scope === 'saved'}
+                                        onClick={() => setFilter('scope', f.scope === 'all' ? 'saved' : 'all')}
+                                    >
+                                        {f.scope === 'all' ? `Избранное${saved.size ? ` · ${saved.size}` : ''}` : 'Все вакансии'}
+                                    </button>
+                                    <select
+                                        className="lib-select"
+                                        aria-label="Сортировка вакансий"
+                                        value={f.sort}
+                                        onChange={(e) => setFilter('sort', e.target.value as SortMode)}
+                                    >
+                                        <option value="match">По совпадению стека</option>
+                                        <option value="recent">Сначала новые</option>
+                                        <option value="salary">По зарплате</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="job-legend"><span>Есть в вашем профиле</span><span>Можно добавить в подготовку</span></div>
+
+                            {visible.length === 0 ? (
+                                <section className="collection-empty">
+                                    <h3>{f.scope === 'saved' && saved.size === 0 ? 'В избранном пока пусто' : 'В этой подборке ничего не найдено'}</h3>
+                                    <p>{f.scope === 'saved' && saved.size === 0 ? 'Отмечайте вакансии звёздочкой, чтобы вернуться к ним позже.' : 'Измените фильтры или вернитесь ко всем вакансиям.'}</p>
+                                    <div className="actions">
+                                        <button type="button" className="lib-textbtn" onClick={() => setFilters(DEFAULT_FILTERS)}>Сбросить фильтры</button>
+                                    </div>
+                                </section>
+                            ) : (
+                                <div className="job-collection">
+                                    {visible.map((vacancy, index) => (
+                                        <VacancyCard
+                                            key={vacancy.id}
+                                            vacancy={vacancy}
+                                            index={index}
+                                            profileSkills={stackSet}
+                                            fallbackSkills={fallbackSkills}
+                                            saved={saved.has(vacancy.id)}
+                                            onToggleSave={() => toggleSaved(vacancy.id)}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+
+                            <p className="job-info-note">
+                                {items.length} из {Math.max(total, items.length).toLocaleString('ru-RU')} по навыкам «{queryText}»
+                                {sources.length > 0 ? ` · источники: ${sources.join(', ')}` : ''}. Совпадение считается по техническим
+                                навыкам: число навыков из профиля / число показанных требований. Это не оценка готовности к работе.
+                                Полное описание и условия — у источника.
+                            </p>
+                        </>
+                    )}
+                </>
             )}
         </PageTransition>
     )

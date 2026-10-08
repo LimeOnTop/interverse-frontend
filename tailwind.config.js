@@ -8,9 +8,26 @@ export default {
     theme: {
         extend: {
             colors: {
+                // Day palette "Шалфей" via CSS channels in styles/common.css;
+                // the .dark class swaps in the stock values.
+                white: 'rgb(var(--iv-white) / <alpha-value>)',
+                gray: {
+                    50: 'rgb(var(--iv-gray-50) / <alpha-value>)',
+                    100: 'rgb(var(--iv-gray-100) / <alpha-value>)',
+                    200: 'rgb(var(--iv-gray-200) / <alpha-value>)',
+                    300: 'rgb(var(--iv-gray-300) / <alpha-value>)',
+                    400: 'rgb(var(--iv-gray-400) / <alpha-value>)',
+                    500: 'rgb(var(--iv-gray-500) / <alpha-value>)',
+                    600: 'rgb(var(--iv-gray-600) / <alpha-value>)',
+                    700: 'rgb(var(--iv-gray-700) / <alpha-value>)',
+                    800: 'rgb(var(--iv-gray-800) / <alpha-value>)',
+                    900: 'rgb(var(--iv-gray-900) / <alpha-value>)',
+                    950: '#030712',
+                },
                 'inter-verse': {
-                    green: '#013220',
-                    'green-light': '#014d30',
+                    green: 'rgb(var(--iv-green) / <alpha-value>)',
+                    'green-light': 'rgb(var(--iv-green-light) / <alpha-value>)',
+                    tint: 'var(--iv-tint)',
                     'purple-dark': '#c084fc',
                     'purple-darker': '#9333ea',
                 },

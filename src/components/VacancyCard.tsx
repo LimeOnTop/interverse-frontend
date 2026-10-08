@@ -1,11 +1,8 @@
 import { isTrainingLimitError } from '../store/promoStore'
-import { ExternalLink, MapPin } from 'lucide-react'
+import { ArrowRight, Clock3, MapPin, Star } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
-import Card from './ui/Card'
-import Button from './ui/Button'
-import Badge from './ui/Badge'
 import { api } from '../services/api'
 import { formatSessionStartError, startInterviewSession } from '../lib/interviewSession'
 
@@ -37,20 +34,30 @@ function formatSalary(v: VacancyCardData): string | null {
     const to = v.salary_to ?? null
     if (from == null && to == null) return null
     const fmt = (n: number) => n.toLocaleString('ru-RU')
-    let text = ''
-    if (from != null && to != null) text = `${fmt(from)} – ${fmt(to)} ${currency}`
-    else if (from != null) text = `от ${fmt(from)} ${currency}`
-    else text = `до ${fmt(to!)} ${currency}`
-    if (v.salary_gross === true) text += ' до вычета'
-    if (v.salary_gross === false) text += ' на руки'
-    return text
+    if (from != null && to != null) return `${fmt(from)} – ${fmt(to)} ${currency}`
+    if (from != null) return `от ${fmt(from)} ${currency}`
+    return `до ${fmt(to!)} ${currency}`
+}
+
+function salaryCaption(v: VacancyCardData, hasSalary: boolean): string {
+    if (!hasSalary) return 'Уточните у работодателя'
+    if (v.salary_gross === true) return 'До вычета налогов'
+    if (v.salary_gross === false) return 'На руки'
+    return 'Налогообложение не уточнено'
 }
 
 function formatDate(raw?: string): string | null {
     if (!raw) return null
     const d = new Date(raw)
     if (Number.isNaN(d.getTime())) return null
-    return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })
+    return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })
+}
+
+function companyInitials(name?: string): string {
+    const words = (name || '').replace(/["«»()]/g, ' ').split(/\s+/).filter((w) => /[\p{L}\d]/u.test(w))
+    if (words.length === 0) return '—'
+    if (words.length === 1) return words[0].slice(0, 2).toUpperCase()
+    return (words[0][0] + words[1][0]).toUpperCase()
 }
 
 function inferSpecialization(skills: string[]): string {
@@ -62,8 +69,10 @@ function inferSpecialization(skills: string[]): string {
     return 'backend'
 }
 
-function inferLevel(experience?: string): string {
+/** Training level guessed from the vacancy's experience line. */
+export function inferLevel(experience?: string): string {
     const raw = (experience || '').toLowerCase()
+    if (/без опыта|нет опыта|intern|стаж[её]р/.test(raw)) return 'intern'
     const years = Number((raw.match(/\d+/) || [])[0] || 0)
     if (years >= 5 || /senior|ведущ|главн/.test(raw)) return 'senior'
     if (years >= 2 || /middle|средн/.test(raw)) return 'middle'
@@ -71,20 +80,46 @@ function inferLevel(experience?: string): string {
     return 'middle'
 }
 
-interface VacancyCardProps {
-    vacancy: VacancyCardData
-    fallbackSkills?: string[]
+/** Work format bucket from the schedule line: remote, hybrid or office. */
+export function workMode(schedule?: string): 'remote' | 'hybrid' | 'office' | '' {
+    const raw = (schedule || '').toLowerCase()
+    if (!raw) return ''
+    if (/гибрид|hybrid/.test(raw)) return 'hybrid'
+    if (/удал[её]н|remote/.test(raw)) return 'remote'
+    return 'office'
 }
 
-export default function VacancyCard({ vacancy, fallbackSkills = [] }: VacancyCardProps) {
+export const normalizeSkill = (skill: string) => skill.trim().toLowerCase()
+
+/** Vacancy requirements with the ones already in the profile marked. */
+export function vacancyRequirements(vacancy: VacancyCardData, profileSkills: Set<string>, fallbackSkills: string[]) {
+    const complete = Boolean(vacancy.skills && vacancy.skills.length > 0)
+    const required = (complete ? vacancy.skills! : fallbackSkills).slice(0, 14)
+    const matched = required.filter((skill) => profileSkills.has(normalizeSkill(skill)))
+    return { complete, required, matched }
+}
+
+interface VacancyCardProps {
+    vacancy: VacancyCardData
+    index?: number
+    profileSkills: Set<string>
+    fallbackSkills?: string[]
+    saved: boolean
+    onToggleSave: () => void
+}
+
+export default function VacancyCard({ vacancy, index = 0, profileSkills, fallbackSkills = [], saved, onToggleSave }: VacancyCardProps) {
     const navigate = useNavigate()
     const [training, setTraining] = useState(false)
     const salary = formatSalary(vacancy)
     const published = formatDate(vacancy.published_at)
-    const tags = [vacancy.employment, vacancy.schedule].filter(Boolean) as string[]
-    const skills = (vacancy.skills && vacancy.skills.length > 0 ? vacancy.skills : fallbackSkills).slice(0, 8)
+    const { complete, required, matched } = vacancyRequirements(vacancy, profileSkills, fallbackSkills)
+    const matchedSet = new Set(matched)
+    const company = vacancy.company_name || 'Компания не указана'
+    const sourceLine = [vacancy.source_label || vacancy.source, published].filter(Boolean).join(' · ')
 
     const handleTrain = async () => {
+        const skills = required.slice(0, 8)
         if (skills.length === 0) {
             toast.error('У вакансии нет технологий для тренировки. Добавьте навыки в профиль.')
             return
@@ -118,119 +153,83 @@ export default function VacancyCard({ vacancy, fallbackSkills = [] }: VacancyCar
     }
 
     return (
-        <Card hover padding="md" className="h-full">
-            <div className="flex h-full min-h-0 flex-1 flex-col">
-                <div className="flex min-h-0 flex-1 flex-col gap-4">
-                    <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0 flex items-start gap-3">
-                            {vacancy.company_logo_url ? (
-                                <img
-                                    src={vacancy.company_logo_url}
-                                    alt=""
-                                    className="w-10 h-10 object-contain shrink-0 p-1"
-                                />
-                            ) : null}
-                            <div className="min-w-0">
-                                <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 leading-snug line-clamp-2">
-                                    {vacancy.title}
-                                </h3>
-                                {vacancy.company_name && (
-                                    <p className="text-sm text-secondary mt-1 truncate">{vacancy.company_name}</p>
-                                )}
-                            </div>
-                        </div>
-                        <Badge
-                            variant="default"
-                            className="shrink-0 !bg-transparent dark:!bg-transparent !border-0"
-                        >
-                            {vacancy.source_label || vacancy.source}
-                        </Badge>
+        <article className="job-card" style={{ '--i': index } as React.CSSProperties}>
+            <header className="job-top">
+                <div className="job-company">
+                    <span className="company-mark" aria-hidden="true">
+                        {vacancy.company_logo_url ? <img src={vacancy.company_logo_url} alt="" loading="lazy" /> : companyInitials(vacancy.company_name)}
+                    </span>
+                    <div>
+                        <b>{company}</b>
+                        {sourceLine && <small>{sourceLine}</small>}
                     </div>
-
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div className="p-2 bg-gray-50 dark:bg-iv-dark-bg">
-                            <div className="text-xs text-secondary mb-0.5">Локация</div>
-                            <div className="font-medium truncate flex items-center gap-1">
-                                {vacancy.area ? (
-                                    <>
-                                        <MapPin className="w-3.5 h-3.5 shrink-0 text-secondary" strokeWidth={1.75} />
-                                        <span className="truncate">{vacancy.area}</span>
-                                    </>
-                                ) : (
-                                    <span className="text-secondary">—</span>
-                                )}
-                            </div>
-                        </div>
-                        <div className="p-2 bg-gray-50 dark:bg-iv-dark-bg">
-                            <div className="text-xs text-secondary mb-0.5">Зарплата</div>
-                            <div className="font-medium truncate">{salary || <span className="text-secondary">не указана</span>}</div>
-                        </div>
-                        <div className="p-2 bg-gray-50 dark:bg-iv-dark-bg">
-                            <div className="text-xs text-secondary mb-0.5">Опыт</div>
-                            <div className="font-medium truncate">
-                                {vacancy.experience || <span className="text-secondary">не указан</span>}
-                            </div>
-                        </div>
-                        <div className="p-2 bg-gray-50 dark:bg-iv-dark-bg">
-                            <div className="text-xs text-secondary mb-0.5">Опубликовано</div>
-                            <div className="font-medium truncate">
-                                {published || <span className="text-secondary">—</span>}
-                            </div>
-                        </div>
-                    </div>
-
-                    {tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5">
-                            {tags.map((item) => (
-                                <span key={item} className="iv-chip !bg-transparent dark:!bg-transparent !border-0">
-                                    {item}
-                                </span>
-                            ))}
-                        </div>
-                    )}
-
-                    {vacancy.snippet && (
-                        <p className="text-sm text-secondary line-clamp-3">{vacancy.snippet}</p>
-                    )}
-
-                    {skills.length > 0 && (
-                        <div>
-                            <div className="text-xs text-secondary mb-2">Технологии</div>
-                            <div className="flex flex-wrap gap-1.5">
-                                {skills.map((skill) => (
-                                    <span key={skill} className="iv-chip !bg-transparent dark:!bg-transparent !border-0">
-                                        {skill}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-                    )}
                 </div>
+                <button
+                    type="button"
+                    className={`save-job ${saved ? 'saved' : ''}`}
+                    aria-pressed={saved}
+                    aria-label={`${saved ? 'Убрать из избранного' : 'Сохранить вакансию'} ${company}`}
+                    onClick={onToggleSave}
+                >
+                    <Star strokeWidth={1.75} />
+                </button>
+            </header>
 
-                <div className="mt-auto shrink-0 pt-4 flex items-center justify-between gap-3">
-                    <a
-                        href={vacancy.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:text-inter-verse-green dark:hover:text-purple-400"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        Перейти на вакансию
-                        <ExternalLink className="w-3.5 h-3.5" strokeWidth={2} />
-                    </a>
-                    <Button
-                        type="button"
-                        className="text-sm px-4 py-2"
-                        loading={training}
-                        onClick={(e) => {
-                            e.stopPropagation()
-                            void handleTrain()
-                        }}
-                    >
-                        Тренироваться
-                    </Button>
-                </div>
+            <h2>{vacancy.title}</h2>
+            <div className={`job-compensation ${salary ? '' : 'unspecified'}`}>{salary || 'Зарплата не указана'}</div>
+            <p className="salary-caption">{salaryCaption(vacancy, Boolean(salary))}</p>
+
+            <div className="job-facts">
+                <span><MapPin strokeWidth={1.75} /> {vacancy.area || 'Город не указан'}</span>
+                {vacancy.schedule && <span><Clock3 strokeWidth={1.75} /> {vacancy.schedule}</span>}
+                {vacancy.experience && <span>{vacancy.experience}</span>}
+                {vacancy.employment && <span>{vacancy.employment}</span>}
             </div>
-        </Card>
+
+            {required.length > 0 && (
+                <>
+                    <div className="job-skill-header">
+                        <strong>Требуемые навыки</strong>
+                        <small>{complete ? 'Из описания вакансии' : 'По навыкам из профиля'}</small>
+                    </div>
+                    <div className="job-skills">
+                        {required.map((skill) => (
+                            <span key={skill} className={`requirement-tag ${matchedSet.has(skill) ? 'match' : ''}`}>
+                                {matchedSet.has(skill) ? '✓ ' : ''}{skill}
+                            </span>
+                        ))}
+                    </div>
+                    <div className="job-coverage">
+                        {complete ? (
+                            <>
+                                <span className="coverage-dots" aria-hidden="true">
+                                    {required.map((skill) => <i key={skill} className={matchedSet.has(skill) ? 'on' : ''} />)}
+                                </span>
+                                <small>{matched.length} из {required.length} в профиле</small>
+                            </>
+                        ) : (
+                            <small>Источник не указал навыки · полное совпадение не оценено</small>
+                        )}
+                    </div>
+                </>
+            )}
+
+            {vacancy.snippet && (
+                <details className="job-detail">
+                    <summary>Задачи и требования</summary>
+                    <p>{vacancy.snippet}</p>
+                </details>
+            )}
+
+            <div className="job-footspace" />
+            <footer className="job-actions">
+                <a href={vacancy.url} target="_blank" rel="noopener noreferrer">
+                    На вакансию ↗
+                </a>
+                <button type="button" className="lib-btn is-primary" disabled={training} onClick={() => void handleTrain()}>
+                    {training ? 'Запускаем…' : <>Тренировка по вакансии <ArrowRight /></>}
+                </button>
+            </footer>
+        </article>
     )
 }

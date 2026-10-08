@@ -1,6 +1,24 @@
 /* InterVerse Design Tokens */
 
 :root {
+    /* Day palette "Шалфей" (design-review/interverse-day-palettes.css, sage).
+       Tailwind gray/white/brand colours read these channels, so the whole day
+       theme follows them; .dark restores the stock values for the night theme. */
+    --iv-white: 255 253 248;
+    --iv-gray-50: 245 242 234;
+    --iv-gray-100: 236 234 225;
+    --iv-gray-200: 221 222 218;
+    --iv-gray-300: 201 204 196;
+    --iv-gray-400: 154 163 155;
+    --iv-gray-500: 112 124 115;
+    --iv-gray-600: 99 112 102;
+    --iv-gray-700: 70 83 74;
+    --iv-gray-800: 51 63 55;
+    --iv-gray-900: 38 51 43;
+    --iv-green: 35 73 54;
+    --iv-green-light: 49 93 70;
+    --iv-tint: #e8eee3;
+
     /* Cards and panels; controls use the small radius. */
     --iv-radius: 0.75rem;
     --iv-radius-sm: 0.5rem;
@@ -11,28 +29,43 @@
     --iv-duration-page: 500ms;
 
     /* Brand gradients — light */
-    --iv-gradient-from: #013220;
-    --iv-gradient-to: #014d30;
-    --iv-gradient: linear-gradient(135deg, #013220 0%, #014d30 100%);
+    --iv-gradient-from: #234936;
+    --iv-gradient-to: #315d46;
+    --iv-gradient: linear-gradient(135deg, #234936 0%, #315d46 100%);
 
     /* Neutrals — light */
-    --iv-bg: #F9FAFB;
-    --iv-surface: #FFFFFF;
-    --iv-text: #111827;
-    --iv-text-secondary: #6B7280;
-    --iv-border: #E5E7EB;
-    --iv-border-hover: #D1D5DB;
+    --iv-bg: #F5F2EA;
+    --iv-surface: #FFFDF8;
+    --iv-text: #26332B;
+    --iv-text-secondary: #637066;
+    --iv-border: #DDDEDA;
+    --iv-border-hover: #C9CCC4;
 
     /* Focus */
-    --iv-focus-ring: rgba(1, 50, 32, 0.4);
+    --iv-focus-ring: rgba(49, 93, 70, 0.4);
 
     /* Scrollbar */
-    --iv-scrollbar-track: #F3F4F6;
-    --iv-scrollbar-thumb: #013220;
+    --iv-scrollbar-track: #ECEAE1;
+    --iv-scrollbar-thumb: #315D46;
 }
 
 .dark {
     color-scheme: dark;
+
+    --iv-white: 255 255 255;
+    --iv-gray-50: 249 250 251;
+    --iv-gray-100: 243 244 246;
+    --iv-gray-200: 229 231 235;
+    --iv-gray-300: 209 213 219;
+    --iv-gray-400: 156 163 175;
+    --iv-gray-500: 107 114 128;
+    --iv-gray-600: 75 85 99;
+    --iv-gray-700: 55 65 81;
+    --iv-gray-800: 31 41 55;
+    --iv-gray-900: 17 24 39;
+    --iv-green: 1 50 32;
+    --iv-green-light: 1 77 48;
+    --iv-tint: #30263F;
 
     --iv-gradient-from: #c084fc;
     --iv-gradient-to: #9333ea;
