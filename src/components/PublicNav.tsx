@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Menu, X, Tag, LogIn, UserPlus } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
+import BrandWordmark from './BrandWordmark'
 
 interface PublicNavProps {
     landing?: boolean
@@ -64,9 +65,9 @@ export default function PublicNav({ landing = false, overlay = false }: PublicNa
                 <Link
                     to="/"
                     onClick={handleLogoClick}
-                    className="inline-flex items-center min-h-[44px] text-xl font-bold gradient-text-adaptive tracking-tight hover:opacity-80 transition-iv"
+                    className="inline-flex items-center min-h-[44px] shrink-0 hover:opacity-80 transition-iv"
                 >
-                    InterVerse
+                    <BrandWordmark />
                 </Link>
 
                 {/* Desktop / tablet actions */}

@@ -5,6 +5,7 @@ import { LogOut, User, Menu, ChevronDown } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 import { motion, AnimatePresence } from 'framer-motion'
 import { NAVIGATION } from './navigation'
+import BrandWordmark from './BrandWordmark'
 
 const routeTitles: Record<string, string> = {
     ...Object.fromEntries(NAVIGATION.map((item) => [item.href, item.name])),
@@ -63,9 +64,9 @@ export default function Header({ onMenuClick }: HeaderProps) {
                     </button>
                     <Link
                         to="/dashboard"
-                        className="inline-flex items-center min-h-[44px] text-xl font-bold gradient-text-adaptive tracking-tight hover:opacity-80 transition-iv"
+                        className="inline-flex items-center min-h-[44px] shrink-0 hover:opacity-80 transition-iv"
                     >
-                        InterVerse
+                        <BrandWordmark />
                     </Link>
                     {pageTitle && (
                         <>
