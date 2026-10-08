@@ -12,8 +12,8 @@ export default function ScoreRing({ score, size = 160 }: { score: number; size?:
             <svg viewBox="0 0 160 160" className="w-full h-full -rotate-90" aria-hidden>
                 <defs>
                     <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0%" className="[stop-color:#013220] dark:[stop-color:#c084fc]" />
-                        <stop offset="100%" className="[stop-color:#01784a] dark:[stop-color:#9333ea]" />
+                        <stop offset="0%" className="[stop-color:#234936] dark:[stop-color:#c084fc]" />
+                        <stop offset="100%" className="[stop-color:#4a8a66] dark:[stop-color:#9333ea]" />
                     </linearGradient>
                 </defs>
                 <circle cx="80" cy="80" r={radius} fill="none" strokeWidth="8" className="stroke-gray-200 dark:stroke-iv-dark-line" />

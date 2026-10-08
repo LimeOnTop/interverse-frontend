@@ -200,7 +200,7 @@ const TechnologySearch: React.FC<TechnologySearchProps> = ({
                                 return (
                                     <motion.div
                                         key={tech.id}
-                                        whileHover={{ backgroundColor: '#f8fafc' }}
+                                        whileHover={{ backgroundColor: '#f5f2ea' }}
                                         className={`p-3 cursor-pointer border-b border-gray-100 last:border-b-0 ${isSelected ? 'bg-green-50' : ''
                                             }`}
                                         onClick={() => !isSelected && handleTechnologySelect(tech)}

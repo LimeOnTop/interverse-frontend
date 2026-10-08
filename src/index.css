@@ -6,9 +6,9 @@
 
 /* Toast colours follow the theme; the dark class sits on <html>. */
 :root {
-    --iv-surface: #ffffff;
-    --iv-text: #111827;
-    --iv-accent-border: #013220;
+    --iv-surface: #fffdf8;
+    --iv-text: #26332b;
+    --iv-accent-border: #315d46;
 }
 
 .dark {
@@ -40,7 +40,7 @@
 @layer components {
     /* ── Gradients ── */
     .gradient-bg {
-        background: linear-gradient(135deg, #013220 0%, #014d30 100%);
+        background: linear-gradient(135deg, #234936 0%, #315d46 100%);
     }
 
     .gradient-bg-dark {
@@ -52,7 +52,7 @@
     }
 
     .gradient-bg-animated {
-        background: linear-gradient(135deg, #013220, #014d30, #013220, #014d30);
+        background: linear-gradient(135deg, #234936, #315d46, #234936, #315d46);
         background-size: 300% 300%;
         animation: gradientBreathe 6s ease infinite;
     }
@@ -255,16 +255,16 @@
 
     .iv-landing-nav {
         @apply sticky top-0 z-40 border-b;
-        background: rgba(255, 255, 255, 0.82);
+        background: rgba(255, 253, 248, 0.82);
         backdrop-filter: blur(12px);
-        border-color: rgba(229, 231, 235, 0.8);
+        border-color: rgba(221, 222, 218, 0.8);
     }
 
     .iv-landing-nav-solid {
         @apply border-b;
-        background: rgba(255, 255, 255, 0.82);
+        background: rgba(255, 253, 248, 0.82);
         backdrop-filter: blur(12px);
-        border-color: rgba(229, 231, 235, 0.8);
+        border-color: rgba(221, 222, 218, 0.8);
     }
 
     .dark .iv-landing-nav {
@@ -282,7 +282,7 @@
         width: 10px;
         height: 10px;
         border-radius: 50%;
-        border: 1.5px solid #013220;
+        border: 1.5px solid #315d46;
         background: transparent;
         transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
         padding: 0;
@@ -293,7 +293,7 @@
     }
 
     .hero-slider-dot-active {
-        background: #013220;
+        background: #315d46;
         transform: scale(1.15);
     }
 
@@ -314,7 +314,7 @@
 
     /* Hero slider — text panel with diagonal cut */
     .hero-slider-text-panel {
-        background: #F9FAFB;
+        background: #F5F2EA;
     }
 
     .hero-slider-text-panel,
@@ -340,7 +340,7 @@
     @media (max-width: 1023px) {
         .hero-slider-text-panel {
             clip-path: none;
-            background: rgba(249, 250, 251, 0.96);
+            background: rgba(245, 242, 234, 0.96);
         }
 
         .dark .hero-slider-text-panel {
@@ -818,7 +818,7 @@
     /* ── Skeleton ── */
     .iv-skeleton {
         @apply bg-gray-200 dark:bg-iv-dark-line;
-        background: linear-gradient(90deg, #E5E7EB 25%, #F3F4F6 50%, #E5E7EB 75%);
+        background: linear-gradient(90deg, #DDDEDA 25%, #ECEAE1 50%, #DDDEDA 75%);
         background-size: 200% 100%;
         animation: shimmer 1.5s ease-in-out infinite;
         border-radius: var(--iv-radius);
@@ -832,8 +832,8 @@
     /* ── Spinner ── */
     .iv-spinner {
         @apply animate-spin rounded-full border-2;
-        border-color: rgba(1, 50, 32, 0.15);
-        border-top-color: #013220;
+        border-color: rgba(49, 93, 70, 0.15);
+        border-top-color: #315d46;
     }
 
     .dark .iv-spinner {
