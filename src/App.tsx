@@ -29,6 +29,7 @@ import SupportPage from './pages/SupportPage'
 import SupportTicketPage from './pages/SupportTicketPage'
 import OAuthCallbackPage from './pages/OAuthCallbackPage'
 import AdminStatsPage from './pages/admin/AdminStatsPage'
+import AdminUsersPage from './pages/admin/AdminUsersPage'
 import AdminQuestionsPage from './pages/admin/AdminQuestionsPage'
 import AdminQuestionDetailPage from './pages/admin/AdminQuestionDetailPage'
 import AdminModerationPage from './pages/admin/AdminModerationPage'
@@ -253,6 +254,7 @@ function App() {
                             </AdminRoute>
                         }
                     />
+                    <Route path="/admin/users" element={<AdminRoute><AdminLayout><AdminUsersPage /></AdminLayout></AdminRoute>} />
                     <Route
                         path="/admin/moderation"
                         element={

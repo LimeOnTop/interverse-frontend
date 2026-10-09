@@ -795,3 +795,29 @@
     .report-entry, .job-card { animation: none; transition: none; }
     .job-card:hover { transform: none; }
 }
+
+/* Compact admin directory: the same surfaces and avatar treatment as vacancies. */
+.admin-users-toolbar { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; }
+.admin-users-periods { display: flex; flex-wrap: wrap; gap: 5px; padding: 5px; border: 1px solid var(--lib-line); background: var(--lib-paper); border-radius: 14px; }
+.admin-users-period { padding: 9px 13px; border-radius: 9px; font-size: 13px; color: var(--lib-muted); transition: background .2s, color .2s; }
+.admin-users-period:hover { background: var(--lib-tint); color: var(--lib-ink); }
+.admin-users-period.is-active { background: var(--lib-accent); color: var(--lib-on-accent); }
+.admin-users-search { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 240px; max-width: 380px; padding: 12px 14px; border: 1px solid var(--lib-line); border-radius: 12px; background: var(--lib-paper); color: var(--lib-muted); }
+.admin-users-search:focus-within { border-color: var(--lib-accent); }
+.admin-users-search input { min-width: 0; width: 100%; background: transparent; border: 0; outline: 0; font-size: 13px; color: var(--lib-ink); }
+.admin-users-search input::-webkit-search-cancel-button { display: none; }
+.admin-users-search button { padding: 3px; flex-shrink: 0; }
+.admin-users-caption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin: 18px 0; font-size: 12px; color: var(--lib-muted); }
+.admin-users-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; }
+.job-card.admin-user-card { padding: 20px; border-radius: 16px; min-height: 150px; }
+.admin-user-heading { display: flex; align-items: center; gap: 12px; min-width: 0; margin-bottom: 15px; }
+.admin-user-avatar { flex-shrink: 0; }
+.admin-user-card .admin-user-heading h2 { margin: 0; min-height: 0; font-size: 16px; line-height: 1.4; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--lib-ink); }
+.admin-user-email, .admin-user-date { display: flex; align-items: center; gap: 8px; min-width: 0; color: var(--lib-muted); }
+.admin-user-email { font-size: 13px; }
+.admin-user-email svg, .admin-user-date svg { flex-shrink: 0; }
+.admin-user-email span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin-user-date { margin-top: 12px; font-size: 11px; }
+.admin-users-pagination { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; margin-top: 24px; color: var(--lib-muted); font-size: 12px; }
+@media(max-width:1200px) { .admin-users-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width:640px) { .admin-users-grid { grid-template-columns: minmax(0,1fr); } .admin-users-search { max-width: none; min-width: 0; flex-basis: 100%; } .admin-users-period { padding: 9px 10px; font-size: 12px; } }
