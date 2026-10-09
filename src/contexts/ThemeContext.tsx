@@ -33,6 +33,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     useEffect(() => {
         // Сохраняем тему в localStorage
         localStorage.setItem('theme', isDark ? 'dark' : 'light')
+        const favicon = document.querySelector<HTMLLinkElement>('#theme-favicon')
+        if (favicon) favicon.href = isDark ? '/favicon-dark.svg' : '/favicon-light.svg'
 
         // Применяем класс к body для темной темы
         if (isDark) {

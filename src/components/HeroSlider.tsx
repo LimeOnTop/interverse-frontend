@@ -2,11 +2,16 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
+import { useTheme } from '../contexts/ThemeContext'
 
 import trainingBg from '../../images/hero-training.png'
 import interviewBg from '../../images/hero-interview.png'
 import levelsBg from '../../images/hero-levels.png'
 import feedbackBg from '../../images/hero-feedback.png'
+import trainingLightBg from '../../images/hero-training-light.webp'
+import interviewLightBg from '../../images/hero-interview-light.webp'
+import levelsLightBg from '../../images/hero-levels-light.webp'
+import feedbackLightBg from '../../images/hero-feedback-light.webp'
 
 type SlideImageKey = 'training' | 'interview' | 'progress' | 'report'
 
@@ -15,6 +20,12 @@ const SLIDE_IMAGE_BACKGROUNDS: Record<SlideImageKey, string> = {
     interview: interviewBg,
     progress: levelsBg,
     report: feedbackBg,
+}
+const LIGHT_SLIDE_IMAGE_BACKGROUNDS: Record<SlideImageKey, string> = {
+    training: trainingLightBg,
+    interview: interviewLightBg,
+    progress: levelsLightBg,
+    report: feedbackLightBg,
 }
 
 interface Slide {
@@ -69,6 +80,7 @@ const SLIDES: Slide[] = [
 const AUTOPLAY_MS = 5500
 
 export default function HeroSlider() {
+    const { isDark } = useTheme()
     const [index, setIndex] = useState(0)
     const [paused, setPaused] = useState(false)
 
@@ -85,12 +97,13 @@ export default function HeroSlider() {
     }, [paused])
 
     const slide = SLIDES[index]
-    const slideImageBg = SLIDE_IMAGE_BACKGROUNDS[slide.illustration]
+    const backgrounds = isDark ? SLIDE_IMAGE_BACKGROUNDS : LIGHT_SLIDE_IMAGE_BACKGROUNDS
+    const slideImageBg = backgrounds[slide.illustration]
 
     useEffect(() => {
         const urls = [
-            SLIDE_IMAGE_BACKGROUNDS[SLIDES[index].illustration],
-            SLIDE_IMAGE_BACKGROUNDS[SLIDES[(index + 1) % SLIDES.length].illustration],
+            backgrounds[SLIDES[index].illustration],
+            backgrounds[SLIDES[(index + 1) % SLIDES.length].illustration],
         ]
         const links: HTMLLinkElement[] = []
         for (const href of urls) {
@@ -107,7 +120,7 @@ export default function HeroSlider() {
                 link.remove()
             }
         }
-    }, [index])
+    }, [index, backgrounds])
 
     return (
         <section
@@ -119,7 +132,7 @@ export default function HeroSlider() {
         >
             <AnimatePresence mode="wait">
                 <motion.div
-                    key={slide.id}
+                    key={`${slide.id}-${isDark ? 'dark' : 'light'}`}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}

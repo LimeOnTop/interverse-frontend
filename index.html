@@ -3,8 +3,11 @@
 
 <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=3" />
-    <link rel="apple-touch-icon" href="/favicon.svg?v=3" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+    <link rel="icon" type="image/png" href="/favicon-96.png" sizes="96x96" />
+    <link id="theme-favicon" rel="icon" type="image/svg+xml" href="/favicon.svg" sizes="any" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+    <link rel="manifest" href="/site.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#f5f2ea" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#14161b" media="(prefers-color-scheme: dark)" />
@@ -22,13 +25,16 @@
     <meta property="og:title" content="InterVerse — подготовка к техническим собеседованиям IT" />
     <meta property="og:description" content="Тренируйтесь к IT-собеседованиям онлайн: симуляции интервью, вопросы и задачи под ваш стек и уровень." />
     <meta property="og:url" content="https://inter-verse.ru/" />
-    <meta property="og:image" content="https://inter-verse.ru/images/interverse-logo-square.svg" />
+    <meta property="og:image" content="https://inter-verse.ru/images/interverse-logo-square.png" />
+    <meta property="og:image:width" content="260" />
+    <meta property="og:image:height" content="260" />
+    <meta property="og:image:type" content="image/png" />
     <meta property="og:image:alt" content="InterVerse" />
 
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="InterVerse — подготовка к техническим собеседованиям IT" />
     <meta name="twitter:description" content="Онлайн-тренировки к техническим собеседованиям: вопросы и задачи под ваш стек." />
-    <meta name="twitter:image" content="https://inter-verse.ru/images/interverse-logo-square.svg" />
+    <meta name="twitter:image" content="https://inter-verse.ru/images/interverse-logo-square.png" />
 
     <link rel="alternate" hreflang="ru" href="https://inter-verse.ru/" />
     <link rel="alternate" hreflang="x-default" href="https://inter-verse.ru/" />
@@ -42,7 +48,7 @@
           "@id": "https://inter-verse.ru/#organization",
           "name": "InterVerse",
           "url": "https://inter-verse.ru/",
-          "logo": "https://inter-verse.ru/images/interverse-logo-square.svg",
+          "logo": {"@type": "ImageObject", "url": "https://inter-verse.ru/images/interverse-logo-square.png", "width": 260, "height": 260},
           "email": "info@inter-verse.ru",
           "sameAs": []
         },
