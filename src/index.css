@@ -596,7 +596,6 @@
         max-width: 100%;
         min-height: 10.5rem;
         border-radius: var(--iv-radius);
-        will-change: transform;
         transition: box-shadow 280ms cubic-bezier(0.22, 1, 0.36, 1),
             border-color 280ms cubic-bezier(0.22, 1, 0.36, 1),
             background-color 280ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -638,16 +637,12 @@
     }
 
     .profile-block-title {
-        @apply text-xl sm:text-4xl font-bold tracking-tight leading-none;
-        transition: transform 400ms cubic-bezier(0.22, 1, 0.36, 1);
+        @apply text-xl sm:text-2xl font-semibold tracking-tight leading-tight;
+        transition: color 180ms ease;
     }
 
     .profile-block-hint {
         @apply text-sm leading-snug;
-    }
-
-    .profile-block-open .profile-block-title {
-        transform: translateY(-2px);
     }
 
     .profile-block-editor {
@@ -947,3 +942,47 @@
     .profile-block:not(.profile-block-open) { min-height: 0 !important; }
     .profile-block { padding: 1rem !important; }
 }
+
+/* Navigation and mobile actions occupy layout space instead of covering content. */
+.iv-app-layout { height: 100%; height: 100dvh; }
+.iv-app-scroll { scroll-padding-block: 20px; overscroll-behavior-y: contain; }
+.iv-mobile-action-bar { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; padding: 12px 16px; border-top: 1px solid var(--iv-border); }
+.iv-mobile-action-bar.safe-bottom { padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
+.iv-mobile-action-bar button > svg { flex-shrink: 0; }
+
+/* The focus toolbar is outside the scroll container and all animated page ancestors. */
+.iv-training-actions-host .iv-mobile-action-bar { grid-template-columns: auto minmax(0,1fr); padding-inline: max(16px, calc((100vw - 1000px) / 2)); }
+.iv-training-session button:focus-visible { outline: 2px solid var(--iv-accent-border); outline-offset: 3px; }
+@media (max-width: 639px) { .iv-training-actions-host .iv-mobile-action-bar { gap: 8px; } .iv-training-session h1 { font-size: 23px; } }
+@media (max-width: 374px) {
+  .iv-training-actions-host .iv-mobile-action-bar button { padding-inline: 10px; font-size: 13px; gap: 6px; flex-shrink: 0; white-space: nowrap; }
+  .iv-training-actions-host .iv-mobile-action-bar { gap: 6px; }
+  .iv-training-actions-host .iv-mobile-action-bar > div { gap: 6px; }
+}
+
+/* Sticky actions belong to the answer panel: stop at its lower edge. */
+.iv-training-sticky-actions { position: sticky; bottom: 0; z-index: 10; display: grid; grid-template-columns: auto minmax(0,1fr); gap: 12px; margin-top: 28px; padding: 12px; padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); background: var(--iv-surface); border: 1px solid var(--iv-border); border-radius: 12px; box-shadow: 0 5px 25px #0000000d; }
+.iv-training-sticky-actions button > svg { flex-shrink: 0; }
+@media (max-width: 639px) {
+ .iv-training-sticky-actions { gap: 4px; padding-inline: 6px; margin-inline: -16px; }
+ .iv-training-sticky-actions button { padding-inline: 8px; font-size: 13px; gap: 4px; flex-shrink: 0; white-space: nowrap; }
+ .iv-training-sticky-actions > div { gap: 6px; }
+}
+/* Training uses the landing page's warm daytime neutrals and solid green accent. */
+:root:not(.dark) .iv-training-session { color: var(--iv-text); }
+:root:not(.dark) .iv-training-session .iv-panel,
+:root:not(.dark) .iv-training-session .iv-training-sticky-actions { background: var(--iv-surface); border-color: var(--iv-border); }
+:root:not(.dark) .iv-training-session h1,
+:root:not(.dark) .iv-training-session h2,
+:root:not(.dark) .iv-training-session h3,
+:root:not(.dark) .iv-training-session label { color: var(--iv-text); }
+:root:not(.dark) .iv-training-session button { border-color: var(--iv-border); color: var(--iv-text); background: var(--iv-surface); }
+:root:not(.dark) .iv-training-session button[aria-pressed="true"],
+:root:not(.dark) .iv-training-session .btn-primary-adaptive { background: #315d46; border-color: #315d46; color: #fffdf8; }
+:root:not(.dark) .iv-training-session button[aria-pressed="true"] > span { color: #fffdf8; }
+:root:not(.dark) .iv-training-session button[aria-pressed="true"] > span:first-child { background: #fffdf8; color: #315d46; }
+:root:not(.dark) .iv-training-session button[aria-current="step"] { border-color: #315d46; box-shadow: 0 0 0 1px #315d46; }
+:root:not(.dark) .iv-training-session button[aria-label*="есть ответ"] { background: #ece9e1; color: #315d46; }
+:root:not(.dark) .iv-training-session textarea { background: var(--iv-bg); border-color: var(--iv-border); color: var(--iv-text); }
+:root:not(.dark) .iv-training-session .iv-track { background: #ece9e1; }
+:root:not(.dark) .iv-training-session .iv-track > span { background: #315d46; }

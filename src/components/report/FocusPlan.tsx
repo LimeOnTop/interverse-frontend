@@ -1,3 +1,4 @@
+import ReportPracticeButton from './ReportPracticeButton'
 import { Link } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
 import type { FocusGroup } from '../../lib/reportAnalysis'
@@ -17,10 +18,11 @@ interface FocusPlanProps {
     title?: string
     description?: string
     action?: boolean
+    reportId?: string
 }
 
 /** Numbered weak topic groups; blurred placeholders with a Pro offer for Basic. */
-export default function FocusPlan({ locked, groups, count, title = 'Следующий шаг', description, action = true }: FocusPlanProps) {
+export default function FocusPlan({ locked, groups, count, title = 'Следующий шаг', description, action = true, reportId }: FocusPlanProps) {
     const empty = !locked && groups.length === 0
 
     return (
@@ -30,7 +32,7 @@ export default function FocusPlan({ locked, groups, count, title = 'Следую
                 {empty ? 'Ошибок не найдено' : 'Закрепить слабые темы'}
             </h2>
             <p className="mt-1 text-sm text-secondary">
-                {description ?? (empty ? 'Можно повышать уровень или добавить новые технологии.' : 'План собран по ошибкам последнего отчёта')}
+                {description ?? (empty ? 'Можно повышать уровень или добавить новые технологии.' : 'План собран по ошибкам этого отчёта')}
             </p>
 
             {locked ? (
@@ -61,7 +63,9 @@ export default function FocusPlan({ locked, groups, count, title = 'Следую
                             ))}
                         </ol>
                     )}
-                    {action && (
+                    {action && reportId && !empty ? (
+                        <><p className="mt-4 text-xs text-secondary">Повторим вопросы и задачи с ошибками из этого отчёта. Повторение учитывается в лимите тренировок.</p><ReportPracticeButton reportId={reportId} className="mt-4 w-full" /></>
+                    ) : action && (
                         <Link to="/interviews/create" className="mt-5 btn-primary-adaptive w-full inline-flex justify-center items-center gap-2 rounded-lg">
                             Настроить тренировку <ArrowRight className="w-4 h-4" />
                         </Link>

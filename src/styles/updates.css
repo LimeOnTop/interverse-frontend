@@ -16,3 +16,4 @@
 .iv-updates-item p { font-size:12px; color:var(--iv-text-secondary); line-height:1.6; margin-top:5px; }
 .iv-updates-footer { padding:14px 22px; border-top:1px solid var(--iv-border); background:var(--iv-bg); color:var(--iv-text-secondary); font-size:11px; line-height:1.6; }
 @media(max-width:600px) { .iv-updates-trigger { font-size:11px; padding:7px 9px; } .iv-updates-panel { position:fixed; top:70px; right:12px; width:min(370px,calc(100vw - 24px)); max-height:calc(100dvh - 155px); } }
+@media(max-width:360px){.iv-updates-label{display:none}.iv-updates-trigger{width:44px;justify-content:center;padding-inline:8px;gap:6px}}

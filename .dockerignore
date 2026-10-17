@@ -6,3 +6,7 @@ dist
 Dockerfile
 docker-compose.yml
 *.log
+public/report-preview-review.html
+public/report-preview-mobile.html
+
+.env*

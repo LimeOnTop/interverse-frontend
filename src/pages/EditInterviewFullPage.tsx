@@ -126,7 +126,7 @@ export default function EditInterviewFullPage() {
         <PageTransition className="max-w-3xl mx-auto">
             <PageHeader
                 title="Редактирование тренировки"
-                description="Обновите параметры тренировки"
+                description="Обнови параметры тренировки"
             />
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -190,7 +190,7 @@ export default function EditInterviewFullPage() {
                                 onChange={(e) => setInterviewData({ ...interviewData, specialization: e.target.value })}
                                 className="input-field-underlined w-full"
                             >
-                                <option value="">Выберите специализацию</option>
+                                <option value="">Выбери специализацию</option>
                                 <option value="frontend">Frontend</option>
                                 <option value="backend">Backend</option>
                                 <option value="devops">DevOps</option>
@@ -206,7 +206,7 @@ export default function EditInterviewFullPage() {
                                 onChange={(e) => setInterviewData({ ...interviewData, level: e.target.value })}
                                 className="input-field-underlined w-full"
                             >
-                                <option value="">Выберите уровень</option>
+                                <option value="">Выбери уровень</option>
                                 <option value="intern">Intern</option>
                                 <option value="junior">Junior</option>
                                 <option value="middle">Middle</option>
@@ -245,7 +245,7 @@ export default function EditInterviewFullPage() {
             <div className="flex justify-end gap-4 mt-8">
                 <Button variant="secondary" onClick={() => navigate('/dashboard')}>Отмена</Button>
                 <Button onClick={handleSubmit} loading={isLoading}>
-                    {isLoading ? 'Сохранение...' : 'Сохранить изменения'}
+                    {isLoading ? 'Сохранение…' : 'Сохранить изменения'}
                 </Button>
             </div>
 

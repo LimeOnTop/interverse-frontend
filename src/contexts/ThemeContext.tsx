@@ -21,6 +21,7 @@ interface ThemeProviderProps {
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     const [isDark, setIsDark] = useState(() => {
+        if (typeof window === 'undefined') return false
         // Проверяем сохраненную тему в localStorage
         const savedTheme = localStorage.getItem('theme')
         if (savedTheme) {
@@ -33,8 +34,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     useEffect(() => {
         // Сохраняем тему в localStorage
         localStorage.setItem('theme', isDark ? 'dark' : 'light')
-        const favicon = document.querySelector<HTMLLinkElement>('#theme-favicon')
-        if (favicon) favicon.href = isDark ? '/favicon-dark.svg' : '/favicon-light.svg'
+        document.querySelector('#theme-color')?.setAttribute('content', isDark ? '#14161b' : '#f5f2ea')
 
         // Применяем класс к body для темной темы
         if (isDark) {

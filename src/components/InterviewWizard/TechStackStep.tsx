@@ -67,10 +67,10 @@ export default function TechStackStep({
         >
             <div className="text-center mb-6">
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                    Выберите навыки
+                    Выбери технологии
                 </h2>
                 <p className="text-secondary text-sm">
-                    Отметьте технологии, которые хотите прокачать на тренировке
+                    Отметь технологии, по которым хочешь потренироваться
                 </p>
             </div>
 
@@ -137,7 +137,7 @@ export default function TechStackStep({
                     </div>
                 ) : (
                     <div className="wizard-stack-panel flex items-center">
-                        <p className="text-sm text-secondary">Пока ничего не выбрано — отметьте технологии ниже</p>
+                        <p className="text-sm text-secondary">Пока ничего не выбрано — отметь технологии ниже</p>
                     </div>
                 )}
             </div>
@@ -150,7 +150,7 @@ export default function TechStackStep({
                     <p className="text-sm text-secondary mb-3">Ищем технологии…</p>
                 ) : null}
                 {isSearchActive && !isSearching && displayedTechs.length === 0 ? (
-                    <p className="text-sm text-secondary">Ничего не найдено — попробуйте другой запрос</p>
+                    <p className="text-sm text-secondary">Ничего не найдено — попробуй другой запрос</p>
                 ) : (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                         {displayedTechs.map((tech) => {

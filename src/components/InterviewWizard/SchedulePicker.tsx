@@ -194,7 +194,7 @@ export default function SchedulePicker({ value, onChange }: SchedulePickerProps)
                 <div className="mt-1 flex justify-between text-[11px] text-secondary tabular-nums">
                     <span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>23:45</span>
                 </div>
-                {lastDay && <p className="mt-2 text-xs text-red-600 dark:text-red-400">На сегодня время закончилось, выберите другую дату.</p>}
+                {lastDay && <p className="mt-2 text-xs text-red-600 dark:text-red-400">На сегодня нет доступного времени. Выбери другую дату.</p>}
             </div>
         </div>
     )

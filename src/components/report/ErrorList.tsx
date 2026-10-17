@@ -11,7 +11,7 @@ export default function ErrorList({ points }: { points: WeakPoint[] }) {
         return (
             <section>
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Ошибок нет</h2>
-                <p className="mt-2 text-secondary">Все вопросы и задачи решены верно.</p>
+                <p className="mt-2 text-secondary">Все ответы верные.</p>
             </section>
         )
     }
@@ -20,7 +20,7 @@ export default function ErrorList({ points }: { points: WeakPoint[] }) {
         <section>
             <div className="flex items-start justify-between gap-3 mb-4">
                 <div>
-                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Разберите ошибки</h2>
+                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Разбери ошибки</h2>
                     <p className="mt-1 text-sm text-secondary">Сначала причина, затем материал и практика</p>
                 </div>
                 <span className="iv-pill shrink-0">
@@ -54,7 +54,7 @@ export default function ErrorList({ points }: { points: WeakPoint[] }) {
                                 <div className="pb-5 sm:pl-10 space-y-4">
                                     <div className="grid gap-3 md:grid-cols-2">
                                         <div className="rounded-lg border border-gray-200 dark:border-iv-dark-line p-3">
-                                            <p className="iv-eyebrow mb-1.5">Ваш ответ</p>
+                                            <p className="iv-eyebrow mb-1.5">Твой ответ</p>
                                             <p className="text-sm whitespace-pre-wrap break-words text-red-600 dark:text-red-400">{point.user_answer}</p>
                                         </div>
                                         <div className="rounded-lg border border-inter-verse-green/40 dark:border-purple-400/50 p-3">

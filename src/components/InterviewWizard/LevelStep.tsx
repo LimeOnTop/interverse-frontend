@@ -14,36 +14,36 @@ const levels = [
     {
         id: 'intern',
         name: 'Intern',
-        description: 'Начинающий разработчик',
-        experience: '0-1 год',
+        description: 'Основы и первые решения',
+        experience: 'Знакомство с темами',
         icon: Star,
     },
     {
         id: 'junior',
         name: 'Junior',
-        description: 'Младший разработчик',
-        experience: '1-2 года',
+        description: 'Базовые вопросы',
+        experience: 'Закрепление основ',
         icon: TrendingUp,
     },
     {
         id: 'middle',
         name: 'Middle',
-        description: 'Средний разработчик',
-        experience: '2-5 лет',
+        description: 'Самостоятельные решения',
+        experience: 'Применение знаний',
         icon: Users,
     },
     {
         id: 'senior',
         name: 'Senior',
-        description: 'Старший разработчик',
-        experience: '5+ лет',
+        description: 'Сложные вопросы и компромиссы',
+        experience: 'Углублённая практика',
         icon: Award,
     },
     {
         id: 'lead',
-        name: 'Lead / CTO',
-        description: 'Руководитель',
-        experience: '7+ лет',
+        name: 'Lead',
+        description: 'Системный подход',
+        experience: 'Комплексные решения',
         icon: Crown,
     },
 ]
@@ -64,10 +64,10 @@ export default function LevelStep({
         >
             <div className="text-center mb-4 sm:mb-6">
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                    Выберите грейд
+                    Выбери сложность
                 </h2>
                 <p className="text-secondary text-sm">
-                    На каком уровне вы планируете тренироваться?
+                    Выбери сложность вопросов. Она не определяет твой профессиональный уровень.
                 </p>
             </div>
 

@@ -75,7 +75,7 @@ export default function ScheduleStep({
                     Планирование тренировки
                 </h2>
                 <p className="text-secondary text-sm">
-                    Выберите удобную дату и время для тренировочного интервью
+                    Выбери удобную дату и время для тренировочного интервью
                 </p>
             </div>
 
@@ -83,7 +83,7 @@ export default function ScheduleStep({
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
                     <Card hover padding="md">
                         <div className="mb-3">
-                            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">Выберите дату</h3>
+                            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">Выбери дату</h3>
                             <p className="text-xs text-secondary">Когда пройдёт тренировка?</p>
                         </div>
                         <input
@@ -99,7 +99,7 @@ export default function ScheduleStep({
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                     <Card hover padding="md">
                         <div className="mb-3">
-                            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">Выберите время</h3>
+                            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">Выбери время</h3>
                             <p className="text-xs text-secondary">Во сколько начнётся тренировка?</p>
                         </div>
                         <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto custom-scrollbar">
@@ -126,7 +126,7 @@ export default function ScheduleStep({
                                 <div className="w-10 h-10 gradient-bg-adaptive flex items-center justify-center mr-3">
                                     <CalendarDays className="w-5 h-5 text-white" />
                                 </div>
-                                <h4 className="text-base font-semibold text-gray-900 dark:text-gray-100">Тренировка запланирована</h4>
+                                <h4 className="text-base font-semibold text-gray-900 dark:text-gray-100">Выбранное время</h4>
                             </div>
                             <div className="space-y-2">
                                 <div className="flex items-center justify-center p-2 iv-surface rounded-lg border border-green-200 dark:border-purple-500/30">
@@ -154,7 +154,7 @@ export default function ScheduleStep({
             <div className="wizard-actions mt-8">
                 <Button variant="ghost" onClick={onBack}>← Назад</Button>
                 <Button onClick={handleNext} disabled={isNextDisabled}>
-                    Начать тренировку
+                    Сохранить тренировку
                     <ChevronRight className="w-5 h-5" />
                 </Button>
             </div>

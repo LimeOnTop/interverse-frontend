@@ -4,8 +4,8 @@
   "lang": "ru",
   "start_url": "/",
   "display": "browser",
-  "background_color": "#14161B",
-  "theme_color": "#14161B",
+  "background_color": "#F5F2EA",
+  "theme_color": "#F5F2EA",
   "icons": [
     {
       "src": "/favicon-192.png",
@@ -19,5 +19,7 @@
       "type": "image/png",
       "purpose": "any"
     }
-  ]
+  ],
+  "id": "/",
+  "scope": "/"
 }

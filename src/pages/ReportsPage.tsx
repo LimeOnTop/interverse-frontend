@@ -1,3 +1,5 @@
+import { PreparationSection } from '../components/VacancyPreparationCard'
+import { usePreparations } from '../lib/preparations'
 import { useState, useEffect, useMemo } from 'react'
 import { ArrowRight, Download, Loader2, Lock, Search, Trash2 } from 'lucide-react'
 import { api } from '../services/api'
@@ -37,10 +39,10 @@ function insightText(report: Report) {
         const correct = report.theory_correct || 0
         let line = `В теории — ${correct} ${pluralRu(correct, ['верный ответ', 'верных ответа', 'верных ответов'])} из ${total}`
         const topics = (report.focus ?? []).map((group) => group.title).slice(0, 2)
-        if (topics.length > 0) line += `: начните с ${topics.join(' и ')}`
+        if (topics.length > 0) line += `: начни с ${topics.join(' и ')}`
         parts.push(`${line}.`)
     }
-    return parts.join(' ') || report.comments || 'Откройте отчёт, чтобы посмотреть разбор ответов.'
+    return parts.join(' ') || report.comments || 'Открой отчёт, чтобы посмотреть разбор ответов.'
 }
 
 function statText(reports: Report[]) {
@@ -48,14 +50,15 @@ function statText(reports: Report[]) {
         return 'Один отчёт — отправная точка. Сравнение появится после следующей тренировки.'
     }
     const diff = clampScore(reports[0].overall_score) - clampScore(reports[1].overall_score)
-    if (diff === 0) return 'Итог последней тренировки совпал с предыдущей.'
-    const points = `${Math.abs(diff)} ${pluralRu(Math.abs(diff), ['пункт', 'пункта', 'пунктов'])}`
+    if (diff === 0) return 'Результат последней тренировки совпал с предыдущим.'
+    const points = `${Math.abs(diff)} ${pluralRu(Math.abs(diff), ['процентный пункт', 'процентных пункта', 'процентных пунктов'])}`
     return diff > 0
-        ? `Последняя тренировка на ${points} выше предыдущей.`
-        : `Последняя тренировка на ${points} ниже предыдущей — повторите слабые темы.`
+        ? `Результат последней тренировки на ${points} выше предыдущего.`
+        : `Результат последней тренировки на ${points} ниже предыдущего — повтори слабые темы.`
 }
 
 export default function ReportsPage() {
+    const preparations = usePreparations()
     const [reports, setReports] = useState<Report[]>([])
     const [loading, setLoading] = useState(true)
     const [searchTerm, setSearchTerm] = usePersistedState('reports-search', '')
@@ -109,7 +112,7 @@ export default function ReportsPage() {
                 if (data?.report) payload = data.report
             }
             await downloadReportPdf(payload)
-            toast.success('PDF скачан')
+            toast.success('PDF подготовлен')
         } catch (error) {
             console.error('PDF export failed:', error)
             toast.error('Не удалось сформировать PDF')
@@ -121,6 +124,7 @@ export default function ReportsPage() {
     const filteredReports = useMemo(() => {
         const query = searchTerm.toLowerCase().trim()
         return reports.filter((report) => {
+            if (preparations.interviewIds.has(report.interview_id)) return false
             if (levelFilter !== 'all' && report.interview?.level !== levelFilter) return false
             if (!query) return true
             const haystack = [
@@ -133,11 +137,11 @@ export default function ReportsPage() {
             ].join(' ').toLowerCase()
             return haystack.includes(query)
         })
-    }, [reports, searchTerm, levelFilter])
+    }, [reports, searchTerm, levelFilter, preparations.interviewIds])
 
     const levels = useMemo(
-        () => LEVEL_FILTERS.filter((level) => reports.some((report) => report.interview?.level === level)),
-        [reports],
+        () => LEVEL_FILTERS.filter((level) => reports.some((report) => report.interview?.level === level) || preparations.preparations.some(p=>p.level===level)),
+        [reports, preparations.preparations],
     )
 
     if (loading) return <Spinner size="lg" className="h-64" />
@@ -150,18 +154,19 @@ export default function ReportsPage() {
             <header className="library-head">
                 <div>
                     <span className="lib-eyebrow">Результаты / библиотека</span>
-                    <h1>Ваши отчёты</h1>
-                    <p>Сохраняйте сильные стороны. Превращайте ошибки в следующую тренировку.</p>
+                    <h1>Твои отчёты</h1>
+                    <p>Сохраняй сильные стороны. Превращай ошибки в следующую тренировку.</p>
                 </div>
                 <Link to="/interviews/create" className="lib-btn is-primary">
                     + Новая тренировка <ArrowRight />
                 </Link>
             </header>
 
+            <PreparationSection data={preparations} mode="reports" query={searchTerm} level={levelFilter} />
             {!latest ? (
                 <section className="collection-empty">
-                    <h3>Отчётов пока нет</h3>
-                    <p>Отчёт появится после завершения первой тренировки: с итогом, разбором ответов и темами для повторения.</p>
+                    <h3>{preparations.preparations.length ? 'Отчёты этапов появятся после тренировки' : 'Отчётов пока нет'}</h3>
+                    <p>После первой тренировки здесь появится отчёт с результатом. Подробный разбор ответов и темы для повторения доступны в Pro.</p>
                     <div className="actions">
                         <Link to="/interviews/create" className="lib-btn is-primary">
                             Начать тренировку <ArrowRight />
@@ -216,8 +221,8 @@ export default function ReportsPage() {
 
                     {filteredReports.length === 0 ? (
                         <section className="collection-empty">
-                            <h3>Отчёты не найдены</h3>
-                            <p>Попробуйте другое название, технологию или уровень.</p>
+                            <h3>{reports.length>0 && reports.every(r=>preparations.interviewIds.has(r.interview_id)) && !searchTerm && levelFilter==='all' ? 'Отчёты этапов собраны выше' : 'Отчёты не найдены'}</h3>
+                            <p>Здесь отображаются отчёты отдельных тренировок. Для поиска измени название, технологию или уровень.</p>
                             <div className="actions">
                                 <button
                                     type="button"
@@ -249,8 +254,8 @@ export default function ReportsPage() {
 
                     <section className="next-practice">
                         <div>
-                            <h3>Дайте результату продолжение.</h3>
-                            <p>Повторите темы из отчёта и проверьте себя в новой тренировке.</p>
+                            <h3>Дай результату продолжение.</h3>
+                            <p>Повтори темы из отчёта и проверь себя в новой тренировке.</p>
                         </div>
                         <Link to="/interviews/create" className="lib-btn">
                             {practiceTech ? `Практика по ${practiceTech}` : 'Новая практика'} <ArrowRight />

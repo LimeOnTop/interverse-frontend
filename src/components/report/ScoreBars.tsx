@@ -18,7 +18,7 @@ export default function ScoreBars({ theory, coding, theoryCorrect, theoryTotal =
             score: theory,
         },
         taskTotal > 0 && {
-            name: 'Кодинг',
+            name: 'Практика',
             hint: `${taskTotal} ${pluralRu(taskTotal, ['задача', 'задачи', 'задач'])}`,
             score: coding,
         },

@@ -1,3 +1,5 @@
+import { PreparationSection } from '../components/VacancyPreparationCard'
+import { usePreparations } from '../lib/preparations'
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
@@ -33,7 +35,7 @@ interface Interview {
 const STATUS_LABELS: Record<string, string> = {
     scheduled: 'Запланирована',
     in_progress: 'В процессе',
-    completed: 'Завершено',
+    completed: 'Завершена',
     cancelled: 'Отменена',
 }
 
@@ -57,6 +59,7 @@ function firstSentences(text: string, limit = 180) {
 }
 
 export default function DashboardPage() {
+    const preparations = usePreparations()
     const user = useAuthStore((state) => state.user)
     const { summary, loading } = useDashboardSummary()
     const [interviews, setInterviews] = useState<Interview[]>([])
@@ -79,9 +82,10 @@ export default function DashboardPage() {
 
     const recent = useMemo(
         () => [...interviews]
+            .filter(i => !preparations.interviewIds.has(i.id))
             .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
             .slice(0, 5),
-        [interviews],
+        [interviews, preparations.interviewIds],
     )
 
     if (loading) return <Spinner size="lg" className="h-64" />
@@ -93,7 +97,7 @@ export default function DashboardPage() {
         ? `${specializationLabel(report.interview.specialization)} ${levelLabel(report.interview.level)}`
         : recent[0]
             ? `${specializationLabel(recent[0].specialization)} ${levelLabel(recent[0].level)}`
-            : ''
+            : preparations.preparations[0]?.title || ''
 
     const quota = summary?.quota
     const quotaCaption = !quota ? undefined : quota.period === 'day' ? (
@@ -116,7 +120,7 @@ export default function DashboardPage() {
                         {firstName ? `С возвращением, ${firstName}` : 'С возвращением'}
                     </h1>
                     <p className="mt-2 text-secondary">
-                        {target ? `Продолжайте подготовку к ${target}.` : 'Начните первую тренировку под свой стек.'}
+                        {target ? `Продолжай подготовку к ${target}.` : 'Начни первую тренировку под свой стек.'}
                     </p>
                 </div>
                 <Link to="/interviews/create" className="btn-primary-adaptive hidden sm:inline-flex items-center gap-2 rounded-lg px-5 py-3 text-sm">
@@ -124,10 +128,11 @@ export default function DashboardPage() {
                 </Link>
             </div>
 
-            <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.65fr_1fr]">
+            <PreparationSection data={preparations} mode="dashboard" />
+            {(report || preparations.preparations.length===0) && <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.65fr_1fr]">
                 <HeroPanel report={report} />
                 <LastResultPanel report={report} />
-            </div>
+            </div>}
 
             {quota && (
                 <DailyActivityBlock completedToday={quota.used} dailyNorm={quota.limit} caption={quotaCaption} />
@@ -148,14 +153,14 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.65fr_1fr] items-start">
                 <section className="iv-panel p-5 sm:p-6">
                     <div className="flex items-center justify-between gap-3 pb-4 border-b border-gray-200 dark:border-iv-dark-line">
-                        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Ваши тренировки</h2>
+                        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Твои тренировки</h2>
                         <Link to="/interview-service" className="text-sm font-semibold text-inter-verse-green dark:text-purple-400 hover:underline">
                             Все тренировки →
                         </Link>
                     </div>
                     {recent.length === 0 ? (
                         <div className="py-8 text-center">
-                            <p className="text-secondary mb-4">Тренировок пока нет.</p>
+                            <p className="text-secondary mb-4">Отдельных тренировок пока нет.</p>
                             <Link to="/interviews/create" className="btn-primary-adaptive inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm">
                                 <Plus className="w-4 h-4" /> Новая тренировка
                             </Link>
@@ -204,12 +209,12 @@ function HeroPanel({ report }: { report: ReportWithInterview | null }) {
                     {report ? 'На основе последнего отчёта' : 'Первый шаг'}
                 </p>
                 <h2 className="mt-3 text-2xl sm:text-3xl font-bold leading-tight">
-                    {report ? <>{first}{second && <><br />{second}</>}</> : <>Пройдите первую тренировку.<br />Мы покажем, что подтянуть.</>}
+                    {report ? <>{first}{second && <><br />{second}</>}</> : <>Пройди первую тренировку.<br />Мы покажем, что подтянуть.</>}
                 </h2>
                 <p className="mt-3 text-sm text-white/80 max-w-xl leading-relaxed">
                     {report?.comments
                         ? firstSentences(report.comments)
-                        : 'Вопросы и практические задачи под ваш стек и грейд. После тренировки появится отчёт с результатом.'}
+                        : 'Вопросы и практические задачи по твоим технологиям и выбранной сложности. После тренировки появится отчёт с результатом.'}
                 </p>
                 <Link
                     to={report ? `/reports/${report.id}` : '/interviews/create'}

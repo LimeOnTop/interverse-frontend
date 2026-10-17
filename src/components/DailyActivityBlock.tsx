@@ -213,14 +213,14 @@ export default function DailyActivityBlock({
         >
             <div className="flex flex-col gap-4">
                 <div>
-                    <p className="iv-eyebrow">Ваш ритм подготовки</p>
+                    <p className="iv-eyebrow">Твой ритм подготовки</p>
                     <h2 className="mt-2 text-lg font-semibold text-gray-900 dark:text-gray-100">Дневная активность</h2>
                     <p className="text-4xl font-semibold tabular-nums text-gray-900 dark:text-gray-100 mt-3">
                         {completedToday}
                         <span className="text-secondary text-xl font-medium"> / {dailyNorm}</span>
                     </p>
                     <p className="text-sm text-secondary mt-2">
-                        {caption ?? 'Пройдено сегодня. Эквалайзер отображает твой прогресс. Заставь его играть на полную!'}
+                        {caption ?? 'Завершено сегодня. Чем больше тренировок, тем активнее эквалайзер.'}
                     </p>
                 </div>
 
@@ -278,7 +278,7 @@ export default function DailyActivityBlock({
                         </div>
                     ))}
                 </div>
-                <p className="mt-2 text-xs text-secondary">Чем больше тренировок за день, тем выше звучит ваш эквалайзер.</p>
+                <p className="mt-2 text-xs text-secondary">Чем больше тренировок за сегодня, тем активнее эквалайзер.</p>
             </div>
         </motion.div>
     )

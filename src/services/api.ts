@@ -1,5 +1,5 @@
 import axios, { type InternalAxiosRequestConfig } from 'axios'
-import { useAuthStore } from '../store/authStore'
+import { useAuthStore, authSessionVersion } from '../store/authStore'
 import { isTrainingLimitError, usePromoStore } from '../store/promoStore'
 
 export const api = axios.create({
@@ -13,7 +13,7 @@ export const api = axios.create({
 
 function isPublicAuthRequest(url?: string) {
     if (!url) return false
-    return /\/auth\/(login|register|refresh|verify-email(?:\/resend)?)(?:\?|$)/.test(url)
+    return /\/auth\/(google\/exchange|login|register|refresh|verify-email(?:\/resend)?)(?:\?|$)/.test(url)
 }
 
 function setAuthHeader(config: { headers?: Record<string, unknown> }, token: string | null) {
@@ -29,11 +29,14 @@ function setAuthHeader(config: { headers?: Record<string, unknown> }, token: str
 }
 
 let refreshInFlight: Promise<boolean> | null = null
+let refreshVersion = -1
 
 function refreshOnce() {
-    if (!refreshInFlight) {
+    if (!refreshInFlight || refreshVersion !== authSessionVersion()) {
+        refreshVersion = authSessionVersion()
+        const version = refreshVersion
         refreshInFlight = useAuthStore.getState().refreshTokens().finally(() => {
-            refreshInFlight = null
+            if (version === refreshVersion) refreshInFlight = null
         })
     }
     return refreshInFlight
@@ -41,6 +44,7 @@ function refreshOnce() {
 
 api.interceptors.request.use(
     (config) => {
+        (config as InternalAxiosRequestConfig & { _sessionVersion?: number })._sessionVersion = authSessionVersion()
         if (isPublicAuthRequest(config.url)) {
             setAuthHeader(config, null)
         } else {
@@ -63,6 +67,10 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
     (response) => {
+        const config = response.config as InternalAxiosRequestConfig & { _sessionVersion?: number }
+        if (!isPublicAuthRequest(config.url) && config._sessionVersion !== authSessionVersion()) {
+            return Promise.reject(new Error('Сессия изменена'))
+        }
         return response
     },
     async (error) => {
@@ -71,7 +79,7 @@ api.interceptors.response.use(
             return Promise.reject(error)
         }
 
-        const originalRequest = error.config as (InternalAxiosRequestConfig & { _retry?: boolean }) | undefined
+        const originalRequest = error.config as (InternalAxiosRequestConfig & { _retry?: boolean; _sessionVersion?: number }) | undefined
 
         if (
             error.response?.status !== 401
@@ -82,10 +90,13 @@ api.interceptors.response.use(
             return Promise.reject(error)
         }
 
+        if (originalRequest._sessionVersion !== authSessionVersion()) return Promise.reject(error)
+        const version = authSessionVersion()
         originalRequest._retry = true
 
         const refreshSuccess = await refreshOnce()
 
+        if (version !== authSessionVersion()) return Promise.reject(error)
         if (refreshSuccess) {
             const { accessToken } = useAuthStore.getState()
             setAuthHeader(originalRequest, accessToken)

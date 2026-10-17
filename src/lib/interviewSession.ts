@@ -1,3 +1,4 @@
+import { privateStorageOwner, readPrivateCache, writePrivateCache } from './privateStorage'
 export type SessionStepType = 'question' | 'task'
 
 export interface ApiSessionItem {
@@ -16,6 +17,7 @@ export interface ApiSessionItem {
 }
 
 export interface ApiInterview {
+    task_mode?: string
     id: string
     title: string
     description?: string
@@ -152,11 +154,11 @@ function mapTaskStep(task: ReturnType<typeof normalizeSessionItem>, taskNumber: 
 }
 
 export function getSessionStorageKey(interviewId: string) {
-    return `interview-session-${interviewId}`
+    return `interview-session-${privateStorageOwner()}-${interviewId}`
 }
 
 export function getAnswersStorageKey(interviewId: string) {
-    return `interview-answers-${interviewId}`
+    return `interview-answers-${privateStorageOwner()}-${interviewId}`
 }
 
 export function clearInterviewSessionCache(interviewId: string) {
@@ -168,13 +170,13 @@ export function restoreAnswersForSession(
     interviewId: string,
     steps: SessionStep[],
 ): Record<string, StepAnswer> {
-    const cachedAnswers = localStorage.getItem(getAnswersStorageKey(interviewId))
+    const cachedAnswers = readPrivateCache<Record<string, StepAnswer>>(localStorage, getAnswersStorageKey(interviewId))
     if (!cachedAnswers) {
         return {}
     }
 
     try {
-        const parsed = JSON.parse(cachedAnswers) as Record<string, StepAnswer>
+        const parsed = cachedAnswers
         const stepIds = new Set(steps.map((step) => step.id))
 
         return Object.fromEntries(
@@ -262,7 +264,7 @@ export async function startInterviewSession(
     const responseData = await requestSessionStart(apiClient, interviewId)
     const sessionData = parseSessionResponse(responseData)
 
-    localStorage.setItem(getSessionStorageKey(interviewId), JSON.stringify(sessionData))
+    writePrivateCache(localStorage, getSessionStorageKey(interviewId), sessionData)
 
     return sessionData
 }
@@ -278,14 +280,11 @@ export function formatUserFacingError(error: unknown, fallback: string): string 
             : ''
 
     if (message.includes('not enough questions')) {
-        if (message.includes('Go')) {
-            return 'В банке пока есть вопросы только по Go. Выберите Go в стеке технологий или создайте новую тренировку с Go.'
-        }
-        return 'Недостаточно вопросов для выбранного стека или уровня. Попробуйте добавить Go.'
+        return 'Для выбранных технологий и уровня пока недостаточно вопросов. Измени технологии или уровень и попробуй снова.'
     }
 
     if (message.includes('not enough tasks')) {
-        return 'Недостаточно практических задач для выбранного стека или уровня. Добавьте Go в технологии.'
+        return 'Для выбранных параметров пока недостаточно задач. Выбери «Только теория», другие технологии или уровень.'
     }
 
     const lower = message.toLowerCase()
@@ -307,7 +306,7 @@ export function formatUserFacingError(error: unknown, fallback: string): string 
 }
 
 export function formatSessionStartError(error: unknown): string {
-    return formatUserFacingError(error, 'Ошибка при запуске тренировки')
+    return formatUserFacingError(error, 'Не удалось начать тренировку. Попробуй ещё раз.')
 }
 
 export function canStartInterview(status: string) {

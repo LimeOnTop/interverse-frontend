@@ -28,7 +28,7 @@ export default function ProTrackCard({ className = '', showPrice = true }: { cla
                 </div>
                 <div className="text-sm text-secondary mt-1">{PRO_TRACK_PLAN.priceHint}</div>
                 <div className="mt-2 text-xs font-medium text-inter-verse-green dark:text-purple-300">
-                    Платные курсы по одной профессии стоят около {formatRub(PRO_TRACK_PLAN.coursePrice)}
+                    Предварительная цена. Итоговые условия сообщим перед запуском.
                 </div>
             </div>}
 

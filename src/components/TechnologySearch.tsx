@@ -21,7 +21,7 @@ const TechnologySearch: React.FC<TechnologySearchProps> = ({
     selectedTechnologies,
     onTechnologiesChange,
     category,
-    placeholder = "Поиск технологий..."
+    placeholder = "Поиск технологий…"
 }) => {
     const [query, setQuery] = useState('')
     const [technologies, setTechnologies] = useState<Technology[]>([])
@@ -192,7 +192,7 @@ const TechnologySearch: React.FC<TechnologySearchProps> = ({
                     >
                         {technologies.length === 0 && !isLoading ? (
                             <div className="p-4 text-center text-gray-500">
-                                {query.length < 2 ? 'Начните вводить название технологии...' : 'Технологии не найдены'}
+                                {query.length < 2 ? 'Начни вводить название технологии…' : 'Технологии не найдены'}
                             </div>
                         ) : (
                             technologies.map((tech) => {

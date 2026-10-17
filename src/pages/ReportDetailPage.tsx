@@ -1,5 +1,6 @@
+import { usePreparationContext } from '../lib/preparations'
 import { useState, useEffect } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Download, Sparkles, Lock } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -36,8 +37,11 @@ interface Report extends GeneratedReport {
 
 export default function ReportDetailPage() {
     const { id } = useParams()
+    const requestedPreparationId = new URLSearchParams(useLocation().search).get('preparation')
     const navigate = useNavigate()
     const [report, setReport] = useState<Report | null>(null)
+    const preparation = usePreparationContext(report?.interview_id)
+    const preparationId = preparation?.id || requestedPreparationId
     const [loading, setLoading] = useState(true)
     const [analyzing, setAnalyzing] = useState(false)
     const [exporting, setExporting] = useState(false)
@@ -79,7 +83,7 @@ export default function ReportDetailPage() {
             }
 
             if (isFallbackReport(updated)) {
-                toast.error('AI-анализ не удался. Попробуйте позже.')
+                toast.error('ИИ-анализ не удался. Попробуй позже.')
             } else {
                 toast.success('Отчёт проанализирован')
             }
@@ -89,7 +93,7 @@ export default function ReportDetailPage() {
                 && 'response' in error
                 && typeof (error as { response?: { data?: { error?: unknown } } }).response?.data?.error === 'string'
                 ? (error as { response: { data: { error: string } } }).response.data.error
-                : 'Не удалось выполнить AI-анализ'
+                : 'Не удалось выполнить ИИ-анализ'
             toast.error(message)
         } finally {
             setAnalyzing(false)
@@ -101,7 +105,7 @@ export default function ReportDetailPage() {
         try {
             setExporting(true)
             await downloadReportPdf(report)
-            toast.success('PDF скачан')
+            toast.success('PDF подготовлен')
         } catch (error) {
             console.error('PDF export failed:', error)
             toast.error('Не удалось сформировать PDF')
@@ -129,7 +133,7 @@ export default function ReportDetailPage() {
     const reviews = report.answer_reviews || []
     const weakCount = report.weak_points_count ?? report.weak_points?.length ?? 0
     const [headlineFirst, headlineSecond] = (report.headline || getScoreLabel(report.overall_score)).split('\n')
-    const title = [specializationLabel(report.interview?.specialization), levelLabel(report.interview?.level)].filter(Boolean).join(' · ')
+    const title = (preparationId && report.technologies?.length ? report.technologies.join(', ') + ' · ' + levelLabel(report.interview?.level) : '') || [specializationLabel(report.interview?.specialization), levelLabel(report.interview?.level)].filter(Boolean).join(' · ')
         || report.interview?.title || 'Тренировка'
     const subtitle = [
         'Отчёт по тренировке',
@@ -147,11 +151,13 @@ export default function ReportDetailPage() {
         <PageTransition className="space-y-6 sm:space-y-8">
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
                 <div>
-                    <Link to="/reports" className="inline-flex items-center gap-1.5 text-sm text-secondary hover:text-gray-900 dark:hover:text-gray-100 mb-2">
-                        <ArrowLeft className="w-4 h-4" /> Отчёты
+                    <Link to={preparationId ? `/reports?preparation=${encodeURIComponent(preparationId)}&stage=${encodeURIComponent(report.interview_id)}#preparation-${encodeURIComponent(preparationId)}` : '/reports'} className="inline-flex items-center gap-1.5 text-sm text-secondary hover:text-gray-900 dark:hover:text-gray-100 mb-2">
+                        <ArrowLeft className="w-4 h-4" /> {preparationId ? 'К подготовке по вакансии' : 'Отчёты'}
                     </Link>
+                    {preparation && <p className="iv-eyebrow mb-2">{preparation.title} · Этап {preparation.attempts.find(a=>a.interview_id===report.interview_id)!.step_index+1} из {preparation.steps.length}</p>}
                     <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100">{title}</h1>
                     <p className="mt-2 text-secondary">{subtitle}</p>
+                    {preparation && <p className="mt-2 text-sm text-secondary">{report.overall_score>80?'Этап засчитан.':'Для зачёта этапа нужен результат больше 80%.'} Все повторы входят в одну попытку подготовки.</p>}
                 </div>
                 {locked ? (
                     <Link to="/subscription" className="shrink-0 inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 dark:border-iv-dark-line px-4 py-2.5 text-sm font-semibold text-gray-900 dark:text-gray-100" title="Скачивание отчёта в PDF доступно в Pro">
@@ -194,14 +200,14 @@ export default function ReportDetailPage() {
                         taskTotal={report.task_total}
                     />
                     <p className="mt-5 text-xs text-secondary">
-                        Архитектура и Soft Skills в тренировках пока не оцениваются. Балл не является прогнозом получения оффера.
+                        Архитектура и гибкие навыки пока не оцениваются. Результат тренировки не прогнозирует успех на собеседовании.
                     </p>
                     {needsAnalysis && (
                         <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-3">
                             <Button onClick={handleAnalyze} loading={analyzing} className="rounded-lg">
                                 <Sparkles className="w-4 h-4" /> Проанализировать
                             </Button>
-                            <span className="text-sm text-secondary">AI-анализ ещё не выполнен.</span>
+                            <span className="text-sm text-secondary">ИИ-анализ ещё не выполнен.</span>
                         </div>
                     )}
                 </div>
@@ -239,6 +245,7 @@ export default function ReportDetailPage() {
 
                 <div className="lg:sticky lg:top-0">
                     <FocusPlan
+                        reportId={report.id}
                         locked={locked && weakCount > 0}
                         groups={report.focus || []}
                         count={report.focus_count ?? 0}
@@ -257,7 +264,7 @@ function StrengthsTab({ report, locked }: { report: Report; locked: boolean }) {
         return (
             <section>
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Сильные стороны</h2>
-                <p className="mt-2 text-secondary">Сильные стороны и рекомендации интервьюера доступны в Pro.</p>
+                <p className="mt-2 text-secondary">Сильные стороны и рекомендации по ответам доступны в Pro.</p>
                 <Link to="/subscription" className="mt-5 btn-primary-adaptive inline-flex items-center gap-2 rounded-lg px-5 py-3 text-sm">
                     Перейти на Pro
                 </Link>
@@ -267,7 +274,7 @@ function StrengthsTab({ report, locked }: { report: Report; locked: boolean }) {
     return (
         <section className="space-y-8">
             <div>
-                <p className="iv-eyebrow">Из комментария интервьюера</p>
+                <p className="iv-eyebrow">По результатам тренировки</p>
                 <h2 className="mt-2 mb-4 text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Сильные стороны</h2>
                 <AccentList text={report.strengths} />
             </div>

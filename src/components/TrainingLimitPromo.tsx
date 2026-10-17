@@ -1,3 +1,4 @@
+import { freeTrainingCaption } from '../lib/trainingLimits'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -57,10 +58,10 @@ export default function TrainingLimitPromo() {
                             <Sparkles className="w-4 h-4" /> Pro
                         </div>
                         <h2 id="training-limit-promo-title" className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
-                            Вы достигли лимита тренировок
+                            Лимит тренировок исчерпан
                         </h2>
                         <p className="text-secondary leading-relaxed mb-5">
-                            На тарифе Basic доступна одна тренировка. В подписке Pro лимит расширен,
+                            На тарифе Basic — {freeTrainingCaption()}. В подписке Pro лимит расширен,
                             а ещё в ней есть:
                         </p>
                         <ul className="space-y-2 mb-7">

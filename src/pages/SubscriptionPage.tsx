@@ -1,3 +1,8 @@
+import ProTrialOffer, { TRIAL_OFFER } from '../components/ProTrialOffer'
+import RenewalControl from '../components/RenewalControl'
+import ProCheckoutDialog from '../components/ProCheckoutDialog'
+import '../styles/subscription.css'
+import { checkoutStarted } from '../lib/analytics'
 import { Check } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useEffect, useState } from 'react'
@@ -6,7 +11,7 @@ import Button from '../components/ui/Button'
 import { useAuthStore } from '../store/authStore'
 import { api } from '../services/api'
 import { Link } from 'react-router-dom'
-import { formatDay, useDashboardSummary } from '../lib/dashboard'
+import { formatDay, pluralRu, useDashboardSummary } from '../lib/dashboard'
 import {
     FALLBACK_PAID_OFFERS,
     FREE_PLAN,
@@ -26,11 +31,14 @@ type PaymentFormPayload = {
     fields: Record<string, string>
 }
 
-type PaymentHistoryItem = {
-    id: number
-    name: string
+type RenewalSettings = {
+    enabled: boolean
+    has_mandate: boolean
+    available: boolean
+    next_charge_at: string
     amount: string
-    paid_at: string
+    pending: boolean
+    last_error: string
 }
 
 function submitRobokassaForm(payment: PaymentFormPayload) {
@@ -79,7 +87,7 @@ function PriceBlock({
             <div className="text-sm text-secondary mt-1">{offer.priceHint}</div>
             {offer.earlyBird && earlyBirdRemaining > 0 && (
                 <div className="mt-2 text-xs font-medium text-inter-verse-green dark:text-purple-300">
-                    Осталось {earlyBirdRemaining} из {earlyBirdLimit} мест по скидке
+                    Осталось {earlyBirdRemaining} из {earlyBirdLimit} мест со скидкой
                 </div>
             )}
         </div>
@@ -93,21 +101,29 @@ export default function SubscriptionPage() {
     const [paidOffers, setPaidOffers] = useState<PaidOffer[]>(FALLBACK_PAID_OFFERS)
     const [earlyBirdRemaining, setEarlyBirdRemaining] = useState(27)
     const [earlyBirdLimit, setEarlyBirdLimit] = useState(100)
-    const [payments, setPayments] = useState<PaymentHistoryItem[]>([])
     const { summary } = useDashboardSummary()
+    const [trialAvailable,setTrialAvailable] = useState(false)
+    const [selectedOffer, setSelectedOffer] = useState<PaidOffer | null>(null)
+    const [renewal, setRenewal] = useState<RenewalSettings | null>(null)
+    const [renewalError, setRenewalError] = useState('')
 
     useEffect(() => {
-        api.get('/payments/history')
-            .then((response) => setPayments(response.data.payments || []))
-            .catch(() => setPayments([]))
-    }, [])
+        if (!accessToken || user?.role === 'admin') return
+        let cancelled = false
+        setRenewal(null)
+        setRenewalError('')
+        api.get('/payments/renewal').then(({ data }) => { if (!cancelled) { setRenewal(data); setRenewalError('') } })
+            .catch(() => { if (!cancelled) setRenewalError('Не удалось загрузить настройки автоплатежа. Обнови страницу.') })
+        return () => { cancelled = true }
+    }, [accessToken, user?.id, user?.role])
 
     useEffect(() => {
         api
             .get('/payments/offers')
             .then((response) => {
                 const mapped = mapOffersResponse(response.data)
-                setPaidOffers(mapped.paidOffers)
+                setPaidOffers(mapped.paidOffers.filter(p => p.id !== 'trial_3d'))
+                setTrialAvailable((response.data.offers||[]).some((p:{id:string})=>p.id==='trial_3d'))
                 setEarlyBirdRemaining(mapped.earlyBirdRemaining)
                 setEarlyBirdLimit(mapped.earlyBirdLimit)
             })
@@ -133,11 +149,13 @@ export default function SubscriptionPage() {
     const handleBuy = async (planId: string) => {
         try {
             setBuyingPlan(planId)
-            const { data } = await api.post('/payments/', { plan: planId })
+            const { data } = await api.post('/payments/', { plan: planId, auto_renew_consent: true, consent_version: 'pro-2026-10-15' })
             const payment = data?.payment as PaymentFormPayload | undefined
             if (!payment?.action || !payment?.fields) {
                 throw new Error('Некорректный ответ платёжного сервиса')
             }
+            const owner = useAuthStore.getState().user?.id
+            if (owner) checkoutStarted(Number(data.inv_id), data.plan || planId, String(owner))
             submitRobokassaForm(payment)
         } catch (error: unknown) {
             const message =
@@ -155,7 +173,7 @@ export default function SubscriptionPage() {
     return (
         <PageTransition className="space-y-6 sm:space-y-8">
             <div>
-                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Ваш план подготовки</h1>
+                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Твой план подготовки</h1>
                 <p className="mt-2 text-secondary">
                     {currentPlan === 'paid'
                         ? (expiresAt ? `Pro активен до ${expiresAt}` : 'Pro активен.')
@@ -163,6 +181,10 @@ export default function SubscriptionPage() {
                 </p>
             </div>
 
+            {selectedOffer && <ProCheckoutDialog offer={selectedOffer} busy={buyingPlan !== null} available={selectedOffer.id === 'trial_3d' ? trialAvailable : renewal?.available ?? null} settingsError={renewalError}
+                onClose={() => setSelectedOffer(null)} onPay={() => void handleBuy(selectedOffer.id)} />}
+
+            {currentPlan !== 'paid' && <ProTrialOffer onSelect={() => setSelectedOffer(TRIAL_OFFER)} />}
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
                 <section className="iv-panel p-5 sm:p-6">
                     <span className="iv-pill">Текущий тариф</span>
@@ -177,22 +199,8 @@ export default function SubscriptionPage() {
                             Действует до <b>{expiresAt}</b>
                         </p>
                     )}
-                    {payments.length > 0 && (
-                        <div className="mt-5">
-                            <p className="iv-eyebrow mb-2">История оплат</p>
-                            <ul className="divide-y divide-gray-200 dark:divide-iv-dark-line">
-                                {payments.map((payment) => (
-                                    <li key={payment.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
-                                        <span className="min-w-0">
-                                            <span className="block truncate text-gray-900 dark:text-gray-100">{payment.name}</span>
-                                            <span className="text-xs text-secondary">{formatDay(payment.paid_at)}</span>
-                                        </span>
-                                        <b className="tabular-nums text-gray-900 dark:text-gray-100">{formatRub(payment.amount)}</b>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
+                    <RenewalControl />
+
                 </section>
 
                 <section className="iv-panel p-5 sm:p-6">
@@ -209,19 +217,19 @@ export default function SubscriptionPage() {
                                 {quota.period === 'day'
                                     ? `Осталось ${quota.remaining}. Лимит обновится в 12:00 по Москве.`
                                     : quota.remaining > 0
-                                        ? 'Бесплатная тренировка ещё доступна.'
-                                        : 'Бесплатная тренировка использована. Больше тренировок в Pro.'}
+                                        ? `Можно пройти ещё ${quota.remaining} ${pluralRu(quota.remaining, ['бесплатную тренировку', 'бесплатные тренировки', 'бесплатных тренировок'])}.`
+                                        : 'Бесплатные тренировки закончились. Больше тренировок доступно в Pro.'}
                             </p>
                         </>
                     ) : (
-                        <p className="mt-3 text-secondary">Не удалось загрузить лимит.</p>
+                        <p className="mt-3 text-secondary">Не удалось загрузить лимит. Обнови страницу.</p>
                     )}
                 </section>
             </div>
 
             <section>
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
-                    {currentPlan === 'paid' ? 'Продлить Pro' : 'Выберите период Pro'}
+                    {currentPlan === 'paid' ? 'Продлить Pro' : 'Выбери период Pro'}
                 </h2>
                 <p className="mt-1 text-sm text-secondary">
                     Оплата тарифа Pro означает согласие с условиями{' '}
@@ -251,9 +259,9 @@ export default function SubscriptionPage() {
                                 className="w-full justify-center"
                                 loading={buyingPlan === plan.id}
                                 disabled={buyingPlan !== null && buyingPlan !== plan.id}
-                                onClick={() => void handleBuy(plan.id)}
+                                onClick={() => setSelectedOffer(plan)}
                             >
-                                {currentPlan === 'paid' ? 'Продлить' : 'Выбрать период'}
+                                Выбрать
                             </Button>
                         </div>
                     ))}

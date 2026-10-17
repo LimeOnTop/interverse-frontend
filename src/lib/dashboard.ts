@@ -18,7 +18,7 @@ export interface DashboardSummary {
         used: number
         limit: number
         remaining: number
-        /** day: Pro, resets at midnight Moscow time; total: Basic. */
+        /** day: Pro, resets at 12:00 Moscow time; total: Basic. */
         period: 'day' | 'total'
         resets_at?: string
     }

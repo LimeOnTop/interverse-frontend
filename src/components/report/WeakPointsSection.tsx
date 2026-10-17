@@ -54,7 +54,7 @@ export default function WeakPointsSection({
 
                 <div className="mt-6 flex flex-col sm:flex-row sm:items-center gap-4">
                     <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                        Сделайте слабые стороны сильными с{' '}
+                        Сделай слабые стороны сильными с{' '}
                         <span className="gradient-text-adaptive">Pro</span>
                     </p>
                     <Link to="/subscription" className="btn-primary-adaptive inline-flex justify-center px-6 py-3 sm:ml-auto">
@@ -69,7 +69,7 @@ export default function WeakPointsSection({
         return (
             <section>
                 <h2 className="text-xl sm:text-2xl font-bold mb-2 text-gray-900 dark:text-gray-100">Слабые места</h2>
-                <p className="text-secondary">Ошибок не найдено: все вопросы и задачи решены верно.</p>
+                <p className="text-secondary">Ошибок не найдено: все ответы верные.</p>
             </section>
         )
     }
@@ -94,7 +94,7 @@ export default function WeakPointsSection({
                             <p className="text-gray-900 dark:text-gray-100 leading-relaxed whitespace-pre-wrap">{point.prompt}</p>
                             <div className="grid md:grid-cols-2 gap-x-6 gap-y-3 text-sm">
                                 <div>
-                                    <p className="text-xs uppercase tracking-wide text-secondary mb-1">Ваш ответ</p>
+                                    <p className="text-xs uppercase tracking-wide text-secondary mb-1">Твой ответ</p>
                                     <p className="whitespace-pre-wrap break-words text-red-600 dark:text-red-400">{point.user_answer}</p>
                                 </div>
                                 <div>

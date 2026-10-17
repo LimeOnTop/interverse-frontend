@@ -1,3 +1,5 @@
+import RenewalControl from '../components/RenewalControl'
+import AccountSecurity from '../components/AccountSecurity'
 import { useState, useEffect, useRef, type ReactNode } from 'react'
 import {
     User,
@@ -18,7 +20,7 @@ import PageTransition from '../components/ui/PageTransition'
 import Button from '../components/ui/Button'
 import Spinner from '../components/ui/Spinner'
 import { readFormDraft, writeFormDraft } from '../hooks/usePersistedForm'
-import { LayoutGroup, motion } from 'framer-motion'
+import { LayoutGroup, motion, useReducedMotion } from 'framer-motion'
 
 interface ProfileData {
     work_experiences: string[]
@@ -102,7 +104,7 @@ const emptyProfile: ProfileData = {
 }
 
 type ProfileBlockId = 'avatar' | 'about_me' | 'higher_education' | 'english_level' | 'skills'
-type OpenBlockId = ProfileBlockId | `work:${number}`
+type OpenBlockId = ProfileBlockId | 'security' | `work:${number}`
 
 const PROFILE_BLOCKS: {
     id: ProfileBlockId
@@ -118,10 +120,8 @@ const PROFILE_BLOCKS: {
 ]
 
 const PROFILE_BLOCK_LAYOUT = {
-    type: 'spring' as const,
-    stiffness: 260,
-    damping: 28,
-    mass: 0.75,
+    duration: 0.24,
+    ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
 }
 
 function isBlockFilled(id: ProfileBlockId, profile: ProfileData) {
@@ -181,7 +181,7 @@ function drawScaled(image: HTMLImageElement, maxEdge: number): HTMLCanvasElement
 
 async function compressImageFile(file: File): Promise<string> {
     if (!file.type.startsWith('image/')) {
-        throw new Error('Выберите файл изображения')
+        throw new Error('Выбери файл изображения')
     }
 
     if (file.size > MAX_SOURCE_BYTES) {
@@ -218,7 +218,7 @@ async function compressImageFile(file: File): Promise<string> {
         }
 
         if (dataUrlByteLength(dataUrl) > MAX_AVATAR_PAYLOAD_CHARS) {
-            throw new Error('Не удалось сжать изображение до допустимого размера. Выберите другое фото.')
+            throw new Error('Не удалось сжать изображение до допустимого размера. Выбери другое фото.')
         }
 
         return dataUrl
@@ -231,6 +231,7 @@ export default function ProfilePage() {
     const user = useAuthStore((s) => s.user)
     const setAvatarUrl = useAuthStore((s) => s.setAvatarUrl)
     const [searchParams, setSearchParams] = useSearchParams()
+    const reduceMotion = useReducedMotion()
     const [profile, setProfile] = useState<ProfileData>(emptyProfile)
     const [openBlock, setOpenBlock] = useState<OpenBlockId | null>(null)
     const [isLoading, setIsLoading] = useState(true)
@@ -239,7 +240,7 @@ export default function ProfilePage() {
     const [isImportingHH, setIsImportingHH] = useState(false)
     const [avatarError, setAvatarError] = useState(false)
     const [showHHModal, setShowHHModal] = useState(false)
-    const [resumeURL, setResumeURL] = useState(() => readFormDraft<string>('hh-resume-url-input') ?? '')
+    const [resumeURL, setResumeURL] = useState(() => readFormDraft<string>(`hh-resume-url-input:${user?.id || 'anonymous'}`) ?? '')
     const fileInputRef = useRef<HTMLInputElement>(null)
     const persistProfileRef = useRef(false)
 
@@ -268,7 +269,7 @@ export default function ProfilePage() {
     }, [profile.work_experiences, profile.about_me, profile.higher_education, profile.english_level, profile.skills, profileDraftKey])
 
     useEffect(() => {
-        writeFormDraft('hh-resume-url-input', resumeURL)
+        writeFormDraft(`hh-resume-url-input:${user?.id || 'anonymous'}`, resumeURL)
     }, [resumeURL])
 
     const fetchProfile = async () => {
@@ -310,7 +311,7 @@ export default function ProfilePage() {
                 setAvatarError(false)
             }
         } catch (error: any) {
-            toast.error(error.response?.data?.error || 'Ошибка загрузки')
+            toast.error(error.response?.data?.error || 'Не удалось загрузить профиль. Обнови страницу.')
         } finally {
             setIsLoading(false)
         }
@@ -362,7 +363,7 @@ export default function ProfilePage() {
             setProfile((p) => ({ ...p, avatar_url: dataUrl }))
             setAvatarUrl(dataUrl)
             setAvatarError(false)
-            toast.success('Фото сжато и выбрано')
+            toast.success('Фото подготовлено. Сохрани профиль, чтобы применить его.')
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Не удалось загрузить фото'
             toast.error(message)
@@ -381,7 +382,7 @@ export default function ProfilePage() {
         if (!user?.id) return
         const url = resumeURL.trim()
         if (!url) {
-            toast.error('Вставьте ссылку на резюме hh.ru')
+            toast.error('Вставь ссылку на резюме hh.ru')
             return
         }
 
@@ -437,7 +438,7 @@ export default function ProfilePage() {
             })
             toast.success('Профиль сохранён')
         } catch (error: any) {
-            toast.error(error.response?.data?.error || 'Ошибка сохранения')
+            toast.error(error.response?.data?.error || 'Не удалось сохранить профиль. Попробуй ещё раз.')
         } finally {
             setIsSaving(false)
         }
@@ -470,7 +471,7 @@ export default function ProfilePage() {
         return (
             <motion.article
                 key={key}
-                layout
+                layout={reduceMotion ? false : "position"}
                 transition={{ layout: PROFILE_BLOCK_LAYOUT }}
                 onClick={onToggle}
                 className={[
@@ -480,25 +481,26 @@ export default function ProfilePage() {
                     accented ? 'profile-block-filled' : '',
                 ].join(' ')}
             >
-                <motion.h2
-                    layout="position"
-                    className={`profile-block-title pr-10 ${accented ? 'text-white' : 'text-gray-900 dark:text-gray-100'}`}
+                <h2
+                    className={`profile-block-title ${accented ? 'text-white' : 'text-gray-900 dark:text-gray-100'}`}
                 >
-                    {title}
-                </motion.h2>
+                    <button type="button" className="text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-current focus-visible:outline-offset-4 rounded-sm" aria-expanded={open} aria-controls={`profile-editor-${key}`}>{title}</button>
+                </h2>
 
                 {!open && (
-                    <motion.p
-                        layout="position"
+                    <p
                         className={`profile-block-hint mt-2 ${accented ? 'text-white/80' : 'text-secondary'}`}
                     >
-                        Нажмите для редактирования
-                    </motion.p>
+                        Нажми для редактирования
+                    </p>
                 )}
 
                 {open && (
                     <motion.div
-                        layout="position"
+                        id={`profile-editor-${key}`}
+                        initial={{ opacity: reduceMotion ? 1 : 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: reduceMotion ? 0 : 0.18 }}
                         className="profile-block-editor"
                         onClick={(e) => e.stopPropagation()}
                     >
@@ -535,7 +537,7 @@ export default function ProfilePage() {
                     )}
                     <div className="flex-1 min-w-0">
                         <p className="text-sm mb-3 text-secondary">
-                            Выберите фото с устройства. Поддерживаются JPEG, PNG и WebP (до 25 МБ).
+                            Выбери фото с устройства. Поддерживаются JPEG, PNG и WebP (до 25 МБ).
                         </p>
                         <div className="flex flex-wrap items-center gap-2">
                             <input
@@ -591,7 +593,7 @@ export default function ProfilePage() {
                     value={profile.higher_education}
                     onChange={(e) => handleChange('higher_education', e.target.value)}
                     className={fieldClass}
-                    placeholder="ВУЗ, специальность"
+                    placeholder="Вуз, специальность"
                 />
             )
         }
@@ -688,7 +690,7 @@ export default function ProfilePage() {
                         && profile.work_experiences.every((item) => item.trim()) && (
                         <motion.article
                             key="add_experience"
-                            layout
+                            layout={reduceMotion ? false : "position"}
                             transition={{ layout: PROFILE_BLOCK_LAYOUT }}
                             onClick={handleAddExperience}
                             className={[
@@ -722,9 +724,16 @@ export default function ProfilePage() {
                             renderBlockEditor(block.id),
                         )
                     })}
+                    {user?.role !== 'admin' && renderMosaicTile(
+                        'security', 'Безопасность', 'profile-span-md', 'min-h-[10rem]',
+                        openBlock === 'security', false,
+                        () => setOpenBlock(openBlock === 'security' ? null : 'security'),
+                        <AccountSecurity />,
+                    )}
                 </div>
                 </LayoutGroup>
 
+                {user?.role !== 'admin' && <RenewalControl />}
                 <div className="flex justify-end mt-6">
                     <Button type="button" loading={isSaving} onClick={() => void handleSave()}>
                         <Save className="w-5 h-5" /> Сохранить
@@ -739,7 +748,7 @@ export default function ProfilePage() {
                             <div>
                                 <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Импорт из hh.ru</h2>
                                 <p className="text-sm text-secondary mt-1">
-                                    Вставьте ссылку на резюме, открытое для просмотра. Подтянем должность, навыки, образование и английский — проверьте поля и сохраните профиль.
+                                    Вставь ссылку на резюме, открытое для просмотра. Заполним должность, навыки, образование и уровень английского — проверь поля и сохрани профиль.
                                 </p>
                             </div>
                             <button
@@ -764,7 +773,7 @@ export default function ProfilePage() {
                                 placeholder="https://hh.ru/resume/..."
                             />
                             <p className="text-xs text-secondary mt-2">
-                                В hh.ru: резюме → «Открыть доступ по ссылке» / «Поделиться», затем вставьте URL сюда.
+                                В hh.ru: резюме → «Открыть доступ по ссылке» / «Поделиться», затем вставь URL сюда.
                             </p>
                         </div>
 
@@ -774,7 +783,7 @@ export default function ProfilePage() {
                             </Button>
                             <Button type="button" loading={isImportingHH} onClick={() => void importFromHH()}>
                                 <Download className="w-4 h-4" />
-                                Загрузить из ссылки
+                                Импортировать резюме
                             </Button>
                         </div>
                     </div>

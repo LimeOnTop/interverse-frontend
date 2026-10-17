@@ -1,10 +1,6 @@
-import { isTrainingLimitError } from '../store/promoStore'
+import PreparationCreateDialog from './PreparationCreateDialog'
 import { ArrowRight, Clock3, MapPin, Star } from 'lucide-react'
 import { useState } from 'react'
-import toast from 'react-hot-toast'
-import { useNavigate } from 'react-router-dom'
-import { api } from '../services/api'
-import { formatSessionStartError, startInterviewSession } from '../lib/interviewSession'
 
 export interface VacancyCardData {
     id: string
@@ -60,15 +56,6 @@ function companyInitials(name?: string): string {
     return (words[0][0] + words[1][0]).toUpperCase()
 }
 
-function inferSpecialization(skills: string[]): string {
-    const joined = skills.join(' ').toLowerCase()
-    if (/(react|vue|angular|typescript|javascript|css|html|frontend)/.test(joined)) return 'frontend'
-    if (/(docker|kubernetes|k8s|terraform|ansible|devops|ci\/cd)/.test(joined)) return 'devops'
-    if (/(qa|selenium|cypress|playwright|pytest)/.test(joined)) return 'qa'
-    if (/(pandas|numpy|tensorflow|pytorch|ml|data)/.test(joined)) return 'data_science'
-    return 'backend'
-}
-
 /** Training level guessed from the vacancy's experience line. */
 export function inferLevel(experience?: string): string {
     const raw = (experience || '').toLowerCase()
@@ -109,8 +96,7 @@ interface VacancyCardProps {
 }
 
 export default function VacancyCard({ vacancy, index = 0, profileSkills, fallbackSkills = [], saved, onToggleSave }: VacancyCardProps) {
-    const navigate = useNavigate()
-    const [training, setTraining] = useState(false)
+    const [creating, setCreating] = useState(false)
     const salary = formatSalary(vacancy)
     const published = formatDate(vacancy.published_at)
     const { complete, required, matched } = vacancyRequirements(vacancy, profileSkills, fallbackSkills)
@@ -118,41 +104,8 @@ export default function VacancyCard({ vacancy, index = 0, profileSkills, fallbac
     const company = vacancy.company_name || 'Компания не указана'
     const sourceLine = [vacancy.source_label || vacancy.source, published].filter(Boolean).join(' · ')
 
-    const handleTrain = async () => {
-        const skills = required.slice(0, 8)
-        if (skills.length === 0) {
-            toast.error('У вакансии нет технологий для тренировки. Добавьте навыки в профиль.')
-            return
-        }
-        const specialization = inferSpecialization(skills)
-        const level = inferLevel(vacancy.experience)
-        try {
-            setTraining(true)
-            const { data } = await api.post('/interviews/', {
-                title: `Тренировка: ${vacancy.title}`.slice(0, 120),
-                description: `Тренировка по технологиям вакансии «${vacancy.title}»`,
-                specialization,
-                level,
-                tech_stack: JSON.stringify(skills),
-            })
-            const interviewId = data?.interview?.id as string | undefined
-            if (!interviewId) {
-                throw new Error('Некорректный ответ при создании тренировки')
-            }
-            await startInterviewSession(api, interviewId)
-            toast.success('Тренировка запущена')
-            navigate(`/interview/${interviewId}`)
-        } catch (error) {
-            // The limit promo opens from the API interceptor.
-            if (!isTrainingLimitError(error)) {
-                toast.error(formatSessionStartError(error))
-            }
-        } finally {
-            setTraining(false)
-        }
-    }
-
     return (
+        <>
         <article className="job-card" style={{ '--i': index } as React.CSSProperties}>
             <header className="job-top">
                 <div className="job-company">
@@ -226,10 +179,12 @@ export default function VacancyCard({ vacancy, index = 0, profileSkills, fallbac
                 <a href={vacancy.url} target="_blank" rel="noopener noreferrer">
                     На вакансию ↗
                 </a>
-                <button type="button" className="lib-btn is-primary" disabled={training} onClick={() => void handleTrain()}>
-                    {training ? 'Запускаем…' : <>Тренировка по вакансии <ArrowRight /></>}
+                <button type="button" className="lib-btn is-primary" onClick={() => setCreating(true)}>
+                    Подготовка по вакансии <ArrowRight />
                 </button>
             </footer>
         </article>
+        {creating && <PreparationCreateDialog vacancy={vacancy} onClose={() => setCreating(false)} />}
+        </>
     )
 }

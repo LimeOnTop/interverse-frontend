@@ -104,7 +104,7 @@ export default function ProgressChart() {
 
             {data.length === 0 ? (
                 <p className="text-sm text-secondary py-16 text-center">
-                    Пройдите тренировку, чтобы увидеть прогресс.
+                    Пройди тренировку, чтобы увидеть прогресс.
                 </p>
             ) : (
                 <div className="h-[240px] sm:h-[320px]">

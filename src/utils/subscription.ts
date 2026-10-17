@@ -1,3 +1,4 @@
+import { freeTrainingCaption } from '../lib/trainingLimits'
 export type SubscriptionPlanId = 'free' | 'paid'
 
 export type SubscriptionPlanLabel = 'Basic' | 'Pro'
@@ -32,13 +33,13 @@ export const FREE_PLAN = {
     name: 'Basic',
     price: 'Бесплатно',
     priceHint: 'Без срока действия',
-    description: 'Попробуйте формат: одна полноценная тренировка с итоговой оценкой.',
+    description: `Попробуй формат: ${freeTrainingCaption()} с итоговой оценкой.`,
     features: [
-        '1 тренировка с вопросами и задачами по вашему стеку',
+        `${freeTrainingCaption()} с вопросами и задачами по твоему стеку`,
         'Итоговый результат в процентах и общий отзыв',
         'Число выявленных слабых мест',
         'Импорт резюме из hh.ru',
-        'Профиль и персонализация',
+        'Профиль с навыками и опытом',
     ],
     paid: false as const,
 }
@@ -49,7 +50,7 @@ export const PRO_TRAININGS_PER_DAY = 15
 export const PRO_FEATURES = [
     `До ${PRO_TRAININGS_PER_DAY} тренировок в день`,
     'Детальный анализ тренировок: слабые места и объяснение правильных ответов',
-    'Ссылки на материалы для изучения каждой темы',
+    'Материалы по темам с ошибками',
     'Подборка вакансий по навыкам профиля',
     'Скачивание отчёта в PDF',
     'Вопросы и задачи по выбранному стеку',
@@ -93,7 +94,7 @@ export const FALLBACK_PAID_OFFERS: PaidOffer[] = [
         regularPrice: '1890.00',
         priceHint: 'за 3 месяца',
         description: 'Оптимальный старт для подготовки к нескольким собеседованиям подряд.',
-        badge: 'Хит',
+        badge: '90 дней',
         durationDays: 90,
         paid: true,
         features: PRO_FEATURES,
@@ -104,7 +105,7 @@ export const FALLBACK_PAID_OFFERS: PaidOffer[] = [
         price: '3390.00',
         regularPrice: '3390.00',
         priceHint: 'за 6 месяцев',
-        description: 'Длинный цикл практики со скидкой относительно помесячной оплаты.',
+        description: 'Полгода для регулярной практики и повторения сложных тем.',
         durationDays: 180,
         paid: true,
         features: PRO_FEATURES,
@@ -115,8 +116,8 @@ export const FALLBACK_PAID_OFFERS: PaidOffer[] = [
         price: '5890.00',
         regularPrice: '5890.00',
         priceHint: 'за год',
-        description: 'Максимальная выгода для системной подготовки в течение года.',
-        badge: 'Выгодно',
+        description: 'Год для системной подготовки и отслеживания результатов.',
+        badge: '365 дней',
         durationDays: 365,
         paid: true,
         features: PRO_FEATURES,
@@ -188,7 +189,7 @@ export const PRO_TRACK_PLAN = {
     priceHint: 'в месяц, доступ ко всем траекториям сразу',
     badge: 'Скоро',
     description:
-        'Доступ к траекториям специальностей: осваивайте новые профессии и проверяйте свои навыки.',
+        'Доступ к траекториям специальностей: осваивай новые профессии и проверяй свои навыки.',
     features: [
         'Все траектории специальностей в одной подписке',
         'Освоение новых профессий шаг за шагом',
@@ -196,5 +197,5 @@ export const PRO_TRACK_PLAN = {
         'Все возможности тарифа Pro',
     ],
     proUpgradeNote:
-        'Действующие подписчики Pro автоматически и бесплатно перейдут на Pro Track, а цена их подписки сохранится навсегда.',
+        'Pro Track пока недоступен. Условия запуска и перехода с Pro сообщим отдельно.',
 } as const

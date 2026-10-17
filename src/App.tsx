@@ -1,43 +1,54 @@
+import ProTrialPage from './pages/ProTrialPage'
+import AnalyticsTracker from './components/AnalyticsTracker'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './store/authStore'
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 
 // Pages
 import HomePage from './pages/HomePage'
-import PricingPage from './pages/PricingPage'
-import PrivacyPage from './pages/PrivacyPage'
-import LoginPage from './pages/LoginPage'
-import RegisterPage from './pages/RegisterPage'
-import VerifyEmailPage from './pages/VerifyEmailPage'
-import DashboardPage from './pages/DashboardPage'
-import ActivityPage from './pages/ActivityPage'
-import InterviewWizardPage from './pages/InterviewWizardPage'
-import EditInterviewPage from './pages/EditInterviewPage'
-import EditInterviewFullPage from './pages/EditInterviewFullPage'
-import InterviewServicePage from './pages/InterviewServicePage'
-import InterviewPage from './pages/InterviewPage'
-import VacanciesPage from './pages/VacanciesPage'
-import TracksPage from './pages/TracksPage'
-import ReportsPage from './pages/ReportsPage'
-import ReportDetailPage from './pages/ReportDetailPage'
-import ProfilePage from './pages/ProfilePage'
-import SubscriptionPage from './pages/SubscriptionPage'
-import PaymentSuccessPage from './pages/PaymentSuccessPage'
-import PaymentFailPage from './pages/PaymentFailPage'
-import ContributeQuestionPage from './pages/ContributeQuestionPage'
-import SupportPage from './pages/SupportPage'
-import SupportTicketPage from './pages/SupportTicketPage'
-import OAuthCallbackPage from './pages/OAuthCallbackPage'
-import AdminStatsPage from './pages/admin/AdminStatsPage'
-import AdminUsersPage from './pages/admin/AdminUsersPage'
-import AdminQuestionsPage from './pages/admin/AdminQuestionsPage'
-import AdminQuestionDetailPage from './pages/admin/AdminQuestionDetailPage'
-import AdminModerationPage from './pages/admin/AdminModerationPage'
-import AdminSupportPage from './pages/admin/AdminSupportPage'
-import AdminSupportTicketPage from './pages/admin/AdminSupportTicketPage'
-import GrafanaLoginPage from './pages/GrafanaLoginPage'
+import { preparations, jobTracks } from './data/preparation'
+import { pythonPreparation } from './data/pythonPreparation'
+const PricingPage = lazy(() => import('./pages/PricingPage'))
+const PreparationPage = lazy(() => import('./pages/PreparationPythonPage'))
+const PublicJobsPage = lazy(() => import('./pages/PublicJobsPage'))
+const PublicCatalogPage = lazy(() => import('./pages/PublicCatalogPage'))
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
+const ContractorPage = lazy(() => import('./pages/ContractorPage'))
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage'))
+const LoginPage = lazy(() => import('./pages/LoginPage'))
+const RegisterPage = lazy(() => import('./pages/RegisterPage'))
+const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'))
+const DashboardPage = lazy(() => import('./pages/DashboardPage'))
+const ActivityPage = lazy(() => import('./pages/ActivityPage'))
+const InterviewWizardPage = lazy(() => import('./pages/InterviewWizardPage'))
+const EditInterviewPage = lazy(() => import('./pages/EditInterviewPage'))
+const EditInterviewFullPage = lazy(() => import('./pages/EditInterviewFullPage'))
+const InterviewServicePage = lazy(() => import('./pages/InterviewServicePage'))
+const InterviewPage = lazy(() => import('./pages/InterviewPage'))
+const VacanciesPage = lazy(() => import('./pages/VacanciesPage'))
+const TracksPage = lazy(() => import('./pages/TracksPage'))
+const ReportsPage = lazy(() => import('./pages/ReportsPage'))
+const ReportDetailPage = lazy(() => import('./pages/ReportDetailPage'))
+const ProfilePage = lazy(() => import('./pages/ProfilePage'))
+const SubscriptionPage = lazy(() => import('./pages/SubscriptionPage'))
+const PaymentSuccessPage = lazy(() => import('./pages/PaymentSuccessPage'))
+const PaymentFailPage = lazy(() => import('./pages/PaymentFailPage'))
+const ContributeQuestionPage = lazy(() => import('./pages/ContributeQuestionPage'))
+const SupportPage = lazy(() => import('./pages/SupportPage'))
+const SupportTicketPage = lazy(() => import('./pages/SupportTicketPage'))
+const OAuthCallbackPage = lazy(() => import('./pages/OAuthCallbackPage'))
+const AdminStatsPage = lazy(() => import('./pages/admin/AdminStatsPage'))
+const AdminUsersPage = lazy(() => import('./pages/admin/AdminUsersPage'))
+const AdminQuestionsPage = lazy(() => import('./pages/admin/AdminQuestionsPage'))
+const AdminQuestionDetailPage = lazy(() => import('./pages/admin/AdminQuestionDetailPage'))
+const AdminModerationPage = lazy(() => import('./pages/admin/AdminModerationPage'))
+const AdminSupportPage = lazy(() => import('./pages/admin/AdminSupportPage'))
+const AdminSupportTicketPage = lazy(() => import('./pages/admin/AdminSupportTicketPage'))
+const GrafanaLoginPage = lazy(() => import('./pages/GrafanaLoginPage'))
 
 // Components
+const ResumeTrainingPage = lazy(() => import('./pages/ResumeTrainingPage'))
+
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminRoute from './components/AdminRoute'
 import Layout from './components/Layout'
@@ -56,11 +67,19 @@ function App() {
     return (
         <ThemeProvider>
             <SeoHead />
+            <AnalyticsTracker />
             <div className="min-h-screen bg-gray-50 dark:bg-iv-dark-bg">
+                <Suspense fallback={<div className="min-h-[70vh] grid place-items-center" role="status">Загрузка страницы…</div>}>
                 <Routes>
                     {/* Public routes */}
+                    <Route path="/training/resume" element={<ProtectedRoute><ResumeTrainingPage /></ProtectedRoute>} />
                     <Route path="/" element={<HomePage />} />
+                    <Route path="/preparation" element={<PublicCatalogPage />} />
+                    <Route path="/jobs" element={<PublicCatalogPage jobs />} />
+                    {[pythonPreparation,...preparations].map(item => <Route key={item.slug} path={'/preparation/'+item.slug} element={<PreparationPage key={item.slug} slug={item.slug} />} />)}
+                    {jobTracks.map(item => <Route key={item.slug} path={'/jobs/'+item.slug} element={<PublicJobsPage key={item.slug} slug={item.slug} />} />)}
                     <Route path="/pricing" element={<PricingPage />} />
+                    <Route path="/about-contractor" element={<ContractorPage />} />
                     <Route path="/privacy" element={<PrivacyPage />} />
                     <Route path="/subscription/success" element={<PaymentSuccessPage />} />
                     <Route path="/subscription/fail" element={<PaymentFailPage />} />
@@ -315,7 +334,10 @@ function App() {
                             </AdminRoute>
                         }
                     />
+                    <Route path="/pro-trial" element={<ProTrialPage />} />
+                    <Route path="*" element={<NotFoundPage />} />
                 </Routes>
+                </Suspense>
                 <TrainingLimitPromo />
             </div>
         </ThemeProvider>

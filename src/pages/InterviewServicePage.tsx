@@ -1,3 +1,5 @@
+import { PreparationSection } from '../components/VacancyPreparationCard'
+import { usePreparations } from '../lib/preparations'
 import { useState, useEffect, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowRight, Search } from 'lucide-react'
@@ -68,6 +70,7 @@ function monogram(interview: Interview) {
 }
 
 export default function InterviewServicePage() {
+    const preparations = usePreparations()
     const navigate = useNavigate()
     const [interviews, setInterviews] = useState<Interview[]>([])
     const [reports, setReports] = useState<Record<string, ReportRef>>({})
@@ -129,15 +132,17 @@ export default function InterviewServicePage() {
         [interviews],
     )
 
+    const standalone = interviews.filter(i => !preparations.interviewIds.has(i.id))
     const counts = useMemo(() => ({
-        all: interviews.length,
-        active: interviews.filter(isActive).length,
-        done: interviews.filter(isDone).length,
-    }), [interviews])
+        all: standalone.length,
+        active: standalone.filter(isActive).length,
+        done: standalone.filter(isDone).length,
+    }), [interviews, preparations.interviewIds])
 
     const visible = useMemo(() => {
         const needle = query.toLocaleLowerCase('ru').trim()
         return sorted.filter((interview) => {
+            if (preparations.interviewIds.has(interview.id)) return false
             if (scope === 'active' && !isActive(interview)) return false
             if (scope === 'done' && !isDone(interview)) return false
             if (!needle) return true
@@ -148,47 +153,49 @@ export default function InterviewServicePage() {
                 ...technologiesOf(interview),
             ].join(' ').toLocaleLowerCase('ru').includes(needle)
         })
-    }, [sorted, scope, query])
+    }, [sorted, scope, query, preparations.interviewIds])
 
     if (loading) return <Spinner size="lg" className="h-64" />
 
     const pad = (value: number) => String(value).padStart(2, '0')
     const waiting = counts.active
+    const completedPaths=preparations.preparations.filter(p=>p.steps.every((_,i)=>p.attempts.some(a=>a.step_index===i&&a.status==='completed'))).length
     const scopes: [Scope, string, number][] = [
-        ['all', 'Все', counts.all],
-        ['active', 'В процессе', counts.active],
-        ['done', 'Завершённые', counts.done],
+        ['all', 'Все', counts.all+preparations.preparations.length],
+        ['active', 'В процессе', counts.active+preparations.preparations.length-completedPaths],
+        ['done', 'Завершённые', counts.done+completedPaths],
     ]
 
     return (
         <PageTransition className="practice-library">
             <header className="library-head">
                 <div>
-                    <span className="lib-eyebrow">Практика / ваша библиотека</span>
-                    <h1>Ваши тренировки</h1>
+                    <span className="lib-eyebrow">Практика / твоя библиотека</span>
+                    <h1>Твои тренировки</h1>
                     <p>Каждая попытка — шаг к уверенному ответу.</p>
                 </div>
                 <Link to="/interviews/create" className="lib-btn is-primary">+ Новая тренировка</Link>
             </header>
 
-            <div className="session-overview">
+            <PreparationSection data={preparations} query={query} scope={scope} />
+            {(counts.all>0 || preparations.preparations.length===0) && <div className="session-overview">
                 <section className="session-feature">
-                    <span className="lib-eyebrow">{waiting > 0 ? 'Вернитесь к практике' : 'Следующий шаг'}</span>
+                    <span className="lib-eyebrow">{waiting > 0 ? 'Вернись к практике' : 'Следующий шаг'}</span>
                     {waiting > 0 ? (
                         <>
                             <h2>Начатое можно<br />продолжить.</h2>
                             <p>
-                                {waiting} {pluralRu(waiting, ['тренировка ждёт', 'тренировки ждут', 'тренировок ждут'])} вашего
-                                возвращения. Выберите нужную ниже или начните подготовку под новую роль.
+                                {waiting} {pluralRu(waiting, ['тренировка ждёт', 'тренировки ждут', 'тренировок ждут'])} твоего
+                                возвращения. Выбери нужную ниже или начни подготовку под новую роль.
                             </p>
                         </>
                     ) : (
                         <>
-                            <h2>Начните новую<br />тренировку.</h2>
+                            <h2>Начни новую<br />тренировку.</h2>
                             <p>
                                 {counts.all > 0
-                                    ? 'Незавершённых тренировок нет. Выберите роль и стек — вопросы и задачи подберутся под них.'
-                                    : 'Выберите роль и стек — вопросы и задачи подберутся под них.'}
+                                    ? 'Незавершённых тренировок нет. Выбери роль и стек — вопросы и задачи подберутся под них.'
+                                    : 'Выбери роль и стек — вопросы и задачи подберутся под них.'}
                             </p>
                         </>
                     )}
@@ -196,7 +203,7 @@ export default function InterviewServicePage() {
                 </section>
                 <aside className="session-summary">
                     <div>
-                        <span className="lib-eyebrow">Ваш ритм</span>
+                        <span className="lib-eyebrow">Твой ритм</span>
                         <h2>Практика в удобном темпе</h2>
                     </div>
                     <div className="session-numbers">
@@ -205,7 +212,7 @@ export default function InterviewServicePage() {
                         <div><strong>{pad(counts.done)}</strong><small>{pluralRu(counts.done, ['Завершена', 'Завершены', 'Завершено'])}</small></div>
                     </div>
                 </aside>
-            </div>
+            </div>}
 
             <div className="session-toolbar">
                 <div className="session-filters" role="group" aria-label="Статус тренировок">
@@ -236,8 +243,8 @@ export default function InterviewServicePage() {
                 <section className="collection-empty">
                     {counts.all === 0 ? (
                         <>
-                            <h3>Тренировок пока нет</h3>
-                            <p>Создайте первую тренировку: выберите направление, уровень и технологии.</p>
+                            <h3>Отдельных тренировок пока нет</h3>
+                            <p>Здесь можно создать отдельную тренировку по своему стеку.</p>
                             <div className="actions">
                                 <Link to="/interviews/create" className="lib-btn is-primary">Начать тренировку <ArrowRight /></Link>
                             </div>
@@ -245,7 +252,7 @@ export default function InterviewServicePage() {
                     ) : (
                         <>
                             <h3>Тренировки не найдены</h3>
-                            <p>Измените запрос или выберите другой статус.</p>
+                            <p>Измени запрос или выбери другой статус.</p>
                             <div className="actions">
                                 <button type="button" className="lib-btn" onClick={() => { setScope('all'); setQuery('') }}>
                                     Сбросить фильтры
@@ -294,7 +301,7 @@ function SessionCard({ interview, report, starting, busy, onStart }: SessionCard
         report.taskTotal > 0 && `${report.taskTotal} ${pluralRu(report.taskTotal, ['задача', 'задачи', 'задач'])}`,
     ].filter(Boolean).join(' · ')
 
-    let bottom = 'Вернитесь к тренировке, когда будет удобно'
+    let bottom = 'Вернись к тренировке, когда будет удобно'
     if (done) bottom = report ? [counts, 'отчёт готов'].filter(Boolean).join(' · ') : 'Отчёт формируется'
     else if (interview.status === 'scheduled') bottom = 'Вопросы и задачи подобраны — можно начинать'
     else if (interview.status === 'cancelled') bottom = 'Тренировка отменена'

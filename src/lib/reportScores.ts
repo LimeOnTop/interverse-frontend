@@ -26,7 +26,7 @@ export function getScoreVariant(score: number): BadgeVariant {
 export function getScoreLabel(score: number) {
     if (score >= 80) return 'Отлично'
     if (score >= PASS_SCORE_THRESHOLD) return 'Хорошо'
-    if (score === 0) return 'Не пройдено'
+    if (score === 0) return 'Пока 0 баллов'
     return 'Есть над чем поработать'
 }
 
@@ -43,7 +43,7 @@ export function buildReportSections(report: {
     return [
         { key: 'theory', name: 'Теория', score: report.algorithm_score, passed: report.algorithm_passed },
         { key: 'architecture', name: 'Архитектура', score: report.architecture_score, passed: false, comingSoon: true },
-        { key: 'coding', name: 'Кодинг', score: report.coding_score, passed: report.coding_passed },
-        { key: 'soft_skills', name: 'Soft Skills', score: report.soft_skills_score, passed: false, comingSoon: true },
+        { key: 'coding', name: 'Практика', score: report.coding_score, passed: report.coding_passed },
+        { key: 'soft_skills', name: 'Гибкие навыки', score: report.soft_skills_score, passed: false, comingSoon: true },
     ]
 }

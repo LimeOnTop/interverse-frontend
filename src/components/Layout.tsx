@@ -20,16 +20,17 @@ export default function Layout({ children }: LayoutProps) {
     }, [location.pathname])
 
     return (
-        <div className="fixed inset-0 iv-page flex flex-col overflow-hidden">
+        <div className="iv-app-layout fixed inset-x-0 top-0 iv-page flex flex-col overflow-hidden">
             <Header onMenuClick={() => setSidebarOpen(true)} />
             <div className="flex flex-1 min-h-0 overflow-hidden">
                 <Sidebar mobileOpen={sidebarOpen} onClose={closeSidebar} />
-                <main className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
-                    <div className={`max-w-content mx-auto px-4 py-5 sm:px-6 sm:py-8 lg:px-8 ${focusMode ? 'pb-0 sm:pb-8' : 'pb-28 lg:pb-8'}`}>
+                <main className="flex-1 min-w-0 min-h-0 overflow-y-auto custom-scrollbar iv-app-scroll">
+                    <div className="max-w-content mx-auto px-4 py-5 sm:px-6 sm:py-8 lg:px-8 pb-8">
                         {children}
                     </div>
                 </main>
             </div>
+            <div id="iv-mobile-actions" className={focusMode ? "shrink-0 iv-training-actions-host" : "sm:hidden shrink-0"} />
             {!focusMode && <MobileTabBar />}
         </div>
     )

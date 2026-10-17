@@ -157,7 +157,7 @@ function formatAnswerReview(item: AnswerReviewItem, index: number) {
     if (item.options && item.options.length > 0) {
         lines.push(`Варианты: ${item.options.map((opt, i) => `${i + 1}) ${opt}`).join('; ')}`)
     }
-    lines.push(`Ответ кандидата: ${item.user_answer || '—'}`)
+    lines.push(`Твой ответ: ${item.user_answer || '—'}`)
     lines.push(`Эталон: ${item.correct_answer || '—'}`)
     return lines.join('\n')
 }
@@ -192,14 +192,14 @@ export async function downloadReportPdf(report: ReportPdfInput) {
     writeHeading('Оценки по критериям')
     for (const section of sections) {
         const status = section.comingSoon
-            ? 'скоро'
+            ? 'не оценивается'
             : typeof section.passed === 'boolean'
                 ? (section.passed ? 'сдано' : 'не сдано')
                 : getScoreLabel(section.score)
-        writeWrapped(`${section.name}: ${section.score}% (${status})`)
+        writeWrapped(section.comingSoon ? `${section.name}: не оценивается` : `${section.name}: ${section.score}% (${status})`)
     }
 
-    writeHeading('Комментарии интервьюера')
+    writeHeading('Выводы по ответам')
     writeWrapped(report.comments || '—')
 
     writeHeading('Рекомендации')
@@ -211,7 +211,7 @@ export async function downloadReportPdf(report: ReportPdfInput) {
         weakPoints.forEach((point, index) => {
             const lines = [
                 `${index + 1}. ${point.label}: ${point.prompt}`,
-                `Ваш ответ: ${point.user_answer || '—'}`,
+                `Твой ответ: ${point.user_answer || '—'}`,
                 `Правильный ответ: ${point.correct_answer || '—'}`,
             ]
             if (point.explanation) lines.push(`Объяснение: ${point.explanation}`)

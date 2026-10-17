@@ -9,7 +9,7 @@ export default function PaymentFailPage() {
                 <div className="max-w-md text-center space-y-4">
                     <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Оплата не завершена</h1>
                     <p className="text-sm text-secondary leading-relaxed">
-                        Платёж был отменён или не прошёл. Вы можете попробовать снова на странице подписки.
+                        Платёж был отменён или не прошёл. Попробуй снова на странице подписки.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
                         <Link to="/subscription">

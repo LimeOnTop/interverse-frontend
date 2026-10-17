@@ -1,11 +1,12 @@
 import { isTrainingLimitError } from '../store/promoStore'
-import { useState, type ReactNode } from 'react'
+import { useState, useRef, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, Check, Search } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { api } from '../services/api'
 import { startInterviewSession, formatSessionStartError } from '../lib/interviewSession'
+import MobileActionBar from '../components/MobileActionBar'
 import PageTransition from '../components/ui/PageTransition'
 import Spinner from '../components/ui/Spinner'
 import { clearFormDraft, usePersistedState } from '../hooks/usePersistedForm'
@@ -14,9 +15,10 @@ import { LEVELS, SPECIALIZATIONS, TECH_STACKS } from '../components/InterviewWiz
 import SchedulePicker, { nextSlot } from '../components/InterviewWizard/SchedulePicker'
 
 const STEPS = [
-    { title: 'Направление', description: 'Ваша специализация' },
+    { title: 'Направление', description: 'Твоя специализация' },
     { title: 'Технологии', description: 'Стек для практики' },
     { title: 'Уровень', description: 'Сложность вопросов' },
+    { title: 'Задачи', description: 'Количество задач' },
     { title: 'Старт', description: 'Проверка параметров' },
 ]
 
@@ -29,12 +31,14 @@ export default function InterviewWizardPage() {
         selectedSpecialization: '',
         selectedTechStack: [] as string[],
         selectedLevel: '',
+        taskMode: 'theory' as 'theory' | 'few' | 'many',
         startMode: 'now' as StartMode,
         scheduledAt: '',
     })
     // Drafts saved by the old five-step wizard.
     const currentStep = Math.min(Math.max(draft.currentStep, 1), STEPS.length)
     const { selectedSpecialization, selectedTechStack, selectedLevel } = draft
+    const taskMode = draft.taskMode || 'theory'
     const startMode: StartMode = draft.startMode === 'later' ? 'later' : 'now'
     const scheduledAt = draft.scheduledAt && !draft.scheduledAt.endsWith('Z') ? draft.scheduledAt : ''
     const [isLoading, setIsLoading] = useState(false)
@@ -42,7 +46,9 @@ export default function InterviewWizardPage() {
     const navigate = useNavigate()
 
     const update = (patch: Partial<typeof draft>) => setDraft((prev) => ({ ...prev, ...patch }))
+    const stepPanel = useRef<HTMLElement>(null)
     const goTo = (step: number) => {
+        stepPanel.current?.scrollIntoView({ block: 'start', behavior: 'auto' })
         setDirection(step > currentStep ? 1 : -1)
         update({ currentStep: step })
     }
@@ -55,6 +61,7 @@ export default function InterviewWizardPage() {
             case 1: return Boolean(selectedSpecialization)
             case 2: return selectedTechStack.length > 0
             case 3: return Boolean(selectedLevel)
+            case 4: return true
             default: return startMode === 'now' || (Boolean(scheduledAt) && new Date(scheduledAt) > new Date())
         }
     })()
@@ -65,10 +72,11 @@ export default function InterviewWizardPage() {
         try {
             const interviewData: Record<string, unknown> = {
                 title: `Тренировка: ${selectedSpecialization} — ${selectedLevel}`,
-                description: `Самостоятельная тренировка интервью по направлению ${selectedSpecialization}, уровень ${selectedLevel}`,
+                description: `Подготовка к собеседованию по направлению ${selectedSpecialization}, уровень ${selectedLevel}`,
                 specialization: selectedSpecialization,
                 tech_stack: JSON.stringify(selectedTechStack),
                 level: selectedLevel,
+                task_mode: taskMode,
             }
             if (withSchedule) {
                 interviewData.scheduled_at = new Date(scheduledAt).toISOString()
@@ -115,7 +123,7 @@ export default function InterviewWizardPage() {
                 <div>
                     <p className="iv-eyebrow">Training studio / 0{currentStep}</p>
                     <h1 className="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Новая тренировка</h1>
-                    <p className="mt-2 text-secondary">От вашей цели к следующему шагу.</p>
+                    <p className="mt-2 text-secondary">Выбери направление, технологии, сложность и количество задач.</p>
                 </div>
                 <span className="hidden sm:inline-flex mt-8 rounded-md border border-gray-200 dark:border-iv-dark-line px-2.5 py-1 text-xs font-semibold text-secondary">
                     Настройка практики
@@ -160,7 +168,7 @@ export default function InterviewWizardPage() {
                     <p className="mt-10 text-xs text-secondary leading-relaxed">Хорошая подготовка начинается<br />с понятной цели.</p>
                 </aside>
 
-                <section className="iv-panel rounded-2xl p-5 sm:p-9 shadow-iv-md min-w-0">
+                <section ref={stepPanel} className="iv-panel rounded-2xl p-5 sm:p-9 shadow-iv-md min-w-0">
                     <div className="flex items-center justify-between gap-4">
                         <span className="font-mono text-xs text-secondary">ШАГ 0{currentStep} / 0{STEPS.length}</span>
                         <div className="iv-track w-24"><span style={{ width: `${(currentStep / STEPS.length) * 100}%` }} /></div>
@@ -176,7 +184,7 @@ export default function InterviewWizardPage() {
                             className="mt-6"
                         >
                             {currentStep === 1 && (
-                                <StepBody title="Для начала выберем направление." copy="Выберите специализацию: от неё зависят технологии на следующем шаге.">
+                                <StepBody title="Для начала выберем направление." copy="Выбери специализацию: от неё зависят технологии на следующем шаге.">
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         {SPECIALIZATIONS.map((item) => (
                                             <OptionCard
@@ -219,12 +227,22 @@ export default function InterviewWizardPage() {
                                 </StepBody>
                             )}
                             {currentStep === 4 && (
-                                <StepBody title="Всё готово к практике." copy="Проверьте параметры и выберите время старта.">
+                                <StepBody title="Сколько задач добавим?" copy="Теоретические вопросы будут во всех режимах. Если задач в банке меньше, добавим доступные.">
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                        <OptionCard glyph="◎" title="Только теория" description="Без практических задач" selected={taskMode === 'theory'} onClick={() => update({ taskMode: 'theory' })} />
+                                        <OptionCard glyph="↗" title="Пара задач" description="От 1 до 3 задач" selected={taskMode === 'few'} onClick={() => update({ taskMode: 'few' })} />
+                                        <OptionCard glyph="✦" title="Много задач" description="От 4 до 6 задач" selected={taskMode === 'many'} onClick={() => update({ taskMode: 'many' })} />
+                                    </div>
+                                </StepBody>
+                            )}
+                            {currentStep === 5 && (
+                                <StepBody title="Всё готово к практике." copy="Проверь параметры и выбери время старта.">
                                     <div className="mb-5 rounded-xl border border-gray-200 dark:border-iv-dark-line p-4 flex flex-wrap items-center gap-x-4 gap-y-2">
                                         <strong className="text-gray-900 dark:text-gray-100">
                                             {[specialization?.name, level?.name].filter(Boolean).join(' · ')}
                                         </strong>
                                         <span className="text-sm text-secondary">{selectedTechStack.join(' · ')}</span>
+                                        <span className="text-sm text-secondary">{taskMode === 'theory' ? 'Только теория' : taskMode === 'few' ? '1–3 задачи' : '4–6 задач'}</span>
                                     </div>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         <OptionCard glyph="↗" title="Начать сейчас" description="Перейти к вопросам" selected={startMode === 'now'} onClick={() => update({ startMode: 'now' })} />
@@ -248,7 +266,7 @@ export default function InterviewWizardPage() {
                         </motion.div>
                     </AnimatePresence>
 
-                    <footer className="mt-8 pt-6 border-t border-gray-200 dark:border-iv-dark-line flex items-center justify-between gap-3">
+                    <footer className="hidden sm:flex mt-8 pt-6 border-t border-gray-200 dark:border-iv-dark-line items-center justify-between gap-3">
                         <button
                             type="button"
                             onClick={handleBack}
@@ -269,11 +287,21 @@ export default function InterviewWizardPage() {
                 </section>
             </div>
 
+            <MobileActionBar>
+                <button type="button" onClick={handleBack} className="min-h-[48px] px-3 rounded-lg border border-gray-200 dark:border-iv-dark-line text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    {currentStep === 1 ? 'Отмена' : 'Назад'}
+                </button>
+                <button type="button" onClick={handleNext} disabled={!canContinue || isLoading} className="btn-primary-adaptive min-w-0 min-h-[48px] px-3 rounded-lg inline-flex items-center justify-center gap-2 text-sm disabled:opacity-50 disabled:pointer-events-none">
+                    {currentStep < STEPS.length ? 'Продолжить' : startMode === 'later' ? 'Запланировать' : 'Начать тренировку'}
+                    <ArrowRight className="w-4 h-4 shrink-0" />
+                </button>
+            </MobileActionBar>
+
             {isLoading && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                     <div className="iv-panel p-8 text-center">
                         <Spinner size="lg" />
-                        <p className="text-secondary mt-4">Подготовка тренировки...</p>
+                        <p className="text-secondary mt-4">Готовим тренировку…</p>
                     </div>
                 </div>
             )}
@@ -340,7 +368,7 @@ function TechStep({ specialization, specializationName, selected, onChange }: {
     return (
         <StepBody
             title="Теперь выберем технологии."
-            copy={`Отметьте одну или несколько технологий${specializationName ? ` для ${specializationName}` : ''}: по ним подберём вопросы.`}
+            copy={`Отметь одну или несколько технологий${specializationName ? ` для ${specializationName}` : ''}: по ним подберём вопросы.`}
         >
             <label className="relative block mb-5 max-w-sm">
                 <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-secondary" />
@@ -354,7 +382,7 @@ function TechStep({ specialization, specializationName, selected, onChange }: {
             </label>
             {isSearchActive && isSearching && <p className="text-sm text-secondary mb-3">Ищем технологии…</p>}
             {isSearchActive && !isSearching && options.length === 0 ? (
-                <p className="text-sm text-secondary">Ничего не найдено, попробуйте другой запрос.</p>
+                <p className="text-sm text-secondary">Ничего не найдено, попробуй другой запрос.</p>
             ) : (
                 <div className="flex flex-wrap gap-2.5">
                     {options.map((tech) => {
@@ -381,7 +409,7 @@ function TechStep({ specialization, specializationName, selected, onChange }: {
             <div className="mt-6 rounded-xl border border-gray-200 dark:border-iv-dark-line p-4">
                 <p className="iv-eyebrow">Выбрано</p>
                 <p className={`mt-1.5 font-semibold ${selected.length ? 'text-lg text-inter-verse-green dark:text-purple-300' : 'text-gray-900 dark:text-gray-100'}`}>
-                    {selected.length ? selected.join(' · ') : 'Выберите хотя бы одну технологию'}
+                    {selected.length ? selected.join(' · ') : 'Выбери хотя бы одну технологию'}
                 </p>
             </div>
         </StepBody>

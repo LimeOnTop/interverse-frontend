@@ -1,39 +1,32 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { FieldValues, UseFormWatch } from 'react-hook-form'
 
-const PREFIX = 'iv:form:'
+import { privateStorageOwner, readPrivateCache, writePrivateCache } from '../lib/privateStorage'
+
+const draftKey = (key: string) => `iv:form:${privateStorageOwner()}:${key}`
 
 export function readFormDraft<T>(key: string): T | null {
-    try {
-        const raw = sessionStorage.getItem(PREFIX + key)
-        if (!raw) return null
-        return JSON.parse(raw) as T
-    } catch {
-        return null
-    }
+    return readPrivateCache<T>(sessionStorage, draftKey(key))
 }
 
 export function writeFormDraft(key: string, value: unknown) {
-    try {
-        sessionStorage.setItem(PREFIX + key, JSON.stringify(value))
-    } catch {
-        // quota / private mode
-    }
+    writePrivateCache(sessionStorage, draftKey(key), value)
 }
 
 export function clearFormDraft(key: string) {
     try {
-        sessionStorage.removeItem(PREFIX + key)
+        sessionStorage.removeItem(draftKey(key))
     } catch {
         // ignore
     }
 }
 
 export function usePersistedState<T>(key: string, initial: T): [T, React.Dispatch<React.SetStateAction<T>>] {
+    const owner = useRef(privateStorageOwner())
     const [state, setState] = useState<T>(() => readFormDraft<T>(key) ?? initial)
 
     useEffect(() => {
-        writeFormDraft(key, state)
+        if (owner.current === privateStorageOwner()) writeFormDraft(key, state)
     }, [key, state])
 
     return [state, setState]
@@ -49,8 +42,9 @@ export function usePersistedRhfValues<T extends FieldValues>(
     pickRef.current = pick
 
     useEffect(() => {
+        const owner = privateStorageOwner()
         const sub = watch((values) => {
-            writeFormDraft(key, pickRef.current(values as T))
+            if (owner === privateStorageOwner()) writeFormDraft(key, pickRef.current(values as T))
         })
         return () => sub.unsubscribe()
     }, [key, watch])

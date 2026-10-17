@@ -1,3 +1,4 @@
+import { authDestination } from '../lib/trainingIntent'
 import { FormEvent, useEffect, useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
@@ -17,10 +18,10 @@ interface VerifyState {
 
 function verifyErrorText(raw: string) {
     if (/invalid code/i.test(raw)) return 'Неверный код'
-    if (/expired/i.test(raw)) return 'Код истёк, запросите новый'
-    if (/too many attempts/i.test(raw)) return 'Слишком много попыток, запросите новый код'
+    if (/expired/i.test(raw)) return 'Код истёк, запроси новый'
+    if (/too many attempts/i.test(raw)) return 'Слишком много попыток, запроси новый код'
     if (/invalid credentials/i.test(raw)) return 'Неверный пароль'
-    if (/already verified/i.test(raw)) return 'Email уже подтверждён, войдите в аккаунт'
+    if (/already verified/i.test(raw)) return 'Email уже подтверждён, войди в аккаунт'
     return raw || 'Не удалось подтвердить email'
 }
 
@@ -51,17 +52,17 @@ export default function VerifyEmailPage() {
     const onSubmit = async (e: FormEvent) => {
         e.preventDefault()
         if (code.length !== 6) {
-            toast.error('Введите 6 цифр из письма')
+            toast.error('Введи 6 цифр из письма')
             return
         }
         if (!password) {
-            toast.error('Введите пароль')
+            toast.error('Введи пароль')
             return
         }
         try {
             const user = await verifyEmail(email, code, password)
             toast.success('Email подтверждён!')
-            navigate(user?.role === 'admin' ? '/admin' : '/dashboard', { replace: true })
+            navigate(authDestination(user?.role === 'admin' ? '/admin' : '/dashboard'), { replace: true })
         } catch (error: any) {
             toast.error(verifyErrorText(String(error?.message || '')))
         }
@@ -84,14 +85,14 @@ export default function VerifyEmailPage() {
     return (
         <AuthSplitLayout
             marketingTitle="Почти готово"
-            marketingDescription="Подтвердите почту, чтобы сохранить прогресс тренировок и получать отчёты."
+            marketingDescription="Подтверди почту, чтобы сохранить прогресс тренировок и получать отчёты."
         >
             <div className="w-full">
                 <FormCard>
                     <div className="mb-8">
                         <h1 className="text-xl sm:text-2xl font-bold tracking-tight mb-2">Подтверждение email</h1>
                         <p className="text-secondary text-sm">
-                            Мы отправили 6-значный код на <span className="font-medium">{email}</span>. Если письма нет, проверьте папку «Спам».
+                            Мы отправили 6-значный код на <span className="font-medium">{email}</span>. Если письма нет, проверь папку «Спам».
                         </p>
                     </div>
 
@@ -147,7 +148,7 @@ export default function VerifyEmailPage() {
                     </div>
 
                     <p className="mt-4 text-center text-sm text-secondary">
-                        Ошиблись адресом?{' '}
+                        Ошибка в адресе?{' '}
                         <Link to="/register" className="font-medium text-inter-verse-green dark:text-purple-400 hover:underline">Зарегистрироваться заново</Link>
                     </p>
                 </FormCard>

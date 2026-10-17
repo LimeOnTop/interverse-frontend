@@ -1,3 +1,5 @@
+import { PreparationSection } from '../components/VacancyPreparationCard'
+import { usePreparations } from '../lib/preparations'
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
@@ -92,6 +94,7 @@ const levelLabels: Record<string, string> = {
 }
 
 export default function InterviewsPage() {
+    const preparations = usePreparations()
     const [interviews, setInterviews] = useState<Interview[]>([])
     const [loading, setLoading] = useState(true)
     const [searchTerm, setSearchTerm] = usePersistedState('interviews-search', '')
@@ -121,6 +124,7 @@ export default function InterviewsPage() {
     }
 
     const filteredInterviews = interviews.filter(interview => {
+        if (preparations.interviewIds.has(interview.id)) return false
         return interview.title.toLowerCase().includes(searchTerm.toLowerCase())
     })
 
@@ -147,7 +151,7 @@ export default function InterviewsPage() {
     })
 
     const handleDelete = async (id: string) => {
-        if (window.confirm('Вы уверены, что хотите удалить это интервью?')) {
+        if (window.confirm('Удалить эту тренировку?')) {
             try {
                 await api.delete(`/interviews/${id}`)
                 toast.success('Интервью удалено')
@@ -180,6 +184,7 @@ export default function InterviewsPage() {
 
     return (
         <PageTransition className="space-y-8">
+            <PreparationSection data={preparations} query={searchTerm} />
             <PageHeader
                 title="Интервью"
                 description="Управление всеми интервью"
@@ -237,8 +242,8 @@ export default function InterviewsPage() {
                         title={searchTerm || hasActiveFilters ? 'Интервью не найдены' : 'Нет интервью'}
                         description={
                             searchTerm || hasActiveFilters
-                                ? 'Попробуйте изменить фильтры или поисковый запрос'
-                                : 'Создайте первое интервью, чтобы начать работу'
+                                ? 'Попробуй изменить фильтры или поисковый запрос'
+                                : 'Создай первое интервью, чтобы начать работу'
                         }
                         action={
                             !searchTerm && !hasActiveFilters ? (

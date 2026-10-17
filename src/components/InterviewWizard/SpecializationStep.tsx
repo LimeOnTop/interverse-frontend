@@ -63,10 +63,10 @@ export default function SpecializationStep({
         >
             <div className="text-center mb-4 sm:mb-6">
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                    Выберите направление
+                    Выбери направление
                 </h2>
                 <p className="text-secondary text-sm">
-                    Какое направление вы хотите отработать на тренировке?
+                    К какому направлению хочешь подготовиться?
                 </p>
             </div>
 

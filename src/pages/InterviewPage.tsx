@@ -1,5 +1,7 @@
+import { usePreparationContext } from '../lib/preparations'
+import { writePrivateCache } from '../lib/privateStorage'
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, Play } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -45,6 +47,7 @@ const levelLabels: Record<string, string> = {
 
 export default function InterviewPage() {
     const { id } = useParams<{ id: string }>()
+    const preparation = usePreparationContext(id)
     const navigate = useNavigate()
 
     const [session, setSession] = useState<InterviewSessionData | null>(null)
@@ -57,15 +60,17 @@ export default function InterviewPage() {
     const [reportId, setReportId] = useState<string | null>(null)
     const [submitError, setSubmitError] = useState<string | null>(null)
     const submitStartedRef = useRef(false)
+    const stepPanel = useRef<HTMLElement>(null)
+    useEffect(() => { stepPanel.current?.scrollIntoView({ block: 'start', behavior: 'auto' }) }, [currentStepIndex])
 
     const persistSession = useCallback((data: InterviewSessionData) => {
         if (!id) return
-        localStorage.setItem(getSessionStorageKey(id), JSON.stringify(data))
+        writePrivateCache(localStorage, getSessionStorageKey(id), data)
     }, [id])
 
     const persistAnswers = useCallback((nextAnswers: Record<string, StepAnswer>) => {
         if (!id) return
-        localStorage.setItem(getAnswersStorageKey(id), JSON.stringify(nextAnswers))
+        writePrivateCache(localStorage, getAnswersStorageKey(id), nextAnswers)
     }, [id])
 
     // A finished training is never shown again (e.g. after "back" from the
@@ -189,7 +194,7 @@ export default function InterviewPage() {
             const sessionData = await startInterviewSession(api, id)
 
             if (sessionData.steps.length === 0) {
-                toast.error('Сессия пуста — проверьте банк вопросов')
+                toast.error('Для этих параметров пока нет вопросов. Попробуй выбрать другие технологии или уровень.')
                 return
             }
 
@@ -305,7 +310,7 @@ export default function InterviewPage() {
         return (
             <PageTransition className="text-center py-12">
                 <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Тренировка не найдена</h2>
-                <Button onClick={() => navigate('/dashboard')}>Вернуться на дашборд</Button>
+                <Button onClick={() => navigate('/dashboard')}>На главную</Button>
             </PageTransition>
         )
     }
@@ -316,7 +321,7 @@ export default function InterviewPage() {
                 <Card padding="md">
                     <div className="flex items-start gap-3">
                         <Button variant="icon" onClick={() => navigate('/interview-service')}>
-                            <ArrowLeft className="w-5 h-5" />
+                            <ArrowLeft className="w-4 h-4" /> <span>Назад</span>
                         </Button>
                         <div>
                             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">{session.interview.title}</h1>
@@ -327,8 +332,8 @@ export default function InterviewPage() {
 
                 <EmptyState
                     icon={Play}
-                    title="Сессия ещё не начата"
-                    description="Нажмите кнопку ниже, чтобы получить набор вопросов (10–20) и практических задач (1–3)"
+                    title="Тренировка ещё не начата"
+                    description="Начни тренировку: вопросы подберём по её параметрам, а количество задач — по выбранному режиму."
                     action={
                         <Button onClick={handleStartSession} loading={starting}>
                             Начать тренировку
@@ -349,7 +354,7 @@ export default function InterviewPage() {
     const isLast = currentStepIndex === totalSteps - 1
     const nextLabel = isLast ? 'Завершить' : currentStep?.type === 'task' ? 'Дальше' : 'Следующий вопрос'
     const practiceTitle = [
-        session.steps.find((step) => step.technology)?.technology || specLabels[session.interview.specialization || ''] || '',
+        session.interview.technologies?.join(' · ') || specLabels[session.interview.specialization || ''] || '',
         levelLabels[session.interview.level || ''] || session.interview.level,
     ].filter(Boolean).join(' · ')
 
@@ -372,11 +377,12 @@ export default function InterviewPage() {
     }
 
     return (
-        <PageTransition className="max-w-5xl mx-auto">
+        <PageTransition className="max-w-5xl mx-auto iv-training-session">
             <header className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
-                    <p className="iv-eyebrow">Режим фокуса</p>
-                    <h1 className="mt-1.5 text-xl sm:text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100 truncate">
+                    <p className="iv-eyebrow">{session.interview.title === 'Повторение по ошибкам' ? 'Повторение по ошибкам' : 'Тренировка · режим фокуса'}</p>
+                    {preparation && <Link to={`/dashboard?preparation=${preparation.id}`} className="text-xs text-secondary underline underline-offset-4">{preparation.title} · К пути подготовки</Link>}
+                    <h1 className="mt-1.5 text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100 break-words">
                         {practiceTitle ? `Практика ${practiceTitle}` : session.interview.title}
                     </h1>
                     <p className="mt-1 text-sm text-secondary">
@@ -384,6 +390,7 @@ export default function InterviewPage() {
                         {taskTotal > 0 && ` + ${taskTotal} ${plural(taskTotal, ['задача', 'задачи', 'задач'])}`}
                         {` · ${filled} из ${totalSteps} заполнено`}
                     </p>
+                    <p className="mt-2 text-xs text-inter-verse-green dark:text-purple-300">✓ Ответы сохраняются в этом браузере</p>
                 </div>
                 <button
                     type="button"
@@ -397,8 +404,8 @@ export default function InterviewPage() {
 
             <div className="mt-5 sm:mt-6 iv-track"><span style={{ width: `${totalSteps ? (filled / totalSteps) * 100 : 0}%` }} /></div>
 
-            <div className="mt-6 sm:mt-8 grid grid-cols-1 lg:grid-cols-[1fr_14rem] gap-6 lg:gap-8 items-start">
-                <section className="iv-panel rounded-2xl p-5 sm:p-9 min-w-0">
+            <div className="mt-6 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_18rem] gap-4 lg:gap-6 items-start">
+                <section ref={stepPanel} className="iv-panel rounded-2xl p-5 sm:p-7 min-w-0">
                     {/* initial={false}: the first step appears with the page, not in a second fade after it. */}
                     <AnimatePresence mode="wait" initial={false}>
                         <motion.div
@@ -426,28 +433,32 @@ export default function InterviewPage() {
                         </motion.div>
                     </AnimatePresence>
 
-                    <footer className="hidden sm:flex mt-8 pt-6 border-t border-gray-200 dark:border-iv-dark-line items-center justify-between gap-3">
-                        <button
-                            type="button"
-                            onClick={handlePrevious}
-                            disabled={currentStepIndex === 0}
-                            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 dark:border-iv-dark-line px-5 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100 disabled:opacity-40 disabled:pointer-events-none"
-                        >
-                            <ArrowLeft className="w-4 h-4" /> Назад
-                        </button>
-                        <button
-                            type="button"
-                            onClick={handleNext}
-                            disabled={!canProceed()}
-                            className="btn-primary-adaptive inline-flex items-center gap-2 rounded-lg px-5 py-3 text-sm disabled:opacity-50 disabled:pointer-events-none"
-                        >
-                            {nextLabel} <ArrowRight className="w-4 h-4" />
-                        </button>
-                    </footer>
+            <footer className="iv-training-sticky-actions">
+                <button
+                    type="button"
+                    onClick={handlePrevious}
+                    disabled={currentStepIndex === 0}
+                    aria-label="Предыдущий шаг"
+                    className="inline-flex items-center justify-center gap-2 min-h-[48px] rounded-lg border border-gray-200 dark:border-iv-dark-line px-4 text-gray-900 dark:text-gray-100 disabled:opacity-40 disabled:pointer-events-none"
+                >
+                    <ArrowLeft className="w-4 h-4" /> <span>Назад</span>
+                </button>
+                <div className="flex justify-end items-center gap-2 min-w-0">
+                    {currentStepIndex < totalSteps - 1 && <button type="button" onClick={handleNext} className="min-h-[48px] px-3 rounded-lg border border-gray-200 dark:border-iv-dark-line text-sm">Пропустить</button>}
+                <button
+                    type="button"
+                    onClick={handleNext}
+                    disabled={!canProceed()}
+                    className="btn-primary-adaptive min-w-0 min-h-[48px] px-3 rounded-lg inline-flex items-center justify-center gap-2 text-sm disabled:opacity-50 disabled:pointer-events-none"
+                >
+                    {currentStepIndex === totalSteps - 1 ? nextLabel : 'Далее'} <ArrowRight className="w-4 h-4" />
+                </button>
+                </div>
+            </footer>
                 </section>
 
-                <aside className="lg:sticky lg:top-0">
-                    <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Ваш маршрут</h3>
+                <aside className="iv-panel rounded-2xl p-5 sm:p-7 min-w-0 order-first lg:order-none lg:sticky lg:top-0">
+                    <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Карта тренировки</h3>
                     <InterviewRouteMap
                         steps={session.steps}
                         currentIndex={currentStepIndex}
@@ -456,32 +467,13 @@ export default function InterviewPage() {
                     />
                     <div className="hidden lg:block mt-6 pt-6 border-t border-gray-200 dark:border-iv-dark-line text-sm text-secondary leading-relaxed">
                         <p className="iv-eyebrow mb-2">В своём темпе</p>
-                        <p>Ответ можно изменить. Переключайтесь между вопросами, ваш выбор сохранится.</p>
-                        <p className="mt-3">Результат и разбор появятся после завершения.</p>
+                        <p>Заливка — ответ сохранён. Обводка — текущий шаг.</p><p className="mt-3">Ответ можно изменить. Переключайся между вопросами, твой выбор сохранится.</p>
+                        <p className="mt-3">Результат появится после завершения. Подробный разбор доступен в Pro.</p>
                     </div>
                 </aside>
             </div>
 
-            {/* Phones: sticky thumb-reach action bar. */}
-            <div className="sm:hidden sticky bottom-0 z-10 mt-6 -mx-4 px-4 py-3 iv-surface border-t border-gray-200 dark:border-iv-dark-line iv-safe-bottom grid grid-cols-[auto_1fr] gap-3">
-                <button
-                    type="button"
-                    onClick={handlePrevious}
-                    disabled={currentStepIndex === 0}
-                    aria-label="Предыдущий шаг"
-                    className="rounded-lg border border-gray-200 dark:border-iv-dark-line px-4 text-gray-900 dark:text-gray-100 disabled:opacity-40 disabled:pointer-events-none"
-                >
-                    <ArrowLeft className="w-5 h-5" />
-                </button>
-                <button
-                    type="button"
-                    onClick={handleNext}
-                    disabled={!canProceed()}
-                    className="btn-primary-adaptive rounded-lg inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
-                >
-                    {nextLabel} <ArrowRight className="w-5 h-5" />
-                </button>
-            </div>
+
         </PageTransition>
     )
 }

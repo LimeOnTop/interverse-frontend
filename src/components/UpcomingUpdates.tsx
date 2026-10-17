@@ -3,11 +3,10 @@ import { useLocation } from 'react-router-dom'
 import { ChevronDown, X } from 'lucide-react'
 
 const updates = [
-    ['Тренировки по вакансии', 'ИИ разберёт требования и поможет подготовиться к конкретной позиции.'],
-    ['Планирование тренировок', 'Выбирайте дату и время для следующей практики.'],
-    ['Голосовые ответы', 'Отвечайте голосом и получайте обратную связь по содержанию и речи.'],
-    ['Вопросы по вашему опыту', 'Тренируйтесь отвечать на вопросы по опыту, указанному в профиле.'],
-    ['Курсы и траектории', 'Осваивайте новые направления. Первый курс — геймдизайн с помощью ИИ.'],
+    ['Тренировки по вакансии', 'Планируем добавить разбор требований вакансии с помощью ИИ.'],
+    ['Голосовые ответы', 'Отвечай голосом и получай обратную связь по содержанию и речи.'],
+    ['Вопросы по опыту из профиля', 'Тренируйся отвечать на вопросы по опыту, указанному в профиле.'],
+    ['Курсы и траектории', 'Осваивай новые направления. Первый курс — геймдизайн с помощью ИИ.'],
 ]
 
 export default function UpcomingUpdates() {
@@ -45,9 +44,9 @@ export default function UpcomingUpdates() {
             if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget as Node)) setOpen(false)
         }}>
             <button type="button" ref={triggerRef} className="iv-header-frame iv-updates-trigger"
-                aria-expanded={open} aria-controls="upcoming-updates" onClick={() => setOpen(!open)}>
+                aria-label="Скоро: планируемые обновления" aria-expanded={open} aria-controls="upcoming-updates" onClick={() => setOpen(!open)}>
                 <span className="iv-updates-dot" aria-hidden="true" />
-                Скоро
+                <span className="iv-updates-label">Скоро</span>
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
             </button>
             {open && (

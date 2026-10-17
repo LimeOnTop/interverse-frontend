@@ -1,12 +1,10 @@
+import ProTrialOffer from './ProTrialOffer'
 import { Link } from 'react-router-dom'
 
 const CONTACTS = {
-    legalName: 'Самозанятый Щеглов Константин Михайлович',
     email: 'info@inter-verse.ru',
     phoneDisplay: '+7 (999) 197-97-66',
     phoneHref: 'tel:+79991979766',
-    inn: '772974697900',
-    city: 'г. Москва',
 } as const
 
 interface SiteFooterProps {
@@ -18,10 +16,14 @@ export default function SiteFooter({ className = '' }: SiteFooterProps) {
         <footer
             className={`iv-landing-section py-8 border-t border-gray-200 dark:border-iv-dark-line ${className}`}
         >
+            <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8"><ProTrialOffer /></div>
             <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-4 text-sm text-secondary">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <span>&copy; {new Date().getFullYear()} InterVerse. Все права защищены.</span>
                     <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+                        <Link to="/preparation" className="inline-flex items-center min-h-[44px] hover:underline">Подготовка</Link>
+                        <a href="/about-contractor" className="inline-flex items-center min-h-[44px] hover:underline">Об исполнителе</a>
+                        <Link to="/jobs" className="inline-flex items-center min-h-[44px] hover:underline">Вакансии IT</Link>
                         <Link
                             to="/pricing"
                             className="inline-flex items-center min-h-[44px] sm:min-h-0 font-medium text-inter-verse-green dark:text-purple-400 hover:underline"
@@ -40,7 +42,7 @@ export default function SiteFooter({ className = '' }: SiteFooterProps) {
                             href="/privacy"
                             className="inline-flex items-center min-h-[44px] sm:min-h-0 font-medium text-inter-verse-green dark:text-purple-400 hover:underline"
                         >
-                            Политика ПДн
+                            Политика конфиденциальности
                         </a>
                         <a
                             href="/legal/refund.html"
@@ -54,11 +56,6 @@ export default function SiteFooter({ className = '' }: SiteFooterProps) {
                 </div>
 
                 <div className="flex flex-col gap-2">
-                    <div className="flex flex-col sm:flex-row sm:flex-wrap gap-x-6 gap-y-1">
-                        <span>{CONTACTS.legalName}</span>
-                        <span>ИНН {CONTACTS.inn}</span>
-                        <span>{CONTACTS.city}</span>
-                    </div>
                     <div className="flex flex-col sm:flex-row sm:flex-wrap gap-x-6 gap-y-1">
                         <a
                             href={`mailto:${CONTACTS.email}`}

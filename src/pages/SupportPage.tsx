@@ -46,11 +46,11 @@ export default function SupportPage() {
         const subject = draft.subject.trim()
         const message = draft.message.trim()
         if (!subject) {
-            toast.error('Укажите тему обращения')
+            toast.error('Укажи тему обращения')
             return
         }
         if (!message) {
-            toast.error('Опишите проблему')
+            toast.error('Опиши проблему')
             return
         }
         try {
@@ -70,7 +70,7 @@ export default function SupportPage() {
         <PageTransition>
             <PageHeader
                 title="Поддержка"
-                description="Опишите вопрос или проблему, и мы ответим в этом разделе. История переписки сохраняется."
+                description="Опиши вопрос или проблему, и мы ответим в этом разделе. История переписки сохраняется."
             />
 
             <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-6 items-start">
@@ -93,7 +93,7 @@ export default function SupportPage() {
                             onChange={(event) => setDraft((prev) => ({ ...prev, message: event.target.value }))}
                             maxLength={5000}
                             className="input-field w-full min-h-[160px] resize-y"
-                            placeholder="Что произошло и что вы ожидали увидеть"
+                            placeholder="Что произошло и какой результат ожидался"
                         />
                     </div>
                     <div className="flex justify-end">

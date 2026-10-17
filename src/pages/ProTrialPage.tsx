@@ -1,0 +1,21 @@
+import { useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import PublicNav from '../components/PublicNav'
+import ProCheckoutDialog from '../components/ProCheckoutDialog'
+import { TRIAL_OFFER } from '../components/ProTrialOffer'
+import { api } from '../services/api'
+import { checkoutStarted } from '../lib/analytics'
+import toast from 'react-hot-toast'
+import { useAuthStore } from '../store/authStore'
+export default function ProTrialPage(){
+ const [busy,setBusy]=useState(false)
+ const [open,setOpen]=useState(false),[available,setAvailable]=useState(false); const navigate=useNavigate(); const {accessToken}=useAuthStore()
+ useEffect(()=>{let active=true;api.get('/payments/offers').then(({data})=>{if(active)setAvailable((data.offers||[]).some((p:{id:string})=>p.id==='trial_3d'))}).catch(()=>{});return()=>{active=false}},[])
+ const pay = async()=>{if(!accessToken){navigate('/login');return};setBusy(true);try{const {data}=await api.post('/payments/',{plan:'trial_3d',auto_renew_consent:true,consent_version:'pro-2026-10-15'});if(!data.payment?.action||!data.payment?.fields)throw new Error('Некорректный ответ оплаты');const owner=useAuthStore.getState().user?.id;if(owner)checkoutStarted(Number(data.inv_id),'trial_3d',String(owner));const form=document.createElement('form');form.method='POST';form.action=data.payment.action;for(const [name,value]of Object.entries(data.payment.fields)){const input=document.createElement('input');input.type='hidden';input.name=name;input.value=String(value);form.appendChild(input)}document.body.appendChild(form);form.submit()}catch{toast.error('Не удалось открыть страницу оплаты. Попробуй ещё раз.');setBusy(false)}}
+ return <div className="min-h-screen bg-gray-50 dark:bg-iv-dark-bg text-gray-900 dark:text-gray-100"><PublicNav landing/><main className="max-w-3xl mx-auto px-5 py-12"><span className="iv-pill-accent">InterVerse Pro</span><h1 className="text-3xl sm:text-5xl font-bold mt-5">Попробуй Pro за 1 ₽</h1><p className="mt-5 text-lg text-secondary">3 дня (72 часа) полного доступа. Затем 390 ₽ каждый календарный месяц с автопродлением до отмены.</p><button onClick={()=>setOpen(true)} className="iv-btn-primary px-6 py-3 rounded-xl mt-6">Оформить пробный доступ</button>{!available&&<p role="status" className="mt-4 text-sm text-secondary">Готовим запуск с Робокассой. Пока оплата пробного периода недоступна, списаний нет.</p>}
+<section className="iv-panel p-6 mt-8"><h2 className="text-xl font-semibold">Как работает подписка</h2><ol className="list-decimal pl-5 mt-4 space-y-3"><li>Перед оплатой подтверди согласие с условиями пробного периода и автопродления.</li><li>После успешной оплаты 1 ₽ получишь Pro на 72 часа. Предложение доступно один раз для первой подписки, если активного Pro нет.</li><li>Если продление включено, после 72 часов списывается 390 ₽ за месяц. Затем — по 390 ₽ ежемесячно.</li><li>За 24 часа до списания отправим письмо. Дата и сумма видны в профиле.</li></ol></section>
+<section className="iv-panel p-6 mt-6"><h2 className="text-xl font-semibold">Отключение в профиле</h2><p className="mt-3 text-secondary">Открой профиль → «Автопродление Pro» → выключи переключатель. Будущие списания прекратятся, уже оплаченный доступ сохранится. Операция, отправленная до отмены, может завершиться.</p><Link className="inline-block underline mt-4" to={accessToken?'/profile':'/login'}>Перейти в профиль</Link><p className="mt-3 text-sm text-secondary">Не получается войти или нужен возврат? Напиши на info@inter-verse.ru: укажи почту аккаунта и номер платежа. Не отправляй реквизиты карты.</p></section>
+<p className="mt-6 text-sm text-secondary">Для автопродления подходят поддерживаемые Робокассой российские банковские карты. <a className="underline" href="/legal/oferta.html#renewal">Полные условия, отмена и возвраты</a>. <a className="underline" href="/legal/user-agreement.html">Пользовательское соглашение</a>. <a className="underline" href="/privacy">Политика конфиденциальности</a>. <a className="underline" href="/legal/personal-data-consent.html">Согласие на обработку данных</a>.</p></main>
+{open&&<ProCheckoutDialog offer={TRIAL_OFFER} busy={busy} available={available} settingsError="" onClose={()=>setOpen(false)} onPay={()=>void pay()}/>}
+</div>
+}

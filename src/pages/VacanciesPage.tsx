@@ -1,3 +1,4 @@
+import PreparationCreateDialog from '../components/PreparationCreateDialog'
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, Search } from 'lucide-react'
@@ -6,7 +7,6 @@ import { api } from '../services/api'
 import { useAuthStore } from '../store/authStore'
 import { resolveSubscriptionPlan } from '../utils/subscription'
 import PageTransition from '../components/ui/PageTransition'
-import Spinner from '../components/ui/Spinner'
 import VacancyCard, {
     inferLevel,
     normalizeSkill,
@@ -54,6 +54,7 @@ function readSaved(key: string): Set<string> {
 }
 
 interface VacanciesResponse {
+    loading?: boolean
     profile_ready: boolean
     query_text?: string
     items?: VacancyCardData[]
@@ -100,9 +101,11 @@ function mergeVacancyCards(prev: VacancyCardData[], next: VacancyCardData[]): {
 }
 
 export default function VacanciesPage() {
+    const [ownVacancy,setOwnVacancy]=useState(false)
     const user = useAuthStore((s) => s.user)
     const hasPro = resolveSubscriptionPlan(user) === 'paid'
     const [loading, setLoading] = useState(true)
+    const [retry, setRetry] = useState(0)
     const [error, setError] = useState<string | null>(null)
     const [profileReady, setProfileReady] = useState(false)
     const [items, setItems] = useState<VacancyCardData[]>([])
@@ -142,22 +145,35 @@ export default function VacanciesPage() {
         }
 
         let cancelled = false
+        const controller = new AbortController()
+        let pause: ReturnType<typeof setTimeout> | undefined
         ;(async () => {
             setLoading(true)
             setError(null)
             try {
-                const { data } = await api.get<VacanciesResponse>('/vacancies/', {
-                    params: { page: 0, per_page: 24 },
-                })
-                if (cancelled) return
-                const list = data.items ?? []
-                setProfileReady(Boolean(data.profile_ready))
-                setItems(list)
-                setQueryText(data.query_text ?? '')
-                setTotal(data.total ?? list.length)
-                setSources(data.sources ?? [])
-                setProviderErrors(data.errors ?? [])
-                setCheckedAt(new Date())
+                for (let attempt = 0; attempt < 20 && !cancelled; attempt++) {
+                    const { data } = await api.get<VacanciesResponse>('/vacancies/', {
+                        params: { page: 0, per_page: 24 }, signal: controller.signal,
+                    })
+                    if (cancelled) return
+                    setProfileReady(Boolean(data.profile_ready))
+                    setQueryText(data.query_text ?? '')
+                    if (data.loading) {
+                        await new Promise<void>(resolve => {
+                            pause = setTimeout(resolve, 3000)
+                            controller.signal.addEventListener('abort', () => resolve(), { once: true })
+                        })
+                        continue
+                    }
+                    const list = data.items ?? []
+                    setItems(list)
+                    setTotal(data.total ?? list.length)
+                    setSources(data.sources ?? [])
+                    setProviderErrors(data.errors ?? [])
+                    setCheckedAt(new Date())
+                    return
+                }
+                if (!cancelled) setError('Подборка ещё готовится. Повтори проверку через несколько секунд.')
             } catch (err: unknown) {
                 if (cancelled) return
                 const message =
@@ -170,20 +186,26 @@ export default function VacanciesPage() {
         })()
         return () => {
             cancelled = true
+            controller.abort()
+            if (pause) clearTimeout(pause)
         }
-    }, [hasPro])
+    }, [hasPro, user?.id, retry])
 
     useEffect(() => {
         if (!hasPro || !profileReady || loading || error) return
 
         let cancelled = false
+        let inFlight = false
         const poll = async () => {
+            if (inFlight || document.hidden) return
+            inFlight = true
             try {
                 setPolling(true)
                 const { data } = await api.get<VacanciesResponse>('/vacancies/', {
                     params: { page: 0, per_page: 24 },
                 })
                 if (cancelled) return
+                if (data.loading) return
                 const list = data.items ?? []
                 setProfileReady(Boolean(data.profile_ready))
                 setQueryText(data.query_text ?? '')
@@ -204,6 +226,7 @@ export default function VacanciesPage() {
             } catch {
                 // Keep showing cached cards; silent on background poll errors.
             } finally {
+                inFlight = false
                 if (!cancelled) setPolling(false)
             }
         }
@@ -266,16 +289,20 @@ export default function VacanciesPage() {
     }, [items, saved, stackSet, fallbackSkills, f.query, f.level, f.mode, f.scope, f.sort])
 
     const head = (
+        <>
+        {ownVacancy && <PreparationCreateDialog vacancy={{id:'manual',source:'manual',source_label:'Своя вакансия',title:'',url:'',skills:[]}} onClose={()=>setOwnVacancy(false)} />}
         <header className="library-head">
             <div>
                 <span className="lib-eyebrow">Карьера / следующий шаг</span>
                 <h1>Вакансии и подготовка</h1>
-                <p>Посмотрите требования. Выберите, к какой роли готовиться дальше.</p>
+                <p>Посмотри требования. Выбери, к какой роли готовиться дальше.</p>
             </div>
+            {hasPro && <button type="button" className="lib-btn is-primary" onClick={()=>setOwnVacancy(true)}>Подготовиться к своей вакансии</button>}
             {hasPro && checkedAt && (
                 <span className="lib-chip">{polling ? 'Обновляем…' : `Проверено ${formatDay(checkedAt.toISOString(), false)}`}</span>
             )}
         </header>
+        </>
     )
 
     if (!hasPro) {
@@ -284,7 +311,7 @@ export default function VacanciesPage() {
                 {head}
                 <section className="collection-empty">
                     <h3>Подбор вакансий доступен в Pro</h3>
-                    <p>В Pro мы собираем актуальные вакансии по навыкам из вашего профиля, показываем совпадение стека и запускаем тренировку по требованиям конкретной роли.</p>
+                    <p>В Pro мы собираем актуальные вакансии по навыкам из твоего профиля, показываем совпадение стека и запускаем тренировку по технологиям вакансии.</p>
                     <div className="actions">
                         <Link to="/subscription" className="lib-btn is-primary">Перейти на Pro <ArrowRight /></Link>
                     </div>
@@ -297,58 +324,6 @@ export default function VacanciesPage() {
         <PageTransition>
             {head}
 
-            {loading && (
-                <div className="flex justify-center py-16">
-                    <Spinner />
-                </div>
-            )}
-
-            {!loading && error && (
-                <section className="collection-empty">
-                    <h3>Не удалось загрузить вакансии</h3>
-                    <p>{error}</p>
-                    <div className="actions">
-                        <button type="button" className="lib-btn" onClick={() => window.location.reload()}>Повторить</button>
-                    </div>
-                </section>
-            )}
-
-            {!loading && !error && !profileReady && (
-                <section className="collection-empty">
-                    <h3>Добавьте навыки в профиль</h3>
-                    <p>Вакансии подбираются по технологиям из формы «Навыки». Укажите стек — и мы найдём подходящие предложения.</p>
-                    <div className="actions">
-                        <Link to={PROFILE_SKILLS_HREF} className="lib-btn is-primary">Указать навыки <ArrowRight /></Link>
-                    </div>
-                </section>
-            )}
-
-            {!loading && !error && profileReady && (
-                <>
-                    <section className="opportunity-profile">
-                        <div className="profile-stack">
-                            <span className="lib-eyebrow">Ваш стек</span>
-                            {stack.slice(0, 12).map((skill) => (
-                                <span key={skill} className="lib-chip">{skill}</span>
-                            ))}
-                        </div>
-                        <Link to={PROFILE_SKILLS_HREF} className="lib-textbtn">Изменить навыки →</Link>
-                    </section>
-
-                    {items.length === 0 ? (
-                        <section className="collection-empty">
-                            <h3>Вакансии не найдены</h3>
-                            <p>
-                                {queryText
-                                    ? `По навыкам «${queryText}» ничего не нашлось${providerErrors.length ? ` (${providerErrors.join('; ')})` : ''}. Обновите навыки или попробуйте позже.`
-                                    : 'По навыкам из профиля вакансии пока не найдены.'}
-                            </p>
-                            <div className="actions">
-                                <Link to={PROFILE_SKILLS_HREF} className="lib-btn">Изменить навыки</Link>
-                            </div>
-                        </section>
-                    ) : (
-                        <>
                             <div className="list-controls">
                                 <div className="search-wrap">
                                     <Search aria-hidden="true" strokeWidth={1.75} />
@@ -374,6 +349,67 @@ export default function VacanciesPage() {
                                 </select>
                             </div>
 
+
+            {loading && (
+                <section aria-busy="true" aria-label="Загрузка вакансий">
+                    <p role="status" className="text-secondary mb-4">Подбираем вакансии по твоему стеку…</p>
+                    <div className="job-collection" aria-hidden="true">
+                        {[0, 1, 2, 3].map(index => <div key={index} className="job-card min-h-[260px]">
+                            <div className="h-3 w-24 bg-gray-200 dark:bg-gray-700 rounded" />
+                            <div className="h-6 w-3/4 bg-gray-200 dark:bg-gray-700 rounded mt-6" />
+                            <div className="h-4 w-1/2 bg-gray-200 dark:bg-gray-700 rounded mt-3" />
+                            <div className="h-16 bg-gray-100 dark:bg-gray-800 rounded mt-6" />
+                        </div>)}
+                    </div>
+                </section>
+            )}
+
+            {!loading && error && (
+                <section className="collection-empty">
+                    <h3>Не удалось загрузить вакансии</h3>
+                    <p>{error}</p>
+                    <div className="actions">
+                        <button type="button" className="lib-btn" onClick={() => setRetry(n => n + 1)}>Повторить</button>
+                    </div>
+                </section>
+            )}
+
+            {!loading && !error && !profileReady && (
+                <section className="collection-empty">
+                    <h3>Добавь навыки в профиль</h3>
+                    <p>Вакансии подбираются по технологиям из формы «Навыки». Укажи стек — и мы найдём подходящие предложения.</p>
+                    <div className="actions">
+                        <Link to={PROFILE_SKILLS_HREF} className="lib-btn is-primary">Указать навыки <ArrowRight /></Link>
+                    </div>
+                </section>
+            )}
+
+            {!loading && !error && profileReady && (
+                <>
+                    <section className="opportunity-profile">
+                        <div className="profile-stack">
+                            <span className="lib-eyebrow">Твой стек</span>
+                            {stack.slice(0, 12).map((skill) => (
+                                <span key={skill} className="lib-chip">{skill}</span>
+                            ))}
+                        </div>
+                        <Link to={PROFILE_SKILLS_HREF} className="lib-textbtn">Изменить навыки →</Link>
+                    </section>
+
+                    {items.length === 0 ? (
+                        <section className="collection-empty">
+                            <h3>Вакансии не найдены</h3>
+                            <p>
+                                {queryText
+                                    ? `По навыкам «${queryText}» ничего не нашлось${providerErrors.length ? ` (${providerErrors.join('; ')})` : ''}. Обнови навыки или попробуй позже.`
+                                    : 'По навыкам из профиля вакансии пока не найдены.'}
+                            </p>
+                            <div className="actions">
+                                <Link to={PROFILE_SKILLS_HREF} className="lib-btn">Изменить навыки</Link>
+                            </div>
+                        </section>
+                    ) : (
+                        <>
                             <div className="collection-heading">
                                 <h2>Подборка <span>· {visible.length}</span></h2>
                                 <div className="row">
@@ -397,12 +433,12 @@ export default function VacanciesPage() {
                                     </select>
                                 </div>
                             </div>
-                            <div className="job-legend"><span>Есть в вашем профиле</span><span>Можно добавить в подготовку</span></div>
+                            <div className="job-legend"><span>Есть в твоём профиле</span><span>Можно добавить в подготовку</span></div>
 
                             {visible.length === 0 ? (
                                 <section className="collection-empty">
                                     <h3>{f.scope === 'saved' && saved.size === 0 ? 'В избранном пока пусто' : 'В этой подборке ничего не найдено'}</h3>
-                                    <p>{f.scope === 'saved' && saved.size === 0 ? 'Отмечайте вакансии звёздочкой, чтобы вернуться к ним позже.' : 'Измените фильтры или вернитесь ко всем вакансиям.'}</p>
+                                    <p>{f.scope === 'saved' && saved.size === 0 ? 'Отмечай вакансии звёздочкой, чтобы вернуться к ним позже.' : 'Измени фильтры или вернись ко всем вакансиям.'}</p>
                                     <div className="actions">
                                         <button type="button" className="lib-textbtn" onClick={() => setFilters(DEFAULT_FILTERS)}>Сбросить фильтры</button>
                                     </div>

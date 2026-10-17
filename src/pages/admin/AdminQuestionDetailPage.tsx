@@ -120,7 +120,7 @@ export default function AdminQuestionDetailPage() {
 
         try {
             setSaving(true)
-            await api.put(`/questions/${id}`, payload())
+            await api.put(`/questions/${id}`, isModeration ? { ...payload(), category: 'contribution', difficulty: 'pending_moderation' } : payload())
             toast.success('Вопрос сохранён')
         } catch (error: any) {
             toast.error(error.response?.data?.error || 'Не удалось сохранить')
@@ -135,16 +135,27 @@ export default function AdminQuestionDetailPage() {
             toast.error('Выберите сложность junior / middle / senior')
             return
         }
+        const approvedCategory = category === 'contribution' ? 'question' : category
+        if (text.trim().length < 10 || !technology.trim() || !answer.trim()) {
+            toast.error('Укажите текст, технологию и правильный ответ'); return
+        }
+        if (approvedCategory === 'question' && (options.length < 2 || options.length > 8 || options.filter(o => o.is_correct).length !== 1 || options.some(o => !o.text.trim()))) {
+            toast.error('Добавьте 2–8 вариантов и отметьте один правильный ответ'); return
+        }
+        if (approvedCategory === 'task' && options.length) {
+            toast.error('Удалите варианты ответа у практической задачи'); return
+        }
         try {
             setApproving(true)
             const { data } = await api.post(`/admin/moderation/questions/${id}/approve`, {
                 difficulty,
                 technology: technology.trim(),
-                category: category === 'contribution' ? 'question' : category,
+                category: approvedCategory,
                 text: text.trim(),
                 answer: answer.trim(),
+                options: payload().options,
             })
-            toast.success(data.message || 'Вопрос одобрен')
+            toast.success(data.message || 'Вопрос одобрен. Автору начислено 30 дней Pro.')
             navigate('/admin/moderation')
         } catch (error: any) {
             toast.error(error.response?.data?.error || 'Не удалось одобрить')
@@ -192,7 +203,7 @@ export default function AdminQuestionDetailPage() {
                 title={isModeration ? 'Модерация вопроса' : 'Редактирование вопроса'}
                 description={
                     isModeration
-                        ? 'Проверьте формулировку и ответ, затем одобрите или отклоните'
+                        ? 'Проверьте вопрос и варианты ответа. После одобрения автор получит 30 дней Pro.'
                         : 'Измените формулировку, ответы, направление и сложность'
                 }
             />

@@ -59,7 +59,7 @@ export default function EditInterviewPage() {
                 setSelectedTechStack([])
             }
         } catch (error: any) {
-            toast.error('Ошибка при загрузке интервью')
+            toast.error('Не удалось загрузить тренировку. Обнови страницу.')
             navigate('/dashboard')
         } finally {
             setIsLoadingData(false)
@@ -80,15 +80,15 @@ export default function EditInterviewPage() {
 
     const handleSubmit = async () => {
         if (!id) {
-            toast.error('ID интервью не найден')
+            toast.error('Не удалось найти тренировку. Вернись к списку тренировок.')
             return
         }
 
         setIsLoading(true)
         try {
             const interviewData = {
-                title: `${selectedSpecialization} интервью - ${selectedLevel}`,
-                description: `Техническое интервью для позиции ${selectedLevel} ${selectedSpecialization} разработчика`,
+                title: `Тренировка: ${selectedSpecialization} — ${selectedLevel}`,
+                description: `Подготовка к собеседованию: ${selectedSpecialization}, сложность ${selectedLevel}`,
                 specialization: selectedSpecialization,
                 tech_stack: JSON.stringify(selectedTechStack),
                 level: selectedLevel,
@@ -97,10 +97,10 @@ export default function EditInterviewPage() {
 
             await api.put(`/interviews/${id}`, interviewData)
 
-            toast.success('Интервью обновлено успешно!')
+            toast.success('Параметры тренировки сохранены')
             navigate('/dashboard')
         } catch (error: any) {
-            toast.error(error.response?.data?.error || 'Ошибка при обновлении интервью')
+            toast.error(error.response?.data?.error || 'Не удалось сохранить тренировку. Попробуй ещё раз.')
         } finally {
             setIsLoading(false)
         }
@@ -154,8 +154,8 @@ export default function EditInterviewPage() {
     return (
         <PageTransition className="max-w-4xl mx-auto">
             <PageHeader
-                title="Редактирование интервью"
-                description="Обновите информацию об интервью"
+                title="Редактирование тренировки"
+                description="Измени параметры тренировки"
             />
 
             <StepIndicator currentStep={currentStep} totalSteps={4} />
@@ -170,7 +170,7 @@ export default function EditInterviewPage() {
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                     <Card padding="lg" className="text-center">
                         <Spinner size="lg" />
-                        <p className="text-secondary mt-4">Обновление интервью...</p>
+                        <p className="text-secondary mt-4">Сохраняем параметры…</p>
                     </Card>
                 </div>
             )}

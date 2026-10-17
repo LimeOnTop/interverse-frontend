@@ -23,7 +23,7 @@ export default function QuestionGrid({ items }: { items: AnswerReviewItem[] }) {
     return (
         <section>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Вопросы тренировки</h2>
-            <p className="text-sm text-secondary mt-1 mb-5">Откройте вопрос, чтобы посмотреть свой ответ.</p>
+            <p className="text-sm text-secondary mt-1 mb-5">Открой вопрос, чтобы посмотреть свой ответ.</p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {reviews.map((item, index) => {
@@ -61,7 +61,7 @@ export default function QuestionGrid({ items }: { items: AnswerReviewItem[] }) {
                             </button>
                             {open && (
                                 <div className="mx-4 mb-4 pt-4 border-t border-gray-200 dark:border-iv-dark-line">
-                                    <p className="text-xs uppercase tracking-wide text-secondary mb-2">{isTask ? 'Ваше решение' : 'Ваш ответ'}</p>
+                                    <p className="text-xs uppercase tracking-wide text-secondary mb-2">{isTask ? 'Твоё решение' : 'Твой ответ'}</p>
                                     {isTask ? (
                                         <pre className="text-xs sm:text-sm font-mono whitespace-pre-wrap break-words text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-iv-dark-bg p-3 overflow-x-auto max-h-80">
                                             {item.user_answer}

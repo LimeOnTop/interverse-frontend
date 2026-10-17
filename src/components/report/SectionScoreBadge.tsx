@@ -20,7 +20,7 @@ export default function SectionScoreBadge({ section, className = '' }: SectionSc
     if (!passed) {
         return (
             <Badge variant="danger" className={className}>
-                Не пройдено
+                Ниже порога
             </Badge>
         )
     }

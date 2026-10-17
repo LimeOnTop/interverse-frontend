@@ -17,7 +17,7 @@ function nextGoal(report: ReportWithInterview) {
     ].filter(Boolean) as { name: string; score: number }[]
     const weakest = sections.sort((a, b) => a.score - b.score)[0]
     if (!weakest || weakest.score >= TARGET_SCORE) {
-        return { title: 'Повысить грейд тренировки', hint: `Все разделы выше ${TARGET_SCORE}%` }
+        return { title: 'Повысить сложность тренировки', hint: `Все разделы выше ${TARGET_SCORE}%` }
     }
     return { title: `Поднять ${weakest.name} до ${TARGET_SCORE}%`, hint: `Сейчас ${weakest.score}%` }
 }
@@ -34,7 +34,7 @@ export default function ActivityPage() {
     return (
         <PageTransition className="space-y-6 sm:space-y-8">
             <div>
-                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Ваш прогресс</h1>
+                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Твой прогресс</h1>
                 <p className="mt-2 text-secondary">Факты подготовки по завершённым тренировкам.</p>
             </div>
 
@@ -93,7 +93,7 @@ export default function ActivityPage() {
                             </Link>
                         </>
                     ) : (
-                        <p className="mt-3 text-secondary">Завершите тренировку, чтобы увидеть результат по теории и практике.</p>
+                        <p className="mt-3 text-secondary">Заверши тренировку, чтобы увидеть результат по теории и практике.</p>
                     )}
                 </section>
 

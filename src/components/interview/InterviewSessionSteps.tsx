@@ -11,10 +11,10 @@ function StepKicker({ step, total }: { step: SessionStep; total: number }) {
     const isTask = step.type === 'task'
     const number = (isTask ? step.taskNumber : step.questionNumber) ?? 1
     return (
-        <div className="flex items-center justify-between gap-3">
-            <span className="iv-eyebrow">{isTask ? 'Задача' : 'Вопрос'} {pad(number)} / {pad(total)}</span>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+            <span className="iv-eyebrow shrink-0">{isTask ? 'Задача' : 'Вопрос'} {pad(number)} / {pad(total)}</span>
             {step.technology && (
-                <span className="rounded-md border border-gray-200 dark:border-iv-dark-line px-2.5 py-1 text-xs font-semibold text-secondary">
+                <span className="rounded-md border border-gray-200 dark:border-iv-dark-line px-2.5 py-1 text-xs font-semibold text-secondary min-w-0 max-w-full break-words">
                     {step.technology}
                 </span>
             )}
@@ -42,6 +42,7 @@ export default function InterviewQuestionStep({
                 {step.text}
             </h2>
 
+            <p className="mt-3 text-sm text-secondary">Выбери один вариант ответа. Его можно изменить до завершения.</p>
             <div className="mt-6 grid gap-3" role="group" aria-label="Варианты ответа">
                 {step.options?.map((option, index) => {
                     const isSelected = selectedOptionIndex === index
@@ -52,17 +53,17 @@ export default function InterviewQuestionStep({
                             onClick={() => onSelectOption(index)}
                             aria-pressed={isSelected}
                             whileTap={{ scale: 0.995 }}
-                            className={`w-full text-left rounded-xl border px-4 py-3.5 sm:px-5 sm:py-4 flex items-center gap-4 transition-[color,background-color,border-color,box-shadow] duration-200 ${
+                            className={`w-full text-left rounded-xl border px-4 py-3.5 sm:px-5 sm:py-4 flex items-start gap-4 transition-[color,background-color,border-color,box-shadow] duration-200 ${
                                 isSelected
-                                    ? 'border-inter-verse-green bg-green-50/60 shadow-[inset_3px_0_0_0_#315d46] dark:border-purple-400 dark:bg-iv-dark-tint dark:shadow-[inset_3px_0_0_0_#c084fc]'
+                                    ? 'border-inter-verse-green bg-[#e8eee3] dark:border-purple-400 dark:bg-iv-dark-tint '
                                     : 'border-gray-200 dark:border-iv-dark-line hover:border-gray-300 dark:hover:border-gray-500'
                             }`}
                         >
                             <span
                                 className={`w-8 h-8 shrink-0 rounded-md flex items-center justify-center text-xs font-bold ${
                                     isSelected
-                                        ? 'gradient-bg-adaptive text-white'
-                                        : 'bg-gray-100 text-gray-600 dark:bg-iv-dark-bg dark:text-gray-400'
+                                        ? 'bg-inter-verse-green text-white dark:bg-purple-400 dark:text-gray-950'
+                                        : 'border border-gray-200 text-gray-600 dark:border-iv-dark-line dark:text-gray-400'
                                 }`}
                             >
                                 {getOptionLabel(index)}
@@ -92,13 +93,13 @@ export function InterviewTaskStep({ step, total, value, onChange }: InterviewTas
             </h2>
             <p className="mt-3 text-sm text-secondary">Можно написать код или объяснить решение словами.</p>
             <label className="mt-5 block">
-                <span className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Ваше решение</span>
+                <span className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Твоё решение</span>
                 <textarea
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
-                    placeholder="// Опишите подход или напишите код…"
+                    placeholder="// Опиши подход или напиши код…"
                     spellCheck={false}
-                    className="input-field rounded-xl resize-y min-h-[45vh] sm:min-h-[260px] font-mono text-sm leading-relaxed dark:!bg-iv-dark-bg"
+                    className="input-field rounded-xl resize-y min-h-[270px] font-mono text-sm leading-relaxed dark:!bg-iv-dark-bg"
                 />
             </label>
         </div>
@@ -115,7 +116,7 @@ interface RouteMapProps {
 /** Grid of all steps: current, answered and empty; tasks are shown as "{ }". */
 export function InterviewRouteMap({ steps, currentIndex, isAnswered, onSelect }: RouteMapProps) {
     return (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(2.75rem,1fr))] gap-2">
+        <div className="grid grid-cols-5 gap-2">
             {steps.map((step, index) => {
                 const active = index === currentIndex
                 const answered = isAnswered(step)
@@ -130,7 +131,7 @@ export function InterviewRouteMap({ steps, currentIndex, isAnswered, onSelect }:
                             active
                                 ? 'border-inter-verse-green text-inter-verse-green bg-green-50/60 dark:border-purple-400 dark:text-purple-200 dark:bg-iv-dark-tint'
                                 : answered
-                                    ? 'border-inter-verse-green/40 text-inter-verse-green dark:border-purple-400/40 dark:text-purple-300'
+                                    ? 'border-inter-verse-green/40 bg-[#e8eee3] text-inter-verse-green dark:bg-iv-dark-tint dark:border-purple-400/40 dark:text-purple-300'
                                     : 'border-gray-200 dark:border-iv-dark-line text-secondary hover:border-gray-300 dark:hover:border-gray-500'
                         }`}
                     >

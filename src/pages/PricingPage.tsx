@@ -43,7 +43,7 @@ function PriceBlock({
             <div className="text-sm text-secondary mt-1">{offer.priceHint}</div>
             {offer.earlyBird && earlyBirdRemaining > 0 && (
                 <div className="mt-2 text-xs font-medium text-inter-verse-green dark:text-purple-300">
-                    Осталось {earlyBirdRemaining} из {earlyBirdLimit} мест по скидке
+                    Осталось {earlyBirdRemaining} из {earlyBirdLimit} мест со скидкой
                 </div>
             )}
         </div>
@@ -80,7 +80,7 @@ export default function PricingPage() {
                             Тарифы
                         </h1>
                         <p className="text-secondary leading-relaxed">
-                            Выберите подходящий план для подготовки к техническим собеседованиям.
+                            Выбери подходящий план для подготовки к техническим собеседованиям.
                             Оплата тарифа Pro означает согласие с условиями{' '}
                             <a
                                 href="/legal/oferta.html"

@@ -1,3 +1,5 @@
+import AuthLegalNotice from '../components/AuthLegalNotice'
+import { authDestination } from '../lib/trainingIntent'
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
@@ -13,8 +15,8 @@ import Input from '../components/ui/Input'
 import { readFormDraft, usePersistedRhfValues } from '../hooks/usePersistedForm'
 
 const loginSchema = z.object({
-    email: z.string().min(1, 'Введите логин'),
-    password: z.string().min(1, 'Введите пароль'),
+    email: z.string().min(1, 'Введи логин'),
+    password: z.string().min(1, 'Введи пароль'),
 })
 
 type LoginForm = z.infer<typeof loginSchema>
@@ -38,10 +40,10 @@ export default function LoginPage() {
         try {
             const user = await login(data.email, data.password)
             toast.success('Добро пожаловать!')
-            navigate(user?.role === 'admin' ? '/admin' : '/dashboard')
+            navigate(authDestination(user?.role === 'admin' ? '/admin' : '/dashboard'))
         } catch (error: any) {
             if (error instanceof EmailNotVerifiedError) {
-                toast('Подтвердите email: мы отправили код на почту')
+                toast('Подтверди email: мы отправили код на почту')
                 navigate('/verify-email', { state: { email: error.email, password: data.password } })
                 return
             }
@@ -60,9 +62,10 @@ export default function LoginPage() {
                 <FormCard>
                     <div className="mb-8">
                         <h1 className="text-xl sm:text-2xl font-bold tracking-tight mb-2">Вход</h1>
-                        <p className="text-secondary text-sm">Войдите, чтобы продолжить тренировки</p>
+                        <p className="text-secondary text-sm">Войди, чтобы продолжить тренировки</p>
                     </div>
 
+                    <div className="mb-5"><AuthLegalNotice /></div>
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                         <Input
                             label="Логин"

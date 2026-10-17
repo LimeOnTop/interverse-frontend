@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { Menu, X, Tag, LogIn, UserPlus } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 import BrandWordmark from './BrandWordmark'
@@ -18,10 +18,34 @@ export default function PublicNav({ landing = false, overlay = false }: PublicNa
     const [pastHero, setPastHero] = useState(false)
     const [menuOpen, setMenuOpen] = useState(false)
     const location = useLocation()
+    const header = useRef<HTMLElement>(null)
+    const toggle = useRef<HTMLButtonElement>(null)
+    const menuId = useId()
+    const reducedMotion = useReducedMotion()
 
     useEffect(() => {
         setMenuOpen(false)
-    }, [location.pathname])
+    }, [location.key])
+
+    useEffect(() => {
+        if (!menuOpen) return
+        const outside = (event: PointerEvent) => {
+            if (!header.current?.contains(event.target as Node)) setMenuOpen(false)
+        }
+        const escape = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') { setMenuOpen(false); toggle.current?.focus() }
+        }
+        const desktop = window.matchMedia('(min-width: 768px)')
+        const resize = () => { if (desktop.matches) setMenuOpen(false) }
+        document.addEventListener('pointerdown', outside)
+        document.addEventListener('keydown', escape)
+        desktop.addEventListener('change', resize)
+        return () => {
+            document.removeEventListener('pointerdown', outside)
+            document.removeEventListener('keydown', escape)
+            desktop.removeEventListener('change', resize)
+        }
+    }, [menuOpen])
 
     const handleLogoClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
         if (location.pathname === '/') {
@@ -60,8 +84,9 @@ export default function PublicNav({ landing = false, overlay = false }: PublicNa
         : 'text-gray-900 dark:text-gray-100'
 
     return (
-        <header className={headerClass}>
-            <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <>
+        <header ref={header} className={`iv-public-header ${overlay ? 'is-overlay' : ''} ${headerClass}`}>
+            <div className="iv-public-nav-bar max-w-content mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                 <Link
                     to="/"
                     onClick={handleLogoClick}
@@ -108,7 +133,9 @@ export default function PublicNav({ landing = false, overlay = false }: PublicNa
                         className={overlay && !pastHero ? 'hover:bg-transparent dark:hover:bg-transparent' : ''}
                     />
                     <button
+                        ref={toggle}
                         type="button"
+                        aria-controls={menuId}
                         onClick={() => setMenuOpen((open) => !open)}
                         className={`btn-icon ${overlay ? overlayActionClass : ''}`}
                         aria-label={menuOpen ? 'Закрыть меню' : 'Открыть меню'}
@@ -122,13 +149,14 @@ export default function PublicNav({ landing = false, overlay = false }: PublicNa
             <AnimatePresence>
                 {menuOpen && (
                     <motion.div
-                        initial={{ opacity: 0, y: -8 }}
+                        id={menuId}
+                        initial={{ opacity: 0, y: reducedMotion ? 0 : -8 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -8 }}
-                        transition={{ duration: 0.18 }}
-                        className="md:hidden iv-surface border-b border-gray-200 dark:border-iv-dark-line shadow-iv-lg"
+                        exit={{ opacity: 0, y: reducedMotion ? 0 : -8 }}
+                        transition={{ duration: reducedMotion ? 0 : 0.18 }}
+                        className="iv-public-mobile-menu md:hidden iv-surface border-b border-gray-200 dark:border-iv-dark-line shadow-iv-lg"
                     >
-                        <nav className="px-4 py-3 flex flex-col gap-1">
+                        <nav aria-label="Меню сайта" onClick={() => setMenuOpen(false)} className="px-4 py-3 flex flex-col gap-1">
                             <Link to="/pricing" className="iv-nav-item text-base">
                                 <Tag className="w-5 h-5" strokeWidth={1.75} /> Тарифы
                             </Link>
@@ -143,5 +171,7 @@ export default function PublicNav({ landing = false, overlay = false }: PublicNa
                 )}
             </AnimatePresence>
         </header>
+        {!overlay && <div className="iv-public-header-space" aria-hidden="true" />}
+        </>
     )
 }

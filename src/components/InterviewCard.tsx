@@ -78,7 +78,7 @@ export default function InterviewCard({ interview, onClick, onDelete, hideOnly =
         e.stopPropagation()
 
         if (hideOnly) {
-            if (!window.confirm('Убрать эту карточку с дашборда? Тренировка сохранится.')) {
+            if (!window.confirm('Убрать эту карточку с главной страницы? Тренировка сохранится.')) {
                 return
             }
             onDelete?.(interview.id)

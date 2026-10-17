@@ -7,7 +7,7 @@ export default function PaymentSuccessPage() {
         <PageTransition>
             <div className="min-h-[60vh] flex items-center justify-center px-6">
                 <div className="max-w-md text-center space-y-4">
-                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Оплата прошла успешно</h1>
+                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Проверяем подтверждение оплаты</h1>
                     <p className="text-sm text-secondary leading-relaxed">
                         Подписка Pro будет активирована после подтверждения платежа. Обычно это занимает несколько секунд.
                     </p>
@@ -15,7 +15,7 @@ export default function PaymentSuccessPage() {
                         <Link to="/subscription">
                             <Button type="button">К подписке</Button>
                         </Link>
-                        <Link to="/interviews" className="btn-secondary text-sm px-4 py-2 inline-flex items-center justify-center">
+                        <Link to="/interview-service" className="btn-secondary text-sm px-4 py-2 inline-flex items-center justify-center">
                             К тренировкам
                         </Link>
                     </div>

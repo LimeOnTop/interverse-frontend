@@ -142,7 +142,7 @@ export default function ModernSelect({
                                 <div className="p-3 border-b border-gray-100 dark:border-iv-dark-line shrink-0">
                                     <input
                                         type="text"
-                                        placeholder="Поиск..."
+                                        placeholder="Поиск…"
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                         className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-iv-dark-line rounded-lg focus:outline-none focus:ring-2 gradient-ring-adaptive focus:border-transparent bg-white dark:bg-iv-dark-bg text-gray-900 dark:text-gray-100"

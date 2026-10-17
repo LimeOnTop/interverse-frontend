@@ -1,3 +1,6 @@
+import { registrationComplete } from '../lib/analytics'
+import { api } from '../services/api'
+import { authDestination } from '../lib/trainingIntent'
 import { useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
@@ -14,21 +17,24 @@ export default function OAuthCallbackPage() {
         if (processedRef.current) return
         processedRef.current = true
 
-        const accessToken = searchParams.get('access_token')
-        const refreshToken = searchParams.get('refresh_token')
+        const code = searchParams.get('code')
+        window.history.replaceState({}, '', '/oauth/callback')
 
-        if (accessToken && refreshToken) {
+        if (code) {
             // Store tokens and load user data
-            setTokens(accessToken, refreshToken).then(() => {
+            api.post('/auth/google/exchange', { code }).then(async ({data}) => {
+                await setTokens(data.access_token, data.refresh_token)
+                if (data.new_registration && data.user_id) registrationComplete(String(data.user_id), 'google')
+            }).then(() => {
                 toast.success('Успешный вход через Google')
-                navigate('/dashboard')
+                navigate(authDestination(), { replace: true })
             }).catch(() => {
                 toast.error('Ошибка загрузки данных пользователя')
-                navigate('/login')
+                navigate('/login', { replace: true })
             })
         } else {
             toast.error('Ошибка аутентификации')
-            navigate('/login')
+            navigate('/login', { replace: true })
         }
     }, [searchParams, setTokens, navigate])
 
@@ -36,7 +42,7 @@ export default function OAuthCallbackPage() {
         <div className="min-h-screen iv-page flex items-center justify-center">
             <div className="text-center">
                 <div className="iv-spinner h-8 w-8 mx-auto mb-4" />
-                <p className="text-gray-600 dark:text-gray-400">Завершение входа...</p>
+                <p className="text-gray-600 dark:text-gray-400">Завершаем вход…</p>
             </div>
         </div>
     )

@@ -59,11 +59,11 @@ export default function ContributeQuestionPage() {
         e.preventDefault()
         const text = question.trim()
         if (text.length < 10) {
-            toast.error('Опишите вопрос подробнее (минимум 10 символов)')
+            toast.error('Опиши вопрос подробнее (минимум 10 символов)')
             return
         }
         if (!technology.trim()) {
-            toast.error('Выберите технологию')
+            toast.error('Выбери технологию')
             return
         }
 
@@ -74,7 +74,7 @@ export default function ContributeQuestionPage() {
                 answer: answer.trim() || undefined,
                 technology: technology.trim(),
             })
-            toast.success(data.message || 'Вопрос отправлен на модерацию')
+            toast.success(data.message || 'Вопрос отправлен на модерацию. После одобрения начислим 30 дней Pro.')
             setDraft((prev) => ({ ...prev, question: '', answer: '' }))
         } catch (error: any) {
             toast.error(
@@ -96,19 +96,18 @@ export default function ContributeQuestionPage() {
                             Предложить вопрос
                         </h1>
                         <p className="text-secondary mt-1 text-sm leading-relaxed">
-                            Помогите наполнить банк тренировок — и получите скидку за одобренные материалы
+                            Предложи вопрос для банка тренировок и получи 30 дней Pro после одобрения.
                         </p>
                     </div>
 
                     <div className="iv-divider" />
 
                     <p className="text-2xl sm:text-3xl font-bold leading-snug">
-                        Ваш вклад поможет 
+                        Твой вклад поможет 
                         <span className="tracking-tight gradient-text-adaptive"> улучшить сервис</span>
                     </p>
                     <p className="text-sm text-secondary leading-relaxed">
-                        Предлагайте нам свои вопросы — выбирайте технологию и сформулируйте вопрос, а с нас{' '}
-                        <span className="font-semibold gradient-text-adaptive">скидка до 90%</span> на подписку!
+                        За каждый одобренный вопрос начислим 30 дней Pro бесплатно. Если Pro уже активен, продлим его на 30 дней. Карта и оплата не нужны.
                     </p>
 
                     <div>
@@ -119,7 +118,7 @@ export default function ContributeQuestionPage() {
                             options={technologyOptions}
                             value={technology}
                             onChange={(value) => setDraft((prev) => ({ ...prev, technology: value }))}
-                            placeholder={isLoadingTechs ? 'Загрузка технологий…' : 'Выберите технологию'}
+                            placeholder={isLoadingTechs ? 'Загрузка технологий…' : 'Выбери технологию'}
                             searchable
                         />
                     </div>
@@ -133,7 +132,7 @@ export default function ContributeQuestionPage() {
                                 value={question}
                                 onChange={(e) => setDraft((prev) => ({ ...prev, question: e.target.value }))}
                                 className="input-field-underlined w-full min-h-[220px] resize-y bg-gray-50 dark:bg-iv-dark-bg px-3"
-                                placeholder="Сформулируйте вопрос для тренировки собеседования…"
+                                placeholder="Например: чем интерфейс отличается от абстрактного класса?"
                                 required
                             />
                         </div>

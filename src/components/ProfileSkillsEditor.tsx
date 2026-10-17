@@ -46,7 +46,7 @@ export default function ProfileSkillsEditor({ skills, onChange }: ProfileSkillsE
                 </div>
             ) : (
                 <div className="wizard-stack-panel flex items-center">
-                    <p className="text-sm text-secondary">Пока нет навыков — добавьте через поиск</p>
+                    <p className="text-sm text-secondary">Пока нет навыков — добавь через поиск</p>
                 </div>
             )}
 
@@ -89,7 +89,7 @@ export default function ProfileSkillsEditor({ skills, onChange }: ProfileSkillsE
                     {isSearching ? (
                         <p className="text-sm text-secondary">Ищем технологии…</p>
                     ) : searchResults.length === 0 ? (
-                        <p className="text-sm text-secondary">Ничего не найдено — попробуйте другой запрос</p>
+                        <p className="text-sm text-secondary">Ничего не найдено — попробуй другой запрос</p>
                     ) : (
                         <div className="grid sm:grid-cols-2 gap-2">
                             {searchResults.map((tech) => {

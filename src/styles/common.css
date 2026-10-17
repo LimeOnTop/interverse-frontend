@@ -129,3 +129,19 @@ html.theme-transition .eq-visualizer *::before,
 html.theme-transition .eq-visualizer *::after {
     transition: none !important;
 }
+
+/* The dropdown is independent of the header bar's height and doesn't move the page. */
+.iv-public-mobile-menu{position:absolute;inset-inline:0;top:100%;height:auto;max-height:calc(100dvh - 68px);overflow-y:auto;overscroll-behavior:contain}
+.iv-public-mobile-menu a{min-height:44px}
+@media(max-width:767px){input,select,textarea{font-size:16px}.iv-public-nav-bar{gap:8px}.iv-public-nav-bar>.inline-flex{min-width:0}}
+@media(max-width:767px){
+ .iv-page input:not([type=checkbox]):not([type=radio]):not([type=range]),.iv-page textarea,.iv-page select,
+ form input:not([type=checkbox]):not([type=radio]):not([type=range]),form textarea,form select{font-size:16px!important}
+}
+.iv-public-header-space{display:none}
+@media(max-width:767px){
+ .iv-public-header:not(.is-overlay){position:fixed;inset:0 0 auto;z-index:50;background:var(--iv-bg);backdrop-filter:none;padding-top:env(safe-area-inset-top,0px)}
+ .iv-public-header:not(.is-overlay)>.iv-public-nav-bar{height:68px}
+ .iv-public-header-space{display:block;height:calc(68px + env(safe-area-inset-top,0px));flex-shrink:0}
+ .iv-public-header .iv-public-mobile-menu{max-height:calc(100dvh - 68px - env(safe-area-inset-top,0px))}
+}

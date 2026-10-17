@@ -12,7 +12,7 @@ export const LEVELS = [
     { id: 'intern', name: 'Intern', description: 'Основы и первые решения', glyph: '01' },
     { id: 'junior', name: 'Junior', description: 'Уверенная база', glyph: '02' },
     { id: 'middle', name: 'Middle', description: 'Самостоятельные решения', glyph: '03' },
-    { id: 'senior', name: 'Senior', description: 'Компромиссы и архитектура', glyph: '04' },
+    { id: 'senior', name: 'Senior', description: 'Сложные вопросы и компромиссы', glyph: '04' },
     { id: 'lead', name: 'Lead / CTO', description: 'Стратегия и системный взгляд', glyph: '05' },
 ]
 

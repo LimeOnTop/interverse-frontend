@@ -6,7 +6,9 @@ interface AdminRouteProps {
 }
 
 export default function AdminRoute({ children }: AdminRouteProps) {
-    const { isAuthenticated, user } = useAuthStore()
+    const { isAuthenticated, user, isLoading } = useAuthStore()
+
+    if (isLoading) return <div role="status" className="min-h-[60vh] grid place-items-center">Проверка сессии…</div>
 
     if (!isAuthenticated) {
         return <Navigate to="/login" replace />

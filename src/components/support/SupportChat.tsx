@@ -200,7 +200,7 @@ export default function SupportChat({ ticketId, viewer, backHref, backLabel }: S
 
     const isOpen = ticket.status === 'open'
     const authorLabel = (message: SupportMessage) => {
-        if (message.author_role === viewer) return 'Вы'
+        if (message.author_role === viewer) return 'Ты'
         if (message.author_role === 'admin') return 'Поддержка InterVerse'
         return ticket.user_email || 'Пользователь'
     }
@@ -290,7 +290,7 @@ export default function SupportChat({ ticketId, viewer, backHref, backLabel }: S
                                 }}
                                 rows={2}
                                 maxLength={5000}
-                                placeholder="Напишите сообщение… Enter отправит, Shift+Enter перенесёт строку"
+                                placeholder="Напиши сообщение… Enter отправит, Shift+Enter перенесёт строку"
                                 className="input-field flex-1 resize-none min-h-[44px] max-h-40"
                             />
                             <Button type="submit" loading={sending} disabled={!draft.trim()} aria-label="Отправить">
@@ -301,7 +301,7 @@ export default function SupportChat({ ticketId, viewer, backHref, backLabel }: S
                     ) : (
                         <p className="text-sm text-secondary text-center py-1">
                             {ticket.closed_by === 'admin' ? 'Поддержка закрыла обращение.' : 'Обращение закрыто.'}
-                            {viewer === 'user' && ' Если вопрос остался, создайте новое обращение.'}
+                            {viewer === 'user' && ' Если вопрос остался, создай новое обращение.'}
                         </p>
                     )}
                 </div>

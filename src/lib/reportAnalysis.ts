@@ -72,6 +72,7 @@ export interface FocusGroup {
     topics: string[]
 }
 
+// Legacy marker is stored in existing reports; keep it compatible with the backend.
 const FALLBACK_MARKER = 'AI-анализ временно недоступен'
 
 export function isFallbackReport(report: Pick<GeneratedReport, 'comments' | 'ai_analyzed'>) {
@@ -112,12 +113,12 @@ function buildAnswerPayload(steps: SessionStep[], answers: Record<string, StepAn
 async function ensureFreshAuth() {
     const authStore = useAuthStore.getState()
     if (!authStore.refreshToken && !authStore.accessToken) {
-        throw new Error('Сессия истекла. Войдите снова.')
+        throw new Error('Сессия истекла. Войди снова.')
     }
 
     const refreshed = await authStore.refreshTokens()
     if (!refreshed && !useAuthStore.getState().accessToken) {
-        throw new Error('Сессия истекла. Войдите снова.')
+        throw new Error('Сессия истекла. Войди снова.')
     }
 }
 
