@@ -1,4 +1,5 @@
-import { usePreparationContext } from '../lib/preparations'
+import { usePreparations, stepResults } from '../lib/preparations'
+import PreparationReportActions from '../components/report/PreparationReportActions'
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
@@ -40,7 +41,8 @@ export default function ReportDetailPage() {
     const requestedPreparationId = new URLSearchParams(useLocation().search).get('preparation')
     const navigate = useNavigate()
     const [report, setReport] = useState<Report | null>(null)
-    const preparation = usePreparationContext(report?.interview_id)
+    const preparationData = usePreparations()
+    const preparation = preparationData.preparations.find(item => item.attempts.some(attempt => attempt.interview_id === report?.interview_id))
     const preparationId = preparation?.id || requestedPreparationId
     const [loading, setLoading] = useState(true)
     const [analyzing, setAnalyzing] = useState(false)
@@ -157,7 +159,7 @@ export default function ReportDetailPage() {
                     {preparation && <p className="iv-eyebrow mb-2">{preparation.title} · Этап {preparation.attempts.find(a=>a.interview_id===report.interview_id)!.step_index+1} из {preparation.steps.length}</p>}
                     <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100">{title}</h1>
                     <p className="mt-2 text-secondary">{subtitle}</p>
-                    {preparation && <p className="mt-2 text-sm text-secondary">{report.overall_score>80?'Этап засчитан.':'Для зачёта этапа нужен результат больше 80%.'} Все повторы входят в одну попытку подготовки.</p>}
+                    {preparation && <p className="mt-2 text-sm text-secondary">{stepResults(preparation, preparation.attempts.find(a=>a.interview_id===report.interview_id)!.step_index, preparationData.reports).passed ? 'Этап засчитан по лучшей попытке.' : 'Для зачёта этапа нужен результат больше 80%.'} Все повторы входят в одну попытку подготовки.</p>}
                 </div>
                 {locked ? (
                     <Link to="/subscription" className="shrink-0 inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 dark:border-iv-dark-line px-4 py-2.5 text-sm font-semibold text-gray-900 dark:text-gray-100" title="Скачивание отчёта в PDF доступно в Pro">
@@ -178,7 +180,7 @@ export default function ReportDetailPage() {
                 <div className="text-center">
                     <ScoreRing score={report.overall_score} />
                     <p className={`mt-3 text-sm font-semibold ${report.overall_score >= PASS_SCORE_THRESHOLD ? 'text-inter-verse-green dark:text-purple-400' : 'text-red-600 dark:text-red-400'}`}>
-                        {getScoreLabel(report.overall_score)} · по шкале сервиса
+                        {getScoreLabel(report.overall_score)}
                     </p>
                 </div>
                 <div className="min-w-0">
@@ -244,7 +246,9 @@ export default function ReportDetailPage() {
                 </motion.div>
 
                 <div className="lg:sticky lg:top-0">
+                    {preparation && <PreparationReportActions preparation={preparation} report={report} reports={preparationData.reports} />}
                     <FocusPlan
+                        action={!preparationId && !preparationData.loading}
                         reportId={report.id}
                         locked={locked && weakCount > 0}
                         groups={report.focus || []}

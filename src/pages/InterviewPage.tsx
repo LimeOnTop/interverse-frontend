@@ -1,8 +1,10 @@
+import FinishPracticeDialog from '../components/interview/FinishPracticeDialog'
+import '../styles/practice-reminders.css'
 import { usePreparationContext } from '../lib/preparations'
 import { writePrivateCache } from '../lib/privateStorage'
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, Play } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { api } from '../services/api'
@@ -47,6 +49,9 @@ const levelLabels: Record<string, string> = {
 
 export default function InterviewPage() {
     const { id } = useParams<{ id: string }>()
+    const reduceMotion = useReducedMotion()
+    const [confirmFinish, setConfirmFinish] = useState(false)
+    const mobileMap = useRef<HTMLDetailsElement>(null)
     const preparation = usePreparationContext(id)
     const navigate = useNavigate()
 
@@ -285,6 +290,8 @@ export default function InterviewPage() {
             return
         }
 
+        const unanswered = session.steps.filter(step => step.type === 'question' ? answers[step.id]?.selectedOptionIndex === undefined : !answers[step.id]?.taskAnswer?.trim()).length
+        if (unanswered > 0) { setConfirmFinish(true); return }
         setIsComplete(true)
         void submitSession()
     }
@@ -402,6 +409,7 @@ export default function InterviewPage() {
                 </button>
             </header>
 
+            <details ref={mobileMap} className="iv-panel pr-mobile-map lg:hidden"><summary>Вопрос {currentStepIndex + 1} из {totalSteps} · Карта <span>{filled} заполнено</span></summary><InterviewRouteMap steps={session.steps} currentIndex={currentStepIndex} isAnswered={isAnswered} onSelect={index => { setCurrentStepIndex(index); if (mobileMap.current) mobileMap.current.open = false }} /></details>
             <div className="mt-5 sm:mt-6 iv-track"><span style={{ width: `${totalSteps ? (filled / totalSteps) * 100 : 0}%` }} /></div>
 
             <div className="mt-6 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_18rem] gap-4 lg:gap-6 items-start">
@@ -410,10 +418,10 @@ export default function InterviewPage() {
                     <AnimatePresence mode="wait" initial={false}>
                         <motion.div
                             key={currentStep?.id}
-                            initial={{ opacity: 0, x: 14 }}
+                            initial={reduceMotion ? { opacity: 1 } : { opacity: 0, x: 14 }}
                             animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -14 }}
-                            transition={{ duration: 0.18 }}
+                            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, x: -14 }}
+                            transition={{ duration: reduceMotion ? 0 : 0.12 }}
                         >
                             {currentStep?.type === 'question' ? (
                                 <InterviewQuestionStep
@@ -448,7 +456,7 @@ export default function InterviewPage() {
                 <button
                     type="button"
                     onClick={handleNext}
-                    disabled={!canProceed()}
+                    disabled={!isLast && !canProceed()}
                     className="btn-primary-adaptive min-w-0 min-h-[48px] px-3 rounded-lg inline-flex items-center justify-center gap-2 text-sm disabled:opacity-50 disabled:pointer-events-none"
                 >
                     {currentStepIndex === totalSteps - 1 ? nextLabel : 'Далее'} <ArrowRight className="w-4 h-4" />
@@ -457,7 +465,7 @@ export default function InterviewPage() {
             </footer>
                 </section>
 
-                <aside className="iv-panel rounded-2xl p-5 sm:p-7 min-w-0 order-first lg:order-none lg:sticky lg:top-0">
+                <aside className="iv-panel rounded-2xl p-5 sm:p-7 min-w-0 hidden lg:block lg:sticky lg:top-0">
                     <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Карта тренировки</h3>
                     <InterviewRouteMap
                         steps={session.steps}
@@ -473,7 +481,7 @@ export default function InterviewPage() {
                 </aside>
             </div>
 
-
+            {confirmFinish && <FinishPracticeDialog skipped={totalSteps - filled} onCancel={() => setConfirmFinish(false)} onConfirm={() => { setConfirmFinish(false); setIsComplete(true); void submitSession() }} />}
         </PageTransition>
     )
 }

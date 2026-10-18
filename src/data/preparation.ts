@@ -44,8 +44,8 @@ export const preparations: Preparation[] = [
  plan:['Основы тестирования и требования','Классы эквивалентности и границы','API: данные, ошибки и права доступа','Баг-репорты с воспроизводимыми шагами','Автоматизация UI на Selenium'],recommendation:'Допиши ожидаемый результат к каждому тесту. Отдельно проверь ошибку сети и возможность повторной попытки.',reference:'https://www.selenium.dev/documentation/webdriver/'}
 ]
 export const jobTracks = [
- {slug:'react',name:'React',role:'frontend',technology:'React',prep:'react',lead:'Вакансии React-разработчиков: сравни требования и подготовься к техническому интервью.'},
- {slug:'frontend',name:'Frontend',role:'frontend',technology:'JavaScript',prep:'frontend',lead:'Вакансии фронтенд-разработчиков: интерфейсы, браузер и веб-технологии.'},
- {slug:'python',name:'Python',role:'backend',technology:'Python',prep:'python',lead:'Вакансии Python-разработчиков: Backend, API и работа с данными. Сверяй специализацию с требованиями объявления.'},
- {slug:'java',name:'Java',role:'backend',technology:'Java',prep:'java',lead:'Вакансии Java-разработчиков: сравни стек, опыт и формат работы перед откликом.'}
+ {slug:'react',name:'React',jobTitle:'React-разработчиком',role:'frontend',technology:'React',prep:'react',lead:'Работа React-разработчиком: вакансии с требованиями к React и JavaScript. Фильтруй удалённую работу и Junior, сравни условия и подготовься к интервью.'},
+ {slug:'frontend',name:'Frontend',jobTitle:'фронтенд-разработчиком',role:'frontend',technology:'JavaScript',prep:'frontend',lead:'Работа фронтенд-разработчиком: вакансии Frontend, JavaScript и веб-интерфейсы. Выбери формат работы и опыт, сравни стек и требования работодателей.'},
+ {slug:'python',name:'Python',jobTitle:'Python-разработчиком',role:'backend',technology:'Python',prep:'python',lead:'Работа Python-разработчиком: вакансии Backend, API и работы с данными. Фильтруй удалённую работу и Junior, сверяй специализацию и требования к опыту.'},
+ {slug:'java',name:'Java',jobTitle:'Java-разработчиком',role:'backend',technology:'Java',prep:'java',lead:'Работа Java-разработчиком: вакансии с Java, Backend и серверными приложениями. Сравни стек, зарплату и опыт, выбери удалённый формат или Junior.'}
 ]

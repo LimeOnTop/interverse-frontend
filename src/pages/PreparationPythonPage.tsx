@@ -43,7 +43,7 @@ export default function PreparationPage({ slug = 'python' }: { slug?: string }) 
             <section className="iv-home-container prep-hero">
                 <div>
                     <div className="iv-hero-label"><span /> {content.name.toUpperCase()} · {content.specialization.toUpperCase()} · ПРАКТИКА</div>
-                    <h1>Собеседование<br />по {content.name}.<br /><em>Начни с практики.</em></h1>
+                    <h1>Собеседование<br />{content.slug === 'qa' ? 'тестировщика QA' : 'по ' + content.name}.<br /><em>Начни с практики.</em></h1>
                     <p className="prep-lead">{content.lead}</p>
                     <div className="iv-hero-actions"><a href="#training" className="iv-landing-button">Настроить тренировку <ArrowUpRight size={18} /></a><a href="#questions" className="iv-landing-text-button">Посмотреть вопросы <ArrowRight size={16} /></a></div>
                     <p className="prep-open-note"><Check size={15} /> Примеры открыты без регистрации</p>
@@ -60,7 +60,7 @@ export default function PreparationPage({ slug = 'python' }: { slug?: string }) 
             <div className="iv-home-container prep-content">
                 <div className="prep-reading">
                     <section id="questions" className="prep-section">
-                        <span className="iv-eyebrow">01 / ПРОВЕРЬ ОСНОВЫ</span><h2>Вопросы на собеседовании {content.name}</h2>
+                        <span className="iv-eyebrow">01 / ПРОВЕРЬ ОСНОВЫ</span><h2>Вопросы на собеседовании {content.slug === 'qa' ? 'тестировщика QA' : content.name}</h2>
                         <p className="prep-section-intro">Начни с ответа своими словами. Затем открой разбор и проверь, можешь ли объяснить не только правило, но и пример его применения.</p>
                         <div className="prep-questions">{questions.map((q, i) => <details key={q.title}><summary><span className="prep-q-number">0{i + 1}</span><span><small>{q.tag}</small>{q.title}</span><ChevronDown size={19} /></summary><div className="prep-answer"><p>{q.answer}</p><div><strong>Уточнение на интервью</strong><p>{q.follow}</p></div></div></details>)}</div>
                     </section>

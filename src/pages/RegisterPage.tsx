@@ -106,7 +106,7 @@ export default function RegisterPage() {
                         </p>
                     </div>
 
-                    <div className="mb-4"><AuthLegalNotice /></div>
+                    <div className="mb-4"><AuthLegalNotice neutral /></div>
                     <GoogleAuthButton onClick={() => registrationFunnel('google_click', { method: 'google' })} />
                     <div className="my-5 flex items-center gap-3 text-xs text-secondary">
                         <span className="h-px flex-1 bg-gray-200 dark:bg-iv-dark-line" />

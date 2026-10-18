@@ -5,7 +5,9 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "tsc && vite build && node scripts/prerender.mjs",
+        "build": "tsc && vite build && node scripts/prerender.mjs && node scripts/check-seo.mjs",
+        "test:seo": "node scripts/check-seo.mjs",
+        "test:seo:live": "node scripts/check-seo-live.mjs",
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
         "preview": "vite preview"
     },

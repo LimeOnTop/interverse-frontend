@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { Menu, X, Tag, LogIn, UserPlus } from 'lucide-react'
+import { Menu, X, Tag, LogIn, UserPlus, Briefcase, BookOpen } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 import BrandWordmark from './BrandWordmark'
 
@@ -97,6 +97,10 @@ export default function PublicNav({ landing = false, overlay = false }: PublicNa
 
                 {/* Desktop / tablet actions */}
                 <div className="hidden md:flex items-center gap-4">
+                    <nav aria-label="Основные разделы" className="hidden lg:flex items-center gap-4 text-sm">
+                        <Link to="/preparation" className="btn-ghost text-sm">Подготовка</Link>
+                        <Link to="/jobs" className="btn-ghost text-sm">IT-вакансии</Link>
+                    </nav>
                     <Link
                         to="/pricing"
                         className={
@@ -157,6 +161,8 @@ export default function PublicNav({ landing = false, overlay = false }: PublicNa
                         className="iv-public-mobile-menu md:hidden iv-surface border-b border-gray-200 dark:border-iv-dark-line shadow-iv-lg"
                     >
                         <nav aria-label="Меню сайта" onClick={() => setMenuOpen(false)} className="px-4 py-3 flex flex-col gap-1">
+                            <Link to="/preparation" className="iv-nav-item text-base"><BookOpen className="w-5 h-5" strokeWidth={1.75} /> Подготовка к собеседованию</Link>
+                            <Link to="/jobs" className="iv-nav-item text-base"><Briefcase className="w-5 h-5" strokeWidth={1.75} /> Работа в IT и вакансии</Link>
                             <Link to="/pricing" className="iv-nav-item text-base">
                                 <Tag className="w-5 h-5" strokeWidth={1.75} /> Тарифы
                             </Link>

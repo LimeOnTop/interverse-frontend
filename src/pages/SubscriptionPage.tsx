@@ -1,3 +1,5 @@
+import { usePaymentNavigation } from '../hooks/usePaymentNavigation'
+import type { PaymentFormPayload } from '../lib/paymentNavigation'
 import ProTrialOffer, { TRIAL_OFFER } from '../components/ProTrialOffer'
 import RenewalControl from '../components/RenewalControl'
 import ProCheckoutDialog from '../components/ProCheckoutDialog'
@@ -25,12 +27,6 @@ import {
     type PaidOffer,
 } from '../utils/subscription'
 
-type PaymentFormPayload = {
-    action: string
-    method: string
-    fields: Record<string, string>
-}
-
 type RenewalSettings = {
     enabled: boolean
     has_mandate: boolean
@@ -39,23 +35,6 @@ type RenewalSettings = {
     amount: string
     pending: boolean
     last_error: string
-}
-
-function submitRobokassaForm(payment: PaymentFormPayload) {
-    const form = document.createElement('form')
-    form.method = (payment.method || 'POST').toUpperCase() === 'GET' ? 'GET' : 'POST'
-    form.action = payment.action
-    form.acceptCharset = 'UTF-8'
-    form.style.display = 'none'
-    Object.entries(payment.fields || {}).forEach(([name, value]) => {
-        const input = document.createElement('input')
-        input.type = 'hidden'
-        input.name = name
-        input.value = String(value ?? '')
-        form.appendChild(input)
-    })
-    document.body.appendChild(form)
-    form.submit()
 }
 
 function PriceBlock({
@@ -98,6 +77,7 @@ export default function SubscriptionPage() {
     const { user, accessToken } = useAuthStore()
     const currentPlan = resolveSubscriptionPlan(user)
     const [buyingPlan, setBuyingPlan] = useState<string | null>(null)
+    const submitRobokassaForm = usePaymentNavigation(() => setBuyingPlan(null))
     const [paidOffers, setPaidOffers] = useState<PaidOffer[]>(FALLBACK_PAID_OFFERS)
     const [earlyBirdRemaining, setEarlyBirdRemaining] = useState(27)
     const [earlyBirdLimit, setEarlyBirdLimit] = useState(100)

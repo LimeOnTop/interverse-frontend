@@ -1,0 +1,25 @@
+{
+  "name": "InterVerse",
+  "short_name": "InterVerse",
+  "lang": "ru",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#F5F2EA",
+  "theme_color": "#F5F2EA",
+  "icons": [
+    {
+      "src": "/favicon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "id": "/",
+  "scope": "/"
+}

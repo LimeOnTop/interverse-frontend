@@ -1,3 +1,4 @@
+import { ReminderButton } from '../components/PracticeReminderDialog'
 import { PreparationSection } from '../components/VacancyPreparationCard'
 import { usePreparations } from '../lib/preparations'
 import { useState, useEffect, useMemo } from 'react'
@@ -159,10 +160,11 @@ export default function InterviewServicePage() {
 
     const pad = (value: number) => String(value).padStart(2, '0')
     const waiting = counts.active
-    const completedPaths=preparations.preparations.filter(p=>p.steps.every((_,i)=>p.attempts.some(a=>a.step_index===i&&a.status==='completed'))).length
+    const activePreparations = preparations.preparations.filter(p=>!p.archived)
+    const completedPaths=activePreparations.filter(p=>p.steps.every((_,i)=>p.attempts.some(a=>a.step_index===i&&a.status==='completed'))).length
     const scopes: [Scope, string, number][] = [
-        ['all', 'Все', counts.all+preparations.preparations.length],
-        ['active', 'В процессе', counts.active+preparations.preparations.length-completedPaths],
+        ['all', 'Все', counts.all+activePreparations.length],
+        ['active', 'В процессе', counts.active+activePreparations.length-completedPaths],
         ['done', 'Завершённые', counts.done+completedPaths],
     ]
 
@@ -321,7 +323,7 @@ function SessionCard({ interview, report, starting, busy, onStart }: SessionCard
                 </div>
                 <p className="session-card-bottom">{bottom}</p>
             </div>
-            <div className="session-card-actions">
+            <div className="session-card-actions">{isActive(interview)&&<ReminderButton target={{kind:'interview',target_id:interview.id,title:interview.title}}/>}
                 {done ? (
                     report ? (
                         <>

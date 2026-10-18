@@ -1,24 +1,11 @@
 User-agent: *
 Allow: /
-Allow: /pricing
-Allow: /privacy
-Allow: /login
-Allow: /register
-Allow: /legal/
-
-Disallow: /dashboard
-Disallow: /activity
-Disallow: /calendar
-Disallow: /interviews
-Disallow: /vacancies
-Disallow: /reports
-Disallow: /profile
-Disallow: /subscription
-Disallow: /admin
-Disallow: /grafana
-Disallow: /metrics-login
-Disallow: /oauth/
+# Application HTML is crawlable so robots can see its noindex directive.
+# Authentication still protects all personal data.
+Disallow: /grafana/
+Disallow: /internal/
 Disallow: /api/
 
+Clean-param: utm_source&utm_medium&utm_campaign&utm_content&utm_term&yclid&gclid&fbclid /
+
 Sitemap: https://inter-verse.ru/sitemap.xml
-Host: https://inter-verse.ru

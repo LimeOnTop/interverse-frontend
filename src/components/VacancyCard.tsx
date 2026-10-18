@@ -179,7 +179,7 @@ export default function VacancyCard({ vacancy, index = 0, profileSkills, fallbac
                 <a href={vacancy.url} target="_blank" rel="noopener noreferrer">
                     На вакансию ↗
                 </a>
-                <button type="button" className="lib-btn is-primary" onClick={() => setCreating(true)}>
+                <button type="button" className="lib-btn is-primary" onClick={event => { event.currentTarget.focus(); setCreating(true) }}>
                     Подготовка по вакансии <ArrowRight />
                 </button>
             </footer>

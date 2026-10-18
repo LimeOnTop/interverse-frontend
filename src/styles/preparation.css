@@ -13,3 +13,5 @@
 .prep-home-links{padding-top:65px}.prep-home-links h2{font-size:clamp(28px,3.3vw,44px);line-height:1.2;margin:16px 0 25px;letter-spacing:-.03em}.prep-home-links>div{display:flex;flex-wrap:wrap;gap:10px}.prep-home-links>div a{display:flex;gap:22px;align-items:center;padding:15px 20px;border:1px solid var(--iv-border);border-radius:8px;background:var(--iv-surface);font-size:15px;transition:transform .2s,border-color .2s}.prep-home-links>div a:hover{transform:translateY(-3px);border-color:var(--home-accent)}.prep-home-links>p{font-size:14px;line-height:1.8;color:var(--iv-text-secondary);margin-top:20px;max-width:700px}.prep-home-links>p a{color:var(--home-accent);text-decoration:underline}
 
 .prep-hero>*,.prep-quiz fieldset{min-width:0}.prep-quiz-option{overflow-wrap:anywhere}.prep-quiz-option>svg{flex-shrink:0}
+
+.public-catalog>.prep-breadcrumb{padding-top:0;margin-bottom:28px}.public-catalog-grid h2{gap:16px;font-size:clamp(22px,2.5vw,27px);line-height:1.3}.public-catalog-grid h2 svg{flex-shrink:0}.catalog-next-step{margin-top:48px;max-width:850px}.public-jobs-hero .prep-related{margin-block:16px 24px}

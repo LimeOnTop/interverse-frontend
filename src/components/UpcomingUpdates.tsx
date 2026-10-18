@@ -1,78 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { ChevronDown, X } from 'lucide-react'
-
-const updates = [
-    ['Тренировки по вакансии', 'Планируем добавить разбор требований вакансии с помощью ИИ.'],
-    ['Голосовые ответы', 'Отвечай голосом и получай обратную связь по содержанию и речи.'],
-    ['Вопросы по опыту из профиля', 'Тренируйся отвечать на вопросы по опыту, указанному в профиле.'],
-    ['Курсы и траектории', 'Осваивай новые направления. Первый курс — геймдизайн с помощью ИИ.'],
-]
-
-export default function UpcomingUpdates() {
-    const [open, setOpen] = useState(false)
-    const rootRef = useRef<HTMLDivElement>(null)
-    const triggerRef = useRef<HTMLButtonElement>(null)
-    const closeRef = useRef<HTMLButtonElement>(null)
-    const location = useLocation()
-
-    useEffect(() => { setOpen(false) }, [location.pathname])
-
-    useEffect(() => {
-        if (!open) return
-        closeRef.current?.focus()
-        const handleOutside = (event: MouseEvent) => {
-            if (!rootRef.current?.contains(event.target as Node)) setOpen(false)
-        }
-        const handleEscape = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
-                event.preventDefault()
-                setOpen(false)
-                triggerRef.current?.focus()
-            }
-        }
-        document.addEventListener('mousedown', handleOutside)
-        document.addEventListener('keydown', handleEscape)
-        return () => {
-            document.removeEventListener('mousedown', handleOutside)
-            document.removeEventListener('keydown', handleEscape)
-        }
-    }, [open])
-
-    return (
-        <div className="iv-updates" ref={rootRef} onBlur={(event) => {
-            if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget as Node)) setOpen(false)
-        }}>
-            <button type="button" ref={triggerRef} className="iv-header-frame iv-updates-trigger"
-                aria-label="Скоро: планируемые обновления" aria-expanded={open} aria-controls="upcoming-updates" onClick={() => setOpen(!open)}>
-                <span className="iv-updates-dot" aria-hidden="true" />
-                <span className="iv-updates-label">Скоро</span>
-                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
-            </button>
-            {open && (
-                <section id="upcoming-updates" className="iv-updates-panel" aria-labelledby="upcoming-updates-title">
-                    <header className="iv-updates-heading">
-                        <div className="flex items-center justify-between gap-3">
-                            <span className="iv-updates-eyebrow">В планах INTERVERSE</span>
-                            <button type="button" ref={closeRef} className="iv-updates-close" aria-label="Закрыть список обновлений"
-                                onClick={() => { setOpen(false); triggerRef.current?.focus() }}>
-                                <X className="w-3.5 h-3.5" aria-hidden="true" />
-                            </button>
-                        </div>
-                        <h2 id="upcoming-updates-title">Что появится дальше</h2>
-                        <p>Больше способов практиковаться и готовиться к новой роли.</p>
-                    </header>
-                    <ul className="iv-updates-list">
-                        {updates.map(([title, description], index) => (
-                            <li className="iv-updates-item" key={title}>
-                                <span className="iv-updates-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
-                                <div><h3>{title}</h3><p>{description}</p></div>
-                            </li>
-                        ))}
-                    </ul>
-                    <footer className="iv-updates-footer">Планируемые обновления. Сроки запуска пока не объявлены.</footer>
-                </section>
-            )}
-        </div>
-    )
+import { api } from '../services/api'
+import { useAuthStore } from '../store/authStore'
+const news=[{id:'vacancy-path-20261017',title:'Подготовка по вакансии',copy:'Пройдите путь по технологиям вакансии. Отчёты — внутри каждого этапа, вся подготовка — одна попытка.',to:'/vacancies'},{id:'practice-reminders-20261017',title:'Напоминания о практике',copy:'Выберите удобное время, возвращайтесь к практике с главной и переносите её без потери прогресса.',to:'/dashboard'}]
+const upcoming=[['Разбор вакансии с помощью ИИ','Планируем разбирать полный текст требований и помогать выбрать фокус подготовки.'],['Голосовые ответы','Отвечайте голосом и получайте обратную связь по содержанию и речи.'],['Вопросы по опыту из профиля','Практикуйте ответы на вопросы о своём опыте.'],['Курсы и траектории','Осваивайте новые направления. Первый курс — геймдизайн с помощью ИИ.']]
+export default function UpcomingUpdates(){
+ const [open,setOpen]=useState(false),[read,setRead]=useState<string[]>([]),[ready,setReady]=useState(false),[error,setError]=useState(false)
+ const user=useAuthStore(s=>s.user?.id),root=useRef<HTMLDivElement>(null),trigger=useRef<HTMLButtonElement>(null),close=useRef<HTMLButtonElement>(null);const location=useLocation();const pending=useRef(new Set<string>())
+ useEffect(()=>{let alive=true;setRead([]);setReady(false);setError(false);setOpen(false);pending.current.clear();if(!user)return;api.get('/news').then(({data})=>{if(alive){setRead(data.read_ids||[]);setReady(true)}}).catch(()=>{if(alive)setError(true)});return()=>{alive=false}},[user])
+ async function mark(ids:string[]){const owner=user;const fresh=ids.filter(id=>!read.includes(id)&&!pending.current.has(id));if(!fresh.length||!owner)return;fresh.forEach(id=>pending.current.add(id));try{await api.post('/news/read',{ids:fresh});if(useAuthStore.getState().user?.id===owner)setRead(v=>Array.from(new Set([...v,...fresh])))}catch{if(useAuthStore.getState().user?.id===owner)setError(true)}finally{fresh.forEach(id=>pending.current.delete(id))}}
+ useEffect(()=>{setOpen(false)},[location.pathname])
+ useEffect(()=>{if(!open)return;close.current?.focus();const outside=(e:MouseEvent)=>{if(!root.current?.contains(e.target as Node))setOpen(false)};const escape=(e:KeyboardEvent)=>{if(e.key==='Escape'){setOpen(false);trigger.current?.focus()}};document.addEventListener('mousedown',outside);document.addEventListener('keydown',escape);return()=>{document.removeEventListener('mousedown',outside);document.removeEventListener('keydown',escape)}},[open])
+ // A news item becomes read only after it has actually remained visible.
+ useEffect(()=>{if(!open||!ready)return;const timers=new Map<Element,ReturnType<typeof setTimeout>>();const panel=root.current?.querySelector('.iv-updates-panel');const observer=new IntersectionObserver(entries=>{for(const entry of entries){const old=timers.get(entry.target);if(old){clearTimeout(old);timers.delete(entry.target)}if(entry.isIntersecting&&entry.intersectionRatio>=.95){const id=(entry.target as HTMLElement).dataset.news;if(id&&!read.includes(id))timers.set(entry.target,setTimeout(()=>{if(document.visibilityState==='visible')void mark([id])},1800))}}},{root:panel,threshold:[0,.95,1]});root.current?.querySelectorAll('[data-news]').forEach(el=>observer.observe(el));return()=>{observer.disconnect();timers.forEach(clearTimeout)}},[open,ready,read,user])
+ const unread=ready&&news.some(n=>!read.includes(n.id))
+ return <div className="iv-updates" ref={root} onBlur={e=>{if(e.relatedTarget&&!e.currentTarget.contains(e.relatedTarget as Node))setOpen(false)}}><button type="button" ref={trigger} className="iv-header-frame iv-updates-trigger" aria-label={`Что нового${unread?': есть непрочитанные новости':''}`} aria-expanded={open} aria-controls="upcoming-updates" onClick={()=>setOpen(v=>!v)}><span className="iv-updates-label">Что нового</span><ChevronDown size={14} aria-hidden/>{unread&&<span className="iv-news-badge" aria-hidden/>}</button>{open&&<section id="upcoming-updates" className="iv-updates-panel" aria-labelledby="upcoming-updates-title"><header className="iv-updates-heading"><div className="flex items-center justify-between gap-3"><span className="iv-updates-eyebrow">Обновления InterVerse</span><button type="button" className="iv-updates-close" ref={close} aria-label="Закрыть список обновлений" onClick={()=>{setOpen(false);trigger.current?.focus()}}><X size={16}/></button></div><h2 id="upcoming-updates-title">Что нового</h2></header><ul className="iv-updates-list">{news.map(n=><li className="iv-news-item" key={n.id} data-news={n.id}><Link to={n.to} onClick={()=>void mark([n.id])}><h3>{n.title}{ready&&!read.includes(n.id)&&<span className="iv-news-item-badge" aria-label="Непрочитанная новость"/>}</h3><p>{n.copy}</p></Link></li>)}</ul>{error&&<p className="iv-news-error">Не удалось синхронизировать прочтение. Новости сохранятся непрочитанными до успешной загрузки.</p>}<div className="iv-updates-soon"><h2>Скоро</h2><ul className="iv-updates-list">{upcoming.map(([title,copy])=><li className="iv-updates-item" key={title}><div><h3>{title}</h3><p>{copy}</p></div></li>)}</ul></div><footer className="iv-updates-footer">Сроки следующих обновлений пока не объявлены.</footer></section>}</div>
 }

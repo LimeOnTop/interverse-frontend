@@ -1,4 +1,5 @@
 import React from 'react'
+import { MotionConfig } from 'framer-motion'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
@@ -10,7 +11,7 @@ import './styles/updates.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
-        <BrowserRouter>
+        <MotionConfig reducedMotion="user"><BrowserRouter>
             <App />
             <Toaster
                 position={window.matchMedia('(max-width: 639px)').matches ? 'top-center' : 'top-right'}
@@ -26,6 +27,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                     },
                 }}
             />
-        </BrowserRouter>
+        </BrowserRouter></MotionConfig>
     </React.StrictMode>,
 )

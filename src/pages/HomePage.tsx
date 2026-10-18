@@ -50,7 +50,7 @@ export default function HomePage() {
                 <div className="iv-hero-copy">
                     <div className="iv-hero-label"><span /> ТВОЙ СЛЕДУЮЩИЙ КАРЬЕРНЫЙ ШАГ</div>
                     <h1>На IT-интервью —<br />с <em>уверенностью.</em></h1>
-                    <p className="iv-hero-description">Меньше неизвестности. Больше практики.<br />Тренируйся под свой стек, разбирай ошибки<br className="iv-desktop-break" /> и готовься к вопросам на собеседовании.</p>
+                    <p className="iv-hero-description">Тренажёр собеседований в IT.<br />Тренируйся под свой стек, разбирай ошибки<br className="iv-desktop-break" /> и готовься к вопросам на собеседовании.</p>
                     <div className="iv-hero-actions"><a className="iv-landing-button" href="#start">Настроить тренировку <ArrowUpRight size={19} /></a><button className="iv-landing-text-button" onClick={() => setFilm(0)}><Play size={16} /> Смотреть обзор <span>36 сек</span></button></div>
                     <div className="iv-hero-note"><Check size={15} /> В своём темпе <span /> Под свой уровень <span /> Без давления</div>
                 </div>

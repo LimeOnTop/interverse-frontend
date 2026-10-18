@@ -1,3 +1,4 @@
+import { previousComparableReport } from '../lib/reportComparison'
 import { PreparationSection } from '../components/VacancyPreparationCard'
 import { usePreparations } from '../lib/preparations'
 import { useState, useEffect, useMemo } from 'react'
@@ -49,12 +50,14 @@ function statText(reports: Report[]) {
     if (reports.length < 2) {
         return 'Один отчёт — отправная точка. Сравнение появится после следующей тренировки.'
     }
-    const diff = clampScore(reports[0].overall_score) - clampScore(reports[1].overall_score)
-    if (diff === 0) return 'Результат последней тренировки совпал с предыдущим.'
+    const previous = previousComparableReport(reports)
+    if (!previous) return 'Для сравнения нужна ещё одна тренировка с тем же стеком, уровнем и форматом.'
+    const diff = clampScore(reports[0].overall_score) - clampScore(previous.overall_score)
+    if (diff === 0) return 'Результат совпал с предыдущей сопоставимой тренировкой.'
     const points = `${Math.abs(diff)} ${pluralRu(Math.abs(diff), ['процентный пункт', 'процентных пункта', 'процентных пунктов'])}`
     return diff > 0
-        ? `Результат последней тренировки на ${points} выше предыдущего.`
-        : `Результат последней тренировки на ${points} ниже предыдущего — повтори слабые темы.`
+        ? `Результат последней тренировки на ${points} выше предыдущей сопоставимой тренировки.`
+        : `Результат последней тренировки на ${points} ниже предыдущей сопоставимой тренировки — повтори слабые темы.`
 }
 
 export default function ReportsPage() {
@@ -162,6 +165,30 @@ export default function ReportsPage() {
                 </Link>
             </header>
 
+                    <div className="list-controls">
+                        <div className="search-wrap">
+                            <Search aria-hidden="true" strokeWidth={1.75} />
+                            <input
+                                type="search"
+                                aria-label="Поиск отчётов"
+                                placeholder="Название, направление или технология"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                        <select
+                            aria-label="Уровень отчётов"
+                            value={levelFilter}
+                            onChange={(e) => setLevelFilter(e.target.value)}
+                        >
+                            <option value="all">Все уровни</option>
+                            {levels.map((level) => (
+                                <option key={level} value={level}>{levelLabel(level)}</option>
+                            ))}
+                        </select>
+                    </div>
+
+
             <PreparationSection data={preparations} mode="reports" query={searchTerm} level={levelFilter} />
             {!latest ? (
                 <section className="collection-empty">
@@ -191,31 +218,9 @@ export default function ReportsPage() {
                         </aside>
                     </div>
 
-                    <div className="list-controls">
-                        <div className="search-wrap">
-                            <Search aria-hidden="true" strokeWidth={1.75} />
-                            <input
-                                type="search"
-                                aria-label="Поиск отчётов"
-                                placeholder="Название, направление или технология"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                        </div>
-                        <select
-                            aria-label="Уровень отчётов"
-                            value={levelFilter}
-                            onChange={(e) => setLevelFilter(e.target.value)}
-                        >
-                            <option value="all">Все уровни</option>
-                            {levels.map((level) => (
-                                <option key={level} value={level}>{levelLabel(level)}</option>
-                            ))}
-                        </select>
-                    </div>
 
                     <div className="collection-heading">
-                        <h2>История тренировок <span>· {filteredReports.length}</span></h2>
+                        <h2>Отдельные тренировки <span>· {filteredReports.length}</span></h2>
                         <small>Сначала последние</small>
                     </div>
 

@@ -1,7 +1,10 @@
+import { usePracticeAvailability } from '../hooks/usePracticeAvailability'
+import { AvailabilityNotice } from '../components/PracticeOptionsEditor'
+import { reminderChanged } from '../lib/practiceReminders'
 import { isTrainingLimitError } from '../store/promoStore'
 import { useState, useRef, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, Check, Search } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { api } from '../services/api'
@@ -41,7 +44,11 @@ export default function InterviewWizardPage() {
     const taskMode = draft.taskMode || 'theory'
     const startMode: StartMode = draft.startMode === 'later' ? 'later' : 'now'
     const scheduledAt = draft.scheduledAt && !draft.scheduledAt.endsWith('Z') ? draft.scheduledAt : ''
+    const reduceMotion = useReducedMotion()
+    const availability = usePracticeAvailability({technologies:selectedTechStack,specialization:selectedSpecialization,level:selectedLevel,task_mode:taskMode}, currentStep === 5 && Boolean(selectedLevel), true)
     const [isLoading, setIsLoading] = useState(false)
+    const [reminderEmail,setReminderEmail]=useState(false)
+    const reminderDraftId=useRef(crypto.randomUUID())
     const [direction, setDirection] = useState(1)
     const navigate = useNavigate()
 
@@ -62,7 +69,7 @@ export default function InterviewWizardPage() {
             case 2: return selectedTechStack.length > 0
             case 3: return Boolean(selectedLevel)
             case 4: return true
-            default: return startMode === 'now' || (Boolean(scheduledAt) && new Date(scheduledAt) > new Date())
+            default: return Boolean(availability.data?.available) && (startMode === 'now' || (Boolean(scheduledAt) && new Date(scheduledAt) > new Date()))
         }
     })()
 
@@ -82,6 +89,11 @@ export default function InterviewWizardPage() {
                 interviewData.scheduled_at = new Date(scheduledAt).toISOString()
             }
 
+
+            if(withSchedule){
+                const {data:plan} = await api.put('/practice-reminders',{kind:'draft',target_id:reminderDraftId.current,title:'',scheduled_at:new Date(scheduledAt).toISOString(),timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'Europe/Moscow',email_enabled:reminderEmail,lead_minutes:0,payload:{technologies:selectedTechStack,specialization:selectedSpecialization,level:selectedLevel,task_mode:taskMode}})
+                reminderChanged(plan.id);toast.success(reminderEmail ? 'План сохранён. Письмо придёт в момент начала.' : 'План сохранён на главной, без письма. Попытка спишется при старте.');clearFormDraft('interview-wizard');navigate(`/dashboard?reminder=${plan.id}`);return
+            }
             const response = await api.post('/interviews/', interviewData)
             const interviewId = response.data?.interview?.id as string | undefined
 
@@ -174,13 +186,14 @@ export default function InterviewWizardPage() {
                         <div className="iv-track w-24"><span style={{ width: `${(currentStep / STEPS.length) * 100}%` }} /></div>
                     </div>
 
+                    {currentStep === 5 && <AvailabilityNotice check={availability} />}
                     <AnimatePresence mode="wait" initial={false}>
                         <motion.div
                             key={currentStep}
-                            initial={{ opacity: 0, x: 14 * direction }}
+                            initial={reduceMotion ? {opacity:1} : { opacity: 0, x: 14 * direction }}
                             animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -14 * direction }}
-                            transition={{ duration: 0.16 }}
+                            exit={reduceMotion ? {opacity:0} : { opacity: 0, x: -14 * direction }}
+                            transition={{ duration: reduceMotion ? 0 : 0.12 }}
                             className="mt-6"
                         >
                             {currentStep === 1 && (
@@ -257,6 +270,8 @@ export default function InterviewWizardPage() {
                                     {startMode === 'later' ? (
                                         <div className="mt-6">
                                             <SchedulePicker value={scheduledAt} onChange={(value) => update({ scheduledAt: value })} />
+                                            <label className="mt-5 flex gap-3 items-center text-sm"><input type="checkbox" checked={reminderEmail} onChange={e=>setReminderEmail(e.target.checked)}/>Напомнить по email в момент начала (до 5 писем за 24 часа)</label>
+                                            <p className="mt-3 text-xs text-secondary">Планирование и перенос не расходуют попытки. Новая тренировка учтётся в лимите при старте.</p>
                                         </div>
                                     ) : (
                                         <p className="mt-5 text-sm text-secondary">Вопросы и практические задачи подберём под выбранный стек и уровень.</p>

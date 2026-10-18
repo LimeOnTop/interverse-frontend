@@ -297,7 +297,7 @@ export default function VacanciesPage() {
                 <h1>Вакансии и подготовка</h1>
                 <p>Посмотри требования. Выбери, к какой роли готовиться дальше.</p>
             </div>
-            {hasPro && <button type="button" className="lib-btn is-primary" onClick={()=>setOwnVacancy(true)}>Подготовиться к своей вакансии</button>}
+            {hasPro && <button type="button" className="lib-btn is-primary" onClick={event=>{event.currentTarget.focus();setOwnVacancy(true)}}>Подготовиться к своей вакансии</button>}
             {hasPro && checkedAt && (
                 <span className="lib-chip">{polling ? 'Обновляем…' : `Проверено ${formatDay(checkedAt.toISOString(), false)}`}</span>
             )}

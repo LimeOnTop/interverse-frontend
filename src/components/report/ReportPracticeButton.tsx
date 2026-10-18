@@ -1,3 +1,4 @@
+import { ReminderButton } from '../PracticeReminderDialog'
 import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowRight, Loader2 } from 'lucide-react'
@@ -7,7 +8,7 @@ import { formatSessionStartError, getSessionStorageKey, parseSessionResponse } f
 import { writePrivateCache } from '../../lib/privateStorage'
 import { isTrainingLimitError } from '../../store/promoStore'
 
-export default function ReportPracticeButton({ reportId, className = '', children = 'Повторить вопросы с ошибками' }: { reportId: string; className?: string; children?: React.ReactNode }) {
+export default function ReportPracticeButton({ reportId, className = '', children = 'Повторить вопросы с ошибками', hidePlanning = false }: { reportId: string; className?: string; children?: React.ReactNode; hidePlanning?: boolean }) {
     const [busy, setBusy] = useState(false)
     const locked = useRef(false)
     const request = useRef<{ reportId: string; id: string } | null>(null)
@@ -30,5 +31,5 @@ export default function ReportPracticeButton({ reportId, className = '', childre
             setBusy(false)
         }
     }
-    return <button type="button" onClick={() => void start()} disabled={busy} aria-busy={busy} className={`btn-primary-adaptive inline-flex items-center justify-center gap-2 rounded-lg disabled:opacity-60 ${className}`}>{busy ? <><Loader2 size={17} className="animate-spin" />Готовим повторение…</> : <>{children}<ArrowRight size={17} /></>}</button>
+    return <><button type="button" onClick={() => void start()} disabled={busy} aria-busy={busy} className={`btn-primary-adaptive inline-flex items-center justify-center gap-2 rounded-lg disabled:opacity-60 ${className}`}>{busy ? <><Loader2 size={17} className="animate-spin" />Готовим повторение…</> : <>{children}<ArrowRight size={17} /></>}</button>{!hidePlanning && <ReminderButton target={{kind:'review',target_id:reportId,title:'Повторить вопросы с ошибками'}}/>}</>
 }

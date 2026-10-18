@@ -1,3 +1,4 @@
+import UpcomingPractice from '../components/UpcomingPractice'
 import { PreparationSection } from '../components/VacancyPreparationCard'
 import { usePreparations } from '../lib/preparations'
 import { useEffect, useMemo, useState } from 'react'
@@ -128,6 +129,7 @@ export default function DashboardPage() {
                 </Link>
             </div>
 
+            <UpcomingPractice />
             <PreparationSection data={preparations} mode="dashboard" />
             {(report || preparations.preparations.length===0) && <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.65fr_1fr]">
                 <HeroPanel report={report} />

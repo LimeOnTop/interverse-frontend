@@ -1,0 +1,1 @@
+import{_ as a,j as n,K as e}from"./renderApp-Cj8RoX51.js";function r({children:t,className:o=""}){const i=a();return n.jsx(e.div,{initial:i?!1:{opacity:0,y:8},animate:{opacity:1,y:0},exit:i?{opacity:0}:{opacity:0,y:-4},transition:{duration:i?0:.18,ease:[.23,1,.32,1]},className:o,children:t})}export{r as P};

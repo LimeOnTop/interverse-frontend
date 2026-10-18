@@ -14,4 +14,6 @@ RUN npm run build
 FROM alpine:3.19
 WORKDIR /app
 COPY --from=builder /app/dist ./dist
-CMD ["sh", "-c", "rm -rf /usr/share/nginx/html/* && cp -r /app/dist/* /usr/share/nginx/html/"]
+# Keep old hashed assets available for clients opened before the release.
+# Copy dotfiles too: the gateway/build checks use the Vite manifest.
+CMD ["sh", "-c", "cp -a /app/dist/. /usr/share/nginx/html/"]

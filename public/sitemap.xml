@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://inter-verse.ru/</loc></url>
-  <url><loc>https://inter-verse.ru/pricing</loc></url>
-  <url><loc>https://inter-verse.ru/privacy</loc></url>
   <url><loc>https://inter-verse.ru/preparation</loc></url>
   <url><loc>https://inter-verse.ru/jobs</loc></url>
   <url><loc>https://inter-verse.ru/preparation/python</loc></url>
@@ -14,4 +12,8 @@
   <url><loc>https://inter-verse.ru/jobs/frontend</loc></url>
   <url><loc>https://inter-verse.ru/jobs/python</loc></url>
   <url><loc>https://inter-verse.ru/jobs/java</loc></url>
+  <url><loc>https://inter-verse.ru/pricing</loc></url>
+  <url><loc>https://inter-verse.ru/pro-trial</loc></url>
+  <url><loc>https://inter-verse.ru/privacy</loc></url>
+  <url><loc>https://inter-verse.ru/about-contractor</loc></url>
 </urlset>
