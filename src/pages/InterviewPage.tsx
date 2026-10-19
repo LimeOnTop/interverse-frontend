@@ -474,8 +474,7 @@ export default function InterviewPage() {
                         onSelect={setCurrentStepIndex}
                     />
                     <div className="hidden lg:block mt-6 pt-6 border-t border-gray-200 dark:border-iv-dark-line text-sm text-secondary leading-relaxed">
-                        <p className="iv-eyebrow mb-2">В своём темпе</p>
-                        <p>Заливка — ответ сохранён. Обводка — текущий шаг.</p><p className="mt-3">Ответ можно изменить. Переключайся между вопросами, твой выбор сохранится.</p>
+                        <p>Ответ можно изменить. Переключайся между вопросами, твой выбор сохранится.</p>
                         <p className="mt-3">Результат появится после завершения. Подробный разбор доступен в Pro.</p>
                     </div>
                 </aside>

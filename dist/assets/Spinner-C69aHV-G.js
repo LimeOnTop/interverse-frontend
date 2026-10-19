@@ -1,1 +1,0 @@
-import{j as s}from"./renderApp-Cj8RoX51.js";const n={sm:"h-6 w-6",md:"h-10 w-10",lg:"h-12 w-12"};function t({size:e="md",className:i=""}){return s.jsx("div",{className:`flex items-center justify-center ${i}`,children:s.jsx("div",{className:`iv-spinner ${n[e]}`})})}export{t as S};

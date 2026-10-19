@@ -3,6 +3,7 @@ import { Bell, Loader2, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { api } from '../services/api'
 import { formatUserFacingError } from '../lib/interviewSession'
+import { reminderAllowed } from '../lib/practiceCalendar'
 import { localParts, zonedISO } from '../lib/practiceTime'
 import { reminderChanged, usePracticeReminders, dateTimeLabel, type PracticeTarget, type PracticeReminder, type PracticePayload } from '../lib/practiceReminders'
 import { useModalDialog } from '../hooks/useModalDialog'
@@ -20,7 +21,6 @@ export default function PracticeReminderDialog({ target, existing, onClose }: { 
     const initial = localParts(existing ? new Date(existing.scheduled_at) : new Date(Date.now() + 86400000), zone)
     const [value, setValue] = useState(`${initial.day}T${existing ? initial.time : '19:00'}`)
     const [email, setEmail] = useState(existing?.email_enabled || false)
-    const [lead, setLead] = useState(existing?.lead_minutes ?? 10)
     const [payload, setPayload] = useState<PracticePayload>(existing?.payload || target.payload || emptyPayload)
     const [saved, setSaved] = useState(existing)
     const initialized = useRef(Boolean(existing))
@@ -34,11 +34,14 @@ export default function PracticeReminderDialog({ target, existing, onClose }: { 
         const found = items.find(plan => plan.kind === target.kind && plan.target_id === target.target_id && (plan.step_index || 0) === (target.step_index || 0))
         if (found) {
             const parts = localParts(new Date(found.scheduled_at), zone)
-            setSaved(found); setValue(`${parts.day}T${parts.time}`); setEmail(found.email_enabled); setLead(found.lead_minutes)
+            setSaved(found); setValue(`${parts.day}T${parts.time}`); setEmail(found.email_enabled)
             if (found.payload) setPayload(found.payload)
         }
         initialized.current = true; setReady(true)
     }, [items, loading, target.kind, target.target_id, target.step_index, zone])
+    let canEmail = false
+    try { const [day, time] = value.split('T'); canEmail = reminderAllowed(zonedISO(day, time, zone)) } catch { /* incomplete date */ }
+    const sendEmail = email && canEmail
     async function save() {
         if (lock.current) return
         setError('')
@@ -48,13 +51,12 @@ export default function PracticeReminderDialog({ target, existing, onClose }: { 
             if (!day || !time) throw new Error('Выберите дату и время')
             at = zonedISO(day, time, zone)
             if (new Date(at) <= new Date()) throw new Error('Это время уже прошло. Выберите время впереди.')
-            if (email && new Date(at).getTime() - lead * 60000 <= Date.now()) throw new Error('До практики меньше выбранного интервала. Выберите письмо в момент начала.')
         } catch (error) { setError((error as Error).message); return }
         lock.current = true; setBusy(true)
         try {
-            const { data } = await api.put<PracticeReminder>('/practice-reminders', { ...target, ...(target.kind === 'draft' ? { payload } : {}), id: saved?.id, revision: saved?.revision, scheduled_at: at, timezone: zone, email_enabled: email, lead_minutes: lead })
+            const { data } = await api.put<PracticeReminder>('/practice-reminders', { ...target, ...(target.kind === 'draft' ? { payload } : {}), id: saved?.id, revision: saved?.revision, scheduled_at: at, timezone: zone, email_enabled: sendEmail, lead_minutes: 60 })
             reminderChanged(data.id)
-            toast.success(email ? `Практика запланирована. Письмо ${lead ? 'за ' + lead + ' минут' : 'в момент начала'}.` : 'План сохранён на главной, без письма.')
+            toast.success(sendEmail ? 'Практика запланирована. Напомним за час до начала.' : 'План сохранён на главной, без письма.')
             onClose()
         } catch (error) { setError(formatUserFacingError(error, 'Не удалось сохранить план')) }
         finally { lock.current = false; setBusy(false) }
@@ -74,9 +76,9 @@ export default function PracticeReminderDialog({ target, existing, onClose }: { 
                 {target.kind === 'draft' && ready && <><PracticeOptionsEditor value={payload} onChange={setPayload} disabled={busy} /><AvailabilityNotice check={check} /></>}
                 <span className="pr-field-label">Удобное время</span>
                 <PracticeTimeFields value={value} onChange={setValue} zone={zone} disabled={busy} />
-                <label className="pr-email"><input type="checkbox" checked={email} onChange={event => setEmail(event.target.checked)} disabled={busy} /><span>Напомнить по email<small>Одно письмо на адрес аккаунта. До 5 писем за 24 часа.</small></span></label>
-                {email && <label className="pr-lead">Отправить письмо<select value={lead} onChange={event => setLead(Number(event.target.value))} disabled={busy}><option value={0}>В момент начала</option><option value={10}>За 10 минут</option><option value={30}>За 30 минут</option></select></label>}
-                <p className="pr-note">{email ? 'Письмо включено. ' : 'Уведомление не придёт: план останется на главной. '}Планирование и перенос не расходуют попытки.{target.kind === 'preparation' ? ' Все этапы и повторы входят в одну попытку подготовки.' : target.kind === 'draft' || target.kind === 'review' ? ' Новая практика учтётся в лимите при старте.' : ''}</p>
+                <label className="pr-email"><input type="checkbox" checked={sendEmail} onChange={event => setEmail(event.target.checked)} disabled={busy || !canEmail || Boolean(saved?.email_sent) || saved?.email_error === 'uncertain'} /><span>Напомнить по email</span></label>
+                <p className="pr-email-hint">{saved?.email_sent ? 'Письмо уже отправлено. Повторного письма не будет.' : saved?.email_error === 'uncertain' ? 'Письмо могло быть доставлено. Повторно не отправляем.' : !canEmail ? 'До начала меньше часа — план сохраним без письма.' : 'Одно письмо за час до начала.'}</p>
+                <p className="pr-note">{sendEmail ? '' : 'Уведомление не придёт: план останется на главной. '}Планирование и перенос не расходуют попытки.{target.kind === 'preparation' ? ' Все этапы и повторы входят в одну попытку подготовки.' : target.kind === 'draft' || target.kind === 'review' ? ' Новая практика учтётся в лимите при старте.' : ''}</p>
                 {error && <p role="alert" className="pr-error">{error}</p>}
                 <div className="pr-actions"><button type="button" className="pr-btn" disabled={busy} onClick={onClose}>Закрыть</button><button type="submit" className="pr-btn primary" disabled={blocked}>{busy && <Loader2 size={16} className="animate-spin" />}{saved ? 'Сохранить изменения' : 'Запланировать'}</button></div>
                 {saved && <button type="button" className="pr-remove" disabled={busy} onClick={() => void remove()}>Отменить план</button>}

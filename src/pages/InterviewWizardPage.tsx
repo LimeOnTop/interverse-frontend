@@ -1,3 +1,4 @@
+import { reminderAllowed } from '../lib/practiceCalendar'
 import { usePracticeAvailability } from '../hooks/usePracticeAvailability'
 import { AvailabilityNotice } from '../components/PracticeOptionsEditor'
 import { reminderChanged } from '../lib/practiceReminders'
@@ -91,8 +92,8 @@ export default function InterviewWizardPage() {
 
 
             if(withSchedule){
-                const {data:plan} = await api.put('/practice-reminders',{kind:'draft',target_id:reminderDraftId.current,title:'',scheduled_at:new Date(scheduledAt).toISOString(),timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'Europe/Moscow',email_enabled:reminderEmail,lead_minutes:0,payload:{technologies:selectedTechStack,specialization:selectedSpecialization,level:selectedLevel,task_mode:taskMode}})
-                reminderChanged(plan.id);toast.success(reminderEmail ? 'План сохранён. Письмо придёт в момент начала.' : 'План сохранён на главной, без письма. Попытка спишется при старте.');clearFormDraft('interview-wizard');navigate(`/dashboard?reminder=${plan.id}`);return
+                const {data:plan} = await api.put('/practice-reminders',{kind:'draft',target_id:reminderDraftId.current,title:'',scheduled_at:new Date(scheduledAt).toISOString(),timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'Europe/Moscow',email_enabled:reminderEmail && reminderAllowed(new Date(scheduledAt).toISOString()),lead_minutes:60,payload:{technologies:selectedTechStack,specialization:selectedSpecialization,level:selectedLevel,task_mode:taskMode}})
+                reminderChanged(plan.id);toast.success(reminderEmail && reminderAllowed(new Date(scheduledAt).toISOString()) ? 'План сохранён. Напомним за час до начала.' : 'План сохранён на главной, без письма. Попытка спишется при старте.');clearFormDraft('interview-wizard');navigate(`/dashboard?reminder=${plan.id}`);return
             }
             const response = await api.post('/interviews/', interviewData)
             const interviewId = response.data?.interview?.id as string | undefined
@@ -270,7 +271,7 @@ export default function InterviewWizardPage() {
                                     {startMode === 'later' ? (
                                         <div className="mt-6">
                                             <SchedulePicker value={scheduledAt} onChange={(value) => update({ scheduledAt: value })} />
-                                            <label className="mt-5 flex gap-3 items-center text-sm"><input type="checkbox" checked={reminderEmail} onChange={e=>setReminderEmail(e.target.checked)}/>Напомнить по email в момент начала (до 5 писем за 24 часа)</label>
+                                            <label className="mt-5 flex gap-3 items-center text-sm"><input type="checkbox" checked={reminderEmail && reminderAllowed(scheduledAt)} disabled={!reminderAllowed(scheduledAt)} onChange={e=>setReminderEmail(e.target.checked)}/>Напомнить по email</label><p className="pr-email-hint">{reminderAllowed(scheduledAt) ? 'Одно письмо за час до начала.' : 'До начала меньше часа — план сохраним без письма.'}</p>
                                             <p className="mt-3 text-xs text-secondary">Планирование и перенос не расходуют попытки. Новая тренировка учтётся в лимите при старте.</p>
                                         </div>
                                     ) : (
