@@ -1,4 +1,4 @@
-import { registrationComplete } from '../lib/analytics'
+import { registrationComplete, setAnalyticsIdentity } from '../lib/analytics'
 import { clearPrivateStorage, tokenUser } from '../lib/privateStorage'
 import axios from 'axios'
 import { create } from 'zustand'
@@ -334,3 +334,8 @@ if (typeof window !== 'undefined') {
         void useAuthStore.getState().checkAuth()
     })
 }
+
+// Synchronous subscription runs before payment handlers/effects can emit events.
+useAuthStore.subscribe(state => {
+    if (!state.isLoading) setAnalyticsIdentity(state.user?.id ? String(state.user.id) : null)
+})

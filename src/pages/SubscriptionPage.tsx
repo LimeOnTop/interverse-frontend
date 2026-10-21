@@ -1,3 +1,4 @@
+import { usePricingAnalytics } from '../hooks/usePricingAnalytics'
 import { usePaymentNavigation } from '../hooks/usePaymentNavigation'
 import type { PaymentFormPayload } from '../lib/paymentNavigation'
 import ProTrialOffer, { TRIAL_OFFER } from '../components/ProTrialOffer'
@@ -74,6 +75,7 @@ function PriceBlock({
 }
 
 export default function SubscriptionPage() {
+    usePricingAnalytics('subscription')
     const { user, accessToken } = useAuthStore()
     const currentPlan = resolveSubscriptionPlan(user)
     const [buyingPlan, setBuyingPlan] = useState<string | null>(null)
