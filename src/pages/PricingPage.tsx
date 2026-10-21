@@ -1,3 +1,4 @@
+import { usePricingAnalytics } from '../hooks/usePricingAnalytics'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Check } from 'lucide-react'
@@ -51,6 +52,7 @@ function PriceBlock({
 }
 
 export default function PricingPage() {
+    usePricingAnalytics('pricing')
     const [paidOffers, setPaidOffers] = useState<PaidOffer[]>(FALLBACK_PAID_OFFERS)
     const [earlyBirdRemaining, setEarlyBirdRemaining] = useState(27)
     const [earlyBirdLimit, setEarlyBirdLimit] = useState(100)

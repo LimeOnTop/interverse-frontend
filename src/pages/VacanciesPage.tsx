@@ -5,7 +5,6 @@ import { ArrowRight, Search } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { api } from '../services/api'
 import { useAuthStore } from '../store/authStore'
-import { resolveSubscriptionPlan } from '../utils/subscription'
 import PageTransition from '../components/ui/PageTransition'
 import VacancyCard, {
     inferLevel,
@@ -103,7 +102,6 @@ function mergeVacancyCards(prev: VacancyCardData[], next: VacancyCardData[]): {
 export default function VacanciesPage() {
     const [ownVacancy,setOwnVacancy]=useState(false)
     const user = useAuthStore((s) => s.user)
-    const hasPro = resolveSubscriptionPlan(user) === 'paid'
     const [loading, setLoading] = useState(true)
     const [retry, setRetry] = useState(0)
     const [error, setError] = useState<string | null>(null)
@@ -124,7 +122,7 @@ export default function VacanciesPage() {
         setFilters((prev) => ({ ...DEFAULT_FILTERS, ...prev, [key]: value }))
 
     useEffect(() => {
-        if (!hasPro || !user?.id) return
+        if (!user?.id) return
         let cancelled = false
         api.get(`/users/${user.id}/profile`)
             .then(({ data }) => {
@@ -136,10 +134,10 @@ export default function VacanciesPage() {
         return () => {
             cancelled = true
         }
-    }, [hasPro, user?.id])
+    }, [user?.id])
 
     useEffect(() => {
-        if (!hasPro) {
+        if (!user?.id) {
             setLoading(false)
             return
         }
@@ -189,10 +187,10 @@ export default function VacanciesPage() {
             controller.abort()
             if (pause) clearTimeout(pause)
         }
-    }, [hasPro, user?.id, retry])
+    }, [user?.id, retry])
 
     useEffect(() => {
-        if (!hasPro || !profileReady || loading || error) return
+        if (!user?.id || !profileReady || loading || error) return
 
         let cancelled = false
         let inFlight = false
@@ -239,7 +237,7 @@ export default function VacanciesPage() {
             cancelled = true
             window.clearInterval(timer)
         }
-    }, [hasPro, profileReady, loading, error])
+    }, [user?.id, profileReady, loading, error])
 
     const fallbackSkills = useMemo(
         () => queryText.split(/\s+/).map((item) => item.trim()).filter(Boolean),
@@ -297,28 +295,14 @@ export default function VacanciesPage() {
                 <h1>Вакансии и подготовка</h1>
                 <p>Посмотри требования. Выбери, к какой роли готовиться дальше.</p>
             </div>
-            {hasPro && <button type="button" className="lib-btn is-primary" onClick={event=>{event.currentTarget.focus();setOwnVacancy(true)}}>Подготовиться к своей вакансии</button>}
-            {hasPro && checkedAt && (
+            <button type="button" className="lib-btn is-primary" onClick={event=>{event.currentTarget.focus();setOwnVacancy(true)}}>Подготовиться к своей вакансии</button>
+            {checkedAt && (
                 <span className="lib-chip">{polling ? 'Обновляем…' : `Проверено ${formatDay(checkedAt.toISOString(), false)}`}</span>
             )}
         </header>
         </>
     )
 
-    if (!hasPro) {
-        return (
-            <PageTransition>
-                {head}
-                <section className="collection-empty">
-                    <h3>Подбор вакансий доступен в Pro</h3>
-                    <p>В Pro мы собираем актуальные вакансии по навыкам из твоего профиля, показываем совпадение стека и запускаем тренировку по технологиям вакансии.</p>
-                    <div className="actions">
-                        <Link to="/subscription" className="lib-btn is-primary">Перейти на Pro <ArrowRight /></Link>
-                    </div>
-                </section>
-            </PageTransition>
-        )
-    }
 
     return (
         <PageTransition>

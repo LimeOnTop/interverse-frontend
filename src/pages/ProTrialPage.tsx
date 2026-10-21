@@ -1,3 +1,4 @@
+import { usePricingAnalytics } from '../hooks/usePricingAnalytics'
 import { usePaymentNavigation } from '../hooks/usePaymentNavigation'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -9,6 +10,7 @@ import { checkoutStarted } from '../lib/analytics'
 import toast from 'react-hot-toast'
 import { useAuthStore } from '../store/authStore'
 export default function ProTrialPage(){
+    usePricingAnalytics('pro_trial')
  const [busy,setBusy]=useState(false)
  const submitPayment = usePaymentNavigation(() => setBusy(false))
  const [open,setOpen]=useState(false),[available,setAvailable]=useState(false); const navigate=useNavigate(); const {accessToken}=useAuthStore()

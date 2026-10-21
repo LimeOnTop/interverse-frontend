@@ -2,19 +2,21 @@ import { useEffect, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import { api } from '../services/api'
-import { confirmPurchases, pendingPurchases, METRIKA_ID } from '../lib/analytics'
+import { confirmPurchases, pendingPurchases, trackPage, setAnalyticsIdentity } from '../lib/analytics'
 
 export default function AnalyticsTracker() {
-    const firstPage = useRef(true)
+    const lastPage = useRef('')
     const { pathname } = useLocation()
     const userId = useAuthStore(s => s.user?.id)
+    const isLoading = useAuthStore(s => s.isLoading)
     useEffect(() => {
-        if (!['inter-verse.ru', 'www.inter-verse.ru'].includes(window.location.hostname)) return
-        if (firstPage.current) { firstPage.current = false; return }
-        // Pageviews contain the route only; OAuth and verification URL parameters stay private.
-        const ym = (window as Window & { ym?: (...args: unknown[]) => void }).ym
-        ym?.(METRIKA_ID, 'hit', window.location.origin + pathname)
-    }, [pathname])
+        if (isLoading) return
+        setAnalyticsIdentity(userId ? String(userId) : null)
+        const key = `${pathname}:${userId || 'guest'}`
+        if (lastPage.current === key) return
+        trackPage(pathname)
+        lastPage.current = key
+    }, [pathname, userId, isLoading])
     useEffect(() => {
         if (!userId || !pendingPurchases().some(p => p.owner === String(userId))) return
         let cancelled = false
