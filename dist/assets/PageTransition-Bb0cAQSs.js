@@ -1,1 +1,0 @@
-import{$ as a,j as n,M as e}from"./renderApp-Rsfw_Gx3.js";function r({children:t,className:o=""}){const i=a();return n.jsx(e.div,{initial:i?!1:{opacity:0,y:8},animate:{opacity:1,y:0},exit:i?{opacity:0}:{opacity:0,y:-4},transition:{duration:i?0:.18,ease:[.23,1,.32,1]},className:o,children:t})}export{r as P};

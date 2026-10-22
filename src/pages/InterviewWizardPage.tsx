@@ -1,3 +1,4 @@
+import { effectiveTaskMode, resolveWizardStep, supportsPracticalTasks, trainingWizardSteps } from '../lib/trainingWizard'
 import { reminderAllowed } from '../lib/practiceCalendar'
 import { usePracticeAvailability } from '../hooks/usePracticeAvailability'
 import { AvailabilityNotice } from '../components/PracticeOptionsEditor'
@@ -18,13 +19,7 @@ import { useTechnologySearch } from '../hooks/useTechnologySearch'
 import { LEVELS, SPECIALIZATIONS, TECH_STACKS } from '../components/InterviewWizard/options'
 import SchedulePicker, { nextSlot } from '../components/InterviewWizard/SchedulePicker'
 
-const STEPS = [
-    { title: 'Направление', description: 'Твоя специализация' },
-    { title: 'Технологии', description: 'Стек для практики' },
-    { title: 'Уровень', description: 'Сложность вопросов' },
-    { title: 'Задачи', description: 'Количество задач' },
-    { title: 'Старт', description: 'Проверка параметров' },
-]
+const WIZARD_EASE = [0.23, 1, 0.32, 1] as const
 
 type StartMode = 'now' | 'later'
 
@@ -39,13 +34,18 @@ export default function InterviewWizardPage() {
         startMode: 'now' as StartMode,
         scheduledAt: '',
     })
-    // Drafts saved by the old five-step wizard.
-    const currentStep = Math.min(Math.max(draft.currentStep, 1), STEPS.length)
+    // Stable IDs preserve existing five-step drafts when the task step disappears.
     const { selectedSpecialization, selectedTechStack, selectedLevel } = draft
-    const taskMode = draft.taskMode || 'theory'
+    const steps = trainingWizardSteps(selectedTechStack)
+    const currentStep = resolveWizardStep(draft.currentStep, selectedTechStack)
+    const stepIndex = steps.findIndex(step => step.id === currentStep)
+    const stepNumber = stepIndex + 1
+    const taskMode = effectiveTaskMode(selectedTechStack, draft.taskMode)
     const startMode: StartMode = draft.startMode === 'later' ? 'later' : 'now'
     const scheduledAt = draft.scheduledAt && !draft.scheduledAt.endsWith('Z') ? draft.scheduledAt : ''
     const reduceMotion = useReducedMotion()
+    const [keyboardInteraction, setKeyboardInteraction] = useState(false)
+    const staticMotion = Boolean(reduceMotion || keyboardInteraction)
     const availability = usePracticeAvailability({technologies:selectedTechStack,specialization:selectedSpecialization,level:selectedLevel,task_mode:taskMode}, currentStep === 5 && Boolean(selectedLevel), true)
     const [isLoading, setIsLoading] = useState(false)
     const [reminderEmail,setReminderEmail]=useState(false)
@@ -53,7 +53,10 @@ export default function InterviewWizardPage() {
     const [direction, setDirection] = useState(1)
     const navigate = useNavigate()
 
-    const update = (patch: Partial<typeof draft>) => setDraft((prev) => ({ ...prev, ...patch }))
+    const update = (patch: Partial<typeof draft>) => setDraft((prev) => {
+        const next = { ...prev, ...patch }
+        return { ...next, taskMode: effectiveTaskMode(next.selectedTechStack, next.taskMode) }
+    })
     const stepPanel = useRef<HTMLElement>(null)
     const goTo = (step: number) => {
         stepPanel.current?.scrollIntoView({ block: 'start', behavior: 'auto' })
@@ -121,22 +124,23 @@ export default function InterviewWizardPage() {
 
     const handleBack = () => {
         if (currentStep === 1) navigate(-1)
-        else goTo(currentStep - 1)
+        else goTo(steps[stepIndex - 1].id)
     }
 
     const handleNext = () => {
         if (!canContinue) return
-        if (currentStep < STEPS.length) goTo(currentStep + 1)
+        if (stepIndex < steps.length - 1) goTo(steps[stepIndex + 1].id)
         else void handleSubmit()
     }
 
     return (
         <PageTransition className="max-w-6xl mx-auto">
+            <div onPointerDownCapture={() => setKeyboardInteraction(false)} onKeyDownCapture={() => setKeyboardInteraction(true)}>
             <header className="flex items-start justify-between gap-4 mb-6 sm:mb-10">
                 <div>
-                    <p className="iv-eyebrow">Training studio / 0{currentStep}</p>
+                    <p className="iv-eyebrow">Training studio / 0{stepNumber}</p>
                     <h1 className="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Новая тренировка</h1>
-                    <p className="mt-2 text-secondary">Выбери направление, технологии, сложность и количество задач.</p>
+                    <p className="mt-2 text-secondary">Выбери направление, технологии и уровень. Подходящие параметры появятся по ходу настройки.</p>
                 </div>
                 <span className="hidden sm:inline-flex mt-8 rounded-md border border-gray-200 dark:border-iv-dark-line px-2.5 py-1 text-xs font-semibold text-secondary">
                     Настройка практики
@@ -145,56 +149,66 @@ export default function InterviewWizardPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-[15rem_1fr] gap-6 lg:gap-10 items-start">
                 <aside className="hidden lg:block pt-4">
-                    <ol>
-                        {STEPS.map((step, index) => {
+                    <ol aria-label="Этапы настройки тренировки">
+                        <AnimatePresence initial={false} mode="popLayout">
+                        {steps.map((step, index) => {
                             const number = index + 1
-                            const done = number < currentStep
-                            const active = number === currentStep
+                            const done = index < stepIndex
+                            const active = step.id === currentStep
                             return (
-                                <li key={step.title} className="relative flex gap-4 pb-8 last:pb-0">
-                                    {index < STEPS.length - 1 && (
-                                        <span className="absolute left-[17px] top-10 bottom-1 w-px bg-gray-200 dark:bg-iv-dark-line" aria-hidden />
+                                <motion.li key={step.id} layout={staticMotion ? false : 'position'}
+                                    initial={staticMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: staticMotion ? 0 : 0.1 } }}
+                                    transition={{ duration: staticMotion ? 0 : 0.18, ease: WIZARD_EASE, layout: { duration: staticMotion ? 0 : 0.22, ease: WIZARD_EASE } }}
+                                    className="relative flex gap-4 pb-8 last:pb-0">
+                                    {index < steps.length - 1 && (
+                                        <span className="absolute left-[17px] top-10 bottom-1 w-px bg-gray-200 dark:bg-iv-dark-line overflow-hidden" aria-hidden>
+                                            <motion.span className="absolute inset-0 bg-inter-verse-green dark:bg-purple-400" style={{ transformOrigin: 'top' }} initial={false}
+                                                animate={{ transform: `scaleY(${done ? 1 : 0})` }} transition={{ duration: staticMotion ? 0 : 0.22, ease: WIZARD_EASE }} />
+                                        </span>
                                     )}
-                                    <button
-                                        type="button"
-                                        onClick={() => done && goTo(number)}
-                                        disabled={!done}
+                                    <button type="button" onClick={() => done && goTo(step.id)} disabled={!done}
                                         aria-current={active ? 'step' : undefined}
-                                        className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-xs font-semibold border transition-iv ${
-                                            active
-                                                ? 'gradient-bg-adaptive text-white border-transparent'
-                                                : done
-                                                    ? 'border-inter-verse-green text-inter-verse-green dark:border-purple-400 dark:text-purple-300 cursor-pointer'
+                                        className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-xs font-semibold border transition-colors duration-150 ${
+                                            active ? 'gradient-bg-adaptive text-white border-transparent'
+                                                : done ? 'border-inter-verse-green text-inter-verse-green dark:border-purple-400 dark:text-purple-300 cursor-pointer'
                                                     : 'border-gray-200 dark:border-iv-dark-line text-secondary'
-                                        }`}
-                                    >
+                                        }`}>
                                         {done ? <Check className="w-4 h-4" /> : `0${number}`}
                                     </button>
                                     <span className="pt-1">
                                         <span className={`block text-sm font-semibold ${active ? 'text-gray-900 dark:text-gray-100' : 'text-secondary'}`}>{step.title}</span>
                                         <span className="block text-xs text-secondary mt-0.5">{step.description}</span>
                                     </span>
-                                </li>
+                                </motion.li>
                             )
                         })}
+                        </AnimatePresence>
                     </ol>
                     <p className="mt-10 text-xs text-secondary leading-relaxed">Хорошая подготовка начинается<br />с понятной цели.</p>
                 </aside>
 
                 <section ref={stepPanel} className="iv-panel rounded-2xl p-5 sm:p-9 shadow-iv-md min-w-0">
                     <div className="flex items-center justify-between gap-4">
-                        <span className="font-mono text-xs text-secondary">ШАГ 0{currentStep} / 0{STEPS.length}</span>
-                        <div className="iv-track w-24"><span style={{ width: `${(currentStep / STEPS.length) * 100}%` }} /></div>
+                        <span className="font-mono text-xs text-secondary" aria-live="polite">ШАГ 0{stepNumber} / 0{steps.length}</span>
+                        <div role="progressbar" aria-label="Прогресс настройки тренировки" aria-valuemin={1} aria-valuemax={steps.length} aria-valuenow={stepNumber} className="flex w-28 gap-1.5 sm:w-36">
+                            <AnimatePresence initial={false} mode="popLayout">
+                                {steps.map((step, index) => <motion.span key={step.id} layout={!staticMotion} initial={staticMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                    transition={{ duration: staticMotion ? 0 : 0.18, ease: WIZARD_EASE }} className="relative h-1.5 flex-1 min-w-0 overflow-hidden rounded-full bg-gray-100 dark:bg-iv-dark-line" aria-hidden>
+                                    <motion.span className="absolute inset-0 rounded-full gradient-bg-adaptive" style={{ transformOrigin: 'left' }} initial={false}
+                                        animate={{ transform: `scaleX(${index <= stepIndex ? 1 : 0})` }} transition={{ duration: staticMotion ? 0 : 0.22, ease: WIZARD_EASE }} />
+                                </motion.span>)}
+                            </AnimatePresence>
+                        </div>
                     </div>
 
                     {currentStep === 5 && <AvailabilityNotice check={availability} />}
                     <AnimatePresence mode="wait" initial={false}>
                         <motion.div
                             key={currentStep}
-                            initial={reduceMotion ? {opacity:1} : { opacity: 0, x: 14 * direction }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={reduceMotion ? {opacity:0} : { opacity: 0, x: -14 * direction }}
-                            transition={{ duration: reduceMotion ? 0 : 0.12 }}
+                            initial={staticMotion ? false : { opacity: 0, transform: `translateX(${12 * direction}px)` }}
+                            animate={{ opacity: 1, transform: 'translateX(0px)' }}
+                            exit={{ opacity: 0, transform: staticMotion ? 'none' : `translateX(${-12 * direction}px)`, transition: { duration: staticMotion ? 0 : 0.1 } }}
+                            transition={{ duration: staticMotion ? 0 : 0.18, ease: WIZARD_EASE }}
                             className="mt-6"
                         >
                             {currentStep === 1 && (
@@ -240,7 +254,7 @@ export default function InterviewWizardPage() {
                                     </div>
                                 </StepBody>
                             )}
-                            {currentStep === 4 && (
+                            {currentStep === 4 && supportsPracticalTasks(selectedTechStack) && (
                                 <StepBody title="Сколько задач добавим?" copy="Теоретические вопросы будут во всех режимах. Если задач в банке меньше, добавим доступные.">
                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                         <OptionCard glyph="◎" title="Только теория" description="Без практических задач" selected={taskMode === 'theory'} onClick={() => update({ taskMode: 'theory' })} />
@@ -275,7 +289,7 @@ export default function InterviewWizardPage() {
                                             <p className="mt-3 text-xs text-secondary">Планирование и перенос не расходуют попытки. Новая тренировка учтётся в лимите при старте.</p>
                                         </div>
                                     ) : (
-                                        <p className="mt-5 text-sm text-secondary">Вопросы и практические задачи подберём под выбранный стек и уровень.</p>
+                                        <p className="mt-5 text-sm text-secondary">{taskMode === 'theory' ? 'Теоретические вопросы подберём под выбранный стек и уровень.' : 'Вопросы и практические задачи подберём под выбранный стек и уровень.'}</p>
                                     )}
                                 </StepBody>
                             )}
@@ -296,7 +310,7 @@ export default function InterviewWizardPage() {
                             disabled={!canContinue || isLoading}
                             className="btn-primary-adaptive inline-flex items-center gap-2 rounded-lg px-5 py-3 text-sm disabled:opacity-50 disabled:pointer-events-none"
                         >
-                            {currentStep < STEPS.length ? 'Продолжить' : startMode === 'later' ? 'Запланировать' : 'Начать тренировку'}
+                            {stepIndex < steps.length - 1 ? 'Продолжить' : startMode === 'later' ? 'Запланировать' : 'Начать тренировку'}
                             <ArrowRight className="w-4 h-4" />
                         </button>
                     </footer>
@@ -308,7 +322,7 @@ export default function InterviewWizardPage() {
                     {currentStep === 1 ? 'Отмена' : 'Назад'}
                 </button>
                 <button type="button" onClick={handleNext} disabled={!canContinue || isLoading} className="btn-primary-adaptive min-w-0 min-h-[48px] px-3 rounded-lg inline-flex items-center justify-center gap-2 text-sm disabled:opacity-50 disabled:pointer-events-none">
-                    {currentStep < STEPS.length ? 'Продолжить' : startMode === 'later' ? 'Запланировать' : 'Начать тренировку'}
+                    {stepIndex < steps.length - 1 ? 'Продолжить' : startMode === 'later' ? 'Запланировать' : 'Начать тренировку'}
                     <ArrowRight className="w-4 h-4 shrink-0" />
                 </button>
             </MobileActionBar>
@@ -321,6 +335,7 @@ export default function InterviewWizardPage() {
                     </div>
                 </div>
             )}
+            </div>
         </PageTransition>
     )
 }
@@ -347,7 +362,7 @@ function OptionCard({ glyph, title, description, selected, onClick }: {
             type="button"
             onClick={onClick}
             aria-pressed={selected}
-            className={`relative text-left rounded-xl border-2 p-5 transition-iv ${
+            className={`relative text-left rounded-xl border-2 p-5 transition-[border-color,background-color,transform] duration-150 ease-out active:scale-[0.98] motion-reduce:transform-none motion-reduce:transition-none ${
                 selected
                     ? 'border-inter-verse-green dark:border-purple-400'
                     : 'border-gray-200 dark:border-iv-dark-line hover:border-gray-300 dark:hover:border-gray-500'
@@ -409,7 +424,7 @@ function TechStep({ specialization, specializationName, selected, onChange }: {
                                 type="button"
                                 onClick={() => toggle(tech)}
                                 aria-pressed={isSelected}
-                                className={`inline-flex items-center gap-2 rounded-full border-2 px-4 py-2 transition-iv ${
+                                className={`inline-flex items-center gap-2 rounded-full border-2 px-4 py-2 transition-[border-color,background-color,transform] duration-150 ease-out active:scale-[0.98] motion-reduce:transform-none motion-reduce:transition-none ${
                                     isSelected
                                         ? 'border-inter-verse-green text-base font-semibold text-inter-verse-green dark:border-purple-400 dark:text-purple-300'
                                         : 'border-gray-200 dark:border-iv-dark-line text-sm font-medium text-gray-800 dark:text-gray-200 hover:border-gray-300 dark:hover:border-gray-500'
