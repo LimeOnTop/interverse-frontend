@@ -18,6 +18,7 @@ const PrivacyPage = lazy(() => import('./pages/PrivacyPage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const RegisterPage = lazy(() => import('./pages/RegisterPage'))
 const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'))
+const SystemDesignPage = lazy(() => import('./features/system-design/SystemDesignPage'))
 const DashboardPage = lazy(() => import('./pages/DashboardPage'))
 const ActivityPage = lazy(() => import('./pages/ActivityPage'))
 const InterviewWizardPage = lazy(() => import('./pages/InterviewWizardPage'))
@@ -91,6 +92,8 @@ function App() {
                     <Route path="/metrics-login" element={<GrafanaLoginPage />} />
 
                     {/* Protected routes */}
+                    <Route path="/system-design" element={<ProtectedRoute><Layout><SystemDesignPage /></Layout></ProtectedRoute>} />
+                    <Route path="/system-design/:id" element={<ProtectedRoute><Layout><SystemDesignPage /></Layout></ProtectedRoute>} />
                     <Route
                         path="/dashboard"
                         element={

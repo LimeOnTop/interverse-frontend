@@ -1,5 +1,6 @@
 import {
     LayoutGrid,
+    Network,
     FileText,
     BarChart3,
     PlayCircle,
@@ -26,6 +27,7 @@ export const PREPARATION_NAV: NavItem[] = [
     { name: 'Отчёты', href: '/reports', icon: FileText },
     { name: 'Прогресс', href: '/activity', icon: BarChart3 },
     { name: 'Вакансии', href: '/vacancies', icon: Briefcase },
+    { name: 'System Design', href: '/system-design', icon: Network },
     { name: 'Траектории', href: '/tracks', icon: Route, soon: true },
 ]
 
