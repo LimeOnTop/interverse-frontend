@@ -472,3 +472,96 @@ export function arrange(design: Design): Design {
         }),
     }
 }
+
+/** Insert or move a simple inline component in one atomic, undoable graph operation. */
+export function insertBlockOnWire(design: Design, block: Block, wireId: string): Design | null {
+    const wire = design.wires.find((w) => w.id === wireId)
+    if (
+        !wire ||
+        wire.source === block.id ||
+        wire.target === block.id ||
+        block.kind === 'client' ||
+        block.kind === 'storage'
+    )
+        return null
+    const existing = design.blocks.some((n) => n.id === block.id)
+    const incoming = design.wires.filter((w) => w.target === block.id)
+    const outgoing = design.wires.filter((w) => w.source === block.id)
+    if (
+        existing &&
+        !(
+            (incoming.length === 0 && outgoing.length === 0) ||
+            (incoming.length === 1 && outgoing.length === 1)
+        )
+    )
+        return null
+    let wires = design.wires.filter((w) => w.id !== wireId && w.source !== block.id && w.target !== block.id)
+    const blocks = existing
+        ? design.blocks.map((n) => (n.id === block.id ? { ...block } : { ...n }))
+        : [...design.blocks.map((n) => ({ ...n })), { ...block }]
+    if (
+        incoming.length === 1 &&
+        outgoing.length === 1 &&
+        !wires.some((w) => w.source === incoming[0].source && w.target === outgoing[0].target)
+    ) {
+        wires.push({
+            id: `bridge:${block.id}:${wireId}`,
+            source: incoming[0].source,
+            target: outgoing[0].target,
+        })
+    }
+    wires = [
+        ...wires,
+        { id: `in:${block.id}:${wireId}`, source: wire.source, target: block.id },
+        { id: `out:${block.id}:${wireId}`, source: block.id, target: wire.target },
+    ]
+    const next = { blocks, wires }
+    if (
+        wires.some((w) =>
+            wouldCycle({ ...next, wires: wires.filter((e) => e.id !== w.id) }, w.source, w.target),
+        )
+    )
+        return null
+    // Make room locally rather than rearranging the entire board after insertion.
+    const from = blocks.find((n) => n.id === wire.source)!,
+        to = blocks.find((n) => n.id === wire.target)!,
+        inserted = blocks.find((n) => n.id === block.id)!
+    if (to.x >= from.x) {
+        inserted.x = Math.max(inserted.x, from.x + 265)
+        const shift = Math.max(0, inserted.x + 265 - to.x)
+        if (shift) {
+            const downstream = new Set<string>()
+            const visit = (id: string) => {
+                if (downstream.has(id) || id === block.id) return
+                downstream.add(id)
+                wires.filter((w) => w.source === id).forEach((w) => visit(w.target))
+            }
+            visit(to.id)
+            blocks.forEach((n) => {
+                if (downstream.has(n.id)) n.x += shift
+            })
+        }
+    }
+    return next
+}
+
+/** Removing a simple inline block restores its old route; branching blocks need explicit rewiring. */
+export function removeDesignBlock(design: Design, id: string): Design {
+    const incoming = design.wires.filter((w) => w.target === id),
+        outgoing = design.wires.filter((w) => w.source === id)
+    const next = {
+        blocks: design.blocks.filter((n) => n.id !== id),
+        wires: design.wires.filter((w) => w.source !== id && w.target !== id),
+    }
+    if (incoming.length === 1 && outgoing.length === 1) {
+        const source = incoming[0].source,
+            target = outgoing[0].target
+        if (
+            source !== target &&
+            !next.wires.some((w) => w.source === source && w.target === target) &&
+            !wouldCycle(next, source, target)
+        )
+            next.wires.push({ id: `restore:${id}`, source, target })
+    }
+    return next
+}

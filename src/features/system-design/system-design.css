@@ -505,19 +505,6 @@
     gap: 10px;
     margin-top: 18px;
 }
-.sd-parts > button {
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    text-align: left;
-    padding: 13px 11px;
-    border: 1px solid var(--iv-border);
-    border-radius: 9px;
-    width: 100%;
-}
-.sd-parts > button > span:nth-child(2) {
-    flex: 1;
-}
 .sd-parts strong {
     font-size: 12px;
     display: block;
@@ -528,11 +515,6 @@
     font-size: 11px;
     line-height: 1.6;
     color: var(--iv-text-secondary);
-}
-.sd-parts > button > svg {
-    flex-shrink: 0;
-    margin-top: 7px;
-    color: var(--sd-accent);
 }
 .sd-wire-form {
     display: grid;
@@ -1003,4 +985,366 @@
 .sd-modal::backdrop {
     background: #0007;
     backdrop-filter: blur(3px);
+}
+/* Direct manipulation: the preview tracks the pointer without easing; only its shape morphs. */
+body.sd-grabbing,
+body.sd-grabbing * {
+    cursor: grabbing !important;
+    user-select: none !important;
+}
+.sd-part-card {
+    display: flex;
+    border: 1px solid var(--iv-border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--iv-surface);
+}
+.sd-part-main {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    text-align: left;
+    padding: 13px 10px;
+    flex: 1;
+    min-width: 0;
+    cursor: grab;
+}
+.sd-part-main > span:nth-child(2) {
+    flex: 1;
+    min-width: 0;
+}
+.sd-part-main > svg {
+    flex-shrink: 0;
+    margin-top: 7px;
+    color: var(--sd-accent);
+}
+.sd-part-grip {
+    width: 32px;
+    min-width: 32px;
+    display: grid;
+    place-items: center;
+    color: var(--iv-text-secondary);
+    border-left: 1px solid var(--iv-border);
+    touch-action: none;
+    cursor: grab;
+}
+.sd-board.is-drop-zone {
+    box-shadow: inset 0 0 0 2px var(--sd-accent);
+}
+.sd-board .react-flow__edge.is-drop-target .react-flow__edge-path {
+    stroke: var(--sd-accent) !important;
+    stroke-width: 5;
+    stroke-dasharray: 7 4;
+}
+.sd-board .react-flow__edge.is-selected-wire .react-flow__edge-path {
+    stroke: var(--sd-accent) !important;
+    stroke-width: 3;
+}
+.sd-drag-preview {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 140;
+    pointer-events: none;
+    width: 0;
+    height: 0;
+    margin: 0;
+    will-change: transform;
+}
+.sd-drag-original,
+.sd-drag-compact {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: top left;
+    transition:
+        transform 180ms cubic-bezier(0.77, 0, 0.175, 1),
+        opacity 180ms cubic-bezier(0.23, 1, 0.32, 1);
+    box-shadow: 0 12px 32px #0002;
+}
+.sd-drag-original {
+    display: flex;
+    gap: 10px;
+    padding: 13px;
+    background: var(--iv-surface);
+    border: 1px solid var(--sd-accent);
+    border-radius: 10px;
+}
+.sd-drag-original strong {
+    display: block;
+    font-size: 12px;
+    line-height: 1.5;
+}
+.sd-drag-original small {
+    display: block;
+    font-size: 11px;
+    line-height: 1.6;
+    color: var(--iv-text-secondary);
+    margin-top: 6px;
+}
+.sd-drag-preview .sd-drag-compact {
+    width: 204px;
+    min-height: 76px;
+}
+.sd-drag-compact.is-blocked {
+    border-color: var(--sd-danger);
+    opacity: 0.55 !important;
+}
+.sd-drop-tip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    white-space: nowrap;
+    padding: 6px 10px;
+    background: var(--iv-surface);
+    border: 1px solid var(--sd-accent);
+    color: var(--iv-text);
+    font-size: 11px;
+    border-radius: 7px;
+    box-shadow: 0 3px 12px #0001;
+}
+.sd-edge-actions {
+    padding: 14px;
+    border-top: 1px solid var(--iv-border);
+    background: var(--iv-tint);
+}
+.sd-edge-actions-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+.sd-edge-actions-title strong {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    flex-wrap: wrap;
+}
+.sd-edge-actions > p {
+    font-size: 11px;
+    color: var(--iv-text-secondary);
+    margin-bottom: 10px;
+}
+.sd-insert-options {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+.sd-insert-options button {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 40px;
+    padding: 8px 11px;
+    font-size: 12px;
+    border: 1px solid var(--iv-border);
+    border-radius: 8px;
+    background: var(--iv-surface);
+}
+.sd-node-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+.sd-node-actions button {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    min-height: 36px;
+    padding: 6px 8px;
+    border: 1px solid var(--iv-border);
+    border-radius: 7px;
+}
+/* Radix owns focus, keyboard navigation, typeahead and collision-aware positioning. */
+.sd-select-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    min-height: 46px;
+    padding: 11px 12px;
+    background: var(--iv-surface);
+    border: 1px solid var(--iv-border);
+    border-radius: 9px;
+    color: var(--iv-text);
+    font-size: 13px;
+    text-align: left;
+}
+.sd-select-trigger[data-placeholder] {
+    color: var(--iv-text-secondary);
+}
+.sd-select-trigger[data-state='open'] {
+    border-color: var(--sd-accent);
+    box-shadow: 0 0 0 2px var(--iv-focus-ring);
+}
+.sd-select-trigger > span:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.sd-select-trigger svg {
+    flex-shrink: 0;
+    color: var(--iv-text-secondary);
+}
+.sd-select-content {
+    z-index: 150;
+    min-width: var(--radix-select-trigger-width);
+    max-width: calc(100vw - 24px);
+    max-height: min(300px, var(--radix-select-content-available-height));
+    background: var(--iv-surface);
+    color: var(--iv-text);
+    border: 1px solid var(--iv-border);
+    border-radius: 10px;
+    padding: 5px;
+    box-shadow: 0 12px 40px #0002;
+    transform-origin: var(--radix-select-content-transform-origin);
+    animation: sd-select-in 150ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.sd-select-viewport {
+    padding: 2px;
+    overscroll-behavior: contain;
+}
+.sd-select-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    min-height: 42px;
+    padding: 9px 11px;
+    border-radius: 6px;
+    font-size: 13px;
+    outline: none;
+    cursor: pointer;
+    user-select: none;
+    touch-action: manipulation;
+}
+.sd-select-option[data-highlighted] {
+    background: var(--iv-tint);
+    color: var(--iv-brand-accent);
+}
+.sd-select-option[data-state='checked'] {
+    color: var(--iv-brand-accent);
+    font-weight: 600;
+}
+.sd-select-option[data-disabled] {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+.sd-select-option > span:last-child {
+    color: var(--iv-brand-accent);
+}
+.sd-select-scroll {
+    display: grid;
+    place-items: center;
+    height: 28px;
+    color: var(--iv-text-secondary);
+}
+@keyframes sd-select-in {
+    from {
+        opacity: 0;
+        transform: translateY(-3px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+@media (pointer: coarse) {
+    .sd-part-grip {
+        width: 44px;
+        min-width: 44px;
+    }
+    .sd-select-option {
+        min-height: 46px;
+        font-size: 16px;
+    }
+    .sd-node-actions button {
+        min-height: 44px;
+    }
+    .sd-select-trigger {
+        font-size: 16px;
+    }
+}
+@media (max-width: 800px) {
+    .sd-part-grip {
+        width: 44px;
+        min-width: 44px;
+    }
+    .sd-insert-options button,
+    .sd-node-actions button {
+        min-height: 44px;
+    }
+    .sd-select-trigger {
+        font-size: 16px;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .sd-drag-original,
+    .sd-drag-compact {
+        transition: none;
+    }
+    .sd-select-content {
+        animation: none;
+    }
+}
+.sd-select-content[data-keyboard='true'] {
+    animation: none;
+}
+.sd-select-hint {
+    font-size: 10px;
+    font-weight: 400;
+    opacity: 0.8;
+    margin-left: auto;
+    white-space: nowrap;
+}
+.sd-page button:focus-visible:active {
+    transform: none;
+}
+.sd-part-card.is-being-dragged {
+    opacity: 0.35;
+}
+.sd-board-section {
+    position: relative;
+}
+.sd-edge-actions,
+.sd-inspector {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 44px;
+    z-index: 10;
+    max-height: 230px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 1px solid var(--iv-border);
+    border-radius: 10px;
+    background: var(--iv-surface);
+    box-shadow: 0 6px 24px #0002;
+    animation: none;
+}
+@media (max-width: 800px) {
+    .sd-edge-actions,
+    .sd-inspector {
+        position: static;
+        max-height: none;
+        border: 0;
+        border-top: 1px solid var(--iv-border);
+        border-radius: 0;
+        box-shadow: none;
+    }
+    .sd-edge-actions {
+        background: var(--iv-tint);
+    }
+}
+@media (min-width: 801px) {
+    .sd-edge-actions,
+    .sd-inspector {
+        left: 76px;
+        right: 66px;
+    }
 }

@@ -6,9 +6,16 @@ const source = readFileSync(new URL('../src/features/system-design/model.ts', im
 const js = ts.transpileModule(source, {
     compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
 }).outputText
-const { EXERCISES, evaluate, cloneDesign, restoreDesign, wouldCycle, arrange } = await import(
-    'data:text/javascript;base64,' + Buffer.from(js).toString('base64')
-)
+const {
+    EXERCISES,
+    evaluate,
+    cloneDesign,
+    restoreDesign,
+    wouldCycle,
+    arrange,
+    insertBlockOnWire,
+    removeDesignBlock,
+} = await import('data:text/javascript;base64,' + Buffer.from(js).toString('base64'))
 const block = (id, kind) => ({ id, kind, x: 300, y: 300 })
 const connect = (d, ...pairs) =>
     (d.wires = pairs.map(([source, target], i) => ({ id: 'w' + i, source, target })))
@@ -169,4 +176,101 @@ test('ordinary fan-out cannot duplicate email jobs and still pass', () => {
         { id: 'dup2', source: 'extraQueue', target: 'sink' },
     )
     assert.equal(evaluate(ex, d).passed, false)
+})
+test('insertion replaces exactly one connection with a complete inline route', () => {
+    const d = cloneDesign(EXERCISES[1].initial),
+        old = d.wires.find((w) => w.source === 'api'),
+        n = block('cache', 'cache')
+    const next = insertBlockOnWire(d, n, old.id)
+    assert.equal(next.blocks.length, d.blocks.length + 1)
+    assert.equal(
+        next.wires.some((w) => w.id === old.id),
+        false,
+    )
+    assert.equal(
+        next.wires.some((w) => w.source === 'api' && w.target === 'cache'),
+        true,
+    )
+    assert.equal(
+        next.wires.some((w) => w.source === 'cache' && w.target === 'sink'),
+        true,
+    )
+    assert.equal(evaluate(EXERCISES[1], next).passed, true)
+    assert.deepEqual(d, EXERCISES[1].initial)
+})
+test('moving an inline node restores its original route and does not duplicate the node', () => {
+    const d = {
+        blocks: [
+            block('a', 'api'),
+            block('b', 'cache'),
+            block('c', 'database'),
+            block('x', 'api'),
+            block('y', 'database'),
+        ],
+        wires: [],
+    }
+    connect(d, ['a', 'b'], ['b', 'c'], ['x', 'y'])
+    const next = insertBlockOnWire(d, d.blocks[1], d.wires[2].id)
+    assert.equal(next.blocks.length, 5)
+    for (const [source, target] of [
+        ['a', 'c'],
+        ['x', 'b'],
+        ['b', 'y'],
+    ])
+        assert.equal(
+            next.wires.some((w) => w.source === source && w.target === target),
+            true,
+        )
+})
+test('insertion of an existing branching component is rejected without losing its connections', () => {
+    const d = solution(EXERCISES[0]),
+        lb = d.blocks.find((n) => n.id === 'lb'),
+        before = cloneDesign(d)
+    assert.equal(insertBlockOnWire(d, lb, d.wires.find((w) => w.source === 'api').id), null)
+    assert.deepEqual(d, before)
+})
+test('insertion into an incident edge or a missing edge is rejected', () => {
+    const d = solution(EXERCISES[1])
+    assert.equal(
+        insertBlockOnWire(
+            d,
+            d.blocks.find((n) => n.id === 'cache'),
+            d.wires.find((w) => w.target === 'cache').id,
+        ),
+        null,
+    )
+    assert.equal(insertBlockOnWire(d, block('fresh', 'cache'), 'missing'), null)
+})
+test('removing an inline component restores its route; a branching node does not guess a route', () => {
+    const ex = EXERCISES[1],
+        d = solution(ex),
+        removed = removeDesignBlock(d, 'cache')
+    assert.equal(
+        removed.blocks.some((n) => n.id === 'cache'),
+        false,
+    )
+    assert.equal(
+        removed.wires.some((w) => w.source === 'api' && w.target === 'sink'),
+        true,
+    )
+    assert.equal(evaluate(ex, removed).passed, false)
+    const traffic = removeDesignBlock(solution(EXERCISES[0]), 'lb')
+    assert.equal(
+        traffic.wires.some((w) => w.source === 'client'),
+        false,
+    )
+})
+test('insertion makes enough space and preserves unrelated branch positions', () => {
+    const d = cloneDesign(EXERCISES[1].initial),
+        wire = d.wires.find((w) => w.source === 'api')
+    const next = insertBlockOnWire(d, { ...block('cache', 'cache'), x: 400, y: 140 }, wire.id)
+    const api = next.blocks.find((n) => n.id === 'api'),
+        cache = next.blocks.find((n) => n.id === 'cache'),
+        sink = next.blocks.find((n) => n.id === 'sink')
+    assert.ok(cache.x >= api.x + 265)
+    assert.ok(sink.x >= cache.x + 265)
+    assert.deepEqual(
+        next.blocks.find((n) => n.id === 'client'),
+        d.blocks.find((n) => n.id === 'client'),
+    )
 })

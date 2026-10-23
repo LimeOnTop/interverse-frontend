@@ -44,3 +44,15 @@ are visible and do not disable practice.
 
 Development runs in the existing `interverse-frontend-dev` container at port 3000.
 This feature has not been merged, pushed to a registry or deployed to production.
+
+## Board interactions
+
+Drag a library card (mouse) or its dedicated grip (touch) onto the canvas; the preview morphs to
+node scale over the board. Drop on a highlighted edge to splice in the new component atomically.
+Dragging an existing isolated or simple inline component onto another edge moves it there and
+restores its previous inline route. Branching nodes are never detached implicitly.
+
+Click/tap an edge for insertion controls, including on mobile. Removing a simple inline component
+restores its predecessor-to-successor connection. Undo/redo capture the complete operation.
+Node actions also offer duplication and starting a connection. Cmd/Ctrl+Z, Shift+Cmd/Ctrl+Z,
+Ctrl+Y and Delete work outside form controls. Selects use Radix keyboard and focus management.

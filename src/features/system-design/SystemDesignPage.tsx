@@ -20,6 +20,9 @@ import {
     ArrowRight,
     Check,
     CheckCircle2,
+    XCircle,
+    GripVertical,
+    Copy,
     AlertCircle,
     Network,
     Database,
@@ -44,6 +47,8 @@ import {
 } from 'lucide-react'
 import '@xyflow/react/dist/style.css'
 import './system-design.css'
+import BoardSelect from './BoardSelect'
+import { usePaletteDrag, edgeAtPoint } from './paletteDrag'
 import { useModalDialog } from '../../hooks/useModalDialog'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useAuthStore } from '../../store/authStore'
@@ -51,6 +56,8 @@ import {
     EXERCISES,
     PARTS,
     arrange,
+    insertBlockOnWire,
+    removeDesignBlock,
     capacity,
     cloneDesign,
     evaluate,
@@ -114,7 +121,7 @@ function ArchitectureNode({ data, selected }: NodeProps<BoardNode>) {
                         : `${Math.round(data.load).toLocaleString('ru-RU')} / ${Number.isFinite(data.limit) ? data.limit.toLocaleString('ru-RU') : '∞'} RPS`}
                 </small>
             </span>
-            {data.overloaded && <AlertCircle size={16} aria-label="Перегрузка" />}
+            {data.overloaded && <XCircle size={16} aria-label="Перегрузка" />}
             {data.kind !== 'storage' && (
                 <Handle type="source" position={Position.Right} aria-label={`Выход: ${data.label}`} />
             )}
@@ -205,6 +212,10 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
     const [running, setRunning] = useState(false)
     const [hint, setHint] = useState(false)
     const [resetOpen, setResetOpen] = useState(false)
+    const [selectedWireId, setSelectedWireId] = useState<string | null>(null)
+    const [insertionEdge, setInsertionEdge] = useState<string | null>(null)
+    const edgeActionsRef = useRef<HTMLDivElement>(null)
+    const boardRef = useRef<HTMLDivElement>(null)
     const [source, setSource] = useState('')
     const [target, setTarget] = useState('')
     const [notice, setNotice] = useState('')
@@ -262,7 +273,13 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
     useEffect(() => {
         if (!expanded) return
         const close = (event: KeyboardEvent) => {
-            if (event.key === 'Escape' && !resetOpen) {
+            if (
+                event.key === 'Escape' &&
+                !event.defaultPrevented &&
+                !resetOpen &&
+                !document.body.classList.contains('sd-grabbing') &&
+                !document.querySelector('.sd-select-content')
+            ) {
                 setExpanded(false)
                 expandButton.current?.focus()
             }
@@ -270,6 +287,33 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
         document.addEventListener('keydown', close)
         return () => document.removeEventListener('keydown', close)
     }, [expanded, resetOpen])
+    useEffect(() => {
+        const board = boardRef.current
+        if (!board) return
+        let width = board.clientWidth,
+            frame = 0
+        const observer = new ResizeObserver(() => {
+            const next = board.clientWidth
+            if (Math.abs(next - width) > 20) {
+                width = next
+                cancelAnimationFrame(frame)
+                frame = requestAnimationFrame(
+                    () => void flow.fitView({ padding: 0.2, maxZoom: 1, duration: 0 }),
+                )
+            }
+        })
+        observer.observe(board)
+        return () => {
+            observer.disconnect()
+            cancelAnimationFrame(frame)
+        }
+    }, [flow])
+    const selectEdge = (id: string) => {
+        setSelectedWireId(id)
+        setSelected(null)
+        if (window.matchMedia('(max-width:800px)').matches)
+            requestAnimationFrame(() => edgeActionsRef.current?.scrollIntoView({ block: 'nearest' }))
+    }
     const invalidate = useCallback(() => {
         setResult(null)
         setRunning(false)
@@ -304,25 +348,82 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
         setSelected(null)
         invalidate()
     }
-    const addPart = (kind: BlockKind) => {
-        if (design.blocks.length >= 15) {
+    const addPart = (
+        kind: BlockKind,
+        at?: { x: number; y: number },
+        wireId: string | null = selectedWireId,
+        animate = true,
+    ) => {
+        const current = designRef.current
+        if (current.blocks.length >= 15) {
             setNotice('На доске уже 15 блоков. Удалите лишний блок.')
             return
         }
+        const edge = current.wires.find((w) => w.id === wireId),
+            from = current.blocks.find((n) => n.id === edge?.source),
+            to = current.blocks.find((n) => n.id === edge?.target)
         const point = flow.screenToFlowPosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 })
-        // Place additions on a free row, rather than hiding them under existing blocks.
-        const pos = {
-            x: Math.max(50, Math.min(900, point.x)),
-            y: Math.max(280, ...design.blocks.map((n) => n.y + 100)),
+        const pos =
+            at ||
+            (from && to
+                ? { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 }
+                : {
+                      x: Math.max(50, Math.min(900, point.x)),
+                      y: Math.max(280, ...current.blocks.map((n) => n.y + 100)),
+                  })
+        const id = `${kind}-${crypto.randomUUID()}`,
+            block = { id, kind, ...pos }
+        const next = wireId
+            ? insertBlockOnWire(current, block, wireId)
+            : { ...current, blocks: [...current.blocks, block] }
+        if (!next) {
+            setNotice('Не удалось встроить блок в эту связь. Выберите другую связь.')
+            return
         }
-        const id = `${kind}-${crypto.randomUUID()}`
-        commit({ ...design, blocks: [...design.blocks, { id, kind, ...pos }] })
+        commit(next)
         setSelected(id)
-        setNotice(`Добавлен: ${PARTS[kind].label}. Соедините его с другими блоками.`)
-        requestAnimationFrame(() => {
-            void flow.fitView({ padding: 0.2, duration: reducedMotion ? 0 : 180, maxZoom: 1 })
-        })
+        setSelectedWireId(null)
+        setNotice(
+            wireId
+                ? `${PARTS[kind].label} встроен в связь. Обе стрелки созданы автоматически.`
+                : `Добавлен: ${PARTS[kind].label}. Соедините его с другими блоками.`,
+        )
+        if (!at || wireId)
+            requestAnimationFrame(
+                () =>
+                    void flow.fitView({
+                        padding: 0.2,
+                        duration: reducedMotion || !animate ? 0 : 180,
+                        maxZoom: 1,
+                    }),
+            )
     }
+    const palette = usePaletteDrag({
+        icons,
+        hitTest: (x, y) => {
+            const board = boardRef.current,
+                rect = board?.getBoundingClientRect(),
+                element = document.elementFromPoint(x, y)
+            const over = Boolean(
+                rect &&
+                    x >= rect.left &&
+                    x <= rect.right &&
+                    y >= rect.top &&
+                    y <= rect.bottom &&
+                    !element?.closest('.react-flow__controls,.sd-fit,.sd-edge-actions,.sd-inspector'),
+            )
+            return {
+                over,
+                edgeId: over ? edgeAtPoint(board, x, y) : null,
+                blocked: over && Boolean(element?.closest('.react-flow__node')),
+                zoom: flow.getZoom(),
+            }
+        },
+        onDrop: (kind, x, y, edgeId) => {
+            const point = flow.screenToFlowPosition({ x, y })
+            addPart(kind, { x: point.x - 102, y: point.y - 38 }, edgeId)
+        },
+    })
     const canConnect = useCallback((c: Pick<Connection, 'source' | 'target'>) => {
         const current = designRef.current
         return Boolean(
@@ -370,7 +471,10 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                     return changed ? next : previous
                 })
             const selection = changes.find((c) => c.type === 'select' && c.selected)
-            if (selection?.type === 'select') setSelected(selection.id)
+            if (selection?.type === 'select') {
+                setSelected(selection.id)
+                setSelectedWireId(null)
+            }
 
             const positions = changes.filter((c) => c.type === 'position')
             if (!positions.length) return
@@ -432,22 +536,97 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                     stroke: result?.overloaded.includes(w.target) ? 'var(--sd-danger)' : 'var(--sd-edge)',
                     strokeWidth: 2,
                 },
+                className:
+                    (palette.target.edgeId || insertionEdge) === w.id
+                        ? 'is-drop-target'
+                        : selectedWireId === w.id
+                          ? 'is-selected-wire'
+                          : '',
+                interactionWidth: 36,
                 ariaLabel: `${label(w.source)} → ${label(w.target)}`,
             })),
-        [design.wires, label, result, running],
+        [design.wires, label, result, running, palette.target.edgeId, insertionEdge, selectedWireId],
     )
     useEffect(() => {
         if (source && !design.blocks.some((node) => node.id === source)) setSource('')
         if (target && !design.blocks.some((node) => node.id === target)) setTarget('')
     }, [design.blocks, source, target])
+    useEffect(() => {
+        if (selectedWireId && !design.wires.some((w) => w.id === selectedWireId)) setSelectedWireId(null)
+    }, [design.wires, selectedWireId])
     const selectedBlock = design.blocks.find((n) => n.id === selected)
     const removeSelected = () => {
-        if (!selected || ex.initial.blocks.some((n) => n.id === selected)) return
-        commit({
-            blocks: design.blocks.filter((n) => n.id !== selected),
-            wires: design.wires.filter((w) => w.source !== selected && w.target !== selected),
-        })
+        if (!selected) return
+        if (ex.initial.blocks.some((n) => n.id === selected)) {
+            setNotice('Исходные блоки остаются на доске. Их связи можно изменить.')
+            return
+        }
+        commit(removeDesignBlock(design, selected))
+        setNotice('Блок удалён. Для линейного участка связь восстановлена автоматически.')
         setSelected(null)
+    }
+    const selectedWire = design.wires.find((w) => w.id === selectedWireId)
+    const removeWire = () => {
+        if (!selectedWireId) return
+        commit({
+            ...designRef.current,
+            wires: designRef.current.wires.filter((w) => w.id !== selectedWireId),
+        })
+        setSelectedWireId(null)
+    }
+    const shortcuts = useRef({ undo, redo, removeSelected, removeWire, selected, selectedWireId })
+    shortcuts.current = { undo, redo, removeSelected, removeWire, selected, selectedWireId }
+    useEffect(() => {
+        const keydown = (event: KeyboardEvent) => {
+            if (
+                event.defaultPrevented ||
+                resetOpen ||
+                document.body.classList.contains('sd-grabbing') ||
+                document.querySelector('.sd-select-content')
+            )
+                return
+            const element = event.target as HTMLElement
+            if (
+                element.closest(
+                    'input,textarea,select,[role="combobox"],[role="option"],[contenteditable="true"]',
+                )
+            )
+                return
+            const current = shortcuts.current
+            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z') {
+                event.preventDefault()
+                if (event.shiftKey) current.redo()
+                else current.undo()
+            } else if (event.ctrlKey && event.key.toLowerCase() === 'y') {
+                event.preventDefault()
+                current.redo()
+            } else if (
+                event.key === 'Delete' ||
+                (event.key === 'Backspace' && element.closest('.react-flow'))
+            ) {
+                event.preventDefault()
+                if (current.selectedWireId) current.removeWire()
+                else current.removeSelected()
+            }
+        }
+        document.addEventListener('keydown', keydown)
+        return () => document.removeEventListener('keydown', keydown)
+    }, [resetOpen])
+    const nodeInsertionTarget = (id: string, event: MouseEvent | TouchEvent) => {
+        const point = 'touches' in event ? event.touches[0] || event.changedTouches[0] : event
+        if (!point) return null
+        const x = point.clientX,
+            y = point.clientY
+        if (document.elementFromPoint(x, y)?.closest('.sd-edge-actions,.sd-inspector')) return null
+        const current = designRef.current,
+            block = current.blocks.find((n) => n.id === id)
+        const edgeId = edgeAtPoint(
+            boardRef.current,
+            x,
+            y,
+            current.wires.filter((w) => w.source === id || w.target === id).map((w) => w.id),
+        )
+        return block && edgeId && insertBlockOnWire(current, block, edgeId) ? edgeId : null
     }
     const check = () => {
         setResult(evaluate(ex, design))
@@ -559,15 +738,51 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                             {result ? 'Проверить ещё раз' : 'Проверить решение'}
                         </button>
                     </div>
-                    <div className="sd-board">
+                    <div ref={boardRef} className={`sd-board ${palette.target.over ? 'is-drop-zone' : ''}`}>
                         <ReactFlow<BoardNode>
                             nodes={nodes}
                             edges={edges}
                             nodeTypes={nodeTypes}
                             onNodesChange={onNodesChange}
-                            onNodeDragStart={checkpoint}
-                            onNodeClick={(_, node) => setSelected(node.id)}
-                            onPaneClick={() => setSelected(null)}
+                            onNodeDragStart={() => {
+                                checkpoint()
+                                setSelectedWireId(null)
+                            }}
+                            onNodeDrag={(event, node) =>
+                                setInsertionEdge(nodeInsertionTarget(node.id, event))
+                            }
+                            onNodeDragStop={(event, node) => {
+                                const edgeId = nodeInsertionTarget(node.id, event)
+                                if (edgeId) {
+                                    const block = designRef.current.blocks.find((n) => n.id === node.id)!,
+                                        next = insertBlockOnWire(
+                                            designRef.current,
+                                            { ...block, x: node.position.x, y: node.position.y },
+                                            edgeId,
+                                        )
+                                    if (next) {
+                                        setDesign(next)
+                                        invalidate()
+                                        setNotice(
+                                            'Блок встроен в связь. Предыдущий линейный маршрут восстановлен.',
+                                        )
+                                    }
+                                }
+                                setInsertionEdge(null)
+                            }}
+                            onNodeClick={(_, node) => {
+                                setSelected(node.id)
+                                setSelectedWireId(null)
+                            }}
+                            onEdgeClick={(_, edge) => selectEdge(edge.id)}
+                            onPaneClick={(event) => {
+                                const edgeId = edgeAtPoint(boardRef.current, event.clientX, event.clientY)
+                                if (edgeId) selectEdge(edgeId)
+                                else {
+                                    setSelected(null)
+                                    setSelectedWireId(null)
+                                }
+                            }}
                             onConnect={connect}
                             isValidConnection={canConnect}
                             onEdgesDelete={(deleted) =>
@@ -620,10 +835,74 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                         </span>
                         <span>Перетащите блок · Соедините точки или откройте «Связи»</span>
                     </div>
+                    {selectedWire && (
+                        <div ref={edgeActionsRef} className="sd-edge-actions">
+                            <div className="sd-edge-actions-title">
+                                <strong>
+                                    {label(selectedWire.source)} <ArrowRight size={14} />{' '}
+                                    {label(selectedWire.target)}
+                                </strong>
+                                <button
+                                    className="sd-icon-button"
+                                    onClick={() => setSelectedWireId(null)}
+                                    aria-label="Закрыть действия со связью"
+                                >
+                                    <X size={16} />
+                                </button>
+                            </div>
+                            <p>Встроить блок в эту связь</p>
+                            <div className="sd-insert-options">
+                                {ex.allowed.map((kind) => (
+                                    <button
+                                        key={kind}
+                                        onClick={(event) =>
+                                            addPart(kind, undefined, selectedWireId, event.detail !== 0)
+                                        }
+                                    >
+                                        <Plus size={14} />
+                                        {PARTS[kind].label}
+                                    </button>
+                                ))}
+                            </div>
+                            <button className="sd-secondary" onClick={removeWire}>
+                                <Trash2 size={15} />
+                                Удалить связь
+                            </button>
+                        </div>
+                    )}
                     {selectedBlock && (
                         <div className="sd-inspector" aria-live="polite">
                             <div>
                                 <strong>{label(selectedBlock.id)}</strong>
+                                <div className="sd-node-actions">
+                                    {selectedBlock.kind !== 'storage' && (
+                                        <button
+                                            onClick={() => {
+                                                setSource(selectedBlock.id)
+                                                setTarget('')
+                                                setPanel('wires')
+                                                sideRef.current?.scrollIntoView({ block: 'nearest' })
+                                            }}
+                                        >
+                                            <GitBranch size={14} />
+                                            Соединить отсюда
+                                        </button>
+                                    )}
+                                    {ex.allowed.includes(selectedBlock.kind) && (
+                                        <button
+                                            onClick={() =>
+                                                addPart(
+                                                    selectedBlock.kind,
+                                                    { x: selectedBlock.x + 40, y: selectedBlock.y + 120 },
+                                                    null,
+                                                )
+                                            }
+                                        >
+                                            <Copy size={14} />
+                                            Дублировать
+                                        </button>
+                                    )}
+                                </div>
                                 <p>
                                     {PARTS[selectedBlock.kind].detail.replace(
                                         '1 000',
@@ -722,39 +1001,65 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                                         «Связи».
                                     </p>
                                     <p>
-                                        Выберите добавленный блок, чтобы удалить его. Исходные блоки остаются;
-                                        их связи можно менять. Масштаб — кнопками +/− или жестом двух пальцев.
+                                        ⌘/Ctrl+Z — отменить, Shift+⌘/Ctrl+Z — повторить. Delete — удалить
+                                        выбранный блок или связь. Выберите добавленный блок, чтобы удалить
+                                        его. Исходные блоки остаются; их связи можно менять. Масштаб —
+                                        кнопками +/− или жестом двух пальцев.
                                     </p>
                                 </details>
-                                <p className="sd-footnote">
-                                    Числа — условия учебной модели, а не замеры реальной инфраструктуры.
-                                </p>
                             </>
                         )}
                         {panel === 'parts' && (
                             <>
                                 <h2>Добавить компонент</h2>
                                 <p className="sd-muted">
-                                    Нажмите на блок. Он появится на доске; затем добавьте связи.
+                                    Нажмите или перетащите блок на доску. Бросьте его на стрелку, чтобы
+                                    встроить в связь.
                                 </p>
                                 <div className="sd-parts">
                                     {ex.allowed.map((kind) => {
                                         const Icon = icons[kind]
                                         return (
-                                            <button
+                                            <div
+                                                className={`sd-part-card ${palette.activeKind === kind ? 'is-being-dragged' : ''}`}
                                                 key={kind}
-                                                onClick={() => addPart(kind)}
-                                                aria-label={`Добавить: ${PARTS[kind].label}`}
                                             >
-                                                <span className="sd-node-icon">
-                                                    <Icon size={20} />
-                                                </span>
-                                                <span>
-                                                    <strong>{PARTS[kind].label}</strong>
-                                                    <small>{PARTS[kind].detail}</small>
-                                                </span>
-                                                <Plus size={18} />
-                                            </button>
+                                                <button
+                                                    className="sd-part-main"
+                                                    {...palette.handlers(kind)}
+                                                    onClick={(event) => {
+                                                        if (!palette.consumeClick())
+                                                            addPart(
+                                                                kind,
+                                                                undefined,
+                                                                selectedWireId,
+                                                                event.detail !== 0,
+                                                            )
+                                                    }}
+                                                    aria-label={`Добавить: ${PARTS[kind].label}`}
+                                                >
+                                                    <span className="sd-node-icon">
+                                                        <Icon size={20} />
+                                                    </span>
+                                                    <span>
+                                                        <strong>{PARTS[kind].label}</strong>
+                                                        <small>{PARTS[kind].detail}</small>
+                                                    </span>
+                                                    <Plus size={18} />
+                                                </button>
+                                                <button
+                                                    className="sd-part-grip"
+                                                    {...palette.handlers(kind, true)}
+                                                    onClick={(event) => {
+                                                        if (event.detail === 0 && !palette.consumeClick())
+                                                            addPart(kind, undefined, selectedWireId, false)
+                                                    }}
+                                                    aria-label={`Перетащить: ${PARTS[kind].label}`}
+                                                    title="Перетащить на доску"
+                                                >
+                                                    <GripVertical size={18} />
+                                                </button>
+                                            </div>
                                         )
                                     })}
                                 </div>
@@ -770,6 +1075,7 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                                             aria-pressed={selected === n.id}
                                             onClick={() => {
                                                 setSelected(n.id)
+                                                setSelectedWireId(null)
                                                 void flow.setCenter(n.x + 102, n.y + 38, {
                                                     zoom: 1,
                                                     duration: 0,
@@ -780,7 +1086,11 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                                             <small>
                                                 {result?.loads[n.id] !== undefined
                                                     ? `${Math.round(result.loads[n.id])} RPS`
-                                                    : PARTS[n.kind].short}
+                                                    : ['api', 'database', 'worker', 'storage'].includes(
+                                                            n.kind,
+                                                        )
+                                                      ? `${capacity(ex, n).toLocaleString('ru-RU')} RPS`
+                                                      : PARTS[n.kind].short}
                                             </small>
                                         </button>
                                     ))}
@@ -796,35 +1106,43 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                                 </p>
                                 <div className="sd-wire-form">
                                     <label htmlFor="sd-source">Откуда</label>
-                                    <select
+                                    <BoardSelect
                                         id="sd-source"
+                                        label="Откуда"
                                         value={source}
-                                        onChange={(e) => setSource(e.target.value)}
-                                    >
-                                        <option value="">Выберите блок</option>
-                                        {design.blocks
+                                        onChange={(value) => {
+                                            setSource(value)
+                                            setTarget('')
+                                        }}
+                                        options={design.blocks
                                             .filter((n) => n.kind !== 'storage')
-                                            .map((n) => (
-                                                <option key={n.id} value={n.id}>
-                                                    {label(n.id)}
-                                                </option>
-                                            ))}
-                                    </select>
+                                            .map((n) => ({ value: n.id, label: label(n.id) }))}
+                                    />
                                     <label htmlFor="sd-target">Куда</label>
-                                    <select
+                                    <BoardSelect
                                         id="sd-target"
+                                        label="Куда"
                                         value={target}
-                                        onChange={(e) => setTarget(e.target.value)}
-                                    >
-                                        <option value="">Выберите блок</option>
-                                        {design.blocks
+                                        onChange={setTarget}
+                                        options={design.blocks
                                             .filter((n) => n.kind !== 'client')
-                                            .map((n) => (
-                                                <option key={n.id} value={n.id}>
-                                                    {label(n.id)}
-                                                </option>
-                                            ))}
-                                    </select>
+                                            .map((n) => ({
+                                                value: n.id,
+                                                label: label(n.id),
+                                                disabled: !!source && !canConnect({ source, target: n.id }),
+                                                hint: !source
+                                                    ? undefined
+                                                    : source === n.id
+                                                      ? 'Тот же блок'
+                                                      : design.wires.some(
+                                                              (w) => w.source === source && w.target === n.id,
+                                                          )
+                                                        ? 'Уже соединено'
+                                                        : wouldCycle(design, source, n.id)
+                                                          ? 'Создаст цикл'
+                                                          : undefined,
+                                            }))}
+                                    />
                                     <button
                                         className="sd-primary"
                                         disabled={!source || !target}
@@ -874,11 +1192,7 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                             ) : (
                                 <>
                                     <div className={`sd-result-heading ${result.passed ? 'is-pass' : ''}`}>
-                                        {result.passed ? (
-                                            <CheckCircle2 size={27} />
-                                        ) : (
-                                            <AlertCircle size={27} />
-                                        )}
+                                        {result.passed ? <CheckCircle2 size={27} /> : <XCircle size={27} />}
                                         <div>
                                             <h2>
                                                 {result.passed ? 'Архитектура выдержала' : 'Есть узкие места'}
@@ -892,7 +1206,7 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                                     <div className="sd-checks">
                                         {result.checks.map((c) => (
                                             <div key={c.label} className={c.ok ? 'is-pass' : 'is-fail'}>
-                                                {c.ok ? <Check size={17} /> : <AlertCircle size={17} />}
+                                                {c.ok ? <Check size={17} /> : <X size={17} />}
                                                 <div>
                                                     <strong>{c.label}</strong>
                                                     <p>{c.detail}</p>
@@ -948,6 +1262,7 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
             <div className="sd-notice" role="status" aria-live="polite">
                 {notice}
             </div>
+            {palette.ghost}
             {resetOpen && (
                 <ResetDialog
                     onClose={() => setResetOpen(false)}
