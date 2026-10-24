@@ -160,7 +160,7 @@ export default function SystemDesignPage() {
     const openPromo = usePromoStore(s => s.openLimitPromo)
     const ex = EXERCISES.find((e) => e.id === id)
     const locked = !!ex && ex.id !== EXERCISES[0].id && !isPro
-    useEffect(() => { if (locked) openPromo() }, [locked, openPromo])
+    useEffect(() => { if (locked) openPromo('system-design') }, [locked, openPromo])
     const completed = EXERCISES.filter((e) => evaluate(e, load(String(owner), e)).passed).length
     if (id && !ex)
         return (
@@ -173,7 +173,7 @@ export default function SystemDesignPage() {
         <Link to="/system-design">← Все задачи</Link>
         <h1 className="mt-6 text-2xl font-semibold">{ex!.title}</h1>
         <p className="mt-3">Эта тренировка доступна в Pro. Первая тренировка — бесплатно.</p>
-        <button className="sd-primary mt-5" onClick={openPromo}>Открыть Pro</button>
+        <button className="sd-primary mt-5" onClick={() => openPromo('system-design')}>Открыть Pro</button>
     </div>
     if (ex)
         return (
@@ -228,7 +228,7 @@ export default function SystemDesignPage() {
                             const solved = evaluate(task, load(String(owner), task)).passed
                             return (
                                 <Link className="sd-exercise" to={`/system-design/${task.id}`} key={task.id}
-                                    onClick={event => { if (i > 0 && !isPro) { event.preventDefault(); openPromo() } }}>
+                                    onClick={event => { if (i > 0 && !isPro) { event.preventDefault(); openPromo('system-design') } }}>
                                     <span className={`sd-exercise-number ${solved ? 'is-complete' : ''}`}>
                                         {solved ? <Check size={22} /> : String(i + 1).padStart(2, '0')}
                                     </span>

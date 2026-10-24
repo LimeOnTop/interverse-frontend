@@ -8,7 +8,7 @@ import { PRO_FEATURES } from '../utils/subscription'
 
 /** Centered promo shown when a Basic user runs out of trainings. No prices here by design. */
 export default function TrainingLimitPromo() {
-    const { limitPromoOpen, closeLimitPromo } = usePromoStore()
+    const { limitPromoOpen, closeLimitPromo, limitPromoContext } = usePromoStore()
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -58,11 +58,12 @@ export default function TrainingLimitPromo() {
                             <Sparkles className="w-4 h-4" /> Pro
                         </div>
                         <h2 id="training-limit-promo-title" className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
-                            Лимит тренировок исчерпан
+                            {limitPromoContext === 'system-design' ? 'Открой все тренировки System Design' : 'Лимит тренировок исчерпан'}
                         </h2>
                         <p className="text-secondary leading-relaxed mb-5">
-                            На тарифе Basic — {freeTrainingCaption()}. В подписке Pro лимит расширен,
-                            а ещё в ней есть:
+                            {limitPromoContext === 'system-design'
+                                ? 'Первая тренировка System Design бесплатная. В Pro доступны все 25 задач в пяти траекториях: от нагрузки и кеширования до репликации и доставки событий.'
+                                : <>На тарифе Basic — {freeTrainingCaption()}. В подписке Pro лимит расширен, а ещё в ней есть:</>}
                         </p>
                         <ul className="space-y-2 mb-7">
                             {PRO_FEATURES.map((feature) => (

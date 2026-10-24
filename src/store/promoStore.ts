@@ -2,13 +2,15 @@ import { create } from 'zustand'
 
 interface PromoState {
     limitPromoOpen: boolean
-    openLimitPromo: () => void
+    limitPromoContext: 'quota' | 'system-design'
+    openLimitPromo: (context?: 'quota' | 'system-design') => void
     closeLimitPromo: () => void
 }
 
 export const usePromoStore = create<PromoState>((set) => ({
     limitPromoOpen: false,
-    openLimitPromo: () => set({ limitPromoOpen: true }),
+    limitPromoContext: 'quota',
+    openLimitPromo: (context = 'quota') => set({ limitPromoOpen: true, limitPromoContext: context }),
     closeLimitPromo: () => set({ limitPromoOpen: false }),
 }))
 
