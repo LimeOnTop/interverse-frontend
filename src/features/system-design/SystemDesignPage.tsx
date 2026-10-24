@@ -48,6 +48,8 @@ import {
 import '@xyflow/react/dist/style.css'
 import './system-design.css'
 import BoardSelect from './BoardSelect'
+import { usePromoStore } from '../../store/promoStore'
+import { resolveSubscriptionPlan } from '../../utils/subscription'
 import { usePaletteDrag, edgeAtPoint } from './paletteDrag'
 import { useModalDialog } from '../../hooks/useModalDialog'
 import { useTheme } from '../../contexts/ThemeContext'
@@ -152,8 +154,13 @@ const panelLabels: Record<Panel, string> = {
 
 export default function SystemDesignPage() {
     const { id } = useParams()
-    const owner = useAuthStore((s) => s.user?.id || 'local')
+    const user = useAuthStore(s => s.user)
+    const owner = user?.id || 'local'
+    const isPro = resolveSubscriptionPlan(user) === 'paid'
+    const openPromo = usePromoStore(s => s.openLimitPromo)
     const ex = EXERCISES.find((e) => e.id === id)
+    const locked = !!ex && ex.id !== EXERCISES[0].id && !isPro
+    useEffect(() => { if (locked) openPromo() }, [locked, openPromo])
     const completed = EXERCISES.filter((e) => evaluate(e, load(String(owner), e)).passed).length
     if (id && !ex)
         return (
@@ -162,6 +169,12 @@ export default function SystemDesignPage() {
                 <Link to="/system-design">К задачам System Design</Link>
             </div>
         )
+    if (locked) return <div className="sd-page">
+        <Link to="/system-design">← Все задачи</Link>
+        <h1 className="mt-6 text-2xl font-semibold">{ex!.title}</h1>
+        <p className="mt-3">Эта тренировка доступна в Pro. Первая тренировка — бесплатно.</p>
+        <button className="sd-primary mt-5" onClick={openPromo}>Открыть Pro</button>
+    </div>
     if (ex)
         return (
             <ReactFlowProvider key={`${owner}:${ex.id}`}>
@@ -173,7 +186,7 @@ export default function SystemDesignPage() {
             <div className="sd-intro">
                 <span className="sd-eyebrow">Архитектура на практике</span>
                 <h1>System Design</h1>
-                <p>Найдите узкое место. Измените схему. Проверьте, выдержит ли она нагрузку.</p>
+                <p>Найдите узкое место. Измените схему. Проверьте решение. Первая тренировка — бесплатно, остальные 24 — в Pro.</p>
                 <div className="sd-intro-meta">
                     <span>
                         <Network size={16} />
@@ -214,11 +227,13 @@ export default function SystemDesignPage() {
                             const i = EXERCISES.indexOf(task)
                             const solved = evaluate(task, load(String(owner), task)).passed
                             return (
-                                <Link className="sd-exercise" to={`/system-design/${task.id}`} key={task.id}>
+                                <Link className="sd-exercise" to={`/system-design/${task.id}`} key={task.id}
+                                    onClick={event => { if (i > 0 && !isPro) { event.preventDefault(); openPromo() } }}>
                                     <span className={`sd-exercise-number ${solved ? 'is-complete' : ''}`}>
                                         {solved ? <Check size={22} /> : String(i + 1).padStart(2, '0')}
                                     </span>
                                     <div>
+                                        <span className={`sd-access-badge ${i === 0 ? 'is-free' : ''}`}>{i === 0 ? 'Бесплатно' : 'Pro'}</span>
                                         <span className="sd-eyebrow">{task.topic}</span>
                                         <h2>{task.title}</h2>
                                         <p>{task.incident}</p>

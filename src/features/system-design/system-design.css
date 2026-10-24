@@ -1418,3 +1418,6 @@ body.sd-grabbing * {
         min-width: 0;
     }
 }
+
+.sd-access-badge { display:table; margin-bottom:10px; padding:3px 8px; border-radius:6px; border:1px solid var(--iv-border); color:var(--sd-accent); font-size:11px; font-weight:650; background:var(--iv-bg); }
+.sd-access-badge.is-free { color:var(--sd-good); }
