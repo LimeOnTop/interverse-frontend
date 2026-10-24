@@ -65,9 +65,14 @@ Ctrl+Y and Delete work outside form controls. Selects use Radix keyboard and foc
 
 ## Dashboard and news
 
-The dashboard announcement flips to the original report recommendations. The reverse face is
-inert/aria-hidden while concealed; focus moves to the visible face on a flip. CSS transforms
-use a 280 ms morph curve; keyboard and reduced-motion transitions are immediate. The entire
+The dashboard announcement dissolves into ASCII and reveals the original report recommendations through ASCII. The reverse face is
+inert/aria-hidden while concealed; focus moves to the visible face after the transition.
+The effect uses the original `ascii-reveal` library by Quan Hoang (MIT), pinned to commit
+`bbb9472d45d7ce9a982f36403dc4e80e145343a5`, with preset `dither`, cinematic timing and speed 0.7.
+Source and demo: https://github.com/quanhoangindex/ascii-reveal and
+https://quanhoangindex.github.io/ascii-reveal/. It runs on dashboard mount and on card changes.
+Keyboard changes are immediate; the library respects reduced motion for mount effects.
+The animation cancels on unmount and locks repeated activation while running. The entire
 front is a link, with the close button as a sibling (no nested interactive controls). The card
 stores the chosen face per account in the existing private browser-cache namespace; the
 reverse-side button returns to the announcement. Account changes remount it with that account’s

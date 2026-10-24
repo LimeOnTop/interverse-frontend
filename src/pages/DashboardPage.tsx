@@ -234,8 +234,8 @@ function HeroPanel({ report }: { report: ReportWithInterview | null }) {
             {report && (
                 <div className="hidden sm:flex flex-col items-center gap-3 pr-2">
                     <div className="w-36 h-36 rounded-full border border-white/25 flex items-center justify-center">
-                        <div className="w-24 h-24 rounded-full border border-white/40 flex items-center justify-center font-mono text-lg">
-                            {`{ ${(tech || 'code').toLowerCase().slice(0, 8)} }`}
+                        <div className="w-24 h-24 shrink-0 rounded-full border border-white/40 flex items-center justify-center font-mono text-xs">
+                            <span className="whitespace-nowrap">{`{ ${(tech || 'code').toLowerCase().slice(0, 8)} }`}</span>
                         </div>
                     </div>
                     {tag && <span className="rounded-md border border-white/30 px-2 py-1 text-[10px] font-semibold tracking-wider">{tag}</span>}
