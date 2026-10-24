@@ -700,7 +700,7 @@
         border-color: var(--sd-accent);
         background: color-mix(in srgb, var(--sd-accent) 2%, var(--iv-surface));
     }
-    .sd-page button:hover:not(:disabled):not(.sd-primary):not(.sd-check) {
+    .sd-page button:hover:not(:disabled):not(.sd-primary):not(.sd-check):not(.sd-drawer-scrim) {
         background-color: var(--iv-tint);
     }
 }
@@ -1419,6 +1419,158 @@ body.sd-grabbing * {
     }
 }
 
-.sd-access-badge { display:table; margin-bottom:10px; padding:3px 8px; border-radius:6px; border:1px solid var(--iv-border); color:var(--sd-accent); font-size:11px; font-weight:650; background:var(--iv-bg); }
-.sd-access-badge:not(.is-free) { background:var(--sd-accent); border-color:var(--sd-accent); color:#fff; }
-.sd-access-badge.is-free { color:#b8bcc5; }
+.sd-access-badge {
+    display: table;
+    margin-bottom: 10px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--iv-border);
+    color: var(--sd-accent);
+    font-size: 11px;
+    font-weight: 650;
+    background: var(--iv-bg);
+}
+.sd-access-badge:not(.is-free) {
+    background: var(--sd-accent);
+    border-color: var(--sd-accent);
+    color: #fff;
+}
+.sd-access-badge.is-free {
+    color: #b8bcc5;
+}
+
+/* Fullscreen: the board owns the viewport; tool panels become a right drawer. */
+.sd-workspace.is-expanded {
+    inset: 0;
+    z-index: 100;
+    width: 100%;
+    height: 100dvh;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+        env(safe-area-inset-left);
+    border: 0;
+    border-radius: 0;
+    display: block;
+    overflow: hidden;
+}
+.sd-workspace:fullscreen {
+    width: 100vw;
+    height: 100dvh;
+}
+.sd-workspace.is-expanded .sd-board-section {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border-radius: 0;
+}
+.sd-workspace.is-expanded .sd-board {
+    flex: 1;
+    min-height: 0;
+    height: auto;
+}
+.sd-workspace.is-expanded .sd-board-bottom {
+    display: none;
+}
+.sd-workspace.is-expanded .sd-toolbar {
+    flex-shrink: 0;
+    min-height: 60px;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    padding: 8px 12px;
+}
+.sd-workspace.is-expanded .sd-toolbar-group {
+    display: none;
+}
+.sd-workspace.is-expanded .sd-check {
+    order: 0;
+    display: flex;
+    width: auto;
+    min-height: 44px;
+    margin: 0;
+}
+.sd-full-menu,
+.sd-drawer-close {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    min-height: 44px;
+    border: 1px solid var(--iv-border);
+    border-radius: 8px;
+    background: var(--iv-surface);
+    color: var(--iv-text);
+}
+.sd-workspace.is-expanded .sd-side {
+    position: absolute;
+    z-index: 30;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(390px, 92%);
+    margin: 0;
+    background: var(--iv-surface);
+    border-left: 1px solid var(--iv-border);
+    overflow: auto;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateX(100%);
+    transition:
+        transform 250ms cubic-bezier(0.32, 0.72, 0, 1),
+        opacity 200ms ease,
+        visibility 250ms;
+    padding: 8px;
+    box-shadow: -12px 0 32px #0003;
+}
+.sd-workspace.is-expanded .sd-side.is-open {
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(0);
+}
+.sd-workspace.is-expanded .sd-panel {
+    max-height: none;
+    overflow: visible;
+}
+.sd-drawer-close {
+    margin: 0 0 8px auto;
+}
+.sd-drawer-scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 29;
+    background: #0005;
+    border: 0;
+}
+.sd-orientation-hint {
+    margin: 0;
+    padding: 4px 12px;
+    font-size: 11px;
+    color: var(--iv-text-secondary);
+}
+@media (orientation: landscape) {
+    .sd-orientation-hint {
+        display: none;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .sd-workspace.is-expanded .sd-side {
+        transition: none;
+    }
+}
+/* The click-away layer must never inherit palette-button hover/press colors. */
+.sd-workspace.is-expanded button.sd-drawer-scrim,
+.sd-workspace.is-expanded button.sd-drawer-scrim:hover,
+.sd-workspace.is-expanded button.sd-drawer-scrim:active,
+.sd-workspace.is-expanded button.sd-drawer-scrim:focus {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    transform: none;
+}
+
+/* Keep check/menu controls visible and reachable while the drawer is open. */
+.sd-workspace.is-expanded .sd-side {
+    top: calc(64px + env(safe-area-inset-top));
+    border-radius: 12px 0 0 0;
+}
+.sd-workspace.is-expanded button.sd-drawer-scrim {
+    top: calc(64px + env(safe-area-inset-top));
+}

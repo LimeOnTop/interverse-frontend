@@ -82,3 +82,14 @@ News ID `system-design-path-20261024` is also registered in interview-service `P
 Read receipts retain the existing authenticated, per-user backend storage; no global local
 "read" flag has been introduced. Deploy these two repositories together when this feature is
 subsequently approved for production.
+
+## Fullscreen board
+
+The bottom-right diagonal-arrow button opens fullscreen and becomes a collapse button.
+A right-hand drawer contains Task, Blocks, Connections and Check; the top action checks the
+design and opens its result. Entry/exit use the same original Dither preset as the dashboard.
+Native fullscreen requests landscape orientation on coarse-pointer devices when supported.
+Browsers refusing orientation lock keep a functional full-viewport board with a rotate-phone
+hint; CSS rotation is deliberately avoided because it corrupts React Flow pointer coordinates.
+Radix selects portal inside the native fullscreen element. Scroll locking and hidden-panel
+inertness are restored on exit. Actual mobile orientation locking requires a physical device.

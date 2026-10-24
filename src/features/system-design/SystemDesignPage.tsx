@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useReducedMotion } from 'framer-motion'
 import { Link, useParams } from 'react-router-dom'
 import {
@@ -40,6 +40,7 @@ import {
     RotateCcw,
     Lightbulb,
     Play,
+    Menu,
     Maximize2,
     Minimize2,
     X,
@@ -47,6 +48,7 @@ import {
 } from 'lucide-react'
 import '@xyflow/react/dist/style.css'
 import './system-design.css'
+import { createAsciiReveal, type AsciiRevealController } from 'ascii-reveal/core'
 import BoardSelect from './BoardSelect'
 import { usePromoStore } from '../../store/promoStore'
 import { resolveSubscriptionPlan } from '../../utils/subscription'
@@ -154,13 +156,15 @@ const panelLabels: Record<Panel, string> = {
 
 export default function SystemDesignPage() {
     const { id } = useParams()
-    const user = useAuthStore(s => s.user)
+    const user = useAuthStore((s) => s.user)
     const owner = user?.id || 'local'
     const isPro = resolveSubscriptionPlan(user) === 'paid'
-    const openPromo = usePromoStore(s => s.openLimitPromo)
+    const openPromo = usePromoStore((s) => s.openLimitPromo)
     const ex = EXERCISES.find((e) => e.id === id)
     const locked = !!ex && ex.id !== EXERCISES[0].id && !isPro
-    useEffect(() => { if (locked) openPromo('system-design') }, [locked, openPromo])
+    useEffect(() => {
+        if (locked) openPromo('system-design')
+    }, [locked, openPromo])
     const completed = EXERCISES.filter((e) => evaluate(e, load(String(owner), e)).passed).length
     if (id && !ex)
         return (
@@ -169,12 +173,17 @@ export default function SystemDesignPage() {
                 <Link to="/system-design">К задачам System Design</Link>
             </div>
         )
-    if (locked) return <div className="sd-page">
-        <Link to="/system-design">← Все задачи</Link>
-        <h1 className="mt-6 text-2xl font-semibold">{ex!.title}</h1>
-        <p className="mt-3">Эта тренировка доступна в Pro. Первая тренировка — бесплатно.</p>
-        <button className="sd-primary mt-5" onClick={() => openPromo('system-design')}>Открыть Pro</button>
-    </div>
+    if (locked)
+        return (
+            <div className="sd-page">
+                <Link to="/system-design">← Все задачи</Link>
+                <h1 className="mt-6 text-2xl font-semibold">{ex!.title}</h1>
+                <p className="mt-3">Эта тренировка доступна в Pro. Первая тренировка — бесплатно.</p>
+                <button className="sd-primary mt-5" onClick={() => openPromo('system-design')}>
+                    Открыть Pro
+                </button>
+            </div>
+        )
     if (ex)
         return (
             <ReactFlowProvider key={`${owner}:${ex.id}`}>
@@ -186,7 +195,10 @@ export default function SystemDesignPage() {
             <div className="sd-intro">
                 <span className="sd-eyebrow">Архитектура на практике</span>
                 <h1>System Design</h1>
-                <p>Найдите узкое место. Измените схему. Проверьте решение. Первая тренировка — бесплатно, остальные 24 — в Pro.</p>
+                <p>
+                    Найдите узкое место. Измените схему. Проверьте решение. Первая тренировка — бесплатно,
+                    остальные 24 — в Pro.
+                </p>
                 <div className="sd-intro-meta">
                     <span>
                         <Network size={16} />
@@ -227,13 +239,24 @@ export default function SystemDesignPage() {
                             const i = EXERCISES.indexOf(task)
                             const solved = evaluate(task, load(String(owner), task)).passed
                             return (
-                                <Link className="sd-exercise" to={`/system-design/${task.id}`} key={task.id}
-                                    onClick={event => { if (i > 0 && !isPro) { event.preventDefault(); openPromo('system-design') } }}>
+                                <Link
+                                    className="sd-exercise"
+                                    to={`/system-design/${task.id}`}
+                                    key={task.id}
+                                    onClick={(event) => {
+                                        if (i > 0 && !isPro) {
+                                            event.preventDefault()
+                                            openPromo('system-design')
+                                        }
+                                    }}
+                                >
                                     <span className={`sd-exercise-number ${solved ? 'is-complete' : ''}`}>
                                         {solved ? <Check size={22} /> : String(i + 1).padStart(2, '0')}
                                     </span>
                                     <div>
-                                        <span className={`sd-access-badge ${i === 0 ? 'is-free' : ''}`}>{i === 0 ? 'Бесплатно' : 'Pro'}</span>
+                                        <span className={`sd-access-badge ${i === 0 ? 'is-free' : ''}`}>
+                                            {i === 0 ? 'Бесплатно' : 'Pro'}
+                                        </span>
                                         <span className="sd-eyebrow">{task.topic}</span>
                                         <h2>{task.title}</h2>
                                         <p>{task.incident}</p>
@@ -275,7 +298,90 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
     const [source, setSource] = useState('')
     const [target, setTarget] = useState('')
     const [notice, setNotice] = useState('')
+    const flow = useReactFlow<BoardNode>()
+    const fullscreenFlow = useRef(flow)
+    fullscreenFlow.current = flow
     const [expanded, setExpanded] = useState(false)
+    const [drawerOpen, setDrawerOpen] = useState(false)
+    const [rotateHint, setRotateHint] = useState(false)
+    const workspace = useRef<HTMLDivElement>(null)
+    const burger = useRef<HTMLButtonElement>(null)
+    const reveal = useRef<AsciiRevealController | null>(null)
+    const switching = useRef(false)
+    const fullscreenStarted = useRef(false)
+    const toggleExpanded = async () => {
+        if (switching.current) return
+        switching.current = true
+        const root = workspace.current
+        if (expanded) {
+            await reveal.current?.hide()
+            setExpanded(false)
+            setDrawerOpen(false)
+            setRotateHint(false)
+            if (document.fullscreenElement) await document.exitFullscreen().catch(() => {})
+            screen.orientation?.unlock?.()
+        } else {
+            fullscreenStarted.current = true
+            setExpanded(true)
+            if (root?.requestFullscreen && window.matchMedia('(pointer: coarse)').matches) {
+                try {
+                    await root.requestFullscreen()
+                    if (window.matchMedia('(pointer: coarse)').matches) {
+                        const orientation = screen.orientation as ScreenOrientation & {
+                            lock?: (value: string) => Promise<void>
+                        }
+                        if (orientation.lock) await orientation.lock('landscape')
+                        else setRotateHint(window.innerHeight > window.innerWidth)
+                    }
+                } catch {
+                    setRotateHint(window.matchMedia('(pointer: coarse) and (orientation: portrait)').matches)
+                }
+            } else setRotateHint(window.matchMedia('(pointer: coarse) and (orientation: portrait)').matches)
+        }
+        switching.current = false
+    }
+    useLayoutEffect(() => {
+        const root = workspace.current
+        if (!root || !fullscreenStarted.current) return
+        reveal.current?.destroy()
+        const effect = createAsciiReveal(root, {
+            preset: 'dither',
+            duration: 'cinematic',
+            speed: 0.7,
+            lazy: false,
+            surfaces: '.sd-board-section',
+            fades: '.sd-toolbar',
+        })
+        reveal.current = effect
+        void effect.reveal().then(() => {
+            void fullscreenFlow.current.fitView({ padding: 0.15, maxZoom: 1 })
+        })
+        return () => {
+            effect.destroy()
+            reveal.current = null
+        }
+    }, [expanded])
+    useEffect(() => {
+        if (!expanded) return
+        const old = document.body.style.overflow
+        document.body.style.overflow = 'hidden'
+        const sync = () => {
+            if (!document.fullscreenElement) {
+                setExpanded(false)
+                setDrawerOpen(false)
+                screen.orientation?.unlock?.()
+            }
+        }
+        document.addEventListener('fullscreenchange', sync)
+        return () => {
+            document.body.style.overflow = old
+            document.removeEventListener('fullscreenchange', sync)
+        }
+    }, [expanded])
+    useEffect(() => {
+        if (expanded) sideRef.current?.toggleAttribute('inert', !drawerOpen)
+        else sideRef.current?.removeAttribute('inert')
+    }, [expanded, drawerOpen])
     const panelRef = useRef<HTMLDivElement>(null)
     const sideRef = useRef<HTMLElement>(null)
     const expandButton = useRef<HTMLButtonElement>(null)
@@ -283,7 +389,6 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
     const [saveError, setSaveError] = useState(false)
     const { isDark } = useTheme()
     const reducedMotion = useReducedMotion()
-    const flow = useReactFlow<BoardNode>()
     const runTimer = useRef<ReturnType<typeof setTimeout>>()
     const designRef = useRef(design)
     designRef.current = design
@@ -336,7 +441,9 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                 !document.body.classList.contains('sd-grabbing') &&
                 !document.querySelector('.sd-select-content')
             ) {
+                if (document.fullscreenElement) void document.exitFullscreen().catch(() => {})
                 setExpanded(false)
+                setDrawerOpen(false)
                 expandButton.current?.focus()
             }
         }
@@ -367,7 +474,7 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
     const selectEdge = (id: string) => {
         setSelectedWireId(id)
         setSelected(null)
-        if (window.matchMedia('(max-width:800px)').matches)
+        if (!expanded && window.matchMedia('(max-width:800px)').matches)
             requestAnimationFrame(() => edgeActionsRef.current?.scrollIntoView({ block: 'nearest' }))
     }
     const invalidate = useCallback(() => {
@@ -687,6 +794,7 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
     const check = () => {
         setResult(evaluate(ex, design))
         setPanel('result')
+        if (expanded) setDrawerOpen(true)
         if (window.matchMedia('(max-width:800px)').matches)
             requestAnimationFrame(() => sideRef.current?.scrollIntoView({ block: 'start' }))
         setRunning(true)
@@ -713,6 +821,7 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                 </span>
             </div>
             <div
+                ref={workspace}
                 className={`sd-workspace ${expanded ? 'is-expanded' : ''}`}
                 role={expanded ? 'dialog' : undefined}
                 aria-modal={expanded ? true : undefined}
@@ -723,7 +832,7 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                         event.currentTarget.querySelectorAll<HTMLElement>(
                             'button:not(:disabled), a[href], select, [tabindex="0"]',
                         ),
-                    )
+                    ).filter((el) => !el.closest('[inert]') && el.getClientRects().length > 0)
                     if (event.shiftKey && document.activeElement === focusable[0]) {
                         event.preventDefault()
                         focusable[focusable.length - 1]?.focus()
@@ -770,12 +879,7 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                             </button>
                             <button
                                 ref={expandButton}
-                                onClick={() => {
-                                    setExpanded(!expanded)
-                                    requestAnimationFrame(
-                                        () => void flow.fitView({ padding: 0.15, maxZoom: 1 }),
-                                    )
-                                }}
+                                onClick={() => void toggleExpanded()}
                                 aria-label={expanded ? 'Свернуть доску' : 'Развернуть доску'}
                                 title={expanded ? 'Свернуть доску' : 'Развернуть доску'}
                             >
@@ -793,7 +897,21 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                             <Play size={16} />
                             {result ? 'Проверить ещё раз' : 'Проверить решение'}
                         </button>
+                        {expanded && (
+                            <button
+                                ref={burger}
+                                className="sd-full-menu"
+                                aria-label="Меню тренировки"
+                                aria-expanded={drawerOpen}
+                                onClick={() => setDrawerOpen(!drawerOpen)}
+                            >
+                                <Menu size={20} />
+                            </button>
+                        )}
                     </div>
+                    {expanded && rotateHint && (
+                        <p className="sd-orientation-hint">Для горизонтальной доски поверните телефон</p>
+                    )}
                     <div ref={boardRef} className={`sd-board ${palette.target.over ? 'is-drop-zone' : ''}`}>
                         <ReactFlow<BoardNode>
                             nodes={nodes}
@@ -878,11 +996,13 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                         </ReactFlow>
                         <button
                             className="sd-fit"
-                            onClick={() => void flow.fitView({ padding: 0.2, maxZoom: 1 })}
-                            aria-label="Показать всю схему"
-                            title="Показать всю схему"
+                            onClick={() => void toggleExpanded()}
+                            aria-label={
+                                expanded ? 'Свернуть полноэкранный режим' : 'Открыть полноэкранный режим'
+                            }
+                            title={expanded ? 'Свернуть доску' : 'Развернуть доску'}
                         >
-                            <Maximize2 size={18} />
+                            {expanded ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
                         </button>
                     </div>
                     <div className="sd-board-bottom">
@@ -985,7 +1105,33 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                         </div>
                     )}
                 </section>
-                <aside ref={sideRef} className="sd-side">
+                {expanded && drawerOpen && (
+                    <button
+                        className="sd-drawer-scrim"
+                        aria-label="Закрыть меню тренировки"
+                        onClick={() => {
+                            setDrawerOpen(false)
+                            burger.current?.focus()
+                        }}
+                    />
+                )}
+                <aside
+                    ref={sideRef}
+                    className={`sd-side ${drawerOpen ? 'is-open' : ''}`}
+                    aria-hidden={expanded && !drawerOpen}
+                >
+                    {expanded && (
+                        <button
+                            className="sd-drawer-close"
+                            aria-label="Закрыть панель"
+                            onClick={() => {
+                                setDrawerOpen(false)
+                                burger.current?.focus()
+                            }}
+                        >
+                            <X size={20} />
+                        </button>
+                    )}
                     <div className="sd-tabs" role="tablist" aria-label="Панели тренировки">
                         {(Object.keys(panelLabels) as Panel[]).map((p) => (
                             <button

@@ -30,7 +30,7 @@ export default function BoardSelect({
                     <ChevronDown size={16} />
                 </Select.Icon>
             </Select.Trigger>
-            <Select.Portal>
+            <Select.Portal container={(document.fullscreenElement as HTMLElement) || undefined}>
                 <Select.Content
                     data-keyboard={keyboard || undefined}
                     position="popper"
