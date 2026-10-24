@@ -193,7 +193,7 @@ export default function ReportsPage() {
             {!latest ? (
                 <section className="collection-empty">
                     <h3>{preparations.preparations.length ? 'Отчёты этапов появятся после тренировки' : 'Отчётов пока нет'}</h3>
-                    <p>После первой тренировки здесь появится отчёт с результатом. Подробный разбор ответов и темы для повторения доступны в Pro.</p>
+                    <p>После первой тренировки здесь появится отчёт с результатом. В Pro доступны подробный разбор ответов, темы для повторения и все тренировки по System Design.</p>
                     <div className="actions">
                         <Link to="/interviews/create" className="lib-btn is-primary">
                             Начать тренировку <ArrowRight />

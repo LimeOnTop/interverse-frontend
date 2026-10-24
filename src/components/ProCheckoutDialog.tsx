@@ -28,9 +28,9 @@ export default function ProCheckoutDialog({ offer, busy, available, settingsErro
             {trial ? (
                 <>
                 <h2 ref={title} tabIndex={-1} id="pro-checkout-title" className="pr-9 text-2xl sm:text-3xl font-bold text-inter-verse-green dark:text-purple-300">Попробуй Pro за 1 ₽</h2>
-                <p className="mt-3 text-sm text-secondary">Полный доступ к Pro на 3 дня: подробные отчёты, разбор ответов и до 15 тренировок в день.</p>
+                <p className="mt-3 text-sm text-secondary">Полный доступ к Pro на 3 дня: все тренировки по System Design, подробные отчёты, разбор ответов и до 15 тренировок в день.</p>
                 <ul className="grid gap-3 mt-5">
-                    {PRO_FEATURES.slice(0, 3).map(feature => <li key={feature} className="flex items-start gap-3 text-sm text-gray-800 dark:text-gray-200"><Check size={18} className="shrink-0 mt-0.5 text-inter-verse-green dark:text-purple-300" /><span>{feature}</span></li>)}
+                    {PRO_FEATURES.slice(0, 4).map(feature => <li key={feature} className="flex items-start gap-3 text-sm text-gray-800 dark:text-gray-200"><Check size={18} className="shrink-0 mt-0.5 text-inter-verse-green dark:text-purple-300" /><span>{feature}</span></li>)}
                 </ul>
                 </>
             ) : <>
@@ -38,7 +38,7 @@ export default function ProCheckoutDialog({ offer, busy, available, settingsErro
             <h2 ref={title} tabIndex={-1} id="pro-checkout-title" className="mt-5 text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">Больше практики. Понятнее следующий шаг.</h2>
             <p className="mt-3 text-sm text-secondary">{offer.description}</p>
             <ul className="grid gap-3 mt-5">
-                {(trial ? PRO_FEATURES.slice(0, 3) : PRO_FEATURES).map(feature => <li key={feature} className="flex items-start gap-3 text-sm text-gray-800 dark:text-gray-200"><Check size={18} className="shrink-0 mt-0.5 text-inter-verse-green dark:text-purple-300" /><span>{feature}</span></li>)}
+                {(trial ? PRO_FEATURES.slice(0, 4) : PRO_FEATURES).map(feature => <li key={feature} className="flex items-start gap-3 text-sm text-gray-800 dark:text-gray-200"><Check size={18} className="shrink-0 mt-0.5 text-inter-verse-green dark:text-purple-300" /><span>{feature}</span></li>)}
             </ul>
             <div className="pro-checkout__price mt-6 p-4 flex items-center justify-between gap-3">
                 <span className="font-medium text-gray-900 dark:text-gray-100">{offer.name}<span className="block text-xs text-secondary mt-1">{trial ? '72 часа доступа' : `${offer.durationDays} дней доступа`}</span></span>
