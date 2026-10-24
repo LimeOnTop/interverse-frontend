@@ -344,6 +344,7 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
         const root = workspace.current
         if (!root || !fullscreenStarted.current) return
         reveal.current?.destroy()
+        root.style.removeProperty('position')
         const effect = createAsciiReveal(root, {
             preset: 'dither',
             duration: 'cinematic',
