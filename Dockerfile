@@ -1,11 +1,11 @@
 # syntax=docker/dockerfile:1.4
 
-FROM node:18-alpine AS builder
+FROM --platform=$BUILDPLATFORM node:18-alpine AS builder
 WORKDIR /app
 RUN apk add --no-cache git
 COPY package*.json ./
 COPY vendor/ ./vendor/
-RUN npm ci
+RUN npm ci --no-audit --no-fund
 COPY . .
 ARG VITE_API_URL
 ENV VITE_API_URL=${VITE_API_URL}
