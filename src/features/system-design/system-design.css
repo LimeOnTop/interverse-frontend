@@ -1348,3 +1348,73 @@ body.sd-grabbing * {
         right: 66px;
     }
 }
+
+.sd-track {
+    margin-top: 32px;
+}
+.sd-track-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+.sd-track-heading h2 {
+    font-size: 18px;
+    font-weight: 650;
+}
+.sd-track-heading > span {
+    font-size: 12px;
+    color: var(--iv-text-secondary);
+    white-space: nowrap;
+}
+@media (max-width: 480px) {
+    .sd-track-heading {
+        align-items: flex-start;
+    }
+    .sd-track-heading h2 {
+        font-size: 16px;
+    }
+}
+
+.sd-track-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 22px 0;
+}
+.sd-track-nav a {
+    padding: 10px 14px;
+    min-height: 44px;
+    border: 1px solid var(--iv-border);
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--iv-text);
+    display: flex;
+    align-items: center;
+}
+.sd-track-nav a:focus-visible {
+    outline: 2px solid var(--sd-accent);
+    outline-offset: 2px;
+}
+.sd-track {
+    scroll-margin-top: 90px;
+}
+@media (max-width: 480px) {
+    .sd-exercise {
+        padding: 18px 16px;
+        gap: 12px;
+    }
+    .sd-exercise-number {
+        width: 32px;
+        height: 36px;
+        font-size: 14px;
+        border-radius: 8px;
+    }
+    .sd-exercise .sd-card-arrow {
+        display: none;
+    }
+    .sd-exercise > div {
+        min-width: 0;
+    }
+}

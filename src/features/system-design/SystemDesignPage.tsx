@@ -54,6 +54,7 @@ import { useTheme } from '../../contexts/ThemeContext'
 import { useAuthStore } from '../../store/authStore'
 import {
     EXERCISES,
+    TRACKS,
     PARTS,
     arrange,
     insertBlockOnWire,
@@ -70,6 +71,18 @@ import {
 } from './model'
 
 const icons: Record<BlockKind, LucideIcon> = {
+    dedup: Layers3,
+    retry: Network,
+    timeout: Network,
+    breaker: Network,
+    limiter: Network,
+    outbox: Network,
+    dlq: Network,
+    replication: GitBranch,
+    quorum: GitBranch,
+    transaction: GitBranch,
+    coalescer: Layers3,
+    versioning: Layers3,
     client: Users,
     api: Server,
     database: Database,
@@ -163,36 +176,64 @@ export default function SystemDesignPage() {
                 <p>Найдите узкое место. Измените схему. Проверьте, выдержит ли она нагрузку.</p>
                 <div className="sd-intro-meta">
                     <span>
-                        <Network size={16} />5 задач с готовой архитектурой
+                        <Network size={16} />
+                        {EXERCISES.length} задач · {TRACKS.length} траекторий
                     </span>
                     <span>
                         <CheckCircle2 size={16} />
-                        {completed} из 5 решено
+                        {completed} из {EXERCISES.length} решено
                     </span>
                 </div>
             </div>
-            <div className="sd-exercises">
-                {EXERCISES.map((task, i) => {
-                    const solved = evaluate(task, load(String(owner), task)).passed
-                    return (
-                        <Link className="sd-exercise" to={`/system-design/${task.id}`} key={task.id}>
-                            <span className={`sd-exercise-number ${solved ? 'is-complete' : ''}`}>
-                                {solved ? <Check size={22} /> : String(i + 1).padStart(2, '0')}
-                            </span>
-                            <div>
-                                <span className="sd-eyebrow">{task.topic}</span>
-                                <h2>{task.title}</h2>
-                                <p>{task.incident}</p>
-                                <span className="sd-exercise-foot">
-                                    {task.demand.toLocaleString('ru-RU')} запросов/с ·{' '}
-                                    {solved ? 'Решено · открыть' : '10–15 минут'}
-                                </span>
-                            </div>
-                            <ArrowRight className="sd-card-arrow" size={22} />
-                        </Link>
-                    )
-                })}
-            </div>
+            <nav className="sd-track-nav" aria-label="Траектории System Design">
+                {TRACKS.map((track, i) => (
+                    <a key={track} href={`#trajectory-${i}`}>
+                        {track}
+                    </a>
+                ))}
+            </nav>
+            {TRACKS.map((track, trackIndex) => (
+                <section className="sd-track" id={`trajectory-${trackIndex}`} key={track}>
+                    <div className="sd-track-heading">
+                        <h2>
+                            {trackIndex + 1}. {track}
+                        </h2>
+                        <span>
+                            {
+                                EXERCISES.filter(
+                                    (t) =>
+                                        (t.track || TRACKS[0]) === track &&
+                                        evaluate(t, load(String(owner), t)).passed,
+                                ).length
+                            }{' '}
+                            / 5 решено
+                        </span>
+                    </div>
+                    <div className="sd-exercises">
+                        {EXERCISES.filter((t) => (t.track || TRACKS[0]) === track).map((task) => {
+                            const i = EXERCISES.indexOf(task)
+                            const solved = evaluate(task, load(String(owner), task)).passed
+                            return (
+                                <Link className="sd-exercise" to={`/system-design/${task.id}`} key={task.id}>
+                                    <span className={`sd-exercise-number ${solved ? 'is-complete' : ''}`}>
+                                        {solved ? <Check size={22} /> : String(i + 1).padStart(2, '0')}
+                                    </span>
+                                    <div>
+                                        <span className="sd-eyebrow">{task.topic}</span>
+                                        <h2>{task.title}</h2>
+                                        <p>{task.incident}</p>
+                                        <span className="sd-exercise-foot">
+                                            {task.demand.toLocaleString('ru-RU')} запросов/с ·{' '}
+                                            {solved ? 'Решено · открыть' : '10–15 минут'}
+                                        </span>
+                                    </div>
+                                    <ArrowRight className="sd-card-arrow" size={22} />
+                                </Link>
+                            )
+                        })}
+                    </div>
+                </section>
+            ))}
             <p className="sd-local-note">
                 Учебная модель с заданными лимитами. Прогресс сохраняется в этом браузере. Обычные попытки
                 тренировок не расходуются.
@@ -647,7 +688,7 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                     Все задачи
                 </Link>
                 <span className="sd-eyebrow">
-                    Задача {number + 1} / 5 · {ex.topic}
+                    Задача {number + 1} / {EXERCISES.length} · {ex.topic}
                 </span>
             </div>
             <div className="sd-title-row">
@@ -1195,7 +1236,9 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                                         {result.passed ? <CheckCircle2 size={27} /> : <XCircle size={27} />}
                                         <div>
                                             <h2>
-                                                {result.passed ? 'Архитектура выдержала' : 'Есть узкие места'}
+                                                {result.passed
+                                                    ? 'Архитектура выдержала'
+                                                    : 'Нужно доработать схему'}
                                             </h2>
                                             <p>
                                                 {result.checks.filter((c) => c.ok).length} из{' '}
@@ -1217,11 +1260,23 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                                     <details className="sd-trace">
                                         <summary>Маршрут и расчёт нагрузки</summary>
                                         <p>
-                                            Вход: {ex.demand.toLocaleString('ru-RU')} RPS. Балансировщик и
-                                            шард-роутер делят поток поровну; обычная развилка дублирует его. В
-                                            задаче каталога кеш пропускает 10% чтений, в задаче статики CDN —
-                                            5%. Для записей кеш поток не уменьшает. Очередь отдаёт задания
-                                            воркеру со скоростью до 200/с; допустимый срок — 20 секунд.
+                                            {ex.scenario ? (
+                                                <>
+                                                    Сценарий: {ex.scenario.event} Нагрузка считается по всем
+                                                    входящим веткам; блоки защиты не уменьшают поток записей.
+                                                    Лимитер явно отклоняет избыток, single-flight объединяет
+                                                    только чтения одного ключа.
+                                                </>
+                                            ) : (
+                                                <>
+                                                    Вход: {ex.demand.toLocaleString('ru-RU')} RPS.
+                                                    Балансировщик и шард-роутер делят поток поровну; обычная
+                                                    развилка дублирует его. В задаче каталога кеш пропускает
+                                                    10% чтений, в задаче статики CDN — 5%. Для записей кеш
+                                                    поток не уменьшает. Очередь отдаёт задания воркеру со
+                                                    скоростью до 200/с; допустимый срок — 20 секунд.
+                                                </>
+                                            )}
                                         </p>
                                         <ol>
                                             {result.trace.map((line, i) => (
@@ -1248,7 +1303,7 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                                                 </Link>
                                             ) : (
                                                 <Link className="sd-primary" to="/system-design">
-                                                    Все задачи решены
+                                                    Ко всем траекториям
                                                     <Check size={16} />
                                                 </Link>
                                             )}

@@ -41,6 +41,15 @@ function solution(ex) {
         d.blocks.push(block('router', 'shard'), block('db2', 'database'))
         connect(d, ['client', 'api'], ['api', 'router'], ['router', 'sink'], ['router', 'db2'])
     }
+    if (ex.scenario) {
+        const nodes = ['client']
+        ex.scenario.route.forEach((kind, i) => {
+            const id = d.blocks.find((n) => n.kind === kind)?.id || `part${i}`
+            if (!d.blocks.some((n) => n.id === id)) d.blocks.push(block(id, kind))
+            nodes.push(id)
+        })
+        connect(d, ...nodes.slice(1).map((id, i) => [nodes[i], id]))
+    }
     return d
 }
 for (const ex of EXERCISES) {
@@ -273,4 +282,73 @@ test('insertion makes enough space and preserves unrelated branch positions', ()
         next.blocks.find((n) => n.id === 'client'),
         d.blocks.find((n) => n.id === 'client'),
     )
+})
+
+test('25 unique levels form five complete trajectories', () => {
+    assert.equal(EXERCISES.length, 25)
+    assert.equal(new Set(EXERCISES.map((e) => e.id)).size, 25)
+    const groups = new Map()
+    for (const e of EXERCISES) {
+        const key = e.track || 'Основы нагрузки'
+        groups.set(key, [...(groups.get(key) || []), e])
+    }
+    assert.equal(groups.size, 5)
+    for (const values of groups.values()) assert.equal(values.length, 5)
+})
+for (const ex of EXERCISES.filter((e) => e.scenario)) {
+    for (const kind of ex.scenario.route.filter((k) => !['api', 'database'].includes(k))) {
+        test(`${ex.id}: bypassing ${kind} breaks the invariant`, () => {
+            const d = solution(ex)
+            const node = d.blocks.find((n) => n.kind === kind)
+            assert.equal(evaluate(ex, removeDesignBlock(d, node.id)).passed, false)
+        })
+    }
+    test(`${ex.id}: extra direct route cannot bypass protection`, () => {
+        const d = solution(ex)
+        d.wires.push({ id: 'bypass', source: 'api', target: 'sink' })
+        assert.equal(evaluate(ex, d).passed, false)
+    })
+    test(`${ex.id}: protection placed after the sink is not accepted`, () => {
+        const d = solution(ex)
+        const ids = [
+            'client',
+            'api',
+            'sink',
+            ...d.blocks.filter((n) => !['client', 'api', 'sink'].includes(n.id)).map((n) => n.id),
+        ]
+        connect(d, ...ids.slice(1).map((id, i) => [ids[i], id]))
+        assert.equal(evaluate(ex, d).passed, false)
+    })
+}
+test('admission explicitly rejects excess before the API', () => {
+    const ex = EXERCISES.find((e) => e.id === 'edge-admission')
+    assert.equal(evaluate(ex, solution(ex)).loads.api, 500)
+})
+test('single-flight coalesces one hot key without pretending a warm cache', () => {
+    const ex = EXERCISES.find((e) => e.id === 'cache-stampede')
+    assert.equal(evaluate(ex, solution(ex)).loads.sink, 1)
+})
+for (const ex of EXERCISES.filter((e) => e.scenario)) {
+    const route = ex.scenario.route
+    for (let index = 0; index < route.length - 1; index++) {
+        if (['api', 'database'].includes(route[index]) || ['api', 'database'].includes(route[index + 1]))
+            continue
+        test(`${ex.id}: order of ${route[index]} and ${route[index + 1]} matters`, () => {
+            const d = solution(ex)
+            const order = ['client', ...route.map((kind) => d.blocks.find((n) => n.kind === kind).id)]
+            ;[order[index + 1], order[index + 2]] = [order[index + 2], order[index + 1]]
+            connect(d, ...order.slice(1).map((id, i) => [order[i], id]))
+            assert.equal(evaluate(ex, d).passed, false)
+        })
+    }
+}
+test('a protected branch does not excuse an unprotected parallel branch', () => {
+    const ex = EXERCISES.find((e) => e.id === 'rpc-dedup')
+    const d = solution(ex)
+    const guard = d.blocks.find((n) => n.kind === 'dedup').id
+    d.blocks.push(block('lb', 'balancer'))
+    connect(d, ['client', 'api'], ['api', 'lb'], ['lb', guard], ['lb', 'sink'], [guard, 'sink'])
+    const result = evaluate(ex, d)
+    assert.equal(result.checks.find((c) => c.label === 'Маршруты без потерь и дублей').ok, true)
+    assert.equal(result.checks.find((c) => c.label === 'Исправлена причина сбоя').ok, false)
 })

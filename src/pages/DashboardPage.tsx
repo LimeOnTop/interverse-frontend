@@ -1,3 +1,4 @@
+import SystemDesignAnnouncement from '../components/SystemDesignAnnouncement'
 import UpcomingPractice from '../components/UpcomingPractice'
 import { PreparationSection } from '../components/VacancyPreparationCard'
 import { usePreparations } from '../lib/preparations'
@@ -131,10 +132,12 @@ export default function DashboardPage() {
 
             <UpcomingPractice />
             <PreparationSection data={preparations} mode="dashboard" />
-            {(report || preparations.preparations.length===0) && <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.65fr_1fr]">
-                <HeroPanel report={report} />
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.65fr_1fr]">
+                <SystemDesignAnnouncement key={user?.id}>
+                    <HeroPanel report={report} />
+                </SystemDesignAnnouncement>
                 <LastResultPanel report={report} />
-            </div>}
+            </div>
 
             {quota && (
                 <DailyActivityBlock completedToday={quota.used} dailyNorm={quota.limit} caption={quotaCaption} />

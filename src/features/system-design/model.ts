@@ -10,6 +10,18 @@ export type BlockKind =
     | 'cdn'
     | 'storage'
     | 'shard'
+    | 'versioning'
+    | 'coalescer'
+    | 'transaction'
+    | 'quorum'
+    | 'replication'
+    | 'dlq'
+    | 'outbox'
+    | 'limiter'
+    | 'breaker'
+    | 'timeout'
+    | 'retry'
+    | 'dedup'
 export interface Block {
     id: string
     kind: BlockKind
@@ -38,11 +50,104 @@ export interface Exercise {
     allowed: BlockKind[]
     initial: Design
     sink: string
+    track?: string
+    scenario?: {
+        route: BlockKind[]
+        event: string
+        success: string
+        failure: string
+        limits?: Partial<Record<BlockKind, number>>
+        admitted?: number
+    }
 }
 export const PARTS: Record<
     BlockKind,
     { label: string; detail: string; capacity: number; latency: number; short: string }
 > = {
+    dedup: {
+        label: 'Дедупликация',
+        detail: 'Ключ операции хранится вместе с результатом. Повтор с тем же ключом возвращает прежний результат, не повторяя эффект.',
+        short: 'Operation ID',
+        capacity: 20000,
+        latency: 5,
+    },
+    retry: {
+        label: 'Повторы с backoff',
+        detail: 'Не более трёх попыток только при временных ошибках; экспоненциальная пауза и jitter. Без дедупликации повтор записи небезопасен.',
+        short: '3 попытки',
+        capacity: 20000,
+        latency: 5,
+    },
+    timeout: {
+        label: 'Таймаут',
+        detail: 'Ограничивает ожидание зависимости 200 мс. Не отменяет уже выполненную удалённую операцию.',
+        short: '200 мс',
+        capacity: 20000,
+        latency: 5,
+    },
+    breaker: {
+        label: 'Circuit breaker',
+        detail: 'После серии ошибок размыкает вызовы зависимости; пробный запрос в half-open проверяет восстановление.',
+        short: 'Closed / open',
+        capacity: 20000,
+        latency: 5,
+    },
+    limiter: {
+        label: 'Rate limiter',
+        detail: 'Token bucket: принимает до 500 запросов/с; избытку отвечает 429 до обращения к зависимости.',
+        short: '500 RPS',
+        capacity: 20000,
+        latency: 5,
+    },
+    outbox: {
+        label: 'Transactional outbox',
+        detail: 'Сохраняет изменение и событие одной локальной транзакцией. Relay повторяет публикацию до подтверждения.',
+        short: 'State + event',
+        capacity: 20000,
+        latency: 5,
+    },
+    dlq: {
+        label: 'DLQ-политика',
+        detail: 'После трёх неуспешных обработок отправляет задание в отдельный карантин, освобождая очередь. Нормальные задания идут дальше.',
+        short: '3 попытки → DLQ',
+        capacity: 20000,
+        latency: 5,
+    },
+    replication: {
+        label: 'Primary / backup',
+        detail: 'Группа из primary и синхронного backup: ACK после записи на оба узла. При отказе primary служба представлений назначает backup новым лидером с fencing epoch; разделение сети разбирается отдельно.',
+        short: '2 реплики',
+        capacity: 20000,
+        latency: 5,
+    },
+    quorum: {
+        label: 'Группа консенсуса',
+        detail: 'Три участника с выбором лидера и журналом. Запись подтверждается большинством 2 из 3; меньшинство при разделении сети не пишет.',
+        short: '2 из 3',
+        capacity: 20000,
+        latency: 5,
+    },
+    transaction: {
+        label: 'Координатор 2PC',
+        detail: 'Prepare всех участников перед commit. Решение хранится в журнале координатора; сбой до решения оставляет участников ждать восстановления.',
+        short: 'Prepare → commit',
+        capacity: 20000,
+        latency: 5,
+    },
+    coalescer: {
+        label: 'Single-flight',
+        detail: 'Объединяет одновременные чтения одного ключа в один запрос. Разные ключи не объединяются.',
+        short: 'Один ключ',
+        capacity: 20000,
+        latency: 5,
+    },
+    versioning: {
+        label: 'Версии и инвалидация',
+        detail: 'Сравнивает версии, не принимает устаревшее обновление кеша и инвалидирует запись после подтверждённой записи.',
+        short: 'Version / CAS',
+        capacity: 20000,
+        latency: 5,
+    },
     client: {
         label: 'Клиенты',
         detail: 'Источник запросов. Нагрузка задана условием.',
@@ -73,14 +178,14 @@ export const PARTS: Record<
     },
     cache: {
         label: 'Кеш',
-        detail: 'В этой задаче 90% чтений — попадания. Только 10% идут дальше в БД; промахи тоже проверяются.',
+        detail: 'Повторные чтения могут обслуживаться из кеша. Записи и холодные промахи идут в БД; допустимая свежесть и hit rate заданы условием задачи.',
         capacity: 10000,
         latency: 2,
-        short: '90% hit rate',
+        short: 'Кеш чтений',
     },
     queue: {
         label: 'Очередь',
-        detail: 'Быстро подтверждает приём. Сохраняет весь двухсекундный всплеск и передаёт задания воркеру в его темпе без потерь.',
+        detail: 'Сохраняет задания до подтверждения обработки и передаёт воркеру в его темпе. Возможны повторные доставки; для неисправимых сообщений нужна политика карантина.',
         capacity: 10000,
         latency: 5,
         short: 'Буфер 10 000',
@@ -211,10 +316,522 @@ export const EXERCISES: Exercise[] = [
         sink: 'sink',
     },
 ]
+
+export const TRACKS = [
+    'Основы нагрузки',
+    'Надёжные запросы',
+    'Репликация и согласованность',
+    'Доставка событий',
+    'Кеш и защита ресурсов',
+]
+EXERCISES.push({
+    id: 'rpc-dedup',
+    title: 'Платёж списался дважды',
+    track: 'Надёжные запросы',
+    topic: 'Идемпотентность RPC',
+    description: 'Клиент повторил платёж после потери ответа. Оба запроса имеют один operation ID.',
+    incident: 'Без атомарного журнала повтор выполнит списание заново.',
+    demand: 100,
+    goal: 'Повтор одного ID возвращает тот же результат; списание выполняется один раз.',
+    hint: 'Расположите компоненты по порядку: Клиенты → API → Дедупликация → БД. Удалите обходные связи.',
+    tradeoff:
+        'Хранение ключа и результата должно быть атомарно с изменением баланса; срок хранения ограничивает окно защиты.',
+    allowed: ['dedup', 'cache', 'balancer'],
+    initial: standard(),
+    sink: 'sink',
+    scenario: {
+        route: ['api', 'dedup', 'database'],
+        event: 'Две доставки одного operation ID.',
+        success: 'Повтор найден в журнале результатов: один эффект, два одинаковых ответа.',
+        failure: 'Без атомарного журнала повтор выполнит списание заново.',
+        limits: {},
+    },
+})
+EXERCISES.push({
+    id: 'rpc-retry',
+    title: 'Пакет потерялся в сети',
+    track: 'Надёжные запросы',
+    topic: 'Ограниченные повторы',
+    description: 'Первая отправка записи теряется. Вторая доходит, но её ответ может потеряться.',
+    incident:
+        'Без таймаута запрос зависнет; без повторов потеряется; без дедупликации возможен двойной эффект.',
+    demand: 100,
+    goal: 'Ограничьте ожидание, повторите временный сбой и защитите запись от повторного эффекта.',
+    hint: 'Расположите компоненты по порядку: Клиенты → API → Повторы с backoff → Таймаут → Дедупликация → БД. Удалите обходные связи.',
+    tradeoff:
+        'Backoff ограничивает повторную нагрузку. Таймаут не доказывает, что удалённая операция не была выполнена.',
+    allowed: ['timeout', 'retry', 'dedup', 'cache', 'balancer'],
+    initial: standard(),
+    sink: 'sink',
+    scenario: {
+        route: ['api', 'retry', 'timeout', 'dedup', 'database'],
+        event: 'Первая доставка потеряна; ответ на вторую тоже потерян.',
+        success:
+            'Таймаут завершает ожидание; повтор с тем же ID возвращает единственный сохранённый результат.',
+        failure:
+            'Без таймаута запрос зависнет; без повторов потеряется; без дедупликации возможен двойной эффект.',
+        limits: {},
+    },
+})
+EXERCISES.push({
+    id: 'dependency-timeout',
+    title: 'Зависимость зависла',
+    track: 'Надёжные запросы',
+    topic: 'Ограничение ожидания',
+    description: 'Сервис профилей перестал отвечать. Нужно ограничить ожидание одного обращения 200 мс.',
+    incident: 'Вызов продолжает занимать слот API без ограничения времени.',
+    demand: 100,
+    goal: 'Поставьте границу ожидания перед зависимостью; кеш не задаёт таймаут.',
+    hint: 'Расположите компоненты по порядку: Клиенты → API → Таймаут → БД. Удалите обходные связи.',
+    tradeoff: 'Отмена ожидания не отменяет работу сервера; для записи нужен operation ID.',
+    allowed: ['timeout', 'cache', 'balancer'],
+    initial: standard(),
+    sink: 'sink',
+    scenario: {
+        route: ['api', 'timeout', 'database'],
+        event: 'Зависимость не отвечает дольше 200 мс.',
+        success: 'Ожидание прервано по таймауту; слот API освобождён.',
+        failure: 'Вызов продолжает занимать слот API без ограничения времени.',
+        limits: {},
+    },
+})
+EXERCISES.push({
+    id: 'retry-storm',
+    title: 'Повторы устроили лавину',
+    track: 'Надёжные запросы',
+    topic: 'Бюджет повторов',
+    description:
+        'Зависимость возвращает временные ошибки сериями. Бесконечные немедленные повторы усугубляют отказ.',
+    incident: 'Повторы продолжают давить на неисправную зависимость.',
+    demand: 100,
+    goal: 'Ограничьте ожидание и число попыток; открытый breaker должен остановить новые серии повторов.',
+    hint: 'Расположите компоненты по порядку: Клиенты → API → Circuit breaker → Повторы с backoff → Таймаут → Дедупликация → БД. Удалите обходные связи.',
+    tradeoff:
+        'Breaker располагается перед политикой повторов и считает итог серии. Jitter рассинхронизирует клиентов.',
+    allowed: ['timeout', 'breaker', 'retry', 'dedup', 'cache', 'balancer'],
+    initial: standard(),
+    sink: 'sink',
+    scenario: {
+        route: ['api', 'breaker', 'retry', 'timeout', 'dedup', 'database'],
+        event: 'Три последовательных ошибки зависимости.',
+        success: 'Бюджет серии исчерпан; breaker блокирует новые серии до пробного запроса.',
+        failure: 'Повторы продолжают давить на неисправную зависимость.',
+        limits: {},
+    },
+})
+EXERCISES.push({
+    id: 'edge-admission',
+    title: 'Один клиент занял весь API',
+    track: 'Надёжные запросы',
+    topic: 'Контроль входящего потока',
+    description: 'Приходит 1 600 запросов/с. Допустимо явно отклонять избыток, сохранив до 500 запросов/с.',
+    incident: 'Без входного лимитера API перегружен.',
+    demand: 1600,
+    goal: 'Ограничьте поток до API, возвращая 429 вместо перегрузки.',
+    hint: 'Расположите компоненты по порядку: Клиенты → Rate limiter → API → БД. Удалите обходные связи.',
+    tradeoff: 'Клиент должен учитывать Retry-After. Лимитер требует правил справедливости по пользователям.',
+    allowed: ['limiter', 'cache', 'balancer'],
+    initial: standard(),
+    sink: 'sink',
+    scenario: {
+        route: ['limiter', 'api', 'database'],
+        event: 'Поток 1 600 запросов/с превышает бюджет 500.',
+        success: 'Принято 500 запросов/с; 1 100 получают 429 до API.',
+        failure: 'Без входного лимитера API перегружен.',
+        limits: {},
+        admitted: 500,
+    },
+})
+EXERCISES.push({
+    id: 'leader-crash',
+    title: 'Лидер упал после ACK',
+    track: 'Репликация и согласованность',
+    topic: 'Primary-backup',
+    description:
+        'Лидер подтверждает запись и сразу выходит из строя. Подтверждённые данные должны пережить один отказ.',
+    incident: 'Подтверждённая запись остаётся только на отказавшем узле.',
+    demand: 100,
+    goal: 'Подтверждайте запись только после синхронного backup.',
+    hint: 'Расположите компоненты по порядку: Клиенты → API → Primary / backup → БД. Удалите обходные связи.',
+    tradeoff:
+        'Синхронный backup увеличивает задержку ACK. При потере связи требуется безопасный выбор нового primary.',
+    allowed: ['replication', 'cache', 'balancer'],
+    initial: standard(),
+    sink: 'sink',
+    scenario: {
+        route: ['api', 'replication', 'database'],
+        event: 'Primary падает сразу после подтверждения записи.',
+        success: 'Backup содержит подтверждённую запись и становится новым primary с новым epoch.',
+        failure: 'Подтверждённая запись остаётся только на отказавшем узле.',
+        limits: {},
+    },
+})
+EXERCISES.push({
+    id: 'split-brain',
+    title: 'Два лидера после разделения сети',
+    track: 'Репликация и согласованность',
+    topic: 'Большинство и fencing',
+    description: 'Сеть разделила три узла на группы 2 и 1. Обе стороны пытаются принять новую запись.',
+    incident: 'Без большинства обе стороны могут подтвердить несовместимые записи.',
+    demand: 100,
+    goal: 'Разрешайте запись только большинству, меньшинство должно отказать.',
+    hint: 'Расположите компоненты по порядку: Клиенты → API → Группа консенсуса → БД. Удалите обходные связи.',
+    tradeoff:
+        'Сохраняем согласованность, жертвуя доступностью меньшинства; кворумный блок включает журнал и выбор лидера.',
+    allowed: ['quorum', 'cache', 'balancer'],
+    initial: standard(),
+    sink: 'sink',
+    scenario: {
+        route: ['api', 'quorum', 'database'],
+        event: 'Разделение сети: 2 узла против 1.',
+        success: 'Группа из двух подтверждает запись; одиночный участник не получает кворум.',
+        failure: 'Без большинства обе стороны могут подтвердить несовместимые записи.',
+        limits: {},
+    },
+})
+EXERCISES.push({
+    id: 'read-own-write',
+    title: 'Пользователь не видит свой ответ',
+    track: 'Репликация и согласованность',
+    topic: 'Read-your-writes',
+    description:
+        'После сохранения профиль читается через устаревший кеш. Версия ответа должна быть не ниже версии записи.',
+    incident: 'Без барьера версий старое значение может заменить новое.',
+    demand: 100,
+    goal: 'Подтвердите репликацию до публикации новой версии и инвалидируйте старое значение.',
+    hint: 'Расположите компоненты по порядку: Клиенты → API → Primary / backup → Версии и инвалидация → БД. Удалите обходные связи.',
+    tradeoff:
+        'Session token или чтение с лидера дают альтернативу. Глобальная линейризуемость не следует из одного session token.',
+    allowed: ['replication', 'versioning', 'cache', 'balancer'],
+    initial: standard(),
+    sink: 'sink',
+    scenario: {
+        route: ['api', 'replication', 'versioning', 'database'],
+        event: 'Записана версия 8, из кеша приходит версия 7.',
+        success: 'После ACK опубликована версия 8; значение версии 7 отклонено.',
+        failure: 'Без барьера версий старое значение может заменить новое.',
+        limits: {},
+    },
+})
+EXERCISES.push({
+    id: 'ordered-events',
+    title: 'События приехали не по порядку',
+    track: 'Репликация и согласованность',
+    topic: 'Монотонные обновления',
+    description:
+        'Обновления одного объекта доставлены в порядке 12, 10, 11. Нельзя откатить объект к старой версии.',
+    incident: 'Без сравнения версий состояние откатывается назад.',
+    demand: 100,
+    goal: 'Сравнивайте версии перед изменением состояния.',
+    hint: 'Расположите компоненты по порядку: Клиенты → API → Версии и инвалидация → БД. Удалите обходные связи.',
+    tradeoff:
+        'Номер версии должен назначаться авторитетным источником. Время часов разных серверов не заменяет порядок версий.',
+    allowed: ['versioning', 'cache', 'balancer'],
+    initial: standard(),
+    sink: 'sink',
+    scenario: {
+        route: ['api', 'versioning', 'database'],
+        event: 'После версии 12 доставлены версии 10 и 11.',
+        success: 'Версии 10 и 11 отклонены; сохранена версия 12.',
+        failure: 'Без сравнения версий состояние откатывается назад.',
+        limits: {},
+    },
+})
+EXERCISES.push({
+    id: 'durable-retry',
+    title: 'ACK потерялся при смене лидера',
+    track: 'Репликация и согласованность',
+    topic: 'Повтор после failover',
+    description:
+        'Запись реплицирована, но ответ потерялся. После failover клиент повторяет тот же operation ID.',
+    incident: 'Без дедупликации или репликации журнала повтор не защищён.',
+    demand: 100,
+    goal: 'Повтор должен найти журнал результата на новой реплике, а не выполнить запись снова.',
+    hint: 'Расположите компоненты по порядку: Клиенты → API → Повторы с backoff → Таймаут → Дедупликация → Primary / backup → БД. Удалите обходные связи.',
+    tradeoff:
+        'Журнал дедупликации — часть реплицируемого состояния. Хранить его только в памяти API недостаточно.',
+    allowed: ['timeout', 'retry', 'dedup', 'replication', 'cache', 'balancer'],
+    initial: standard(),
+    sink: 'sink',
+    scenario: {
+        route: ['api', 'retry', 'timeout', 'dedup', 'replication', 'database'],
+        event: 'ACK потерян; primary отказал; запрос повторён.',
+        success: 'Журнал ID реплицирован вместе с результатом; новый лидер возвращает прежний ответ.',
+        failure: 'Без дедупликации или репликации журнала повтор не защищён.',
+        limits: {},
+    },
+})
+EXERCISES.push({
+    id: 'event-gap',
+    title: 'Заказ есть, события нет',
+    track: 'Доставка событий',
+    topic: 'Transactional outbox',
+    description: 'Процесс упал между записью заказа и публикацией события. Событие не должно потеряться.',
+    incident: 'Отдельные запись и публикация оставляют окно потери события.',
+    demand: 100,
+    goal: 'Сохраните событие с изменением атомарно и передайте его через очередь воркеру.',
+    hint: 'Расположите компоненты по порядку: Клиенты → API → Transactional outbox → Очередь → Воркер → БД. Удалите обходные связи.',
+    tradeoff:
+        'Relay может отправить событие повторно. Потребитель должен быть идемпотентным; outbox не означает exactly-once доставку.',
+    allowed: ['outbox', 'queue', 'worker', 'cache', 'balancer'],
+    initial: standard(),
+    sink: 'sink',
+    scenario: {
+        route: ['api', 'outbox', 'queue', 'worker', 'database'],
+        event: 'Сбой после локального commit, до публикации.',
+        success: 'Событие осталось в outbox; relay повторяет публикацию после восстановления.',
+        failure: 'Отдельные запись и публикация оставляют окно потери события.',
+        limits: {},
+    },
+})
+EXERCISES.push({
+    id: 'consumer-redelivery',
+    title: 'Событие применилось дважды',
+    track: 'Доставка событий',
+    topic: 'Идемпотентный потребитель',
+    description: 'Воркер изменил запись в БД, но упал до ACK очереди. Сообщение доставлено ещё раз.',
+    incident: 'Очередь повторит доставку и эффект выполнится дважды.',
+    demand: 100,
+    goal: 'Поставьте проверку event ID перед записью эффекта.',
+    hint: 'Расположите компоненты по порядку: Клиенты → API → Очередь → Воркер → Дедупликация → БД. Удалите обходные связи.',
+    tradeoff:
+        'Для внешних эффектов вроде почты нужна идемпотентность провайдера или отдельный согласованный протокол.',
+    allowed: ['queue', 'worker', 'dedup', 'cache', 'balancer'],
+    initial: standard(),
+    sink: 'sink',
+    scenario: {
+        route: ['api', 'queue', 'worker', 'dedup', 'database'],
+        event: 'Повторная доставка после потери consumer ACK.',
+        success: 'Event ID уже обработан; повтор подтверждён без второго эффекта.',
+        failure: 'Очередь повторит доставку и эффект выполнится дважды.',
+        limits: {},
+    },
+})
+EXERCISES.push({
+    id: 'poison-message',
+    title: 'Одно сообщение остановило очередь',
+    track: 'Доставка событий',
+    topic: 'Карантин ошибок',
+    description:
+        'Неисправимое сообщение всегда падает; бесконечные повторные доставки блокируют следующие задания.',
+    incident: 'Без ограниченного карантина сообщение повторяется бесконечно.',
+    demand: 100,
+    goal: 'После трёх неудач изолируйте сообщение, сохранив возможность разобрать его позже.',
+    hint: 'Расположите компоненты по порядку: Клиенты → API → Очередь → DLQ-политика → Воркер → БД. Удалите обходные связи.',
+    tradeoff:
+        'DLQ нужно мониторить и разбирать. Повторный запуск после исправления ошибки должен сохранять исходный event ID.',
+    allowed: ['queue', 'dlq', 'worker', 'cache', 'balancer'],
+    initial: standard(),
+    sink: 'sink',
+    scenario: {
+        route: ['api', 'queue', 'dlq', 'worker', 'database'],
+        event: 'Одно сообщение завершает три обработки ошибкой.',
+        success: 'Сообщение помещено в карантин; последующие задания продолжают обработку.',
+        failure: 'Без ограниченного карантина сообщение повторяется бесконечно.',
+        limits: {},
+    },
+})
+EXERCISES.push({
+    id: 'webhook-retries',
+    title: 'Webhook временно недоступен',
+    track: 'Доставка событий',
+    topic: 'Доставка с повтором',
+    description:
+        'Получатель webhook вернул 503, затем восстановился. Потерять событие или продублировать эффект нельзя.',
+    incident: 'Без повтора событие потеряется; без ID возможен дубль.',
+    demand: 100,
+    goal: 'Ограничьте вызов по времени, повторите временную ошибку с тем же ID.',
+    hint: 'Расположите компоненты по порядку: Клиенты → API → Очередь → Воркер → Повторы с backoff → Таймаут → Дедупликация → БД. Удалите обходные связи.',
+    tradeoff:
+        'Повторять стоит временные ошибки и 429 с Retry-After; постоянные ошибки направляют в карантин.',
+    allowed: ['queue', 'worker', 'timeout', 'retry', 'dedup', 'cache', 'balancer'],
+    initial: standard(),
+    sink: 'sink',
+    scenario: {
+        route: ['api', 'queue', 'worker', 'retry', 'timeout', 'dedup', 'database'],
+        event: 'Первая попытка 503, следующая успешна, ответ потерян.',
+        success: 'Ограниченный повтор с тем же ID завершается единственным эффектом.',
+        failure: 'Без повтора событие потеряется; без ID возможен дубль.',
+        limits: {},
+    },
+})
+EXERCISES.push({
+    id: 'atomic-transfer',
+    title: 'Деньги ушли только с одного счёта',
+    track: 'Доставка событий',
+    topic: 'Межшардная транзакция',
+    description:
+        'Два участника перевода находятся в разных шардах. Один голосует prepare=no. В блоке БД представлены оба участника.',
+    incident: 'Без общего решения возможен частичный перевод.',
+    demand: 100,
+    goal: 'Координатор должен собрать prepare и принять общее решение перед commit.',
+    hint: 'Расположите компоненты по порядку: Клиенты → API → Координатор 2PC → БД. Удалите обходные связи.',
+    tradeoff:
+        '2PC может блокировать участников при отказе координатора. Долговечный журнал и восстановление обязательны; saga подходит не для всех инвариантов.',
+    allowed: ['transaction', 'cache', 'balancer'],
+    initial: standard(),
+    sink: 'sink',
+    scenario: {
+        route: ['api', 'transaction', 'database'],
+        event: 'Первый участник готов, второй отвечает prepare=no.',
+        success: 'Координатор журналирует abort; оба участника отменяют изменения.',
+        failure: 'Без общего решения возможен частичный перевод.',
+        limits: {},
+    },
+})
+EXERCISES.push({
+    id: 'hot-key',
+    title: 'Популярный ключ перегрузил БД',
+    track: 'Кеш и защита ресурсов',
+    topic: 'Объединение чтений',
+    description:
+        '800 одновременных чтений одного ключа проходят через холодный кеш. БД выдерживает 100 запросов/с.',
+    incident: 'Все 800 чтений доходят до БД одновременно.',
+    demand: 800,
+    goal: 'Объедините одновременные запросы одного ключа; простое добавление кеша не спасает первый промах.',
+    hint: 'Расположите компоненты по порядку: Клиенты → API → Single-flight → БД. Удалите обходные связи.',
+    tradeoff: 'Single-flight нужен на общем для запросов участке. Для разных ключей нагрузка не уменьшается.',
+    allowed: ['coalescer', 'cache', 'balancer'],
+    initial: standard(),
+    sink: 'sink',
+    scenario: {
+        route: ['api', 'coalescer', 'database'],
+        event: '800 одновременных чтений одного и того же ключа.',
+        success: 'Один запрос читает значение; остальные ожидают его результат.',
+        failure: 'Все 800 чтений доходят до БД одновременно.',
+        limits: { database: 100 },
+    },
+})
+EXERCISES.push({
+    id: 'stale-cache',
+    title: 'Старый ответ затёр новый кеш',
+    track: 'Кеш и защита ресурсов',
+    topic: 'Гонка инвалидации',
+    description:
+        'Медленное чтение версии 4 завершается после записи версии 5 и пытается снова наполнить кеш.',
+    incident: 'Одна инвалидация не остановит позднюю запись старого значения.',
+    demand: 100,
+    goal: 'Отбрасывайте старую версию перед заполнением кеша.',
+    hint: 'Расположите компоненты по порядку: Клиенты → API → Версии и инвалидация → Кеш → БД. Удалите обходные связи.',
+    tradeoff:
+        'Атомарный compare-and-set и версия tombstone защищают от позднего refill; один TTL только ограничивает время ошибки.',
+    allowed: ['versioning', 'cache', 'balancer'],
+    initial: standard(),
+    sink: 'sink',
+    scenario: {
+        route: ['api', 'versioning', 'cache', 'database'],
+        event: 'Версия 5 подтверждена; задержанный ответ содержит версию 4.',
+        success: 'Сравнение версий запрещает публикацию версии 4.',
+        failure: 'Одна инвалидация не остановит позднюю запись старого значения.',
+        limits: {},
+    },
+})
+EXERCISES.push({
+    id: 'cache-stampede',
+    title: 'Кеш истёк у всех одновременно',
+    track: 'Кеш и защита ресурсов',
+    topic: 'Cache stampede',
+    description:
+        'TTL популярного ключа истёк. 800 клиентов одновременно хотят обновить значение. БД рассчитана на 100 запросов/с.',
+    incident: 'Прогретый hit rate не защищает от одновременного истечения TTL.',
+    demand: 800,
+    goal: 'Сериализуйте заполнение одного ключа перед кешем, сохранив путь промаха к БД.',
+    hint: 'Расположите компоненты по порядку: Клиенты → API → Single-flight → Кеш → БД. Удалите обходные связи.',
+    tradeoff:
+        'Jitter TTL, stale-while-revalidate и раннее обновление дополняют single-flight, но требуют правил допустимой свежести.',
+    allowed: ['coalescer', 'cache', 'balancer'],
+    initial: standard(),
+    sink: 'sink',
+    scenario: {
+        route: ['api', 'coalescer', 'cache', 'database'],
+        event: '800 одновременных промахов для одного ключа.',
+        success: 'Только владелец single-flight заполняет кеш; остальные получают его результат.',
+        failure: 'Прогретый hit rate не защищает от одновременного истечения TTL.',
+        limits: { database: 100 },
+    },
+})
+EXERCISES.push({
+    id: 'dependency-isolation',
+    title: 'Чужой сбой съел ресурсы API',
+    track: 'Кеш и защита ресурсов',
+    topic: 'Fail-fast для зависимости',
+    description:
+        'Зависимость долго отвечает и стабильно падает. Новые обращения должны быстро отказываться после серии ошибок.',
+    incident: 'Таймаут без breaker продолжает расходовать ресурсы на каждый новый запрос.',
+    demand: 100,
+    goal: 'Ограничьте один вызов и остановите обращения к неисправной зависимости.',
+    hint: 'Расположите компоненты по порядку: Клиенты → API → Circuit breaker → Таймаут → БД. Удалите обходные связи.',
+    tradeoff:
+        'Breaker не заменяет отдельный пул потоков и лимит concurrency. Клиенту нужен понятный ответ о временной недоступности.',
+    allowed: ['timeout', 'breaker', 'cache', 'balancer'],
+    initial: standard(),
+    sink: 'sink',
+    scenario: {
+        route: ['api', 'breaker', 'timeout', 'database'],
+        event: 'Серия таймаутов открывает breaker.',
+        success: 'Новые обращения получают быстрый отказ; half-open допускает один пробный вызов.',
+        failure: 'Таймаут без breaker продолжает расходовать ресурсы на каждый новый запрос.',
+        limits: {},
+    },
+})
+EXERCISES.push({
+    id: 'protected-writes',
+    title: 'Всплеск записи после восстановления',
+    track: 'Кеш и защита ресурсов',
+    topic: 'Admission и безопасный повтор',
+    description: 'После восстановления 1 600 запросов/с повторяют операции записи. Бюджет приёма — 500/с.',
+    incident: 'Без admission возникает перегрузка, без ID — повторный эффект.',
+    demand: 1600,
+    goal: 'Сначала ограничьте вход; затем ограничьте ожидание и безопасно повторите принятые операции.',
+    hint: 'Расположите компоненты по порядку: Клиенты → Rate limiter → API → Повторы с backoff → Таймаут → Дедупликация → БД. Удалите обходные связи.',
+    tradeoff:
+        'Бюджет ограничивает новые операции, а повторные попытки тоже требуют отдельного лимита. Не держите очередь повторов бесконечной.',
+    allowed: ['limiter', 'timeout', 'retry', 'dedup', 'cache', 'balancer'],
+    initial: standard(),
+    sink: 'sink',
+    scenario: {
+        route: ['limiter', 'api', 'retry', 'timeout', 'dedup', 'database'],
+        event: 'Вход 1 600/с, первая попытка принятой записи теряет ответ.',
+        success: '1 100/с получают 429; повтор принятых ID не дублирует записи.',
+        failure: 'Без admission возникает перегрузка, без ID — повторный эффект.',
+        limits: {},
+        admitted: 500,
+    },
+})
+
+/** Existing infrastructure is part of each incident, not something the learner must rebuild. */
+const infrastructure: Record<string, BlockKind[]> = {
+    'retry-storm': ['retry'],
+    'read-own-write': ['replication'],
+    'durable-retry': ['replication'],
+    'event-gap': ['worker'],
+    'consumer-redelivery': ['queue', 'worker'],
+    'poison-message': ['queue', 'worker'],
+    'webhook-retries': ['queue', 'worker'],
+    'stale-cache': ['cache'],
+    'cache-stampede': ['cache'],
+    'protected-writes': ['retry'],
+}
+for (const ex of EXERCISES) {
+    const existing = infrastructure[ex.id]
+    if (!existing) continue
+    const nodes: Block[] = [
+        b('client', 'client', 30, 140),
+        b('api', 'api', 295, 140),
+        ...existing.map((kind, i) => b(`existing-${kind}`, kind, 560 + i * 265, 140)),
+        b('sink', 'database', 560 + existing.length * 265, 140),
+    ]
+    ex.initial = {
+        blocks: nodes,
+        wires: wires(...nodes.slice(1).map((n, i): [string, string] => [nodes[i].id, n.id])),
+    }
+}
+
 export function cloneDesign(design: Design): Design {
     return JSON.parse(JSON.stringify(design))
 }
 export function capacity(ex: Exercise, block: Block): number {
+    if (ex.scenario?.limits?.[block.kind] !== undefined) return ex.scenario.limits[block.kind]!
     if (ex.id === 'traffic' && block.kind === 'database') return 5000
     if (ex.id === 'catalog' && block.kind === 'database') return 100
     if ((ex.id === 'shards' || ex.id === 'jobs') && block.kind === 'api') return 5000
@@ -328,6 +945,30 @@ export function evaluate(ex: Exercise, design: Design): Evaluation {
             out(out('api')[0].id).filter((n) => n.kind === 'database').length >= 2 &&
             out(out('api')[0].id).every((n) => n.kind === 'database') &&
             byKind('cache').length === 0
+    if (ex.scenario && acyclic) {
+        // A path automaton checks EVERY route, including merges and bypasses. Merely placing
+        // the right kinds somewhere on the board never satisfies a scenario invariant.
+        const route = ex.scenario.route
+        const memo = new Map<string, boolean>()
+        const follows = (id: string, step: number): boolean => {
+            const key = `${id}:${step}`
+            if (memo.has(key)) return memo.get(key)!
+            const kind = map.get(id)?.kind
+            const next = kind === route[step] ? step + 1 : step
+            const children = out(id)
+            const ok = children.length
+                ? children.every((n) => follows(n.id, next))
+                : id === ex.sink && next === route.length
+            memo.set(key, ok)
+            return ok
+        }
+        architecture = follows('client', 0)
+        add(
+            'Сценарий отказа',
+            architecture,
+            `${ex.scenario.event} ${architecture ? ex.scenario.success : ex.scenario.failure}`,
+        )
+    }
     add('Исправлена причина сбоя', architecture, ex.goal)
     // A topological pass accumulates every incoming branch before calculating outgoing load.
     const loads: Record<string, number> = { client: ex.demand }
@@ -356,6 +997,10 @@ export function evaluate(ex: Exercise, design: Design): Evaluation {
                             ? Math.min(1, PARTS.worker.capacity / rate)
                             : 0
                         : 1
+            if (ex.scenario?.admitted && node.kind === 'limiter')
+                factor = rate > 0 ? Math.min(1, ex.scenario.admitted / rate) : 0
+            if (ex.scenario && node.kind === 'coalescer' && ['hot-key', 'cache-stampede'].includes(ex.id))
+                factor = rate > 0 ? 1 / rate : 0
             if (node.kind === 'balancer' || node.kind === 'shard') factor /= Math.max(1, children.length)
             for (const child of children) {
                 loads[child.id] = (loads[child.id] || 0) + rate * factor
@@ -394,6 +1039,7 @@ export function evaluate(ex: Exercise, design: Design): Evaluation {
         const suffix = peers.length > 1 ? ` ${peers.findIndex((b) => b.id === n.id) + 1}` : ''
         return `${PARTS[n.kind].label}${suffix}: ${Math.round(loads[n.id] || 0).toLocaleString('ru-RU')} запросов/с${overloaded.includes(n.id) ? ' — перегрузка' : ''}`
     })
+    if (ex.scenario) trace.push(ex.scenario.event, architecture ? ex.scenario.success : ex.scenario.failure)
     return {
         passed: checks.every((c) => c.ok),
         checks,

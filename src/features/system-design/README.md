@@ -2,8 +2,9 @@
 
 Routes: `/system-design` and `/system-design/:id`, inside the existing authenticated app layout.
 
-Five original repair exercises cover API load balancing, read caching, asynchronous email jobs,
-CDN offload and write sharding. React Flow provides the editable directed graph. The evaluator
+Twenty-five original exercises form five tracks: load fundamentals, reliable requests,
+replication/consistency, event delivery, and caching/resource protection. The first five cover API
+load balancing, read caching, asynchronous email jobs, CDN offload and write sharding. React Flow provides the editable directed graph. The evaluator
 in `model.ts` checks topology, required components, complete request paths, bottlenecks and unused
 nodes. It accumulates fan-in in topological order. It never awards a pass for a disconnected fix,
 cache bypass or cyclic diagram. Each case has explicit educational capacity assumptions, rather
@@ -11,9 +12,14 @@ than claimed real-world benchmarks. Queue processing preserves the burst's total
 worker throughput and total drain time are shown separately from API acknowledgement latency.
 
 This is a deterministic teaching model, **not** a production benchmark, packet simulator or
-DSLabs model checker. It does not model cache warm-up, failures, retries, persistence, billing,
-consistency protocols or real network/CPU scheduling. These trade-offs appear after a successful
-repair. No backend API or ordinary training quota is involved.
+DSLabs model checker. The twenty advanced scenarios check ordered protection on **every** request route and show a fixed
+failure/recovery example. A replica group, consensus group, outbox, and 2PC coordinator are
+encapsulated protocol components with explicit contracts in the palette, not implementations of
+those protocols. The evaluator checks their placement; it does not execute arbitrary distributed
+protocols, enumerate network schedules, or prove correctness in production. Numeric traffic
+remains a separate check: admission explicitly rejects excess and single-flight combines only
+the stated simultaneous reads of one key. Cache hits never hide writes or cold-cache incidents.
+Billing, real clocks and persistence faults are not simulated. Trade-offs appear after repair. No backend API or ordinary training quota is involved.
 
 Progress is versioned browser storage, partitioned by authenticated user and exercise. Existing
 private-cache cleanup removes it at logout. Undo/redo are session-only. Invalid cached graphs
@@ -56,3 +62,18 @@ Click/tap an edge for insertion controls, including on mobile. Removing a simple
 restores its predecessor-to-successor connection. Undo/redo capture the complete operation.
 Node actions also offer duplication and starting a connection. Cmd/Ctrl+Z, Shift+Cmd/Ctrl+Z,
 Ctrl+Y and Delete work outside form controls. Selects use Radix keyboard and focus management.
+
+## Dashboard and news
+
+The dashboard announcement flips to the original report recommendations. The reverse face is
+inert/aria-hidden while concealed; focus moves to the visible face on a flip. CSS transforms
+use a 280 ms morph curve; keyboard and reduced-motion transitions are immediate. The entire
+front is a link, with the close button as a sibling (no nested interactive controls). The card
+stores the chosen face per account in the existing private browser-cache namespace; the
+reverse-side button returns to the announcement. Account changes remount it with that account’s
+preference. Logout clears private browser cache.
+
+News ID `system-design-path-20261024` is also registered in interview-service `PublishedNews`.
+Read receipts retain the existing authenticated, per-user backend storage; no global local
+"read" flag has been introduced. Deploy these two repositories together when this feature is
+subsequently approved for production.

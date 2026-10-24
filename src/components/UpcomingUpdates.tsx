@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { ChevronDown, X } from 'lucide-react'
 import { api } from '../services/api'
 import { useAuthStore } from '../store/authStore'
-const news=[{id:'vacancy-path-20261017',title:'Подготовка по вакансии',copy:'Пройдите путь по технологиям вакансии. Отчёты — внутри каждого этапа, вся подготовка — одна попытка.',to:'/vacancies'},{id:'practice-reminders-20261017',title:'Напоминания о практике',copy:'Выберите удобное время, возвращайтесь к практике с главной и переносите её без потери прогресса.',to:'/dashboard'}]
+const news=[{id:'system-design-path-20261024',title:'Траектории System Design',copy:'25 задач в пяти траекториях: нагрузка, надёжные запросы, репликация, доставка событий и защита ресурсов. Меняй схему и проверяй решение.',to:'/system-design'},{id:'vacancy-path-20261017',title:'Подготовка по вакансии',copy:'Пройдите путь по технологиям вакансии. Отчёты — внутри каждого этапа, вся подготовка — одна попытка.',to:'/vacancies'},{id:'practice-reminders-20261017',title:'Напоминания о практике',copy:'Выберите удобное время, возвращайтесь к практике с главной и переносите её без потери прогресса.',to:'/dashboard'}]
 const upcoming=[['Разбор вакансии с помощью ИИ','Планируем разбирать полный текст требований и помогать выбрать фокус подготовки.'],['Голосовые ответы','Отвечайте голосом и получайте обратную связь по содержанию и речи.'],['Вопросы по опыту из профиля','Практикуйте ответы на вопросы о своём опыте.'],['Курсы и траектории','Осваивайте новые направления. Первый курс — геймдизайн с помощью ИИ.']]
 export default function UpcomingUpdates(){
  const [open,setOpen]=useState(false),[read,setRead]=useState<string[]>([]),[ready,setReady]=useState(false),[error,setError]=useState(false)
