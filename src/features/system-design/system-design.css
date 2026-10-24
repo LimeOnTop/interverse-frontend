@@ -428,7 +428,7 @@
     max-height: calc(58dvh + 50px);
     min-height: 360px;
     overflow-y: auto;
-    overscroll-behavior: contain;
+    overscroll-behavior-y: auto;
     scrollbar-width: thin;
 }
 .sd-panel h2 {
