@@ -66,7 +66,7 @@ export default function TrainingLimitPromo() {
                                 : <>На тарифе Basic — {freeTrainingCaption()}. В подписке Pro лимит расширен, а ещё в ней есть:</>}
                         </p>
                         <ul className="space-y-2 mb-7">
-                            {PRO_FEATURES.map((feature) => (
+                            {PRO_FEATURES.filter(feature => feature !== 'Импорт резюме из hh.ru').map((feature) => (
                                 <li key={feature} className="flex items-start gap-3 text-sm text-gray-800 dark:text-gray-200">
                                     <span className="font-bold text-inter-verse-green dark:text-purple-400" aria-hidden>—</span>
                                     <span>{feature}</span>
