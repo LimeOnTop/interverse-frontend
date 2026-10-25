@@ -1578,3 +1578,16 @@ body.sd-grabbing * {
 .sd-side-header .sd-tabs {
     background-color: var(--iv-surface);
 }
+
+/* One fitted snapshot keeps SVG paths, icons and scaled node text aligned. */
+.sd-board-reveal {
+    position: absolute;
+    z-index: 40;
+    pointer-events: none;
+    overflow: hidden;
+}
+.sd-workspace[data-sd-reveal-preparing='true'] > .sd-board-section,
+.sd-board-section[data-sd-snapshot-hidden='true'] {
+    opacity: 0;
+    pointer-events: none;
+}

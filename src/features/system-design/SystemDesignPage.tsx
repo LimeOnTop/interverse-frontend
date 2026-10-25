@@ -49,7 +49,7 @@ import {
 } from 'lucide-react'
 import '@xyflow/react/dist/style.css'
 import './system-design.css'
-import { createAsciiReveal, type AsciiRevealController } from 'ascii-reveal/core'
+import { createBoardReveal, type BoardRevealController } from './boardReveal'
 import BoardSelect from './BoardSelect'
 import { usePromoStore } from '../../store/promoStore'
 import { resolveSubscriptionPlan } from '../../utils/subscription'
@@ -330,7 +330,8 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
     const [rotateHint, setRotateHint] = useState(false)
     const workspace = useRef<HTMLDivElement>(null)
     const burger = useRef<HTMLButtonElement>(null)
-    const reveal = useRef<AsciiRevealController | null>(null)
+    const reveal = useRef<BoardRevealController | null>(null)
+    const fullscreenTransition = useRef(false)
     const switching = useRef(false)
     const fullscreenStarted = useRef(false)
     const toggleExpanded = async () => {
@@ -346,6 +347,7 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
             if (document.fullscreenElement) await document.exitFullscreen().catch(() => {})
             screen.orientation?.unlock?.()
         } else {
+            if (root) root.dataset.sdRevealPreparing = 'true'
             fullscreenStarted.current = true
             drawerEntryPending.current = true
             setDrawerAnimated(false)
@@ -370,32 +372,57 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
     }
     useLayoutEffect(() => {
         const root = workspace.current
-        if (!root || !fullscreenStarted.current) return
-        reveal.current?.destroy()
-        root.style.removeProperty('position')
-        const effect = createAsciiReveal(root, {
-            preset: 'dither',
-            duration: 'cinematic',
-            speed: 0.7,
-            lazy: false,
-            surfaces: '.sd-board-section',
-            fades: '.sd-toolbar',
-        })
-        reveal.current = effect
+        const board = root?.querySelector<HTMLElement>('.sd-board-section')
+        if (!root || !board || !fullscreenStarted.current) return
         let active = true
-        void effect.reveal().then(() => {
-            if (!active) return
-            void fullscreenFlow.current.fitView({ padding: 0.15, maxZoom: 1 })
+        let generation = 0
+        const frame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
+        const prepare = async () => {
+            const current = ++generation
+            fullscreenTransition.current = true
+            root.dataset.sdRevealPreparing = 'true'
+            root.dataset.sdRevealPhase = 'preparing'
+            reveal.current?.destroy()
+            reveal.current = null
+            root.style.removeProperty('position')
+            // Let React Flow measure the final fullscreen dimensions before fitting.
+            await frame()
+            await frame()
+            if (!active || current !== generation) return
+            await fullscreenFlow.current.fitView({ padding: expanded ? 0.15 : 0.2, maxZoom: 1, duration: 0 })
+            await frame()
+            await frame()
+            if (!active || current !== generation) return
+            const controller = createBoardReveal(root, board)
+            reveal.current = controller
+            await controller.reveal()
+            if (!active || current !== generation) return
+            fullscreenTransition.current = false
             if (expanded && drawerEntryPending.current) {
                 drawerEntryPending.current = false
                 setDrawerAnimated(false)
                 setDrawerOpen(true)
             }
+        }
+        let size = `${root.clientWidth}:${root.clientHeight}`
+        const observer = new ResizeObserver(() => {
+            const next = `${root.clientWidth}:${root.clientHeight}`
+            if (next === size) return
+            size = next
+            // Native orientation changes invalidate an in-flight snapshot.
+            if (fullscreenTransition.current) void prepare()
         })
+        observer.observe(root)
+        void prepare()
         return () => {
             active = false
-            effect.destroy()
+            generation++
+            observer.disconnect()
+            reveal.current?.destroy()
             reveal.current = null
+            fullscreenTransition.current = false
+            delete root.dataset.sdRevealPreparing
+            delete root.dataset.sdRevealPhase
         }
     }, [expanded])
     useEffect(() => {
@@ -496,9 +523,10 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
             if (Math.abs(next - width) > 20) {
                 width = next
                 cancelAnimationFrame(frame)
-                frame = requestAnimationFrame(
-                    () => void flow.fitView({ padding: 0.2, maxZoom: 1, duration: 0 }),
-                )
+                if (fullscreenTransition.current) return
+                frame = requestAnimationFrame(() => {
+                    if (!fullscreenTransition.current) void flow.fitView({ padding: 0.2, maxZoom: 1, duration: 0 })
+                })
             }
         })
         observer.observe(board)

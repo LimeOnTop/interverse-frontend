@@ -19,6 +19,7 @@
     "axios": "^1.6.2",
     "date-fns": "^2.30.0",
     "framer-motion": "^10.16.16",
+    "html-to-image": "1.11.11",
     "jspdf": "^4.2.1",
     "lucide-react": "^0.294.0",
     "moment": "^2.30.1",

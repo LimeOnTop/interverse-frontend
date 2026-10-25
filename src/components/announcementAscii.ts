@@ -1,5 +1,12 @@
 import { createAsciiReveal } from 'ascii-reveal/core'
 
+export const announcementAsciiOptions = {
+    preset: 'dither' as const,
+    duration: 'cinematic' as const,
+    speed: 0.7,
+    lazy: false,
+}
+
 /** Original Dither preset by Quan Hoang, pinned in package-lock.json (MIT). */
 export function playAnnouncementAscii(
     _canvas: HTMLCanvasElement,
@@ -8,7 +15,7 @@ export function playAnnouncementAscii(
     done: () => void,
     entryOnly = false,
 ) {
-    const options = { preset: 'dither' as const, duration: 'cinematic' as const, speed: 0.7, lazy: false }
+    const options = announcementAsciiOptions
     if (from !== to) to.style.setProperty('opacity', '0', 'important')
     const outgoing = createAsciiReveal(from, options)
     const incoming = from === to ? outgoing : createAsciiReveal(to, options)
