@@ -320,6 +320,8 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
     fullscreenFlow.current = flow
     const [expanded, setExpanded] = useState(false)
     const [drawerOpen, setDrawerOpen] = useState(false)
+    const [drawerAnimated, setDrawerAnimated] = useState(false)
+    const changeDrawer = (open: boolean) => { setDrawerAnimated(true); setDrawerOpen(open) }
     const [rotateHint, setRotateHint] = useState(false)
     const workspace = useRef<HTMLDivElement>(null)
     const burger = useRef<HTMLButtonElement>(null)
@@ -339,6 +341,7 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
             screen.orientation?.unlock?.()
         } else {
             fullscreenStarted.current = true
+            setDrawerAnimated(false)
             setDrawerOpen(true)
             setExpanded(true)
             if (root?.requestFullscreen && window.matchMedia('(pointer: coarse)').matches) {
@@ -812,7 +815,7 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
     const check = () => {
         setResult(evaluate(ex, design))
         setPanel('result')
-        if (expanded) setDrawerOpen(true)
+        if (expanded) changeDrawer(true)
         if (window.matchMedia('(max-width:800px)').matches)
             requestAnimationFrame(() => sideRef.current?.scrollIntoView({ block: 'start' }))
         setRunning(true)
@@ -921,7 +924,7 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                                 className="sd-full-menu"
                                 aria-label="Меню тренировки"
                                 aria-expanded={drawerOpen}
-                                onClick={() => setDrawerOpen(!drawerOpen)}
+                                onClick={() => changeDrawer(!drawerOpen)}
                             >
                                 <Menu size={20} />
                             </button>
@@ -1128,14 +1131,14 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                         className="sd-drawer-scrim"
                         aria-label="Закрыть меню тренировки"
                         onClick={() => {
-                            setDrawerOpen(false)
+                            changeDrawer(false)
                             burger.current?.focus()
                         }}
                     />
                 )}
                 <aside
                     ref={sideRef}
-                    className={`sd-side ${drawerOpen ? 'is-open' : ''}`}
+                    className={`sd-side ${drawerOpen ? 'is-open' : ''} ${drawerAnimated ? '' : 'is-settled'}`}
                     aria-hidden={expanded && !drawerOpen}
                 >
                     {expanded && (
@@ -1143,7 +1146,7 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                             className="sd-drawer-close"
                             aria-label="Закрыть панель"
                             onClick={() => {
-                                setDrawerOpen(false)
+                                changeDrawer(false)
                                 burger.current?.focus()
                             }}
                         >

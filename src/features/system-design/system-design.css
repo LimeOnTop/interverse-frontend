@@ -1568,3 +1568,8 @@ body.sd-grabbing * {
 .sd-workspace.is-expanded button.sd-drawer-scrim {
     top: calc(64px + env(safe-area-inset-top));
 }
+
+/* Fullscreen starts with its tools already visible; later manual toggles still slide. */
+.sd-workspace.is-expanded .sd-side.is-settled {
+    transition: none;
+}
