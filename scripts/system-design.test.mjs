@@ -8,6 +8,7 @@ const js = ts.transpileModule(source, {
 }).outputText
 const {
     EXERCISES,
+    ADDABLE_BLOCKS,
     evaluate,
     cloneDesign,
     restoreDesign,
@@ -352,3 +353,23 @@ test('a protected branch does not excuse an unprotected parallel branch', () => 
     assert.equal(result.checks.find((c) => c.label === 'Маршруты без потерь и дублей').ok, true)
     assert.equal(result.checks.find((c) => c.label === 'Исправлена причина сбоя').ok, false)
 })
+
+
+test('all 25 exercises offer exactly the same 20 addable block kinds', () => {
+    assert.equal(EXERCISES.length, 25)
+    assert.equal(ADDABLE_BLOCKS.length, 20)
+    assert.equal(new Set(ADDABLE_BLOCKS).size, 20)
+    assert.equal(ADDABLE_BLOCKS.includes('client'), false)
+    assert.equal(ADDABLE_BLOCKS.includes('storage'), false)
+    for (const ex of EXERCISES) assert.deepEqual(ex.allowed, ADDABLE_BLOCKS, ex.id)
+})
+for (const ex of EXERCISES) {
+    test(`${ex.id}: all 20 block kinds survive saved-design restoration`, () => {
+        const design = cloneDesign(ex.initial)
+        for (const [i, kind] of ADDABLE_BLOCKS.entries()) {
+            design.blocks.push({ id: `library-${i}`, kind, x: 200 + i * 10, y: 400 })
+        }
+        assert.deepEqual(restoreDesign(design, ex), design)
+        assert.equal(evaluate(ex, design).passed, false, 'Adding unrelated blocks alone must not solve the task')
+    })
+}

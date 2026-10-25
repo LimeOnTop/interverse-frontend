@@ -219,6 +219,12 @@ export const PARTS: Record<
         short: 'Hash(key)',
     },
 }
+export const ADDABLE_BLOCKS: BlockKind[] = [
+    'api', 'database', 'balancer', 'cache', 'queue', 'worker', 'cdn', 'shard',
+    'dedup', 'retry', 'timeout', 'breaker', 'limiter', 'outbox', 'dlq',
+    'replication', 'quorum', 'transaction', 'coalescer', 'versioning',
+]
+
 const b = (id: string, kind: BlockKind, x: number, y: number): Block => ({ id, kind, x, y })
 const wires = (...pairs: [string, string][]): Wire[] =>
     pairs.map(([source, target]) => ({ id: `${source}-${target}`, source, target }))
@@ -239,7 +245,7 @@ export const EXERCISES: Exercise[] = [
         hint: 'Поставьте балансировщик перед API. Уберите старую прямую связь клиентов с API и подключите ещё один сервер к общей БД.',
         tradeoff:
             'Реплики API снимают нагрузку с приложения, но не масштабируют общую БД. В реальной системе ещё нужны health checks и отсутствие локального состояния.',
-        allowed: ['balancer', 'api', 'cache'],
+        allowed: [...ADDABLE_BLOCKS],
         initial: standard(),
         sink: 'sink',
     },
@@ -255,7 +261,7 @@ export const EXERCISES: Exercise[] = [
         hint: 'Кеш поставьте между API и БД. Удалите прямую связь API → БД, иначе база продолжит получать все запросы.',
         tradeoff:
             '90% попаданий оставляют 80 чтений/с для БД. Холодный кеш и инвалидация требуют отдельного плана; эти условия не входят в нагрузочный сценарий.',
-        allowed: ['cache', 'api', 'balancer'],
+        allowed: [...ADDABLE_BLOCKS],
         initial: standard(),
         sink: 'sink',
     },
@@ -271,7 +277,7 @@ export const EXERCISES: Exercise[] = [
         hint: 'Добавьте очередь перед воркером и уберите синхронный обход. Очередь должна вести к воркеру, а воркер — к журналу отправки.',
         tradeoff:
             'Очередь сглаживает всплеск: 2 400 / 200 = 12 секунд обработки. В production нужны повторные доставки, идемпотентность и обработка неисправимых заданий.',
-        allowed: ['queue', 'cache', 'balancer'],
+        allowed: [...ADDABLE_BLOCKS],
         initial: {
             blocks: [
                 b('client', 'client', 30, 140),
@@ -295,7 +301,7 @@ export const EXERCISES: Exercise[] = [
         hint: 'Поставьте CDN перед API. Удалите прямой путь клиентов к origin. Соедините CDN с API для промахов.',
         tradeoff:
             'На origin останется 300 запросов/с. CDN подходит публичной статике; приватные файлы требуют правил доступа, а обновления — версионирования или инвалидации.',
-        allowed: ['cdn', 'cache', 'api'],
+        allowed: [...ADDABLE_BLOCKS],
         initial: standard('storage'),
         sink: 'sink',
     },
@@ -311,7 +317,7 @@ export const EXERCISES: Exercise[] = [
         hint: 'Подключите шард-роутер после API и две базы после него. Удалите прямой путь API → БД.',
         tradeoff:
             'Каждому из двух шардов достанется 800 записей/с. Цена решения — ребалансировка ключей и сложные запросы между шардами. Это не репликация.',
-        allowed: ['shard', 'database', 'cache'],
+        allowed: [...ADDABLE_BLOCKS],
         initial: standard(),
         sink: 'sink',
     },
@@ -336,7 +342,7 @@ EXERCISES.push({
     hint: 'Расположите компоненты по порядку: Клиенты → API → Дедупликация → БД. Удалите обходные связи.',
     tradeoff:
         'Хранение ключа и результата должно быть атомарно с изменением баланса; срок хранения ограничивает окно защиты.',
-    allowed: ['dedup', 'cache', 'balancer'],
+    allowed: [...ADDABLE_BLOCKS],
     initial: standard(),
     sink: 'sink',
     scenario: {
@@ -360,7 +366,7 @@ EXERCISES.push({
     hint: 'Расположите компоненты по порядку: Клиенты → API → Повторы с backoff → Таймаут → Дедупликация → БД. Удалите обходные связи.',
     tradeoff:
         'Backoff ограничивает повторную нагрузку. Таймаут не доказывает, что удалённая операция не была выполнена.',
-    allowed: ['timeout', 'retry', 'dedup', 'cache', 'balancer'],
+    allowed: [...ADDABLE_BLOCKS],
     initial: standard(),
     sink: 'sink',
     scenario: {
@@ -384,7 +390,7 @@ EXERCISES.push({
     goal: 'Поставьте границу ожидания перед зависимостью; кеш не задаёт таймаут.',
     hint: 'Расположите компоненты по порядку: Клиенты → API → Таймаут → БД. Удалите обходные связи.',
     tradeoff: 'Отмена ожидания не отменяет работу сервера; для записи нужен operation ID.',
-    allowed: ['timeout', 'cache', 'balancer'],
+    allowed: [...ADDABLE_BLOCKS],
     initial: standard(),
     sink: 'sink',
     scenario: {
@@ -408,7 +414,7 @@ EXERCISES.push({
     hint: 'Расположите компоненты по порядку: Клиенты → API → Circuit breaker → Повторы с backoff → Таймаут → Дедупликация → БД. Удалите обходные связи.',
     tradeoff:
         'Breaker располагается перед политикой повторов и считает итог серии. Jitter рассинхронизирует клиентов.',
-    allowed: ['timeout', 'breaker', 'retry', 'dedup', 'cache', 'balancer'],
+    allowed: [...ADDABLE_BLOCKS],
     initial: standard(),
     sink: 'sink',
     scenario: {
@@ -430,7 +436,7 @@ EXERCISES.push({
     goal: 'Ограничьте поток до API, возвращая 429 вместо перегрузки.',
     hint: 'Расположите компоненты по порядку: Клиенты → Rate limiter → API → БД. Удалите обходные связи.',
     tradeoff: 'Клиент должен учитывать Retry-After. Лимитер требует правил справедливости по пользователям.',
-    allowed: ['limiter', 'cache', 'balancer'],
+    allowed: [...ADDABLE_BLOCKS],
     initial: standard(),
     sink: 'sink',
     scenario: {
@@ -455,7 +461,7 @@ EXERCISES.push({
     hint: 'Расположите компоненты по порядку: Клиенты → API → Primary / backup → БД. Удалите обходные связи.',
     tradeoff:
         'Синхронный backup увеличивает задержку ACK. При потере связи требуется безопасный выбор нового primary.',
-    allowed: ['replication', 'cache', 'balancer'],
+    allowed: [...ADDABLE_BLOCKS],
     initial: standard(),
     sink: 'sink',
     scenario: {
@@ -478,7 +484,7 @@ EXERCISES.push({
     hint: 'Расположите компоненты по порядку: Клиенты → API → Группа консенсуса → БД. Удалите обходные связи.',
     tradeoff:
         'Сохраняем согласованность, жертвуя доступностью меньшинства; кворумный блок включает журнал и выбор лидера.',
-    allowed: ['quorum', 'cache', 'balancer'],
+    allowed: [...ADDABLE_BLOCKS],
     initial: standard(),
     sink: 'sink',
     scenario: {
@@ -502,7 +508,7 @@ EXERCISES.push({
     hint: 'Расположите компоненты по порядку: Клиенты → API → Primary / backup → Версии и инвалидация → БД. Удалите обходные связи.',
     tradeoff:
         'Session token или чтение с лидера дают альтернативу. Глобальная линейризуемость не следует из одного session token.',
-    allowed: ['replication', 'versioning', 'cache', 'balancer'],
+    allowed: [...ADDABLE_BLOCKS],
     initial: standard(),
     sink: 'sink',
     scenario: {
@@ -526,7 +532,7 @@ EXERCISES.push({
     hint: 'Расположите компоненты по порядку: Клиенты → API → Версии и инвалидация → БД. Удалите обходные связи.',
     tradeoff:
         'Номер версии должен назначаться авторитетным источником. Время часов разных серверов не заменяет порядок версий.',
-    allowed: ['versioning', 'cache', 'balancer'],
+    allowed: [...ADDABLE_BLOCKS],
     initial: standard(),
     sink: 'sink',
     scenario: {
@@ -550,7 +556,7 @@ EXERCISES.push({
     hint: 'Расположите компоненты по порядку: Клиенты → API → Повторы с backoff → Таймаут → Дедупликация → Primary / backup → БД. Удалите обходные связи.',
     tradeoff:
         'Журнал дедупликации — часть реплицируемого состояния. Хранить его только в памяти API недостаточно.',
-    allowed: ['timeout', 'retry', 'dedup', 'replication', 'cache', 'balancer'],
+    allowed: [...ADDABLE_BLOCKS],
     initial: standard(),
     sink: 'sink',
     scenario: {
@@ -573,7 +579,7 @@ EXERCISES.push({
     hint: 'Расположите компоненты по порядку: Клиенты → API → Transactional outbox → Очередь → Воркер → БД. Удалите обходные связи.',
     tradeoff:
         'Relay может отправить событие повторно. Потребитель должен быть идемпотентным; outbox не означает exactly-once доставку.',
-    allowed: ['outbox', 'queue', 'worker', 'cache', 'balancer'],
+    allowed: [...ADDABLE_BLOCKS],
     initial: standard(),
     sink: 'sink',
     scenario: {
@@ -596,7 +602,7 @@ EXERCISES.push({
     hint: 'Расположите компоненты по порядку: Клиенты → API → Очередь → Воркер → Дедупликация → БД. Удалите обходные связи.',
     tradeoff:
         'Для внешних эффектов вроде почты нужна идемпотентность провайдера или отдельный согласованный протокол.',
-    allowed: ['queue', 'worker', 'dedup', 'cache', 'balancer'],
+    allowed: [...ADDABLE_BLOCKS],
     initial: standard(),
     sink: 'sink',
     scenario: {
@@ -620,7 +626,7 @@ EXERCISES.push({
     hint: 'Расположите компоненты по порядку: Клиенты → API → Очередь → DLQ-политика → Воркер → БД. Удалите обходные связи.',
     tradeoff:
         'DLQ нужно мониторить и разбирать. Повторный запуск после исправления ошибки должен сохранять исходный event ID.',
-    allowed: ['queue', 'dlq', 'worker', 'cache', 'balancer'],
+    allowed: [...ADDABLE_BLOCKS],
     initial: standard(),
     sink: 'sink',
     scenario: {
@@ -644,7 +650,7 @@ EXERCISES.push({
     hint: 'Расположите компоненты по порядку: Клиенты → API → Очередь → Воркер → Повторы с backoff → Таймаут → Дедупликация → БД. Удалите обходные связи.',
     tradeoff:
         'Повторять стоит временные ошибки и 429 с Retry-After; постоянные ошибки направляют в карантин.',
-    allowed: ['queue', 'worker', 'timeout', 'retry', 'dedup', 'cache', 'balancer'],
+    allowed: [...ADDABLE_BLOCKS],
     initial: standard(),
     sink: 'sink',
     scenario: {
@@ -668,7 +674,7 @@ EXERCISES.push({
     hint: 'Расположите компоненты по порядку: Клиенты → API → Координатор 2PC → БД. Удалите обходные связи.',
     tradeoff:
         '2PC может блокировать участников при отказе координатора. Долговечный журнал и восстановление обязательны; saga подходит не для всех инвариантов.',
-    allowed: ['transaction', 'cache', 'balancer'],
+    allowed: [...ADDABLE_BLOCKS],
     initial: standard(),
     sink: 'sink',
     scenario: {
@@ -691,7 +697,7 @@ EXERCISES.push({
     goal: 'Объедините одновременные запросы одного ключа; простое добавление кеша не спасает первый промах.',
     hint: 'Расположите компоненты по порядку: Клиенты → API → Single-flight → БД. Удалите обходные связи.',
     tradeoff: 'Single-flight нужен на общем для запросов участке. Для разных ключей нагрузка не уменьшается.',
-    allowed: ['coalescer', 'cache', 'balancer'],
+    allowed: [...ADDABLE_BLOCKS],
     initial: standard(),
     sink: 'sink',
     scenario: {
@@ -715,7 +721,7 @@ EXERCISES.push({
     hint: 'Расположите компоненты по порядку: Клиенты → API → Версии и инвалидация → Кеш → БД. Удалите обходные связи.',
     tradeoff:
         'Атомарный compare-and-set и версия tombstone защищают от позднего refill; один TTL только ограничивает время ошибки.',
-    allowed: ['versioning', 'cache', 'balancer'],
+    allowed: [...ADDABLE_BLOCKS],
     initial: standard(),
     sink: 'sink',
     scenario: {
@@ -739,7 +745,7 @@ EXERCISES.push({
     hint: 'Расположите компоненты по порядку: Клиенты → API → Single-flight → Кеш → БД. Удалите обходные связи.',
     tradeoff:
         'Jitter TTL, stale-while-revalidate и раннее обновление дополняют single-flight, но требуют правил допустимой свежести.',
-    allowed: ['coalescer', 'cache', 'balancer'],
+    allowed: [...ADDABLE_BLOCKS],
     initial: standard(),
     sink: 'sink',
     scenario: {
@@ -763,7 +769,7 @@ EXERCISES.push({
     hint: 'Расположите компоненты по порядку: Клиенты → API → Circuit breaker → Таймаут → БД. Удалите обходные связи.',
     tradeoff:
         'Breaker не заменяет отдельный пул потоков и лимит concurrency. Клиенту нужен понятный ответ о временной недоступности.',
-    allowed: ['timeout', 'breaker', 'cache', 'balancer'],
+    allowed: [...ADDABLE_BLOCKS],
     initial: standard(),
     sink: 'sink',
     scenario: {
@@ -786,7 +792,7 @@ EXERCISES.push({
     hint: 'Расположите компоненты по порядку: Клиенты → Rate limiter → API → Повторы с backoff → Таймаут → Дедупликация → БД. Удалите обходные связи.',
     tradeoff:
         'Бюджет ограничивает новые операции, а повторные попытки тоже требуют отдельного лимита. Не держите очередь повторов бесконечной.',
-    allowed: ['limiter', 'timeout', 'retry', 'dedup', 'cache', 'balancer'],
+    allowed: [...ADDABLE_BLOCKS],
     initial: standard(),
     sink: 'sink',
     scenario: {
