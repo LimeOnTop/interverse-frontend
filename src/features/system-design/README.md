@@ -93,3 +93,9 @@ Browsers refusing orientation lock keep a functional full-viewport board with a 
 hint; CSS rotation is deliberately avoided because it corrupts React Flow pointer coordinates.
 Radix selects portal inside the native fullscreen element. Scroll locking and hidden-panel
 inertness are restored on exit. Actual mobile orientation locking requires a physical device.
+
+## Account progress
+
+`/api/v1/system-design/progress` loads and saves designs per authenticated account. The interview service stores designs, sticky completion and optimistic revisions in `system_design_progress` (migration 000014). Local version-1 designs are imported only for exercises absent from the account; pending offline edits are replayed only against the matching revision. Conflicts do not overwrite another device's work. Choosing the account version retains the unsynced draft in a local `:backup` key. Progress does not consume interview quota or grant subscription access.
+
+Frontend sync coverage: `node --test scripts/system-design-progress.test.mjs`. Backend database coverage: `PREPARATION_TEST_DATABASE_URL=... go test ./internal/service -run TestSystemDesign -count=1`.

@@ -1,3 +1,4 @@
+import { storageKey, accountRecord, cacheDraft, saveProgress, loadProgress } from './progress'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useReducedMotion } from 'framer-motion'
 import { Link, useParams } from 'react-router-dom'
@@ -98,8 +99,9 @@ const icons: Record<BlockKind, LucideIcon> = {
     storage: HardDrive,
     shard: GitBranch,
 }
-const storageKey = (owner: string, id: string) => `iv:form:system-design:${owner}:${id}`
 function load(owner: string, ex: Exercise): Design {
+    const remote = accountRecord(owner, ex)
+    if (remote) return cloneDesign(remote.design)
     try {
         const saved = JSON.parse(localStorage.getItem(storageKey(owner, ex.id)) || 'null')
         if (saved?.version === 1) return restoreDesign(saved.design, ex) || cloneDesign(ex.initial)
@@ -158,6 +160,19 @@ export default function SystemDesignPage() {
     const { id } = useParams()
     const user = useAuthStore((s) => s.user)
     const owner = user?.id || 'local'
+    const [readyOwner, setReadyOwner] = useState('')
+    const [loadError, setLoadError] = useState('')
+    const [loadAttempt, setLoadAttempt] = useState(0)
+    const preferRemote = useRef(false)
+    useEffect(() => {
+        let active = true
+        setLoadError('')
+        if (owner === 'local') return
+        loadProgress(String(owner), preferRemote.current).then(() => {
+            if (active) setReadyOwner(String(owner))
+        }).catch((error) => { if (active) setLoadError(error?.message || 'Не удалось загрузить прогресс') })
+        return () => { active = false }
+    }, [owner, loadAttempt])
     const isPro = resolveSubscriptionPlan(user) === 'paid'
     const openPromo = usePromoStore((s) => s.openLimitPromo)
     const ex = EXERCISES.find((e) => e.id === id)
@@ -165,7 +180,13 @@ export default function SystemDesignPage() {
     useEffect(() => {
         if (locked) openPromo('system-design')
     }, [locked, openPromo])
-    const completed = EXERCISES.filter((e) => evaluate(e, load(String(owner), e)).passed).length
+    const completed = EXERCISES.filter((e) => (accountRecord(String(owner), e)?.completed || evaluate(e, load(String(owner), e)).passed)).length
+    if (readyOwner !== String(owner)) return (
+        <div className="sd-page" role="status">
+            {loadError ? <><p>{loadError}</p><button className="sd-primary" onClick={() => setLoadAttempt(n => n + 1)}>Повторить</button>
+            <button className="sd-secondary" onClick={() => { preferRemote.current = true; setLoadAttempt(n => n + 1) }}>Загрузить версию аккаунта</button></> : 'Загрузка…'}
+        </div>
+    )
     if (id && !ex)
         return (
             <div className="sd-page">
@@ -228,7 +249,7 @@ export default function SystemDesignPage() {
                                 EXERCISES.filter(
                                     (t) =>
                                         (t.track || TRACKS[0]) === track &&
-                                        evaluate(t, load(String(owner), t)).passed,
+                                        (accountRecord(String(owner), t)?.completed || evaluate(t, load(String(owner), t)).passed),
                                 ).length
                             }{' '}
                             / 5 решено
@@ -237,7 +258,7 @@ export default function SystemDesignPage() {
                     <div className="sd-exercises">
                         {EXERCISES.filter((t) => (t.track || TRACKS[0]) === track).map((task) => {
                             const i = EXERCISES.indexOf(task)
-                            const solved = evaluate(task, load(String(owner), task)).passed
+                            const solved = (accountRecord(String(owner), task)?.completed || evaluate(task, load(String(owner), task)).passed)
                             return (
                                 <Link
                                     className="sd-exercise"
@@ -384,6 +405,8 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
     const expandButton = useRef<HTMLButtonElement>(null)
     const [saving, setSaving] = useState(false)
     const [saveError, setSaveError] = useState(false)
+    const [saveAttempt, setSaveAttempt] = useState(0)
+    const [saveConflict, setSaveConflict] = useState(false)
     const { isDark } = useTheme()
     const reducedMotion = useReducedMotion()
     const runTimer = useRef<ReturnType<typeof setTimeout>>()
@@ -396,35 +419,32 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
         [],
     )
     useEffect(() => {
+        let active = true
         setSaving(true)
+        try { cacheDraft(owner, ex, design) } catch { /* Saving to the account does not require local storage. */ }
         const timer = setTimeout(() => {
-            try {
-                localStorage.setItem(storageKey(owner, ex.id), JSON.stringify({ version: 1, design }))
-                setSaveError(false)
-            } catch {
-                setSaveError(true)
-            }
-            setSaving(false)
-        }, 180)
-        return () => clearTimeout(timer)
-    }, [design, owner, ex.id])
-    useEffect(() => {
+            saveProgress(owner, ex, design).then(() => {
+                if (active) { setSaveError(false); setSaveConflict(false) }
+            }).catch((error) => { if (active) { setSaveError(true); setSaveConflict(error?.response?.status === 409) } }).finally(() => { if (active) setSaving(false) })
+        }, 350)
         const flush = () => {
-            try {
-                localStorage.setItem(
-                    storageKey(owner, ex.id),
-                    JSON.stringify({ version: 1, design: designRef.current }),
-                )
-            } catch {
-                /* Session-only work remains usable without storage. */
-            }
+            clearTimeout(timer)
+            void saveProgress(owner, ex, designRef.current).catch(() => {})
         }
+        const retry = () => setSaveAttempt(n => n + 1)
+        window.addEventListener('online', retry)
         window.addEventListener('pagehide', flush)
         return () => {
+            active = false
+            clearTimeout(timer)
             window.removeEventListener('pagehide', flush)
-            flush()
+            window.removeEventListener('online', retry)
         }
-    }, [owner, ex.id])
+    }, [design, owner, ex, saveAttempt])
+    useEffect(() => () => {
+        // Flush the final edit on route changes as well as browser navigation.
+        void saveProgress(owner, ex, designRef.current).catch(() => {})
+    }, [owner, ex])
     useEffect(() => {
         panelRef.current?.scrollTo({ top: 0 })
     }, [panel, result])
@@ -814,7 +834,7 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
             <div className="sd-title-row">
                 <h1>{ex.title}</h1>
                 <span className="sd-save">
-                    {saveError ? 'Не удалось сохранить' : saving ? 'Сохранение…' : 'Сохранено в браузере'}
+                    {saveError ? <button onClick={() => saveConflict ? window.location.reload() : setSaveAttempt(n => n + 1)}>{saveConflict ? 'Схема изменена. Обновить' : 'Не удалось сохранить. Повторить'}</button> : saving ? 'Сохранение…' : 'Сохранено'}
                 </span>
             </div>
             <div
