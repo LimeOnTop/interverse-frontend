@@ -1560,18 +1560,9 @@ body.sd-grabbing * {
     transform: none;
 }
 
-/* Keep check/menu controls visible and reachable while the drawer is open. */
+/* The fullscreen drawer overlays the toolbar as well as the canvas. */
 .sd-workspace.is-expanded .sd-side {
-    top: calc(64px + env(safe-area-inset-top));
     border-radius: 0;
-}
-.sd-workspace.is-expanded button.sd-drawer-scrim {
-    top: calc(64px + env(safe-area-inset-top));
-}
-
-/* Entry reveals tools after the board; later manual toggles still slide. */
-.sd-workspace.is-expanded .sd-side.is-settled {
-    transition: none;
 }
 
 .sd-side-header,
@@ -1579,15 +1570,8 @@ body.sd-grabbing * {
     background-color: var(--iv-surface);
 }
 
-/* One fitted snapshot keeps SVG paths, icons and scaled node text aligned. */
-.sd-board-reveal {
-    position: absolute;
-    z-index: 40;
-    pointer-events: none;
-    overflow: hidden;
-}
-.sd-workspace[data-sd-reveal-preparing='true'] > .sd-board-section,
-.sd-board-section[data-sd-snapshot-hidden='true'] {
+/* Fit the board before measuring the DOM-based ASCII animation. */
+.sd-workspace[data-sd-reveal-preparing='true'] > .sd-board-section {
     opacity: 0;
     pointer-events: none;
 }

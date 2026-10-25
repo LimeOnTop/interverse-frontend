@@ -320,11 +320,9 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
     fullscreenFlow.current = flow
     const [expanded, setExpanded] = useState(false)
     const [drawerOpen, setDrawerOpen] = useState(false)
-    const [drawerAnimated, setDrawerAnimated] = useState(false)
     const drawerEntryPending = useRef(false)
     const changeDrawer = (open: boolean) => {
         drawerEntryPending.current = false
-        setDrawerAnimated(true)
         setDrawerOpen(open)
     }
     const [rotateHint, setRotateHint] = useState(false)
@@ -350,7 +348,6 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
             if (root) root.dataset.sdRevealPreparing = 'true'
             fullscreenStarted.current = true
             drawerEntryPending.current = true
-            setDrawerAnimated(false)
             setDrawerOpen(false)
             setExpanded(true)
             if (root?.requestFullscreen && window.matchMedia('(pointer: coarse)').matches) {
@@ -393,14 +390,13 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
             await frame()
             await frame()
             if (!active || current !== generation) return
-            const controller = createBoardReveal(root, board)
+            const controller = createBoardReveal(root)
             reveal.current = controller
             await controller.reveal()
             if (!active || current !== generation) return
             fullscreenTransition.current = false
             if (expanded && drawerEntryPending.current) {
                 drawerEntryPending.current = false
-                setDrawerAnimated(false)
                 setDrawerOpen(true)
             }
         }
@@ -409,7 +405,7 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
             const next = `${root.clientWidth}:${root.clientHeight}`
             if (next === size) return
             size = next
-            // Native orientation changes invalidate an in-flight snapshot.
+            // Native orientation changes invalidate the measured animation coordinates.
             if (fullscreenTransition.current) void prepare()
         })
         observer.observe(root)
@@ -1181,7 +1177,7 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                 )}
                 <aside
                     ref={sideRef}
-                    className={`sd-side ${drawerOpen ? 'is-open' : ''} ${drawerAnimated ? '' : 'is-settled'}`}
+                    className={`sd-side ${drawerOpen ? 'is-open' : ''}`}
                     aria-hidden={expanded && !drawerOpen}
                 >
                     <div className="sd-side-header">

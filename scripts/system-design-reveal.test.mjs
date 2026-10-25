@@ -5,34 +5,29 @@ import {mkdtemp,writeFile} from 'node:fs/promises'
 import {tmpdir} from 'node:os'
 import {pathToFileURL} from 'node:url'
 import path from 'node:path'
-
-const bundle=await build({entryPoints:['src/features/system-design/boardReveal.ts'],bundle:true,format:'esm',platform:'node',write:false,plugins:[{name:'animation-fakes',setup(b){b.onResolve({filter:/^(html-to-image|ascii-reveal\/core)$/},a=>({path:a.path,namespace:'fake'}));b.onLoad({filter:/.*/,namespace:'fake'},a=>({contents:a.path==='html-to-image'?'export const toCanvas=(...a)=>globalThis.captureBoard(...a)':'export const createAsciiReveal=(...a)=>globalThis.animateBoard(...a)',loader:'js'}))}}]})
-const dir=await mkdtemp(path.join(tmpdir(),'sd-reveal-'));const file=path.join(dir,'reveal.mjs');await writeFile(file,bundle.outputFiles[0].text);const {createBoardReveal}=await import(pathToFileURL(file))
-const deferred=()=>{let resolve;const promise=new Promise(r=>resolve=r);return {promise,resolve}}
-function fixture(){
- const children=[];const root={dataset:{sdRevealPreparing:'true'},scrollLeft:0,scrollTop:0,clientLeft:1,clientTop:1,getBoundingClientRect:()=>({left:10,top:20}),append(e){children.push(e)}}
- const board={dataset:{},getBoundingClientRect:()=>({left:11,top:82,width:720,height:800})}
- globalThis.window={devicePixelRatio:2};globalThis.document={createElement:()=>({style:{},setAttribute(){},append(){},remove(){children.pop()}})}
- const canvas={style:{}};globalThis.captureBoard=async()=>canvas
- globalThis.animateBoard=()=>({reveal:async()=>{},hide:async()=>{},destroy(){}})
- return {root,board,children,canvas}
-}
-test('snapshot animates in board coordinates and hands off without leaving an overlay',async()=>{
- const f=fixture();let overlay
- globalThis.animateBoard=(el)=>{overlay=el;return {reveal:async()=>{},hide:async()=>{},destroy(){}}}
- const ctrl=createBoardReveal(f.root,f.board);await ctrl.reveal()
- assert.equal(overlay.style.left,'0px');assert.equal(overlay.style.top,'61px');assert.equal(overlay.style.width,'720px');assert.equal(f.canvas.style.width,'720px');assert.equal(f.children.length,0);assert.equal(f.board.dataset.sdSnapshotHidden,undefined);assert.equal(f.root.dataset.sdRevealPhase,'ready')
+import vm from 'node:vm'
+import {execFileSync} from 'node:child_process'
+const bundle=await build({entryPoints:['src/features/system-design/boardReveal.ts'],bundle:true,format:'esm',platform:'node',write:false,plugins:[{name:'fake-core',setup(b){b.onResolve({filter:/^ascii-reveal\/core$/},a=>({path:a.path,namespace:'fake'}));b.onLoad({filter:/.*/,namespace:'fake'},()=>({contents:'export const createAsciiReveal=(...a)=>globalThis.animateBoard(...a)',loader:'js'}))}}]})
+const dir=await mkdtemp(path.join(tmpdir(),'sd-dom-reveal-'));const file=path.join(dir,'reveal.mjs');await writeFile(file,bundle.outputFiles[0].text);const {createBoardReveal}=await import(pathToFileURL(file))
+test('uses the production surface and per-character Dither instead of a canvas snapshot',async()=>{
+ let options,called=false
+ globalThis.animateBoard=(_root,o)=>{options=o;return {reveal:async()=>{called=true},hide:async()=>{},destroy(){}}}
+ const root={dataset:{sdRevealPreparing:'true'}};await createBoardReveal(root).reveal()
+ assert.equal(called,true);assert.equal(options.preset,'dither');assert.equal(options.speed,.7);assert.equal(options.surfaces,'.sd-board-section');assert.equal(options.fades,'.sd-toolbar');assert.equal(options.media,undefined);assert.equal(root.dataset.sdRevealPhase,'ready');assert.equal(root.dataset.sdRevealPreparing,undefined)
 })
-test('late snapshot completion after unmount cannot hide or overwrite the live board',async()=>{
- const f=fixture(),capture=deferred();globalThis.captureBoard=()=>capture.promise
- const ctrl=createBoardReveal(f.root,f.board),job=ctrl.reveal();ctrl.destroy();capture.resolve(f.canvas);await job
- assert.equal(f.children.length,0);assert.equal(f.board.dataset.sdSnapshotHidden,undefined)
+test('destroy prevents a late completion changing a newer transition',async()=>{
+ let finish;globalThis.animateBoard=()=>({reveal:()=>new Promise(r=>finish=r),destroy(){finish()}})
+ const root={dataset:{}};const ctrl=createBoardReveal(root);const running=ctrl.reveal();ctrl.destroy();root.dataset.sdRevealPhase='preparing';await running;assert.equal(root.dataset.sdRevealPhase,'preparing')
 })
-test('capture failure leaves the actual board usable',async()=>{
- const f=fixture();globalThis.captureBoard=async()=>{throw Error('unsupported SVG')}
- await createBoardReveal(f.root,f.board).reveal();assert.equal(f.board.dataset.sdSnapshotHidden,undefined);assert.equal(f.root.dataset.sdRevealPreparing,undefined);assert.equal(f.root.dataset.sdRevealPhase,'ready')
+const patched=execFileSync('tar',['-xOf','vendor/ascii-reveal-0.3.0-interverse.1.tgz','package/dist/core.js'],{encoding:'utf8'})
+const helper=patched.slice(patched.lastIndexOf('function __arScaledFontSize'))
+function font(node,size){return vm.runInNewContext(helper+';__arScaledFontSize(node,size)',{node,size,getComputedStyle:el=>({transform:el.transform}),DOMMatrixReadOnly:class{constructor(text){const [a,b]=text.match(/matrix\(([^)]+)\)/)[1].split(',').map(Number);this.a=a;this.b=b}}})}
+test('canvas text uses nested viewport scale while translations leave its size unchanged',()=>{
+ const viewport={transform:'matrix(0.5,0,0,0.5,22,140)',parentElement:null}
+ const node={transform:'matrix(1,0,0,1,120,30)',parentElement:viewport}
+ assert.equal(font({parentElement:node},'14px'),'7px')
+ viewport.transform='matrix(0.8,0,0,0.8,22,140)';assert.equal(font({parentElement:node},'14px'),'11.200000000000001px')
 })
-test('interrupted animation releases the live board without a stale overlay',async()=>{
- const f=fixture(),running=deferred();globalThis.animateBoard=()=>({reveal:()=>running.promise,hide:async()=>{},destroy(){running.resolve()}})
- const ctrl=createBoardReveal(f.root,f.board),job=ctrl.reveal();await new Promise(r=>setImmediate(r));assert.equal(f.board.dataset.sdSnapshotHidden,'true');ctrl.destroy();await job;assert.equal(f.children.length,0);assert.equal(f.board.dataset.sdSnapshotHidden,undefined)
+test('untransformed dashboard text keeps the original font size',()=>{
+ assert.equal(font({parentElement:{transform:'none',parentElement:null}},'14px'),'14px')
 })
