@@ -272,10 +272,6 @@ export default function SystemDesignPage() {
                     </div>
                 </section>
             ))}
-            <p className="sd-local-note">
-                Учебная модель с заданными лимитами. Прогресс сохраняется в этом браузере. Обычные попытки
-                тренировок не расходуются.
-            </p>
         </div>
     )
 }

@@ -131,13 +131,6 @@
     align-self: center;
     color: var(--sd-accent);
 }
-.sd-local-note {
-    margin-top: 24px;
-    max-width: 680px;
-    font-size: 12px;
-    line-height: 1.7;
-    color: var(--iv-text-secondary);
-}
 .sd-editor-heading {
     display: flex;
     align-items: center;
