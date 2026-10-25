@@ -339,6 +339,7 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
             screen.orientation?.unlock?.()
         } else {
             fullscreenStarted.current = true
+            setDrawerOpen(true)
             setExpanded(true)
             if (root?.requestFullscreen && window.matchMedia('(pointer: coarse)').matches) {
                 try {
