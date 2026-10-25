@@ -321,7 +321,12 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
     const [expanded, setExpanded] = useState(false)
     const [drawerOpen, setDrawerOpen] = useState(false)
     const [drawerAnimated, setDrawerAnimated] = useState(false)
-    const changeDrawer = (open: boolean) => { setDrawerAnimated(true); setDrawerOpen(open) }
+    const drawerEntryPending = useRef(false)
+    const changeDrawer = (open: boolean) => {
+        drawerEntryPending.current = false
+        setDrawerAnimated(true)
+        setDrawerOpen(open)
+    }
     const [rotateHint, setRotateHint] = useState(false)
     const workspace = useRef<HTMLDivElement>(null)
     const burger = useRef<HTMLButtonElement>(null)
@@ -333,6 +338,7 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
         switching.current = true
         const root = workspace.current
         if (expanded) {
+            drawerEntryPending.current = false
             await reveal.current?.hide()
             setExpanded(false)
             setDrawerOpen(false)
@@ -341,8 +347,9 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
             screen.orientation?.unlock?.()
         } else {
             fullscreenStarted.current = true
+            drawerEntryPending.current = true
             setDrawerAnimated(false)
-            setDrawerOpen(true)
+            setDrawerOpen(false)
             setExpanded(true)
             if (root?.requestFullscreen && window.matchMedia('(pointer: coarse)').matches) {
                 try {
@@ -375,10 +382,18 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
             fades: '.sd-toolbar',
         })
         reveal.current = effect
+        let active = true
         void effect.reveal().then(() => {
+            if (!active) return
             void fullscreenFlow.current.fitView({ padding: 0.15, maxZoom: 1 })
+            if (expanded && drawerEntryPending.current) {
+                drawerEntryPending.current = false
+                setDrawerAnimated(false)
+                setDrawerOpen(true)
+            }
         })
         return () => {
+            active = false
             effect.destroy()
             reveal.current = null
         }
@@ -1141,47 +1156,49 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                     className={`sd-side ${drawerOpen ? 'is-open' : ''} ${drawerAnimated ? '' : 'is-settled'}`}
                     aria-hidden={expanded && !drawerOpen}
                 >
-                    {expanded && (
-                        <button
-                            className="sd-drawer-close"
-                            aria-label="Закрыть панель"
-                            onClick={() => {
-                                changeDrawer(false)
-                                burger.current?.focus()
-                            }}
-                        >
-                            <X size={20} />
-                        </button>
-                    )}
-                    <div className="sd-tabs" role="tablist" aria-label="Панели тренировки">
-                        {(Object.keys(panelLabels) as Panel[]).map((p) => (
+                    <div className="sd-side-header">
+                        {expanded && (
                             <button
-                                key={p}
-                                role="tab"
-                                id={`tab-${p}`}
-                                aria-controls={`panel-${p}`}
-                                aria-selected={panel === p}
-                                tabIndex={panel === p ? 0 : -1}
-                                onClick={() => setPanel(p)}
-                                onKeyDown={(event) => {
-                                    const tabs = Object.keys(panelLabels) as Panel[]
-                                    const direction =
-                                        event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0
-                                    if (direction) {
-                                        event.preventDefault()
-                                        const newTab =
-                                            tabs[(tabs.indexOf(p) + direction + tabs.length) % tabs.length]
-                                        setPanel(newTab)
-                                        document.getElementById(`tab-${newTab}`)?.focus()
-                                    }
+                                className="sd-drawer-close"
+                                aria-label="Закрыть панель"
+                                onClick={() => {
+                                    changeDrawer(false)
+                                    burger.current?.focus()
                                 }}
                             >
-                                {panelLabels[p]}
-                                {p === 'result' && result && (
-                                    <span className={result.passed ? 'sd-tab-dot is-pass' : 'sd-tab-dot'} />
-                                )}
+                                <X size={20} />
                             </button>
-                        ))}
+                        )}
+                        <div className="sd-tabs" role="tablist" aria-label="Панели тренировки">
+                            {(Object.keys(panelLabels) as Panel[]).map((p) => (
+                                <button
+                                    key={p}
+                                    role="tab"
+                                    id={`tab-${p}`}
+                                    aria-controls={`panel-${p}`}
+                                    aria-selected={panel === p}
+                                    tabIndex={panel === p ? 0 : -1}
+                                    onClick={() => setPanel(p)}
+                                    onKeyDown={(event) => {
+                                        const tabs = Object.keys(panelLabels) as Panel[]
+                                        const direction =
+                                            event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0
+                                        if (direction) {
+                                            event.preventDefault()
+                                            const newTab =
+                                                tabs[(tabs.indexOf(p) + direction + tabs.length) % tabs.length]
+                                            setPanel(newTab)
+                                            document.getElementById(`tab-${newTab}`)?.focus()
+                                        }
+                                    }}
+                                >
+                                    {panelLabels[p]}
+                                    {p === 'result' && result && (
+                                        <span className={result.passed ? 'sd-tab-dot is-pass' : 'sd-tab-dot'} />
+                                    )}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                     <div
                         ref={panelRef}

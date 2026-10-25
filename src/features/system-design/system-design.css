@@ -1563,13 +1563,18 @@ body.sd-grabbing * {
 /* Keep check/menu controls visible and reachable while the drawer is open. */
 .sd-workspace.is-expanded .sd-side {
     top: calc(64px + env(safe-area-inset-top));
-    border-radius: 12px 0 0 0;
+    border-radius: 0;
 }
 .sd-workspace.is-expanded button.sd-drawer-scrim {
     top: calc(64px + env(safe-area-inset-top));
 }
 
-/* Fullscreen starts with its tools already visible; later manual toggles still slide. */
+/* Entry reveals tools after the board; later manual toggles still slide. */
 .sd-workspace.is-expanded .sd-side.is-settled {
     transition: none;
+}
+
+.sd-side-header,
+.sd-side-header .sd-tabs {
+    background-color: var(--iv-surface);
 }
