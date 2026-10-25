@@ -12,6 +12,7 @@ export interface BoardRevealController {
 export function createBoardReveal(root: HTMLElement): BoardRevealController {
     const effect = createAsciiReveal(root, {
         ...announcementAsciiOptions,
+        selector: '.sd-board-section',
         surfaces: '.sd-board-section',
         fades: '.sd-toolbar',
     })

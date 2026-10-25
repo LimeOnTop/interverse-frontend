@@ -1178,6 +1178,7 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                 <aside
                     ref={sideRef}
                     className={`sd-side ${drawerOpen ? 'is-open' : ''}`}
+                    data-ascii="skip"
                     aria-hidden={expanded && !drawerOpen}
                 >
                     <div className="sd-side-header">

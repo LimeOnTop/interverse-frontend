@@ -13,7 +13,7 @@ test('uses the production surface and per-character Dither instead of a canvas s
  let options,called=false
  globalThis.animateBoard=(_root,o)=>{options=o;return {reveal:async()=>{called=true},hide:async()=>{},destroy(){}}}
  const root={dataset:{sdRevealPreparing:'true'}};await createBoardReveal(root).reveal()
- assert.equal(called,true);assert.equal(options.preset,'dither');assert.equal(options.speed,.7);assert.equal(options.surfaces,'.sd-board-section');assert.equal(options.fades,'.sd-toolbar');assert.equal(options.media,undefined);assert.equal(root.dataset.sdRevealPhase,'ready');assert.equal(root.dataset.sdRevealPreparing,undefined)
+ assert.equal(called,true);assert.equal(options.preset,'dither');assert.equal(options.speed,.7);assert.equal(options.selector,'.sd-board-section');assert.equal(options.surfaces,'.sd-board-section');assert.equal(options.fades,'.sd-toolbar');assert.equal(options.media,undefined);assert.equal(root.dataset.sdRevealPhase,'ready');assert.equal(root.dataset.sdRevealPreparing,undefined)
 })
 test('destroy prevents a late completion changing a newer transition',async()=>{
  let finish;globalThis.animateBoard=()=>({reveal:()=>new Promise(r=>finish=r),destroy(){finish()}})
