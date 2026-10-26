@@ -18,7 +18,7 @@ export default function PublicCatalogPage({ jobs = false }: { jobs?: boolean }) 
             <p>{jobs
                 ? 'Найди IT-вакансии по своему направлению: Python, Java, React или Frontend. В подборке можно выбрать удалённую работу и позиции Junior, сравнить требования и перейти к отклику у источника.'
                 : 'Выбери направление технического интервью. Вопросы с ответами, практические задачи и план повторения открыты без регистрации. Для персональной тренировки выбери стек и уровень.'}</p>
-            <div className="public-catalog-grid">{items.map(item => <Link to={(jobs ? '/jobs/' : '/preparation/') + item.slug} key={item.slug}>
+            <div className="public-catalog-grid">{!jobs && <Link to="/preparation/system-design"><span>ИНТЕРАКТИВНАЯ ДОСКА</span><h2>System Design<ArrowUpRight size={22} /></h2><p>Собирай архитектуру, проверяй решения и готовься к вопросам о распределённых системах. Первый уровень бесплатно.</p></Link>}{items.map(item => <Link to={(jobs ? '/jobs/' : '/preparation/') + item.slug} key={item.slug}>
                 <span>{jobs ? 'ВАКАНСИИ И ТРЕБОВАНИЯ' : 'ВОПРОСЫ И ПРАКТИКА'}</span>
                 <h2>{jobs ? 'Вакансии ' + item.name : item.slug === 'qa' ? 'Собеседование тестировщика QA' : 'Собеседование ' + item.name}<ArrowUpRight size={22} /></h2>
                 <p>{item.lead}</p>

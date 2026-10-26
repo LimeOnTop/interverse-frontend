@@ -21,7 +21,8 @@ export default function SiteFooter({ className = '' }: SiteFooterProps) {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <span>&copy; {new Date().getFullYear()} InterVerse. Все права защищены.</span>
                     <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-                        <Link to="/preparation" className="inline-flex items-center min-h-[44px] hover:underline">Подготовка</Link>
+                        <Link to="/preparation/system-design">System Design</Link>
+                    <Link to="/preparation" className="inline-flex items-center min-h-[44px] hover:underline">Подготовка</Link>
                         <a href="/about-contractor" className="inline-flex items-center min-h-[44px] hover:underline">Об исполнителе</a>
                         <Link to="/jobs" className="inline-flex items-center min-h-[44px] hover:underline">Вакансии IT</Link>
                         <Link

@@ -19,6 +19,11 @@ const ROUTES: Record<string, SeoConfig> = {
         description: 'Вопросы на собеседовании с ответами и практические задачи по Python, Java, React, Frontend и QA. Проверь знания и начни онлайн-тренировку под свой уровень.',
         path: '/preparation',
     },
+    '/preparation/system-design': {
+        title: 'System Design — задачи и тренажёр архитектуры систем | InterVerse',
+        description: 'Подготовка к System Design интервью: 25 задач на интерактивной доске. Балансировка, кеширование, очереди и репликация. Первый уровень бесплатно.',
+        path: '/preparation/system-design',
+    },
     '/jobs': {
         title: 'IT-вакансии и поиск работы в IT — вакансии разработчиков | InterVerse',
         description: 'Ищи работу в IT по стеку: вакансии Python, Java, React и Frontend. Сравни требования, выбери удалённый формат или Junior и подготовься к собеседованию.',
@@ -85,7 +90,7 @@ export function structuredData(pathname: string) {
     const collectionItems = seo.path === '/jobs'
         ? jobTracks.map(item => ({ name: `Вакансии ${item.name}`, url: SITE_URL + '/jobs/' + item.slug }))
         : seo.path === '/preparation'
-            ? allPreparations.map(item => ({ name: `Собеседование ${item.name}`, url: SITE_URL + '/preparation/' + item.slug }))
+            ? [...allPreparations.map(item => ({ name: `Собеседование ${item.name}`, url: SITE_URL + '/preparation/' + item.slug })), { name: 'System Design', url: SITE_URL + '/preparation/system-design' }]
             : []
     return {
         '@context': 'https://schema.org',

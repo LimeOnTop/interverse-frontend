@@ -22,6 +22,7 @@ for (const path of [...publicPaths, '/404']) {
     const pageKey = path === '/404' ? 'src/pages/NotFoundPage.tsx'
         : path === '/pro-trial' ? 'src/pages/ProTrialPage.tsx'
         : path.startsWith('/jobs/') ? 'src/pages/PublicJobsPage.tsx'
+        : path === '/preparation/system-design' ? 'src/pages/PreparationSystemDesignPage.tsx'
         : path.startsWith('/preparation/') ? 'src/pages/PreparationPythonPage.tsx'
         : path === '/jobs' || path === '/preparation' ? 'src/pages/PublicCatalogPage.tsx'
         : path === '/pricing' ? 'src/pages/PricingPage.tsx'

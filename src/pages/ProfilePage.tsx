@@ -1,4 +1,5 @@
 import RenewalControl from '../components/RenewalControl'
+import { resolveSubscriptionPlan } from '../utils/subscription'
 import AccountSecurity from '../components/AccountSecurity'
 import { useState, useEffect, useRef, type ReactNode } from 'react'
 import {
@@ -733,7 +734,7 @@ export default function ProfilePage() {
                 </div>
                 </LayoutGroup>
 
-                {user?.role !== 'admin' && <RenewalControl />}
+                {user?.role !== 'admin' && resolveSubscriptionPlan(user) === 'paid' && <RenewalControl />}
                 <div className="flex justify-end mt-6">
                     <Button type="button" loading={isSaving} onClick={() => void handleSave()}>
                         <Save className="w-5 h-5" /> Сохранить

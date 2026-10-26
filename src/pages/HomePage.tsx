@@ -1,3 +1,4 @@
+import SystemDesignHomeSection from '../components/SystemDesignHomeSection'
 import { freeTrainingCaption } from '../lib/trainingLimits'
 import { useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -73,6 +74,7 @@ export default function HomePage() {
                 <div className="iv-section-heading" data-reveal><div><span className="iv-eyebrow">НЕ ПРОСТО СПИСОК ВОПРОСОВ</span><h2>Всё, чтобы двигаться<br />вперёд.</h2></div><p>Практика, результаты и темы для повторения.<br />Подготовка, в которой понятен следующий шаг.</p></div>
                 <div className="iv-capabilities">{capabilities.map(({ icon: Icon, ...item }) => <article key={item.number} className="iv-capability" data-reveal data-tilt><div className="iv-capability-top"><Icon size={24} strokeWidth={1.4} /><span>{item.number}</span></div><h3>{item.title}</h3><p>{item.text}</p><div className="iv-capability-bottom"><span>{item.tag}</span></div></article>)}</div>
             </section>
+            <SystemDesignHomeSection />
             <ReportPreview />
             <section className="iv-home-container iv-home-section" id="start">
                 <div className="iv-start-layout"><div className="iv-start-copy"><span className="iv-eyebrow">НАЧНИ СО СВОЕГО</span><h2>{freeTrainingCaption()} бесплатно.<br /><em>Понятный план роста.</em></h2><p>Не нужно готовиться ко всему сразу.<br />Выбери направление, технологию и уровень —<br />собери тренировку под свою цель.</p><ol><li><span>01</span><div>Выбери фокус<small>То, что действительно пригодится на интервью</small></div></li><li><span>02</span><div>Попробуй свои силы<small>Теория и практика в удобном темпе</small></div></li><li><span>03</span><div>Посмотри, где расти<small>Понятный разбор вместо догадок</small></div></li></ol></div>

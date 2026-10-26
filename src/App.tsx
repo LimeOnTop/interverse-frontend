@@ -9,6 +9,7 @@ import HomePage from './pages/HomePage'
 import { preparations, jobTracks } from './data/preparation'
 import { pythonPreparation } from './data/pythonPreparation'
 const PricingPage = lazy(() => import('./pages/PricingPage'))
+const PreparationSystemDesignPage = lazy(() => import('./pages/PreparationSystemDesignPage'))
 const PreparationPage = lazy(() => import('./pages/PreparationPythonPage'))
 const PublicJobsPage = lazy(() => import('./pages/PublicJobsPage'))
 const PublicCatalogPage = lazy(() => import('./pages/PublicCatalogPage'))
@@ -76,6 +77,7 @@ function App() {
                     <Route path="/training/resume" element={<ProtectedRoute><ResumeTrainingPage /></ProtectedRoute>} />
                     <Route path="/" element={<HomePage />} />
                     <Route path="/preparation" element={<PublicCatalogPage />} />
+                    <Route path="/preparation/system-design" element={<PreparationSystemDesignPage />} />
                     <Route path="/jobs" element={<PublicCatalogPage jobs />} />
                     {[pythonPreparation,...preparations].map(item => <Route key={item.slug} path={'/preparation/'+item.slug} element={<PreparationPage key={item.slug} slug={item.slug} />} />)}
                     {jobTracks.map(item => <Route key={item.slug} path={'/jobs/'+item.slug} element={<PublicJobsPage key={item.slug} slug={item.slug} />} />)}
