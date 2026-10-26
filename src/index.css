@@ -986,3 +986,10 @@
 :root:not(.dark) .iv-training-session textarea { background: var(--iv-bg); border-color: var(--iv-border); color: var(--iv-text); }
 :root:not(.dark) .iv-training-session .iv-track { background: #ece9e1; }
 :root:not(.dark) .iv-training-session .iv-track > span { background: #315d46; }
+
+/* Pro labels share the registration button palette in both themes. */
+.iv-pro-badge {
+    background: var(--iv-pro-badge-background);
+    color: #fff;
+    border-color: transparent;
+}

@@ -34,7 +34,7 @@ export default function ProCheckoutDialog({ offer, busy, available, settingsErro
                 </ul>
                 </>
             ) : <>
-            <span className="iv-pill-accent inline-flex items-center gap-2"><Sparkles size={16} /> InterVerse Pro</span>
+            <span className="iv-pro-badge iv-pill-accent inline-flex items-center gap-2"><Sparkles size={16} /> InterVerse Pro</span>
             <h2 ref={title} tabIndex={-1} id="pro-checkout-title" className="mt-5 text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">Больше практики. Понятнее следующий шаг.</h2>
             <p className="mt-3 text-sm text-secondary">{offer.description}</p>
             <ul className="grid gap-3 mt-5">

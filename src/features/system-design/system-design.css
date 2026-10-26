@@ -1425,8 +1425,8 @@ body.sd-grabbing * {
     background: var(--iv-bg);
 }
 .sd-access-badge:not(.is-free) {
-    background: var(--sd-accent);
-    border-color: var(--sd-accent);
+    background: var(--iv-pro-badge-background);
+    border-color: transparent;
     color: #fff;
 }
 .sd-access-badge.is-free {
