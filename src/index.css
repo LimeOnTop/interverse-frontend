@@ -998,7 +998,7 @@
 .iv-home em, .iv-cover-title > span, .iv-cover-v, .iv-wordmark-v,
 .iv-hero-label, .iv-cover-bottom strong, .iv-capability-bottom > span,
 .iv-capability-top > span, .iv-form-heading > span, .iv-faq a,
-.prep-hero h1 em, .prep-related a, .prep-home-links a,
+.prep-hero h1 em, .prep-related a, .prep-home-links > p a, .iv-direction-label,
 .prep-quiz-feedback strong, .prep-q-number, .sd-task-link,
 .sd-topics small, .sd-how li > span, .rd-material, .rd-footer span:last-child {
     background-image: var(--iv-pro-badge-background);
