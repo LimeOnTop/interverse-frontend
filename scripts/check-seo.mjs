@@ -12,6 +12,8 @@ for (const url of urls) {
     assert.equal(search, '', 'Filtered URLs must not enter sitemap')
     assert.ok(pathname === '/' || !pathname.endsWith('/'), 'Noncanonical trailing slash in sitemap')
     const html = await readFile(pathname === '/' ? 'dist/index.html' : `dist${pathname}/index.html`, 'utf8')
+    assert.match(html, /<link rel="stylesheet" href="\/assets\/[^"]+\.css"/, `${pathname}: first render requires stylesheet in HTML`)
+    assert.ok(html.includes("document.documentElement.classList.toggle('dark', dark)"), `${pathname}: theme must resolve before first paint`)
     assert.equal([...html.matchAll(/<h1(?:\s|>)/g)].length, 1, `${pathname}: expected one H1`)
     const title = html.match(/<title>([^<]+)<\/title>/)?.[1]
     const description = html.match(/<meta name="description" content="([^"]+)"/)?.[1]

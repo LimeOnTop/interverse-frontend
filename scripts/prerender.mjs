@@ -6,13 +6,26 @@ const manifest = JSON.parse(await readFile('dist/.vite/manifest.json', 'utf8'))
 const serverDir = resolve('.seo-build')
 await build({ build: { ssr: 'src/entry-seo.tsx', outDir: serverDir, emptyOutDir: true }, logLevel: 'warn' })
 const { render, publicPaths, serializeStructuredData } = await import(serverDir + '/entry-seo.js')
+const appEntry = manifest['index.html']?.dynamicImports?.find(key => manifest[key]?.name === 'renderApp')
+if (!appEntry) throw new Error('Missing renderApp entry in Vite manifest')
 const shell = (await readFile('dist/index.html', 'utf8'))
     .replace(/<main style="max-width:720px;[\s\S]*?<\/main>/, '')
     .replace(/<div id="root">[\s\S]*<\/div>/, '<div id="root"></div>')
     .replace(/<script id="page-structured-data" type="application\/ld\+json">[\s\S]*?<\/script>\s*/g, '')
     .replace(/^[ \t]+$/gm, '')
 const esc = s => s.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
-const privateShell = shell
+const baseCss = new Set()
+const collectCss = (key, files, visited = new Set()) => {
+    if (visited.has(key)) return
+    visited.add(key)
+    const item = manifest[key]
+    if (!item) return
+    for (const file of item.css || []) files.add(file)
+    for (const dep of item.imports || []) collectCss(dep, files, visited)
+}
+collectCss(appEntry, baseCss)
+const styledShell = [...baseCss].reduce((html, file) => html.includes('/' + file) ? html : html.replace('</head>', `<link rel="stylesheet" href="/${file}">\n</head>`), shell)
+const privateShell = styledShell
     .replace(/<title>[^<]*<\/title>/, '<title>InterVerse</title>')
     .replace(/(<meta name="robots" content=")[^"]+/, '$1noindex, follow')
     .replace(/\s*<link rel="(?:canonical|alternate)"[^>]*>/g, '')
@@ -28,7 +41,7 @@ for (const path of [...publicPaths, '/404']) {
         : path === '/pricing' ? 'src/pages/PricingPage.tsx'
         : path === '/about-contractor' ? 'src/pages/ContractorPage.tsx'
         : path === '/privacy' ? 'src/pages/PrivacyPage.tsx' : null
-    const css = new Set()
+    const css = new Set(baseCss)
     const visited = new Set()
     const walk = key => {
         if (visited.has(key)) return
@@ -41,7 +54,7 @@ for (const path of [...publicPaths, '/404']) {
     if (pageKey) walk(pageKey)
     const { body, seo } = render(path)
     const canonical = 'https://inter-verse.ru' + seo.path
-    let html = shell.replace(/<title>[^<]*<\/title>/, `<title>${esc(path === '/404' ? 'Страница не найдена — InterVerse' : seo.title)}</title>`)
+    let html = styledShell.replace(/<title>[^<]*<\/title>/, `<title>${esc(path === '/404' ? 'Страница не найдена — InterVerse' : seo.title)}</title>`)
     for (const [attr, key, value] of [
         ['name', 'description', seo.description], ['property', 'og:title', seo.title],
         ['property', 'og:description', seo.description], ['property', 'og:url', canonical],

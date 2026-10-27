@@ -993,3 +993,40 @@
     color: #fff;
     border-color: transparent;
 }
+
+/* Use the registration palette for accent labels, including the video cover. */
+.iv-home em, .iv-cover-title > span, .iv-cover-v, .iv-wordmark-v,
+.iv-hero-label, .iv-cover-bottom strong, .iv-capability-bottom > span,
+.iv-capability-top > span, .iv-form-heading > span, .iv-faq a,
+.prep-hero h1 em, .prep-related a, .prep-home-links a,
+.prep-quiz-feedback strong, .prep-q-number, .sd-task-link,
+.sd-topics small, .sd-how li > span, .rd-material, .rd-footer span:last-child {
+    background-image: var(--iv-pro-badge-background);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: none;
+}
+:is(.iv-home em, .sd-task-link, .rd-material, .prep-related a) svg {
+    color: var(--iv-gradient-to);
+}
+.dark :is(span,a,p,h1,h2,h3,h4,strong,em,small,label)[class~="dark:text-purple-300"],
+.dark :is(span,a,p,h1,h2,h3,h4,strong,em,small,label)[class~="dark:text-purple-400"],
+.dark :is(span,a,p,h1,h2,h3,h4,strong,em,small,label)[class~="text-purple-400"] {
+    background-image: var(--iv-pro-badge-background);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+.dark :is(span,a,p,h1,h2,h3,h4,strong,em,small,label)[class*="text-purple-"] svg { color: var(--iv-gradient-to); }
+@media (forced-colors: active) {
+    .iv-home em, .iv-cover-title > span, .iv-wordmark-v, .sd-task-link,
+    .dark :is(span,a,p,h1,h2,h3,h4,strong,em,small,label)[class*="text-purple-"] {
+        background: none; color: LinkText;
+    }
+}
+
+.iv-pill-accent, .dark .dark\:bg-purple-400, .dark .dark\:bg-purple-500, .dark .dark\:bg-purple-600 {
+    background-image: var(--iv-pro-badge-background);
+    color: #fff;
+}

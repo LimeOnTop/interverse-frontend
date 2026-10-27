@@ -13,6 +13,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta id="theme-color" name="theme-color" content="#f5f2ea" />
 
+    <script>
+        (() => {
+            let dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            try { const saved = localStorage.getItem('theme'); if (saved) dark = saved === 'dark'; } catch {}
+            document.documentElement.classList.toggle('dark', dark);
+            document.getElementById('theme-color').content = dark ? '#14161b' : '#f5f2ea';
+        })();
+    </script>
     <title>InterVerse — подготовка к техническим собеседованиям IT</title>
     <meta name="description" content="InterVerse — онлайн-тренировки к техническим собеседованиям: Frontend, Backend, DevOps, QA и Data Science. Вопросы и задачи под ваш стек и уровень от Intern до Senior." />
     <meta name="author" content="InterVerse" />
