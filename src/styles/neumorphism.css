@@ -593,3 +593,81 @@ html[data-motion-input='keyboard'] .iv-burger-bars > span::after { transition: n
 :root .iv-app-layout .iv-mobile-create:is(:hover, :active, :focus-visible) {
     box-shadow: var(--iv-neu-accent-inset);
 }
+
+/* Vacancy cards carry the raised material; their outbound links stay unframed. */
+:root .iv-app-layout .job-card {
+    background: var(--iv-neu-surface);
+    border: 1px solid var(--iv-neu-edge);
+    border-radius: 24px;
+    box-shadow: var(--iv-neu-shadow);
+}
+
+:root .iv-app-layout .job-card button.save-job.saved,
+:root .iv-app-layout .job-card button.save-job.saved:is(:hover, :active, :focus-visible) {
+    background: var(--iv-gradient);
+    border-color: transparent;
+    color: #fff;
+    box-shadow: var(--iv-neu-accent-inset) !important;
+}
+:root .iv-app-layout .job-card .save-job.saved svg { color: #fff; fill: currentColor; }
+
+/* Accent depth comes from the inset highlight, without an extra painted frame. */
+:root body :is(.btn-primary,.btn-primary-adaptive,.iv-btn-primary,.lib-btn.is-primary,.pr-btn.primary,.sd-primary,.sd-check,.iv-sidebar-cta,.sd-announcement-cta,.iv-mobile-create,.iv-home .iv-landing-button,.sd-tabs button[aria-selected="true"],.save-job.saved,.wizard-tech-chip-selected,.wizard-stack-chip,.lib-select-option[data-state="checked"],.modern-select-option[aria-selected="true"],.iv-home .iv-levels button.selected) { border-color: transparent !important; }
+:root body :is(.btn-primary,.btn-primary-adaptive,.iv-btn-primary,.lib-btn.is-primary,.pr-btn.primary,.sd-primary,.sd-check,.iv-sidebar-cta,.sd-announcement-cta,.iv-mobile-create,.iv-home .iv-landing-button,.sd-tabs button[aria-selected="true"],.save-job.saved,.wizard-tech-chip-selected,.wizard-stack-chip,.lib-select-option[data-state="checked"],.modern-select-option[aria-selected="true"],.iv-home .iv-levels button.selected)::after { display: none !important; }
+
+/* Public navigation uses the dashboard's floating header material. */
+:root body .iv-public-header {
+    background: transparent;
+    background-image: none;
+    border: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+    isolation: isolate;
+}
+.iv-public-header::before,
+.iv-public-header::after {
+    content: '';
+    position: absolute;
+    inset: 0 0 -36px;
+    z-index: -1;
+    pointer-events: none;
+}
+.iv-public-header::before {
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    mask-image: linear-gradient(to bottom, #000 0%, #000 30%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 30%, transparent 100%);
+}
+.iv-public-header::after {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    mask-image: linear-gradient(to bottom, #000 0%, #000 10%, transparent 75%);
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 10%, transparent 75%);
+}
+:root body .iv-public-nav-bar :is(.iv-public-brand,.iv-public-header-action,.btn-ghost,.btn-icon) {
+    background: var(--iv-neu-surface);
+    color: var(--iv-text);
+    border: 1px solid var(--iv-neu-edge);
+    border-radius: 14px;
+    box-shadow: var(--iv-neu-shadow);
+}
+:root body .iv-public-nav-bar .iv-public-brand { padding: 0 14px; }
+:root body .iv-public-mobile-menu {
+    background: var(--iv-neu-surface);
+    border: 1px solid var(--iv-neu-edge);
+    border-radius: 20px;
+    margin: 8px 12px 12px;
+    box-shadow: var(--iv-neu-shadow);
+}
+@media (hover: hover) and (pointer: fine) {
+    :root body .iv-public-nav-bar :is(.iv-public-brand,.iv-public-header-action,.btn-ghost,.btn-icon):hover { background: var(--iv-neu-surface); }
+}
+@media (max-width: 639px) {
+    :root body .iv-public-nav-bar .iv-public-brand { padding: 0 8px; }
+    .iv-public-brand .iv-wordmark { font-size: 15px; letter-spacing: .18em; }
+}
+@media (prefers-reduced-transparency: reduce) {
+    .iv-public-header::before,.iv-public-header::after { backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+
+.iv-public-header-action { display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; }

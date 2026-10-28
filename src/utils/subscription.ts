@@ -82,11 +82,11 @@ export const FALLBACK_PAID_OFFERS: PaidOffer[] = [
     {
         id: 'paid_1m',
         name: 'Pro · 1 месяц',
-        price: '390.00',
+        price: '690.00',
         regularPrice: '690.00',
-        priceHint: 'скидка для первых 100 пользователей',
+        priceHint: 'в месяц',
         description: 'Расширенный лимит для интенсивной подготовки к собеседованиям.',
-        earlyBird: true,
+        earlyBird: false,
         durationDays: 30,
         paid: true,
         features: PRO_FEATURES,
@@ -143,6 +143,8 @@ export const SUBSCRIPTION_PLANS = [
 ] as const
 
 export type OffersResponse = {
+    discount_expires_at?: string
+    server_time?: string
     offers: Array<{
         id: string
         name: string

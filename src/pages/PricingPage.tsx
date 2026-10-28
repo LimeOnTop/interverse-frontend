@@ -17,12 +17,9 @@ import {
 
 function PriceBlock({
     offer,
-    earlyBirdRemaining,
-    earlyBirdLimit,
+
 }: {
     offer: PaidOffer
-    earlyBirdRemaining: number
-    earlyBirdLimit: number
 }) {
     const showStrike =
         Boolean(offer.earlyBird) &&
@@ -42,11 +39,7 @@ function PriceBlock({
                 </span>
             </div>
             <div className="text-sm text-secondary mt-1">{offer.priceHint}</div>
-            {offer.earlyBird && earlyBirdRemaining > 0 && (
-                <div className="mt-2 text-xs font-medium text-inter-verse-green dark:text-purple-300">
-                    Осталось {earlyBirdRemaining} из {earlyBirdLimit} мест со скидкой
-                </div>
-            )}
+
         </div>
     )
 }
@@ -54,8 +47,6 @@ function PriceBlock({
 export default function PricingPage() {
     usePricingAnalytics('pricing')
     const [paidOffers, setPaidOffers] = useState<PaidOffer[]>(FALLBACK_PAID_OFFERS)
-    const [earlyBirdRemaining, setEarlyBirdRemaining] = useState(27)
-    const [earlyBirdLimit, setEarlyBirdLimit] = useState(100)
 
     useEffect(() => {
         api
@@ -63,8 +54,6 @@ export default function PricingPage() {
             .then((response) => {
                 const mapped = mapOffersResponse(response.data)
                 setPaidOffers(mapped.paidOffers)
-                setEarlyBirdRemaining(mapped.earlyBirdRemaining)
-                setEarlyBirdLimit(mapped.earlyBirdLimit)
             })
             .catch(() => {
                 // keep fallback catalog
@@ -165,8 +154,6 @@ export default function PricingPage() {
 
                                 <PriceBlock
                                     offer={plan}
-                                    earlyBirdRemaining={earlyBirdRemaining}
-                                    earlyBirdLimit={earlyBirdLimit}
                                 />
 
                                 <ul className="space-y-3 mb-8 flex-1">

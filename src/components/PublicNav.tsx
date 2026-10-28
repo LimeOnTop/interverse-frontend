@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { Menu, X, Tag, LogIn, UserPlus, Briefcase, BookOpen } from 'lucide-react'
+import { X, Tag, LogIn, UserPlus, Briefcase, BookOpen } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 import BrandWordmark from './BrandWordmark'
 
@@ -90,13 +90,13 @@ export default function PublicNav({ landing = false, overlay = false }: PublicNa
                 <Link
                     to="/"
                     onClick={handleLogoClick}
-                    className="inline-flex items-center min-h-[44px] shrink-0 hover:opacity-80 transition-iv"
+                    className="iv-public-brand iv-header-frame inline-flex items-center min-h-[44px] shrink-0 transition-iv"
                 >
                     <BrandWordmark />
                 </Link>
 
                 {/* Desktop / tablet actions */}
-                <div className="hidden md:flex items-center gap-4">
+                <div className="hidden md:flex items-center gap-2">
                     <nav aria-label="Основные разделы" className="hidden lg:flex items-center gap-4 text-sm">
                         <Link to="/preparation" className="btn-ghost text-sm">Подготовка</Link>
                         <Link to="/jobs" className="btn-ghost text-sm">IT-вакансии</Link>
@@ -105,7 +105,7 @@ export default function PublicNav({ landing = false, overlay = false }: PublicNa
                         to="/pricing"
                         className={
                             overlay
-                                ? `text-sm font-medium transition-iv hover:opacity-80 ${overlayActionClass}`
+                                ? `iv-public-header-action text-sm font-medium transition-iv ${overlayActionClass}`
                                 : 'btn-ghost text-sm'
                         }
                     >
@@ -119,7 +119,7 @@ export default function PublicNav({ landing = false, overlay = false }: PublicNa
                         to="/login"
                         className={
                             overlay
-                                ? `text-sm font-medium transition-iv hover:opacity-80 ${overlayActionClass}`
+                                ? `iv-public-header-action text-sm font-medium transition-iv ${overlayActionClass}`
                                 : 'btn-ghost text-sm'
                         }
                     >
@@ -142,11 +142,11 @@ export default function PublicNav({ landing = false, overlay = false }: PublicNa
                         type="button"
                         aria-controls={menuId}
                         onClick={() => setMenuOpen((open) => !open)}
-                        className={`btn-icon ${overlay ? overlayActionClass : ''}`}
+                        className={`btn-icon iv-header-frame iv-header-menu ${overlay ? overlayActionClass : ''}`}
                         aria-label={menuOpen ? 'Закрыть меню' : 'Открыть меню'}
                         aria-expanded={menuOpen}
                     >
-                        {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                        {menuOpen ? <X className="w-6 h-6" /> : <span className="iv-burger-bars" aria-hidden="true"><span /><span /><span /></span>}
                     </button>
                 </div>
             </div>

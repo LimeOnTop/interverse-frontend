@@ -1,3 +1,4 @@
+import { discountDeadline as getDiscountDeadline, discountSecondsLeft, availableOffers } from '../lib/discountWindow'
 import { usePricingAnalytics } from '../hooks/usePricingAnalytics'
 import { usePaymentNavigation } from '../hooks/usePaymentNavigation'
 import type { PaymentFormPayload } from '../lib/paymentNavigation'
@@ -40,12 +41,10 @@ type RenewalSettings = {
 
 function PriceBlock({
     offer,
-    earlyBirdRemaining,
-    earlyBirdLimit,
+    discountSeconds,
 }: {
     offer: PaidOffer
-    earlyBirdRemaining: number
-    earlyBirdLimit: number
+    discountSeconds: number
 }) {
     const showStrike =
         Boolean(offer.earlyBird) &&
@@ -65,9 +64,9 @@ function PriceBlock({
                 </span>
             </div>
             <div className="text-sm text-secondary mt-1">{offer.priceHint}</div>
-            {offer.earlyBird && earlyBirdRemaining > 0 && (
+            {offer.earlyBird && discountSeconds > 0 && (
                 <div className="mt-2 text-xs font-medium text-inter-verse-green dark:text-purple-300">
-                    Осталось {earlyBirdRemaining} из {earlyBirdLimit} мест со скидкой
+                    Предложение действует {Math.floor(discountSeconds / 60).toString().padStart(2, '0')}:{(discountSeconds % 60).toString().padStart(2, '0')}
                 </div>
             )}
         </div>
@@ -81,8 +80,8 @@ export default function SubscriptionPage() {
     const [buyingPlan, setBuyingPlan] = useState<string | null>(null)
     const submitPaymentForm = usePaymentNavigation(() => setBuyingPlan(null))
     const [paidOffers, setPaidOffers] = useState<PaidOffer[]>(FALLBACK_PAID_OFFERS)
-    const [earlyBirdRemaining, setEarlyBirdRemaining] = useState(27)
-    const [earlyBirdLimit, setEarlyBirdLimit] = useState(100)
+    const [discountDeadline, setDiscountDeadline] = useState(0)
+    const [discountSeconds, setDiscountSeconds] = useState(0)
     const { summary } = useDashboardSummary()
     const [trialAvailable,setTrialAvailable] = useState(false)
     const [selectedOffer, setSelectedOffer] = useState<PaidOffer | null>(null)
@@ -100,19 +99,42 @@ export default function SubscriptionPage() {
     }, [accessToken, user?.id, user?.role])
 
     useEffect(() => {
+        let cancelled = false
+        setPaidOffers(FALLBACK_PAID_OFFERS)
+        setDiscountDeadline(0); setDiscountSeconds(0); setSelectedOffer(null)
         api
-            .get('/payments/offers')
+            .get(accessToken ? '/payments/account-offers' : '/payments/offers')
             .then((response) => {
+                if (cancelled) return
                 const mapped = mapOffersResponse(response.data)
                 setPaidOffers(mapped.paidOffers.filter(p => p.id !== 'trial_3d'))
                 setTrialAvailable((response.data.offers||[]).some((p:{id:string})=>p.id==='trial_3d'))
-                setEarlyBirdRemaining(mapped.earlyBirdRemaining)
-                setEarlyBirdLimit(mapped.earlyBirdLimit)
+                const deadline = getDiscountDeadline(response.data.discount_expires_at, response.data.server_time, performance.now())
+                setDiscountDeadline(deadline)
+                setDiscountSeconds(discountSecondsLeft(deadline, performance.now()))
             })
             .catch(() => {
                 // keep fallback catalog
             })
-    }, [])
+        return () => { cancelled = true }
+    }, [accessToken, user?.id])
+
+    useEffect(() => {
+        if (!discountDeadline) return
+        const tick = () => {
+            const left = discountSecondsLeft(discountDeadline, performance.now())
+            setDiscountSeconds(left)
+            if (!left) {
+                setPaidOffers(offers => offers.map(offer => offer.earlyBird ? FALLBACK_PAID_OFFERS[0] : offer))
+                setDiscountDeadline(0)
+                setSelectedOffer(offer => offer?.earlyBird ? null : offer)
+            }
+        }
+        tick()
+        const timer = window.setInterval(tick, 250)
+        window.addEventListener('focus', tick)
+        return () => { clearInterval(timer); window.removeEventListener('focus', tick) }
+    }, [discountDeadline])
 
     useEffect(() => {
         if (!accessToken) return
@@ -130,6 +152,11 @@ export default function SubscriptionPage() {
 
     const handleBuy = async (planId: string) => {
         try {
+            if (planId === 'paid_1m_discount' && discountSecondsLeft(discountDeadline, performance.now()) === 0) {
+                setSelectedOffer(null)
+                setPaidOffers(offers => offers.filter(offer => !offer.earlyBird))
+                throw new Error('Время предложения со скидкой истекло')
+            }
             setBuyingPlan(planId)
             const { data } = await api.post('/payments/', { plan: planId, auto_renew_consent: true, consent_version: 'pro-2026-10-15' })
             const payment = data?.payment as PaymentFormPayload | undefined
@@ -226,14 +253,14 @@ export default function SubscriptionPage() {
                     .
                 </p>
                 <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                    {paidOffers.map((plan) => (
+                    {availableOffers(paidOffers, discountSeconds).map((plan) => (
                         <div key={plan.id} className="iv-panel p-5 flex flex-col">
                             <div className="flex items-start justify-between gap-2">
                                 <h3 className="font-semibold text-gray-900 dark:text-gray-100">{plan.name.replace(/^Pro · /, '')}</h3>
                                 {plan.badge && <span className="iv-pill">{plan.badge}</span>}
                             </div>
                             <div className="mt-3 flex-1">
-                                <PriceBlock offer={plan} earlyBirdRemaining={earlyBirdRemaining} earlyBirdLimit={earlyBirdLimit} />
+                                <PriceBlock offer={plan} discountSeconds={discountSeconds} />
                             </div>
                             <Button
                                 type="button"
