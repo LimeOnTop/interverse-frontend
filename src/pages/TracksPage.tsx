@@ -34,7 +34,7 @@ export default function TracksPage() {
                     <p>
                         Сейчас доступны тренировки и отчёты. {PRO_TRACK_PLAN.proUpgradeNote}
                     </p>
-                    <Link to="/interviews/create" className="lib-btn">
+                    <Link to="/interviews/create" className="lib-btn is-primary">
                         Перейти к тренировкам <ArrowRight />
                     </Link>
                 </div>

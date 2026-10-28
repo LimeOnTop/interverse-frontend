@@ -693,10 +693,11 @@
 
 .lib-hero p { color: var(--lib-hero-muted); max-width: 560px; margin-bottom: 24px; font-size: 14px; line-height: 1.65; }
 
-.lib-hero .lib-btn {
-    background: #fff;
-    color: #1f2a24;
+.lib-hero .lib-btn.is-primary {
+    background: var(--iv-gradient);
+    color: #ffffff;
     border-color: transparent;
+    border-radius: 12px;
 }
 
 .lib-hero-route {
