@@ -337,3 +337,7 @@
 :root .iv-app-layout :is(.iv-panel,.iv-card,.iv-form-card,.lib-card,.library-insight,.report-entry,.next-practice,.report-next,.job-card,.opportunity-profile,.lib-hero,.track-point,.session-feature,.session-summary,.session-card,.session-filters,.pr-card,.pr-calendar,.vp-card,.vp-step,.sd-task-panel,.sd-panel,.sd-announcement,.iv-start-form,.iv-start-layout,.sd-home-feature,.iv-dropdown,dialog,[class~="bg-white"],[class~="dark:bg-iv-dark-surface"]) :is(.iv-btn,.btn-secondary,.iv-btn-secondary,.btn-ghost,.btn-icon,.lib-btn,.pr-btn,.vp-btn):not(:is(.is-primary,.primary,.btn-primary,.btn-primary-adaptive,.iv-btn-primary,.gradient-bg,.gradient-bg-adaptive,.gradient-bg-dark,.danger,.is-danger,[aria-pressed="true"])):is(:hover,:active,:focus-visible,[aria-expanded="true"],[data-state="open"],[data-state="on"],.is-active,.active) {
     border-color: var(--iv-brand-accent);
 }
+
+/* Empty progress remains visible against the light raised panel surface. */
+.iv-dashboard .iv-track { background: #d6dae3; }
+.dark .iv-dashboard .iv-track { background: #343843; }
