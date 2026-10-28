@@ -216,7 +216,7 @@
     gap: 8px;
     min-height: 42px;
     background: var(--sd-accent);
-    color: var(--iv-surface);
+    color: #ffffff;
     padding: 10px 14px;
     border-radius: 8px;
     font-size: 12px;
@@ -225,7 +225,7 @@
 }
 .dark .sd-check,
 .dark .sd-primary {
-    color: #20172d;
+    color: #ffffff;
 }
 .sd-secondary {
     display: inline-flex;

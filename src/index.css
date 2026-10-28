@@ -1040,3 +1040,13 @@
 :root:not(.dark) :is(.bg-purple-50,.bg-purple-50\/60) { background-color: var(--iv-tint); }
 :root:not(.dark) .iv-landing-button { color: #ffffff; }
 :root:not(.dark) .iv-training-session .btn-primary-adaptive { background: var(--iv-gradient); color: #ffffff; }
+
+/* Accent actions keep white labels and icons in both themes and all states. */
+:root :is(.btn-primary,.btn-primary-adaptive,.iv-btn-primary,.iv-sidebar-cta,.iv-landing-button,.lib-btn.is-primary,.pr-btn.primary,.vp-btn.primary,.sd-check,.sd-primary,.sd-announcement-cta,.iv-levels button.selected,.session-filters button[aria-pressed="true"]) {
+    color: #ffffff;
+    -webkit-text-fill-color: #ffffff;
+}
+:root :is(.btn-primary,.btn-primary-adaptive,.iv-btn-primary,.iv-sidebar-cta,.iv-landing-button,.lib-btn.is-primary,.pr-btn.primary,.vp-btn.primary,.sd-check,.sd-primary,.sd-announcement-cta,.iv-levels button.selected,.session-filters button[aria-pressed="true"]) :is(span,svg) {
+    color: inherit;
+    -webkit-text-fill-color: inherit;
+}
