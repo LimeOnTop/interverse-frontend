@@ -671,3 +671,10 @@ html[data-motion-input='keyboard'] .iv-burger-bars > span::after { transition: n
 }
 
 .iv-public-header-action { display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; }
+
+/* Admin navigation marks the current section without a colored fill. */
+:root body .iv-admin-sidebar .iv-nav-item-active,
+:root body .iv-admin-sidebar .iv-nav-item-active:hover {
+    background: transparent;
+    color: var(--iv-text);
+}

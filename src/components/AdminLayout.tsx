@@ -87,7 +87,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
     return (
         <div className="h-screen iv-page flex overflow-hidden">
-            <aside className="iv-sidebar hidden lg:flex flex-col shrink-0 h-full overflow-y-auto custom-scrollbar w-60">
+            <aside className="iv-admin-sidebar iv-sidebar hidden lg:flex flex-col shrink-0 h-full overflow-y-auto custom-scrollbar w-60">
                 <NavContent />
             </aside>
 
@@ -125,7 +125,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                             animate={{ x: 0 }}
                             exit={{ x: '-100%' }}
                             transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-                            className="fixed inset-y-0 left-0 z-50 w-60 iv-sidebar flex flex-col lg:hidden"
+                            className="fixed inset-y-0 left-0 z-50 w-60 iv-admin-sidebar iv-sidebar flex flex-col lg:hidden"
                         >
                             <div className="flex justify-end p-3">
                                 <button data-iv-close
