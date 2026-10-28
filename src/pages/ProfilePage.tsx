@@ -1,3 +1,5 @@
+import ReportDisclosure from '../components/report/ReportDisclosure'
+import { instantMotion } from '../lib/motion'
 import RenewalControl from '../components/RenewalControl'
 import { resolveSubscriptionPlan } from '../utils/subscription'
 import AccountSecurity from '../components/AccountSecurity'
@@ -470,7 +472,7 @@ export default function ProfilePage() {
         const accented = filled && !open
 
         return (
-            <motion.article
+            <motion.article data-motion-owned
                 key={key}
                 layout={reduceMotion ? false : "position"}
                 transition={{ layout: PROFILE_BLOCK_LAYOUT }}
@@ -496,18 +498,15 @@ export default function ProfilePage() {
                     </p>
                 )}
 
-                {open && (
-                    <motion.div
+                <ReportDisclosure open={open} instant={instantMotion()}>
+                    <div
                         id={`profile-editor-${key}`}
-                        initial={{ opacity: reduceMotion ? 1 : 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: reduceMotion ? 0 : 0.18 }}
                         className="profile-block-editor"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {editor}
-                    </motion.div>
-                )}
+                    </div>
+                </ReportDisclosure>
 
                 {accented && (
                     <span className="profile-block-check" aria-hidden>
@@ -689,7 +688,7 @@ export default function ProfilePage() {
 
                     {profile.work_experiences.length < MAX_WORK_EXPERIENCES
                         && profile.work_experiences.every((item) => item.trim()) && (
-                        <motion.article
+                        <motion.article data-motion-owned
                             key="add_experience"
                             layout={reduceMotion ? false : "position"}
                             transition={{ layout: PROFILE_BLOCK_LAYOUT }}

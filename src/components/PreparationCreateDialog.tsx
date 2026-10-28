@@ -1,3 +1,4 @@
+import { useDialogMotion } from '../hooks/useDialogMotion'
 import { useCallback, useEffect, useId, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowDown, ArrowUp, Loader2, X } from 'lucide-react'
@@ -28,7 +29,7 @@ function StepAvailability({ step, level, onStatus }: { step: PreparationStep; le
         {status === 'pending' ? 'Проверяем вопросы и доступные уровни…' : status === 'error' ? <>{check.error} <button type="button" onClick={check.retry}>Повторить</button></> : <>{check.data?.available ? 'Вопросы есть.' : 'Для этого уровня недостаточно вопросов.'}{check.data?.available_levels.length ? ' Доступно: ' + check.data.available_levels.map(id => LEVELS.find(item => item.id === id)?.name || id).join(', ') + '.' : ' Выберите другую технологию.'}</>}
     </div>
 }
-export default function PreparationCreateDialog({ vacancy, preparation, onClose, onSaved }: { vacancy?: VacancyCardData; preparation?: Preparation; onClose: () => void; onSaved?: () => Promise<void> }) {
+export default function PreparationCreateDialog({ vacancy, preparation, onClose: finishClose, onSaved }: { vacancy?: VacancyCardData; preparation?: Preparation; onClose: () => void; onSaved?: () => Promise<void> }) {
     const dialog = useModalDialog()
     const navigate = useNavigate()
     const datalist = useId()
@@ -69,7 +70,8 @@ export default function PreparationCreateDialog({ vacancy, preparation, onClose,
         } catch (error) { setError(formatUserFacingError(error, 'Не удалось сохранить подготовку. Ввод сохранён в черновике.')) }
         finally { setBusy(false) }
     }
-    return <dialog ref={dialog} className="vp-dialog" aria-labelledby="prep-title" onCancel={event => { if (busy) event.preventDefault(); else onClose() }}>
+    const onClose = useDialogMotion(dialog, finishClose)
+    return <dialog ref={dialog} className="vp-dialog" aria-labelledby="prep-title" onCancel={event => { event.preventDefault(); if (!busy) onClose() }}>
         <div className="vp-dialog-head"><span className="vp-label">Подготовка по вакансии</span><button type="button" aria-label="Закрыть" onClick={onClose} disabled={busy}><X size={18} /></button></div>
         <h2 id="prep-title">{preparation ? 'Изменить подготовку' : manual ? 'Подготовка к своей вакансии' : 'Подготовиться к вакансии'}</h2>
         <p className="vp-muted">{preparation ? 'История и результаты останутся у своих технологий. Новая попытка не списывается.' : 'Черновик сохраняется при закрытии. Проверьте технологии и уровень перед началом.'}</p>

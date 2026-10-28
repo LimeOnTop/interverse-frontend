@@ -1,0 +1,41 @@
+/* The existing neutral frame stays in place; only its accent layer is revealed. */
+@supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)) {
+    :where([aria-haspopup="listbox"],.iv-home .iv-landing-button,.btn-secondary,.iv-btn-secondary,.lib-btn,.pr-btn,.vp-btn,.lib-select-trigger,.iv-header-frame,.iv-nav-item,.sd-preview-repair,.prep-quiz-option,.iv-levels button,.prep-home-links>div a,.iv-public-header .btn-ghost) {
+        position: relative;
+    }
+    :is([aria-haspopup="listbox"],.iv-home .iv-landing-button,.btn-secondary,.iv-btn-secondary,.lib-btn,.pr-btn,.vp-btn,.lib-select-trigger,.iv-header-frame,.iv-nav-item,.sd-preview-repair,.prep-quiz-option,.iv-levels button,.prep-home-links>div a,.iv-public-header .btn-ghost)::after {
+        content: '';
+        position: absolute;
+        inset: -1px;
+        padding: 1.5px;
+        border-radius: inherit;
+        pointer-events: none;
+        background: var(--iv-brand-accent);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        clip-path: inset(0 100% 0 0);
+        transition: clip-path 280ms var(--iv-motion-out, cubic-bezier(.23,1,.32,1));
+    }
+    /* Keep border geometry and neutral color stable while the overlay draws. */
+    :root :is([aria-haspopup="listbox"],.iv-home .iv-landing-button,.btn-secondary,.iv-btn-secondary,.lib-btn,.pr-btn,.vp-btn,.lib-select-trigger,.iv-header-frame,.sd-preview-repair,.prep-quiz-option,.iv-levels button,.prep-home-links>div a,.iv-public-header .btn-ghost):not(:is(.is-primary,.primary,.is-danger,.danger,.selected,[aria-pressed="true"])) {
+        border-color: var(--iv-border) !important;
+    }
+    :root .iv-app-layout .iv-sidebar .iv-nav-item {
+        box-shadow: none !important;
+    }
+    .iv-sidebar .iv-nav-item::after { inset: 0; }
+    :is([aria-haspopup="listbox"],.iv-home .iv-landing-button,.btn-secondary,.iv-btn-secondary,.lib-btn,.pr-btn,.vp-btn,.lib-select-trigger,.iv-header-frame,.iv-nav-item,.sd-preview-repair,.prep-quiz-option,.iv-levels button,.prep-home-links>div a,.iv-public-header .btn-ghost):is(:focus-visible,:active,[aria-expanded="true"],[data-state="open"],.iv-nav-item-active,.selected,[aria-pressed="true"]):not(:disabled)::after {
+        clip-path: inset(0);
+    }
+    @media (hover:hover) and (pointer:fine) {
+        :is([aria-haspopup="listbox"],.iv-home .iv-landing-button,.btn-secondary,.iv-btn-secondary,.lib-btn,.pr-btn,.vp-btn,.lib-select-trigger,.iv-header-frame,.iv-nav-item,.sd-preview-repair,.prep-quiz-option,.iv-levels button,.prep-home-links>div a,.iv-public-header .btn-ghost):hover:not(:disabled):not([aria-disabled="true"])::after {
+            clip-path: inset(0);
+        }
+    }
+    @media (prefers-reduced-motion:reduce) {
+        :is([aria-haspopup="listbox"],.iv-home .iv-landing-button,.btn-secondary,.iv-btn-secondary,.lib-btn,.pr-btn,.vp-btn,.lib-select-trigger,.iv-header-frame,.iv-nav-item,.sd-preview-repair,.prep-quiz-option,.iv-levels button,.prep-home-links>div a,.iv-public-header .btn-ghost)::after { transition: none; }
+    }
+    html[data-motion-input="keyboard"] :is([aria-haspopup="listbox"],.iv-home .iv-landing-button,.btn-secondary,.iv-btn-secondary,.lib-btn,.pr-btn,.vp-btn,.lib-select-trigger,.iv-header-frame,.iv-nav-item,.sd-preview-repair,.prep-quiz-option,.iv-levels button,.prep-home-links>div a,.iv-public-header .btn-ghost)::after { transition: none; }
+}

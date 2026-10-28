@@ -19,6 +19,7 @@ export interface NavItem {
     icon: LucideIcon
     /** Section is not available yet. */
     soon?: boolean
+    isNew?: boolean
 }
 
 export const PREPARATION_NAV: NavItem[] = [
@@ -27,7 +28,7 @@ export const PREPARATION_NAV: NavItem[] = [
     { name: 'Отчёты', href: '/reports', icon: FileText },
     { name: 'Прогресс', href: '/activity', icon: BarChart3 },
     { name: 'Вакансии', href: '/vacancies', icon: Briefcase },
-    { name: 'System Design', href: '/system-design', icon: Network },
+    { name: 'System Design', href: '/system-design', icon: Network, isNew: true },
     { name: 'Траектории', href: '/tracks', icon: Route, soon: true },
 ]
 

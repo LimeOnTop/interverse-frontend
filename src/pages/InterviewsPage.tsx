@@ -1,3 +1,4 @@
+import CompletedBadge from '../components/ui/CompletedBadge'
 import { PreparationSection } from '../components/VacancyPreparationCard'
 import { usePreparations } from '../lib/preparations'
 import { useState, useEffect } from 'react'
@@ -256,7 +257,7 @@ export default function InterviewsPage() {
                 ) : (
                     <div className="grid gap-4">
                         {filteredInterviews.map((interview, index) => (
-                            <motion.div
+                            <motion.div data-motion-owned
                                 key={interview.id}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -269,9 +270,7 @@ export default function InterviewsPage() {
                                                 <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                                                     {interview.title}
                                                 </h3>
-                                                <Badge variant={statusBadgeVariant(interview.status)}>
-                                                    {statusLabels[interview.status] || interview.status}
-                                                </Badge>
+                                                {interview.status === 'completed' ? <CompletedBadge /> : <Badge variant={statusBadgeVariant(interview.status)}>{statusLabels[interview.status] || interview.status}</Badge>}
                                             </div>
 
                                             <p className="text-secondary text-sm mb-4">{interview.description}</p>

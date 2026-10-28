@@ -131,12 +131,12 @@ export default function HeroSlider() {
             aria-label="Преимущества InterVerse"
         >
             <AnimatePresence mode="wait">
-                <motion.div
+                <motion.div data-motion-owned
                     key={`${slide.id}-${isDark ? 'dark' : 'light'}`}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+                    transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
                     className="absolute inset-0"
                 >
                     <div
@@ -158,12 +158,12 @@ export default function HeroSlider() {
                 <div className="h-full flex flex-col pt-20 pb-16 pl-6 pr-10 sm:pl-8 sm:pr-14 lg:pl-10 lg:pr-16 xl:pl-16 xl:pr-20">
                     <div className="flex-1 flex flex-col justify-center">
                         <AnimatePresence mode="wait">
-                            <motion.div
+                            <motion.div data-motion-owned
                                 key={slide.id}
                                 initial={{ opacity: 0, x: -24 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: 24 }}
-                                transition={{ duration: 0.45, ease: [0.4, 0, 0.2, 1] }}
+                                transition={{ duration: 0.45, ease: [0.23, 1, 0.32, 1] }}
                                 className="w-full max-w-md"
                             >
                                 <p className="text-xs font-medium uppercase tracking-widest text-secondary mb-4">

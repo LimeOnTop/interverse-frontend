@@ -129,7 +129,7 @@ export default function EditInterviewFullPage() {
                 description="Обнови параметры тренировки"
             />
 
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+            <motion.div data-motion-owned initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                 <Card padding="lg">
                     <div className="flex items-center gap-3 mb-6">
                         <Calendar className="w-5 h-5 text-inter-verse-green dark:text-purple-400" />

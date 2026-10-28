@@ -1,3 +1,4 @@
+import { useDialogMotion } from '../hooks/useDialogMotion'
 import { useEffect, useRef, useState } from 'react'
 import { Play, Pause, X, Volume2, VolumeX, Maximize, RotateCcw } from 'lucide-react'
 
@@ -5,7 +6,7 @@ const VIDEO = '/media/interverse-overview.mp4'
 export const VIDEO_CHAPTERS = [{ time: 0, name: 'Знакомство' }, { time: 6, name: 'Тренировки' }, { time: 12, name: 'Отчёты' }, { time: 19, name: 'Вакансии' }, { time: 25, name: 'Твой ритм' }]
 const clock = (value: number) => `0:${Math.floor(value).toString().padStart(2, '0')}`
 
-export default function LandingVideo({ startAt, onClose }: { startAt: number; onClose: () => void }) {
+export default function LandingVideo({ startAt, onClose: finishClose }: { startAt: number; onClose: () => void }) {
     const dialog = useRef<HTMLDialogElement>(null)
     const video = useRef<HTMLVideoElement>(null)
     const [playing, setPlaying] = useState(false)
@@ -34,7 +35,8 @@ export default function LandingVideo({ startAt, onClose }: { startAt: number; on
         else el.pause()
     }
     const seek = (value: number) => { if (video.current && ready) video.current.currentTime = value; setTime(value) }
-    return <dialog ref={dialog} className="iv-film-dialog" aria-labelledby="film-title" onCancel={onClose} onClick={e => { if (e.target === e.currentTarget) onClose() }}>
+    const onClose = useDialogMotion(dialog, finishClose)
+    return <dialog ref={dialog} className="iv-film-dialog" aria-labelledby="film-title" onCancel={event => { event.preventDefault(); onClose() }} onClick={e => { if (e.target === e.currentTarget) onClose() }}>
         <div className="iv-film-shell">
             <div className="iv-film-heading"><div><span className="iv-eyebrow">INTERVERSE / В ДЕЙСТВИИ</span><h2 id="film-title">Твой следующий шаг</h2></div><button autoFocus className="iv-film-icon" onClick={onClose} aria-label="Закрыть видео"><X /></button></div>
             <div className="iv-film-screen">

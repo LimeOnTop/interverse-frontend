@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { NavLink, Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, X, LogOut, ChevronRight } from 'lucide-react'
@@ -24,12 +24,14 @@ function NavGroup({ title, items, onNavigate }: { title: string; items: NavItem[
                         <NavLink
                             key={item.href}
                             to={item.href}
+                            aria-label={item.name}
                             onClick={onNavigate}
                             className={({ isActive }) => `iv-nav-item ${isActive ? 'iv-nav-item-active' : ''}`}
                         >
                             <Icon className="w-[18px] h-[18px] shrink-0" strokeWidth={1.75} />
                             <span className="flex-1 min-w-0 truncate">{item.name}</span>
                             {item.soon && <span className="text-[10px] font-semibold tracking-wider text-secondary">СКОРО</span>}
+                            {item.isNew && <span className="shrink-0 text-[10px] font-semibold tracking-wider gradient-text-adaptive">НОВОЕ</span>}
                         </NavLink>
                     )
                 })}
@@ -41,7 +43,7 @@ function NavGroup({ title, items, onNavigate }: { title: string; items: NavItem[
 function NavContent({ onNavigate }: { onNavigate?: () => void }) {
     return (
         <div className="flex flex-col gap-6 px-3 pt-4 pb-4">
-            <Link to="/interviews/create" onClick={onNavigate} className="iv-sidebar-cta">
+            <Link to="/interviews/create" aria-label="Новая тренировка" onClick={onNavigate} className="iv-sidebar-cta">
                 <Plus className="w-[18px] h-[18px] shrink-0" strokeWidth={2} />
                 <span>Новая тренировка</span>
             </Link>
@@ -75,13 +77,39 @@ function AccountCard() {
 }
 
 export default function Sidebar({ mobileOpen = false, onClose }: SidebarProps) {
+    const [expanded, setExpanded] = useState(false)
+    const desktopRef = useRef<HTMLElement>(null)
+
     return (
         <>
             {/* Desktop sidebar */}
-            <aside className="iv-sidebar hidden lg:flex flex-col shrink-0 h-full overflow-y-auto custom-scrollbar">
-                <NavContent />
-                <AccountCard />
-            </aside>
+            <div className={`iv-sidebar-rail hidden lg:block shrink-0 ${expanded ? 'is-expanded' : ''}`}>
+                <aside
+                    ref={desktopRef}
+                    aria-label="Основное меню"
+                    className={`iv-sidebar iv-sidebar-desktop flex flex-col custom-scrollbar ${expanded ? 'is-expanded' : ''}`}
+                    onPointerEnter={(event) => {
+                        if (event.pointerType === 'mouse' || event.pointerType === 'pen') setExpanded(true)
+                    }}
+                    onPointerLeave={() => {
+                        const focused = document.activeElement
+                        if (!desktopRef.current?.contains(focused) || !focused?.matches(':focus-visible')) setExpanded(false)
+                    }}
+                    onFocusCapture={() => setExpanded(true)}
+                    onBlurCapture={(event) => {
+                        if (!event.currentTarget.contains(event.relatedTarget) && !event.currentTarget.matches(':hover')) setExpanded(false)
+                    }}
+                    onKeyDown={(event) => {
+                        if (event.key === 'Escape') {
+                            if (document.activeElement instanceof HTMLElement) document.activeElement.blur()
+                            setExpanded(false)
+                        }
+                    }}
+                >
+                    <NavContent />
+                    <AccountCard />
+                </aside>
+            </div>
 
             {/* Mobile drawer */}
             <AnimatePresence>
@@ -117,7 +145,7 @@ function MobileDrawer({ onClose }: { onClose?: () => void }) {
 
     return (
         <>
-            <motion.div
+            <motion.div data-motion-owned
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -125,11 +153,11 @@ function MobileDrawer({ onClose }: { onClose?: () => void }) {
                 className="fixed inset-0 bg-black/50 z-50 lg:hidden"
                 onClick={onClose}
             />
-            <motion.aside
+            <motion.aside data-motion-owned
                 initial={{ x: '-100%' }}
                 animate={{ x: 0 }}
                 exit={{ x: '-100%' }}
-                transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
                 className="fixed inset-y-0 left-0 z-50 w-[86vw] max-w-xs iv-sidebar flex flex-col lg:hidden iv-safe-top iv-safe-bottom"
                 role="dialog"
                 aria-modal="true"

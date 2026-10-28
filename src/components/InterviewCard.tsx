@@ -1,3 +1,4 @@
+import CompletedBadge from './ui/CompletedBadge'
 import { useState } from 'react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
@@ -124,9 +125,7 @@ export default function InterviewCard({ interview, onClick, onDelete, hideOnly =
     return (
         <Card hover padding="md" onClick={handleClick} className="group h-full flex flex-col">
             <div className="mb-4">
-                <Badge variant={statusBadgeVariant(interview.status || '')} className="mb-3">
-                    {statusLabels[interview.status || ''] || interview.status}
-                </Badge>
+                {interview.status === 'completed' ? <CompletedBadge className="mb-3" /> : <Badge variant={statusBadgeVariant(interview.status || '')} className="mb-3">{statusLabels[interview.status || ''] || interview.status}</Badge>}
                 <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 group-hover:text-inter-verse-green dark:group-hover:text-purple-400 transition-iv line-clamp-1">
                     {interview.title}
                 </h3>

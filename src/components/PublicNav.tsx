@@ -152,7 +152,7 @@ export default function PublicNav({ landing = false, overlay = false }: PublicNa
 
             <AnimatePresence>
                 {menuOpen && (
-                    <motion.div
+                    <motion.div data-motion-owned
                         id={menuId}
                         initial={{ opacity: 0, y: reducedMotion ? 0 : -8 }}
                         animate={{ opacity: 1, y: 0 }}

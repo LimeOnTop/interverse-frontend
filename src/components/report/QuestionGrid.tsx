@@ -1,3 +1,4 @@
+import ReportDisclosure from './ReportDisclosure'
 import { useMemo, useState } from 'react'
 import { ChevronDown, Code2, HelpCircle } from 'lucide-react'
 import type { AnswerReviewItem } from '../../lib/reportAnalysis'
@@ -16,6 +17,7 @@ export default function QuestionGrid({ items }: { items: AnswerReviewItem[] }) {
         }),
         [items],
     )
+    const [instantDisclosure, setInstantDisclosure] = useState(false)
     const [openId, setOpenId] = useState<string | null>(null)
 
     if (reviews.length === 0) return null
@@ -33,6 +35,7 @@ export default function QuestionGrid({ items }: { items: AnswerReviewItem[] }) {
                     return (
                         <div
                             key={item.step_id}
+                            data-report-block
                             className={`iv-surface border rounded-xl overflow-hidden transition-iv ${
                                 open
                                     ? 'sm:col-span-2 border-inter-verse-green dark:border-purple-400'
@@ -41,26 +44,26 @@ export default function QuestionGrid({ items }: { items: AnswerReviewItem[] }) {
                         >
                             <button
                                 type="button"
-                                onClick={() => setOpenId(open ? null : item.step_id)}
+                                onClick={(event) => { setInstantDisclosure(event.detail === 0); setOpenId(open ? null : item.step_id) }}
                                 aria-expanded={open}
                                 className="w-full text-left p-4"
                             >
                                 <div className="flex items-center gap-3">
-                                    <span className="text-2xl font-bold tabular-nums leading-none gradient-text-adaptive w-8 shrink-0">
+                                    <span data-report-detail="value" className="text-2xl font-bold tabular-nums leading-none gradient-text-adaptive w-8 shrink-0">
                                         {String(index + 1).padStart(2, '0')}
                                     </span>
-                                    <span className="flex-1 min-w-0 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-secondary">
+                                    <span data-report-detail="meta" className="flex-1 min-w-0 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-secondary">
                                         <Icon className="w-3.5 h-3.5 shrink-0" />
                                         <span className="truncate">{isTask ? 'Задача' : 'Вопрос'}{item.technology ? ` · ${item.technology}` : ''}</span>
                                     </span>
-                                    <ChevronDown className={`w-4 h-4 shrink-0 text-secondary transition-transform ${open ? 'rotate-180' : ''}`} />
+                                    <ChevronDown style={instantDisclosure ? { transitionDuration: '0ms' } : undefined} className={`report-disclosure-chevron w-4 h-4 shrink-0 text-secondary ${open ? 'rotate-180' : ''}`} />
                                 </div>
-                                <p className={`mt-3 text-sm text-gray-900 dark:text-gray-100 leading-relaxed whitespace-pre-wrap ${open ? '' : 'line-clamp-2'}`}>
+                                <p data-report-detail="body" className={`mt-3 text-sm text-gray-900 dark:text-gray-100 leading-relaxed whitespace-pre-wrap ${open ? '' : 'line-clamp-2'}`}>
                                     {item.prompt}
                                 </p>
                             </button>
-                            {open && (
-                                <div className="mx-4 mb-4 pt-4 border-t border-gray-200 dark:border-iv-dark-line">
+                            <ReportDisclosure open={open} instant={instantDisclosure}>
+                                <div data-report-block className="mx-4 mb-4 pt-4 border-t border-gray-200 dark:border-iv-dark-line">
                                     <p className="text-xs uppercase tracking-wide text-secondary mb-2">{isTask ? 'Твоё решение' : 'Твой ответ'}</p>
                                     {isTask ? (
                                         <pre className="text-xs sm:text-sm font-mono whitespace-pre-wrap break-words text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-iv-dark-bg p-3 overflow-x-auto max-h-80">
@@ -70,7 +73,7 @@ export default function QuestionGrid({ items }: { items: AnswerReviewItem[] }) {
                                         <p className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap leading-relaxed">{item.user_answer}</p>
                                     )}
                                 </div>
-                            )}
+                            </ReportDisclosure>
                         </div>
                     )
                 })}

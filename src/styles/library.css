@@ -2,19 +2,19 @@
    (reports(), vacancies(), tracks()). Day = palette "Шалфей", night = night palette. */
 
 :root {
-    --lib-bg: #f5f2ea;
-    --lib-paper: #fffdf8;
-    --lib-ink: #26332b;
-    --lib-muted: #637066;
-    --lib-line: #dddeda;
-    --lib-accent: #315d46;
-    --lib-tint: #e8eee3;
-    --lib-dark: #243c2e;
-    --lib-gradient: linear-gradient(135deg, #234936, #315d46);
+    --lib-bg: #ffffff;
+    --lib-paper: #ffffff;
+    --lib-ink: #202124;
+    --lib-muted: #62656b;
+    --lib-line: #e4e4e7;
+    --lib-accent: #a855f7;
+    --lib-tint: #f3e8ff;
+    --lib-dark: #23202e;
+    --lib-gradient: var(--iv-gradient);
     --lib-on-accent: #ffffff;
-    --lib-hero-accent: #c4d7b4;
-    --lib-hero-muted: #c4d7b4;
-    --lib-green: #246545;
+    --lib-hero-accent: #e9d5ff;
+    --lib-hero-muted: #e9d5ff;
+    --lib-green: #9333ea;
     --lib-error: #a34949;
 }
 
@@ -28,10 +28,10 @@
     --lib-tint: #30263f;
     --lib-dark: #23202e;
     --lib-gradient: linear-gradient(to right, #c084fc, #9333ea);
-    --lib-on-accent: #160d23;
+    --lib-on-accent: #ffffff;
     --lib-hero-accent: #d5b2fa;
     --lib-hero-muted: #c9c3d6;
-    --lib-green: #94d3b0;
+    --lib-green: #d8b4fe;
     --lib-error: #dea2a2;
 }
 
@@ -69,15 +69,6 @@
     border-color: transparent;
 }
 
-.lib-chip.is-done { color: var(--lib-green); }
-.lib-chip.is-done::before {
-    content: '';
-    width: 11px;
-    height: 11px;
-    flex-shrink: 0;
-    background: currentColor;
-    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' d='m3 8 3 3 7-7'/%3E%3C/svg%3E") center/contain no-repeat;
-}
 
 .lib-btn {
     display: inline-flex;
@@ -271,8 +262,7 @@
     border-radius: 20px;
     background: var(--lib-paper);
     overflow: hidden;
-    animation: lib-stage-in 0.4s ease both;
-    animation-delay: calc(var(--i, 0) * 50ms);
+
 }
 
 .report-mark {
@@ -309,7 +299,23 @@
     font-variant-numeric: tabular-nums;
 }
 
-.report-mark strong span { font-size: 12px; letter-spacing: 0; }
+.report-mark .score-ring > strong {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    line-height: 1;
+}
+.report-mark .score-value {
+    display: inline-flex;
+    align-items: baseline;
+    justify-content: center;
+    font: inherit;
+    white-space: nowrap;
+}
+.report-mark .score-value [data-motion-owned],
+.report-mark .score-value [data-motion-owned] > span { font: inherit; }
+.report-mark .score-unit { font-size: 12px; letter-spacing: 0; }
 .report-mark small { display: block; font-size: 10px; margin-top: 14px; color: var(--lib-muted); }
 
 .report-main { padding: 28px; min-width: 0; }
@@ -826,3 +832,5 @@
  .job-coverage small{white-space:normal;overflow-wrap:anywhere;line-height:1.6}
  .collection-heading h2{white-space:normal}
 }
+
+:root:not(.dark) .lib-btn.is-primary { color: #ffffff; }

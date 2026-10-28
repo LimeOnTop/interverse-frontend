@@ -1,5 +1,5 @@
-.iv-home{--home-accent:#315d46;--home-tint:#e8eee3;--home-stage:#ece9e1;--home-on-accent:#fffdf8;background:var(--iv-bg);color:var(--iv-text)}
-.dark .iv-home{--home-accent:#a855f7;--home-tint:#30263f;--home-stage:#191b22;--home-on-accent:#14161b}
+.iv-home{--home-accent:#a855f7;--home-tint:#f3e8ff;--home-stage:#f4f4f5;--home-on-accent:#ffffff;background:var(--iv-bg);color:var(--iv-text)}
+.dark .iv-home{--home-accent:#a855f7;--home-tint:#30263f;--home-stage:#191b22;--home-on-accent:#ffffff}
 .iv-home-container{max-width:1280px;margin-inline:auto;padding-inline:48px}
 .iv-home .iv-landing-nav{background:var(--iv-bg);border-bottom:1px solid var(--iv-border)}
 .iv-home .iv-landing-nav>.iv-public-nav-bar{max-width:1280px;padding-inline:48px;height:80px}
@@ -32,7 +32,7 @@
 .iv-final-cta{text-align:center;padding-top:100px;padding-bottom:92px}.iv-final-cta h2{font-size:clamp(36px,4.2vw,58px);margin-bottom:30px}.iv-final-cta>.iv-landing-text-button{display:flex;margin:12px auto 0}
 .iv-home :focus-visible,.iv-film-dialog :focus-visible{outline:2px solid var(--iv-brand-accent);outline-offset:5px}
 .iv-home [data-reveal].will-reveal{opacity:0;transform:translateY(18px);transition:opacity .55s cubic-bezier(.2,.7,.2,1),transform .55s cubic-bezier(.2,.7,.2,1)}.iv-home [data-reveal].is-visible{opacity:1;transform:none}
-.iv-film-dialog{padding:0;border:1px solid #45404e;border-radius:16px;width:min(1000px,calc(100vw - 40px));max-height:calc(100dvh - 32px);background:#191b23;color:#eeeef2;overflow:auto;box-shadow:0 25px 90px #0007;--home-accent:#a855f7;--home-on-accent:#14161b}.iv-film-dialog::backdrop{background:#06080de8}.iv-film-dialog[open]{animation:iv-film-in .25s cubic-bezier(.2,.7,.2,1)}.iv-film-heading{padding:22px 26px;display:flex;align-items:center;justify-content:space-between;gap:20px}.iv-film-heading .iv-eyebrow{color:#a6aab5;font-size:9px;margin-bottom:5px}.iv-film-heading h2{font-size:20px;font-weight:500;letter-spacing:-.02em}.iv-film-icon{height:44px;min-width:44px;display:grid;place-items:center;border-radius:8px;color:#eeeef2;transition:background .2s}.iv-film-icon:hover{background:#ffffff10}.iv-film-icon svg{height:19px;width:19px}.iv-film-screen{position:relative;background:#14161b;aspect-ratio:16/9}.iv-film-screen video{width:100%;height:100%;display:block}.iv-film-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:66px;height:66px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(to right,#c084fc,#9333ea);color:#fff}.iv-film-controls{display:flex;align-items:center;gap:10px;padding:10px 18px}.iv-film-controls input{flex:1;min-width:30px;accent-color:#a855f7;cursor:pointer}.iv-film-time{font-size:11px;font-variant-numeric:tabular-nums;color:#a6aab5}.iv-film-chapters{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:0 24px 22px}.iv-film-chapters button{text-align:left;padding:11px 13px;border:1px solid #343843;border-radius:8px;font-size:11px;transition:background .2s,border-color .2s}.iv-film-chapters span{display:block;color:#a6aab5;font-size:9px;margin-bottom:4px}.iv-film-chapters .active{background:#30263f;border-color:#a855f7;color:#a855f7}.iv-film-error{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:15px;padding:25px;text-align:center;font-size:14px}.iv-film-dialog:fullscreen{width:100%;max-height:100vh;border-radius:0;display:grid;place-items:center}.iv-film-dialog:fullscreen .iv-film-shell{width:min(1200px,100%)}
+.iv-film-dialog{padding:0;border:1px solid #45404e;border-radius:16px;width:min(1000px,calc(100vw - 40px));max-height:calc(100dvh - 32px);background:#191b23;color:#eeeef2;overflow:auto;box-shadow:0 25px 90px #0007;--home-accent:#a855f7;--home-on-accent:#ffffff}.iv-film-dialog::backdrop{background:#06080de8}.iv-film-dialog[open]{animation:iv-film-in .25s cubic-bezier(.2,.7,.2,1)}.iv-film-heading{padding:22px 26px;display:flex;align-items:center;justify-content:space-between;gap:20px}.iv-film-heading .iv-eyebrow{color:#a6aab5;font-size:9px;margin-bottom:5px}.iv-film-heading h2{font-size:20px;font-weight:500;letter-spacing:-.02em}.iv-film-icon{height:44px;min-width:44px;display:grid;place-items:center;border-radius:8px;color:#eeeef2;transition:background .2s}.iv-film-icon:hover{background:#ffffff10}.iv-film-icon svg{height:19px;width:19px}.iv-film-screen{position:relative;background:#14161b;aspect-ratio:16/9}.iv-film-screen video{width:100%;height:100%;display:block}.iv-film-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:66px;height:66px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(to right,#c084fc,#9333ea);color:#fff}.iv-film-controls{display:flex;align-items:center;gap:10px;padding:10px 18px}.iv-film-controls input{flex:1;min-width:30px;accent-color:#a855f7;cursor:pointer}.iv-film-time{font-size:11px;font-variant-numeric:tabular-nums;color:#a6aab5}.iv-film-chapters{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:0 24px 22px}.iv-film-chapters button{text-align:left;padding:11px 13px;border:1px solid #343843;border-radius:8px;font-size:11px;transition:background .2s,border-color .2s}.iv-film-chapters span{display:block;color:#a6aab5;font-size:9px;margin-bottom:4px}.iv-film-chapters .active{background:#30263f;border-color:#a855f7;color:#a855f7}.iv-film-error{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:15px;padding:25px;text-align:center;font-size:14px}.iv-film-dialog:fullscreen{width:100%;max-height:100vh;border-radius:0;display:grid;place-items:center}.iv-film-dialog:fullscreen .iv-film-shell{width:min(1200px,100%)}
 @keyframes iv-film-in{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:none}}
 @media(hover:hover) and (pointer:fine){.iv-landing-button:hover{transform:translateY(-2px);box-shadow:0 8px 18px -12px var(--home-accent)}.iv-landing-button:hover svg{transform:translate(2px,-1px)}.iv-landing-text-button:hover{color:var(--home-accent)}.iv-video-cover:hover{transform:translateY(-5px);box-shadow:0 26px 50px -25px #0009}.iv-video-cover:hover .iv-cover-play{transform:scale(1.08)}.iv-capability:hover{transform:translateY(-4px);border-color:var(--home-accent)}}
 @media(max-width:1100px){.iv-home-container{padding-inline:32px}.iv-home .iv-landing-nav>.iv-public-nav-bar{padding-inline:32px}.iv-home-hero{gap:30px;padding-top:65px}.iv-hero-actions{gap:10px}.iv-start-layout{gap:40px;padding:36px}.iv-stack-strip>div{gap:20px}.iv-capabilities{grid-template-columns:repeat(2,1fr)}.iv-capability h3{max-width:220px}.iv-cover-live{display:none}}
@@ -69,3 +69,81 @@
  .iv-summary-dot{flex-shrink:0;margin-top:5px}
 }
 @media(max-width:360px){.iv-home h1{font-size:32px}.iv-hero-description{font-size:13px}.iv-hero-description br{display:none}}
+
+/* Public funnels use the same controls in both palettes. Text actions remain links. */
+:root .iv-home .iv-landing-button {
+    background: var(--iv-gradient);
+    color: #fff;
+    -webkit-text-fill-color: #fff;
+    border: 1.5px solid transparent;
+    border-radius: 12px;
+    box-shadow: var(--iv-neu-accent-raised);
+    transition: border-color 180ms ease, box-shadow 180ms ease, opacity 160ms ease, scale 140ms var(--iv-motion-out);
+}
+:root .iv-home :is(.iv-start-form,.sd-home-feature,.prep-quiz,.prep-task) .iv-landing-button {
+    box-shadow: var(--iv-neu-accent-inset);
+}
+:root .iv-home :is(.iv-levels button,.prep-quiz-option,.prep-home-links>div a) {
+    border: 1.5px solid var(--iv-border);
+    border-radius: 12px;
+    background: var(--iv-surface);
+    color: var(--iv-text);
+    -webkit-text-fill-color: currentColor;
+    box-shadow: var(--iv-neu-control-inset);
+    transition: border-color 180ms ease, background-color 180ms ease, color 180ms ease, box-shadow 180ms ease, scale 140ms var(--iv-motion-out);
+}
+:root .iv-home .prep-home-links>div a { box-shadow: var(--iv-neu-control-raised); }
+:root .iv-home .iv-levels button.selected {
+    background: var(--iv-gradient);
+    color: #fff;
+    border-color: var(--iv-brand-accent);
+    box-shadow: var(--iv-neu-accent-inset);
+}
+:root .iv-home .prep-quiz-option.selected { border-color: var(--iv-brand-accent); }
+:root .iv-home .iv-landing-text-button {
+    background: transparent;
+    box-shadow: none;
+    border: 0;
+    color: var(--iv-brand-accent);
+    -webkit-text-fill-color: currentColor;
+}
+:root .iv-home :is(.iv-landing-button,.iv-levels button,.prep-quiz-option):active { transform: none; scale: .98; }
+@media (hover:hover) and (pointer:fine) {
+    :root .iv-home .iv-landing-button:hover { transform: none; border-color: var(--iv-brand-accent); }
+    :root .iv-home :is(.iv-levels button,.prep-quiz-option,.prep-home-links>div a):hover { transform: none; border-color: var(--iv-brand-accent); }
+    :root .iv-home .iv-landing-text-button:hover { text-decoration: underline; text-underline-offset: 4px; }
+}
+@media (hover:none), (pointer:coarse), (prefers-reduced-motion:reduce) {
+    .iv-home :is(.public-catalog-grid>a,.prep-home-links>div a):hover { transform: none; }
+}
+@media (prefers-reduced-motion:reduce) {
+    :root .iv-home :is(.iv-landing-button,.iv-levels button,.prep-quiz-option):active { scale: 1; }
+}
+:root .iv-public-header :is(.btn-ghost,.btn-icon,.btn-primary-adaptive,.btn-primary) {
+    border: 1.5px solid var(--iv-border);
+    border-radius: 12px;
+    box-shadow: var(--iv-neu-control-inset);
+}
+:root .iv-public-header :is(.btn-primary-adaptive,.btn-primary) {
+    background: var(--iv-gradient);
+    color: #fff;
+    -webkit-text-fill-color: #fff;
+    border-color: transparent;
+    box-shadow: var(--iv-neu-accent-inset);
+}
+@media (hover:hover) and (pointer:fine) {
+    :root .iv-public-header :is(.btn-ghost,.btn-icon,.btn-primary-adaptive,.btn-primary):hover { border-color: var(--iv-brand-accent); }
+}
+:root .iv-home .sd-preview .iv-landing-button { box-shadow: var(--iv-neu-accent-inset); }
+:root .iv-home .sd-preview-repair {
+    background: var(--iv-surface);
+    color: var(--iv-text);
+    border: 1.5px solid var(--iv-border);
+    border-radius: 12px;
+    box-shadow: var(--iv-neu-control-inset);
+    transition: border-color 180ms ease, opacity 160ms ease, scale 140ms var(--iv-motion-out);
+}
+:root .iv-home .sd-preview-repair:disabled { opacity: .65; cursor: default; }
+@media (hover:hover) and (pointer:fine) {
+    :root .iv-home .sd-preview-repair:not(:disabled):hover { border-color: var(--iv-brand-accent); }
+}

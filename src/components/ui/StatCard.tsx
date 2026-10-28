@@ -1,5 +1,4 @@
 import { LucideIcon } from 'lucide-react'
-import { motion } from 'framer-motion'
 import Card from './Card'
 
 interface StatCardProps {
@@ -9,12 +8,9 @@ interface StatCardProps {
     delay?: number
 }
 
-export default function StatCard({ label, value, icon: Icon, delay = 0 }: StatCardProps) {
+export default function StatCard({ label, value, icon: Icon, delay: _delay = 0 }: StatCardProps) {
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay, ease: [0.4, 0, 0.2, 1] }}
+        <div data-motion-block
         >
             <Card padding="md" className="border-gray-200 dark:border-iv-dark-line">
                 <div className="flex items-center justify-between">
@@ -27,6 +23,6 @@ export default function StatCard({ label, value, icon: Icon, delay = 0 }: StatCa
                     </div>
                 </div>
             </Card>
-        </motion.div>
+        </div>
     )
 }

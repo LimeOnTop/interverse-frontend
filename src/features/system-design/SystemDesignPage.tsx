@@ -1,3 +1,5 @@
+import ReportDisclosure from '../../components/report/ReportDisclosure'
+import { instantMotion } from '../../lib/motion'
 import { storageKey, accountRecord, cacheDraft, saveProgress, loadProgress } from './progress'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useReducedMotion } from 'framer-motion'
@@ -1256,7 +1258,7 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                                         {hint ? 'Скрыть подсказку' : 'Подсказка'}
                                     </button>
                                 </div>
-                                {hint && <p className="sd-hint">{ex.hint}</p>}
+                                <ReportDisclosure open={hint} instant={instantMotion()}><p className="sd-hint">{ex.hint}</p></ReportDisclosure>
                                 <details className="sd-help">
                                     <summary>Как пользоваться доской</summary>
                                     <p>

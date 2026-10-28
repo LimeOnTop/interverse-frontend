@@ -8,7 +8,7 @@ public = Path(__file__).resolve().parents[1] / 'public'
 scale = 8
 image = Image.new('RGBA', (192 * scale, 192 * scale))
 draw = ImageDraw.Draw(image)
-draw.rounded_rectangle((0, 0, 192 * scale - 1, 192 * scale - 1), radius=40 * scale, fill='#F5F2EA')
+draw.rounded_rectangle((0, 0, 192 * scale - 1, 192 * scale - 1), radius=40 * scale, fill='#FFFFFF')
 length = math.hypot(48, 99)
 x, y = 4.5 * 99 / length, 4.5 * 48 / length
 cx, cy = y, x
@@ -19,7 +19,7 @@ for size in (48, 96, 120, 192, 512):
     image.resize((size, size), Image.Resampling.LANCZOS).save(public / f'favicon-{size}.png')
 image.resize((96, 96), Image.Resampling.LANCZOS).save(public / 'favicon-light.png')
 # Apple applies its own corner mask; use an opaque canvas.
-apple = Image.new('RGBA', image.size, '#F5F2EA')
+apple = Image.new('RGBA', image.size, '#FFFFFF')
 apple.alpha_composite(image)
 apple = apple.convert('RGB').resize((180, 180), Image.Resampling.LANCZOS)
 for name in ('apple-touch-icon.png', 'apple-touch-icon-light.png', 'apple-touch-icon-precomposed.png'):
@@ -30,5 +30,5 @@ mask_points = ' '.join(f'{a/12:.5f},{b/12:.5f}' for a, b in points)
 (public / 'favicon.svg').write_bytes((public / 'favicon-light.svg').read_bytes())
 manifest_path = public / 'site.webmanifest'
 manifest = json.loads(manifest_path.read_text())
-manifest.update(id='/', scope='/', background_color='#F5F2EA', theme_color='#F5F2EA')
+manifest.update(id='/', scope='/', background_color='#FFFFFF', theme_color='#FFFFFF')
 manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n')

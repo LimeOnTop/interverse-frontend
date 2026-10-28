@@ -47,7 +47,7 @@ export default function InterviewQuestionStep({
                 {step.options?.map((option, index) => {
                     const isSelected = selectedOptionIndex === index
                     return (
-                        <motion.button
+                        <motion.button data-motion-owned
                             key={`${step.id}-${index}`}
                             type="button"
                             onClick={() => onSelectOption(index)}
@@ -55,7 +55,7 @@ export default function InterviewQuestionStep({
                             whileTap={{ scale: 0.995 }}
                             className={`w-full text-left rounded-xl border px-4 py-3.5 sm:px-5 sm:py-4 flex items-start gap-4 transition-[color,background-color,border-color,box-shadow] duration-200 ${
                                 isSelected
-                                    ? 'border-inter-verse-green bg-[#e8eee3] dark:border-purple-400 dark:bg-iv-dark-tint '
+                                    ? 'border-inter-verse-green bg-[#f3e8ff] dark:border-purple-400 dark:bg-iv-dark-tint '
                                     : 'border-gray-200 dark:border-iv-dark-line hover:border-gray-300 dark:hover:border-gray-500'
                             }`}
                         >
@@ -129,9 +129,9 @@ export function InterviewRouteMap({ steps, currentIndex, isAnswered, onSelect }:
                         aria-label={`${step.label}${answered ? ', есть ответ' : ''}`}
                         className={`h-11 rounded-lg border font-mono text-xs font-semibold transition-iv ${
                             active
-                                ? 'border-inter-verse-green text-inter-verse-green bg-green-50/60 dark:border-purple-400 dark:text-purple-200 dark:bg-iv-dark-tint'
+                                ? 'border-inter-verse-green text-inter-verse-green bg-purple-50/60 dark:border-purple-400 dark:text-purple-200 dark:bg-iv-dark-tint'
                                 : answered
-                                    ? 'border-inter-verse-green/40 bg-[#e8eee3] text-inter-verse-green dark:bg-iv-dark-tint dark:border-purple-400/40 dark:text-purple-300'
+                                    ? 'border-inter-verse-green/40 bg-[#f3e8ff] text-inter-verse-green dark:bg-iv-dark-tint dark:border-purple-400/40 dark:text-purple-300'
                                     : 'border-gray-200 dark:border-iv-dark-line text-secondary hover:border-gray-300 dark:hover:border-gray-500'
                         }`}
                     >

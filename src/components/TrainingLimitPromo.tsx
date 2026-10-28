@@ -28,14 +28,14 @@ export default function TrainingLimitPromo() {
     return (
         <AnimatePresence>
             {limitPromoOpen && (
-                <motion.div
+                <motion.div data-motion-owned
                     className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-4"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     onClick={closeLimitPromo}
                 >
-                    <motion.div
+                    <motion.div data-motion-owned
                         role="dialog"
                         aria-modal="true"
                         aria-labelledby="training-limit-promo-title"

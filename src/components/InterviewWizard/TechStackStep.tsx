@@ -1,3 +1,4 @@
+import { useRevealMotion } from '../../hooks/useRevealMotion'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search } from 'lucide-react'
@@ -57,12 +58,10 @@ export default function TechStackStep({
         }
     }
 
+    const reveal = useRevealMotion()
     return (
-        <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
+        <motion.div data-motion-owned
+            {...reveal}
             className="max-w-4xl mx-auto"
         >
             <div className="text-center mb-6">
@@ -89,7 +88,7 @@ export default function TechStackStep({
                     >
                         <AnimatePresence>
                             {isSearchOpen && (
-                                <motion.div
+                                <motion.div data-motion-owned
                                     key="search-input"
                                     initial={{ opacity: 0, width: 0, x: 20 }}
                                     animate={{ opacity: 1, width: 220, x: 0 }}
@@ -157,7 +156,7 @@ export default function TechStackStep({
                             const isSelected = selectedTechStack.includes(tech)
 
                             return (
-                                <motion.button
+                                <motion.button data-motion-owned
                                     key={tech}
                                     type="button"
                                     onClick={() => handleTechSelect(tech)}

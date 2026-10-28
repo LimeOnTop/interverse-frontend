@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, Check, Database, Network, Server, X } from 'lucide-react'
 import './SystemDesignAnnouncement.css'
@@ -26,7 +26,9 @@ export default function SystemDesignAnnouncement({ children }: { children: React
     const close = useRef<HTMLButtonElement>(null)
     const changed = useRef(false)
     const initialSide = useRef(flipped)
-    useEffect(() => {
+    // Hide the initial face before the browser can paint its static contents.
+    // The reveal controller synchronously prepares its hidden state before awaiting.
+    useLayoutEffect(() => {
         const face = initialSide.current ? back.current : front.current
         if (!face || !canvas.current || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
             setBusy(false)
@@ -143,6 +145,7 @@ export default function SystemDesignAnnouncement({ children }: { children: React
                         ref={restore}
                         type="button"
                         className="sd-announcement-restore"
+                        style={{ background: 'transparent', boxShadow: 'none', border: 0, borderRadius: 0, padding: 0 }}
                         onClick={(e) => turn(false, e.detail)}
                         tabIndex={flipped ? 0 : -1}
                     >

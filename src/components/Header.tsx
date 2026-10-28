@@ -1,3 +1,4 @@
+import { useRevealMotion } from '../hooks/useRevealMotion'
 import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
@@ -21,6 +22,7 @@ interface HeaderProps {
 }
 
 export default function Header({ onMenuClick }: HeaderProps) {
+    const reveal = useRevealMotion(true)
     const { user, logout } = useAuthStore()
     const navigate = useNavigate()
     const location = useLocation()
@@ -59,16 +61,16 @@ export default function Header({ onMenuClick }: HeaderProps) {
                     </button>
                     <Link
                         to="/dashboard"
-                        className="inline-flex items-center min-h-[44px] shrink-0 hover:opacity-80 transition-iv"
+                        className="iv-header-frame iv-header-brand inline-flex items-center gap-3 min-h-[44px] shrink-0"
                     >
                         <BrandWordmark />
+                        {pageTitle && (
+                            <>
+                                <span className="hidden sm:inline text-gray-300 dark:text-gray-600">/</span>
+                                <span className="hidden sm:inline text-sm font-medium text-secondary">{pageTitle}</span>
+                            </>
+                        )}
                     </Link>
-                    {pageTitle && (
-                        <>
-                            <span className="hidden sm:inline text-gray-300 dark:text-gray-600">/</span>
-                            <span className="hidden sm:inline text-sm font-medium text-secondary">{pageTitle}</span>
-                        </>
-                    )}
                 </div>
 
                 <div className="flex items-center gap-1 sm:gap-3">
@@ -90,13 +92,10 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
                         <AnimatePresence>
                             {dropdownOpen && (
-                                <motion.div
-                                    initial={{ opacity: 0, scale: 0.95, y: -4 }}
-                                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                                    exit={{ opacity: 0, scale: 0.95, y: -4 }}
-                                    transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
+                                <motion.div data-motion-owned
+                                    {...reveal}
                                     className="absolute right-0 mt-1 w-48 iv-dropdown py-1"
-                                    style={{ position: 'absolute' }}
+                                    style={{ position: 'absolute', transformOrigin: 'top right' }}
                                 >
                                     <Link
                                         to="/profile"

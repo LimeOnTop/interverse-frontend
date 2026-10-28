@@ -1,3 +1,4 @@
+import { useRevealMotion } from '../../hooks/useRevealMotion'
 import { motion } from 'framer-motion'
 import { Check } from 'lucide-react'
 import {
@@ -53,12 +54,10 @@ export default function SpecializationStep({
     onSelect,
     onNext,
 }: SpecializationStepProps) {
+    const reveal = useRevealMotion()
     return (
-        <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
+        <motion.div data-motion-owned
+            {...reveal}
             className="max-w-4xl mx-auto"
         >
             <div className="text-center mb-4 sm:mb-6">

@@ -1,4 +1,6 @@
 @import './styles/common.css';
+@import './styles/neumorphism.css';
+@import './styles/accent-border.css';
 
 @tailwind base;
 @tailwind components;
@@ -6,9 +8,9 @@
 
 /* Toast colours follow the theme; the dark class sits on <html>. */
 :root {
-    --iv-surface: #fffdf8;
-    --iv-text: #26332b;
-    --iv-accent-border: #315d46;
+    --iv-surface: #ffffff;
+    --iv-text: #202124;
+    --iv-accent-border: #a855f7;
 }
 
 .dark {
@@ -40,7 +42,7 @@
 @layer components {
     /* ── Gradients ── */
     .gradient-bg {
-        background: linear-gradient(135deg, #234936 0%, #315d46 100%);
+        background: linear-gradient(to right, #c084fc 0%, #9333ea 100%);
     }
 
     .gradient-bg-dark {
@@ -52,7 +54,7 @@
     }
 
     .gradient-bg-animated {
-        background: linear-gradient(135deg, #234936, #315d46, #234936, #315d46);
+        background: linear-gradient(135deg, #c084fc, #9333ea, #c084fc, #9333ea);
         background-size: 300% 300%;
         animation: gradientBreathe 6s ease infinite;
     }
@@ -255,14 +257,14 @@
 
     .iv-landing-nav {
         @apply sticky top-0 z-40 border-b;
-        background: rgba(255, 253, 248, 0.82);
+        background: rgba(255, 255, 255, 0.82);
         backdrop-filter: blur(12px);
         border-color: rgba(221, 222, 218, 0.8);
     }
 
     .iv-landing-nav-solid {
         @apply border-b;
-        background: rgba(255, 253, 248, 0.82);
+        background: rgba(255, 255, 255, 0.82);
         backdrop-filter: blur(12px);
         border-color: rgba(221, 222, 218, 0.8);
     }
@@ -282,9 +284,9 @@
         width: 10px;
         height: 10px;
         border-radius: 50%;
-        border: 1.5px solid #315d46;
+        border: 1.5px solid #a855f7;
         background: transparent;
-        transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+        transition: color 200ms ease, background-color 200ms ease, border-color 200ms ease, box-shadow 200ms ease, transform 200ms cubic-bezier(.23,1,.32,1);
         padding: 0;
     }
 
@@ -293,7 +295,7 @@
     }
 
     .hero-slider-dot-active {
-        background: #315d46;
+        background: #a855f7;
         transform: scale(1.15);
     }
 
@@ -314,7 +316,7 @@
 
     /* Hero slider — text panel with diagonal cut */
     .hero-slider-text-panel {
-        background: #F5F2EA;
+        background: #ffffff;
     }
 
     .hero-slider-text-panel,
@@ -340,7 +342,7 @@
     @media (max-width: 1023px) {
         .hero-slider-text-panel {
             clip-path: none;
-            background: rgba(245, 242, 234, 0.96);
+            background: rgba(255, 255, 255, 0.96);
         }
 
         .dark .hero-slider-text-panel {
@@ -536,11 +538,11 @@
         @apply inline-flex items-center px-3 py-1 text-xs font-medium bg-gray-100 text-gray-700;
         @apply dark:bg-iv-dark-bg dark:text-gray-300 border border-gray-200 dark:border-iv-dark-line;
         border-radius: var(--iv-radius-sm);
-        transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+        transition: color 200ms ease, background-color 200ms ease, border-color 200ms ease, box-shadow 200ms ease, transform 200ms cubic-bezier(.23,1,.32,1);
     }
 
     .iv-chip-active {
-        @apply border-inter-verse-green text-inter-verse-green bg-green-50;
+        @apply border-inter-verse-green text-inter-verse-green bg-purple-50;
         @apply dark:border-purple-400 dark:text-purple-400 dark:bg-purple-900/20;
     }
 
@@ -571,8 +573,8 @@
 
     .iv-nav-item {
         @apply flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-400 rounded-lg border-2 border-transparent;
-        @apply hover:bg-gray-50 hover:text-gray-900 dark:hover:bg-iv-dark-bg dark:hover:text-gray-100;
-        transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+        @apply hover:bg-transparent dark:hover:bg-transparent;
+        transition: color 200ms ease, background-color 200ms ease, border-color 200ms ease, box-shadow 200ms ease, transform 200ms cubic-bezier(.23,1,.32,1);
     }
 
     .iv-nav-item-active {
@@ -681,12 +683,12 @@
     .step-indicator {
         @apply w-10 h-10 flex items-center justify-center text-sm font-semibold;
         border-radius: var(--iv-radius-sm);
-        transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+        transition: color 200ms ease, background-color 200ms ease, border-color 200ms ease, box-shadow 200ms ease, transform 200ms cubic-bezier(.23,1,.32,1);
     }
 
     .step-indicator.active-adaptive { @apply gradient-bg-adaptive text-white; }
     .step-indicator.completed {
-        @apply bg-green-50 text-inter-verse-green dark:bg-purple-900/30 dark:text-purple-300;
+        @apply bg-purple-50 text-inter-verse-green dark:bg-purple-900/30 dark:text-purple-300;
     }
     .step-indicator.pending {
         @apply bg-gray-100 text-gray-400 dark:bg-iv-dark-bg dark:text-gray-500;
@@ -721,7 +723,7 @@
     }
 
     .wizard-option-card-selected {
-        @apply ring-2 ring-inter-verse-green border-inter-verse-green/40 bg-green-50/60;
+        @apply ring-2 ring-inter-verse-green border-inter-verse-green/40 bg-purple-50/60;
         @apply dark:ring-purple-400 dark:border-purple-500/40 dark:bg-purple-900/20;
     }
 
@@ -730,7 +732,7 @@
         @apply bg-gray-100 text-gray-700 border border-gray-200;
         @apply dark:bg-iv-dark-bg dark:text-gray-300 dark:border-iv-dark-line;
         border-radius: var(--iv-radius-sm);
-        transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+        transition: color 200ms ease, background-color 200ms ease, border-color 200ms ease, box-shadow 200ms ease, transform 200ms cubic-bezier(.23,1,.32,1);
     }
 
     .wizard-option-card-selected .wizard-option-icon {
@@ -764,7 +766,7 @@
         @apply flex items-center gap-3 px-4 py-3 text-sm font-medium text-white;
         @apply gradient-bg-adaptive hover:opacity-90;
         border-radius: var(--iv-radius-sm);
-        transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+        transition: color 200ms ease, background-color 200ms ease, border-color 200ms ease, box-shadow 200ms ease, transform 200ms cubic-bezier(.23,1,.32,1);
     }
 
     .iv-nav-item-subscription.iv-nav-item-subscription-active {
@@ -820,7 +822,7 @@
     /* ── Skeleton ── */
     .iv-skeleton {
         @apply bg-gray-200 dark:bg-iv-dark-line;
-        background: linear-gradient(90deg, #DDDEDA 25%, #ECEAE1 50%, #DDDEDA 75%);
+        background: linear-gradient(90deg, #e4e4e7 25%, #f4f4f5 50%, #e4e4e7 75%);
         background-size: 200% 100%;
         animation: shimmer 1.5s ease-in-out infinite;
         border-radius: var(--iv-radius);
@@ -834,8 +836,8 @@
     /* ── Spinner ── */
     .iv-spinner {
         @apply animate-spin rounded-full border-2;
-        border-color: rgba(49, 93, 70, 0.15);
-        border-top-color: #315d46;
+        border-color: rgba(168, 85, 247, 0.15);
+        border-top-color: #a855f7;
     }
 
     .dark .iv-spinner {
@@ -882,7 +884,7 @@
 @layer utilities {
     .tabular-nums { font-variant-numeric: tabular-nums; }
     .text-secondary { @apply text-gray-500 dark:text-gray-400; }
-    .transition-iv { transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1); }
+    .transition-iv { transition: color 200ms ease, background-color 200ms ease, border-color 200ms ease, box-shadow 200ms ease, transform 200ms cubic-bezier(.23,1,.32,1); }
 }
 
 @keyframes gradientBreathe {
@@ -978,14 +980,14 @@
 :root:not(.dark) .iv-training-session label { color: var(--iv-text); }
 :root:not(.dark) .iv-training-session button { border-color: var(--iv-border); color: var(--iv-text); background: var(--iv-surface); }
 :root:not(.dark) .iv-training-session button[aria-pressed="true"],
-:root:not(.dark) .iv-training-session .btn-primary-adaptive { background: #315d46; border-color: #315d46; color: #fffdf8; }
-:root:not(.dark) .iv-training-session button[aria-pressed="true"] > span { color: #fffdf8; }
-:root:not(.dark) .iv-training-session button[aria-pressed="true"] > span:first-child { background: #fffdf8; color: #315d46; }
-:root:not(.dark) .iv-training-session button[aria-current="step"] { border-color: #315d46; box-shadow: 0 0 0 1px #315d46; }
-:root:not(.dark) .iv-training-session button[aria-label*="есть ответ"] { background: #ece9e1; color: #315d46; }
+:root:not(.dark) .iv-training-session .btn-primary-adaptive { background: #a855f7; border-color: #a855f7; color: #ffffff; }
+:root:not(.dark) .iv-training-session button[aria-pressed="true"] > span { color: #ffffff; }
+:root:not(.dark) .iv-training-session button[aria-pressed="true"] > span:first-child { background: #ffffff; color: #a855f7; }
+:root:not(.dark) .iv-training-session button[aria-current="step"] { border-color: #a855f7; box-shadow: 0 0 0 1px #a855f7; }
+:root:not(.dark) .iv-training-session button[aria-label*="есть ответ"] { background: #f4f4f5; color: #a855f7; }
 :root:not(.dark) .iv-training-session textarea { background: var(--iv-bg); border-color: var(--iv-border); color: var(--iv-text); }
-:root:not(.dark) .iv-training-session .iv-track { background: #ece9e1; }
-:root:not(.dark) .iv-training-session .iv-track > span { background: #315d46; }
+:root:not(.dark) .iv-training-session .iv-track { background: #f4f4f5; }
+:root:not(.dark) .iv-training-session .iv-track > span { background: #a855f7; }
 
 /* Pro labels share the registration button palette in both themes. */
 .iv-pro-badge {
@@ -1030,3 +1032,11 @@
     background-image: var(--iv-pro-badge-background);
     color: #fff;
 }
+
+/* Light theme: purple fills with white labels. */
+:root:not(.dark) :is(.btn-primary,.btn-primary-adaptive,.iv-btn-primary,.iv-sidebar-cta) { color: #ffffff; }
+:root:not(.dark) .text-inter-verse-green { color: var(--iv-brand-accent); }
+:root:not(.dark) .gradient-text-adaptive { background-image: linear-gradient(to right, #c084fc, #9333ea); }
+:root:not(.dark) :is(.bg-purple-50,.bg-purple-50\/60) { background-color: var(--iv-tint); }
+:root:not(.dark) .iv-landing-button { color: #ffffff; }
+:root:not(.dark) .iv-training-session .btn-primary-adaptive { background: var(--iv-gradient); color: #ffffff; }

@@ -26,7 +26,7 @@ export default function FocusPlan({ locked, groups, count, title = 'Следую
     const empty = !locked && groups.length === 0
 
     return (
-        <div className="iv-panel p-5 sm:p-6">
+        <div data-report-block className="iv-panel p-5 sm:p-6">
             <p className="iv-eyebrow">{title}</p>
             <h2 className="mt-2 text-xl font-semibold text-gray-900 dark:text-gray-100">
                 {empty ? 'Ошибок не найдено' : 'Закрепить слабые темы'}
@@ -78,8 +78,8 @@ export default function FocusPlan({ locked, groups, count, title = 'Следую
 
 function PlanStep({ index, title, subtitle, blurred = false }: { index: number; title: string; subtitle: string; blurred?: boolean }) {
     return (
-        <li className="flex gap-3 py-3.5 border-b last:border-b-0 border-gray-200 dark:border-iv-dark-line">
-            <span className="font-mono text-xs font-semibold pt-1 gradient-text-adaptive">{String(index + 1).padStart(2, '0')}</span>
+        <li data-report-block className="flex gap-3 py-3.5 border-b last:border-b-0 border-gray-200 dark:border-iv-dark-line">
+            <span data-report-detail="value" className="font-mono text-xs font-semibold pt-1 gradient-text-adaptive">{String(index + 1).padStart(2, '0')}</span>
             <div className={`min-w-0 ${blurred ? 'blur-[6px] pointer-events-none' : ''}`}>
                 <h3 className="font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
                 <p className="text-sm text-secondary mt-0.5">{subtitle}</p>

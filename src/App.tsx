@@ -1,3 +1,4 @@
+import AppMotion from './components/motion/AppMotion'
 import ProTrialPage from './pages/ProTrialPage'
 import AnalyticsTracker from './components/AnalyticsTracker'
 import { Routes, Route, Navigate } from 'react-router-dom'
@@ -68,6 +69,7 @@ function App() {
 
     return (
         <ThemeProvider>
+            <AppMotion />
             <SeoHead />
             <AnalyticsTracker />
             <div className="min-h-screen bg-gray-50 dark:bg-iv-dark-bg">

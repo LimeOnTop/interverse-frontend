@@ -1,0 +1,60 @@
+:root {
+    --iv-motion-out: cubic-bezier(.23,1,.32,1);
+    --iv-motion-feedback: 140ms;
+}
+/* Retargetable feedback: pressing again continues from the current state. */
+:where(button,a[role="button"],.lib-btn,.pr-btn,.vp-btn,.btn-primary-adaptive,.btn-secondary,.iv-nav-item,summary) {
+    transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease,
+        box-shadow 180ms ease, opacity 160ms ease, scale var(--iv-motion-feedback) var(--iv-motion-out);
+}
+:where(button,a[role="button"],.lib-btn,.pr-btn,.vp-btn,.btn-primary-adaptive,.btn-secondary):not(:disabled):not([aria-disabled="true"]):active { scale: .98; }
+:where(input,textarea,select) { transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease; }
+:where([role="tab"],[role="switch"],[role="checkbox"],[aria-pressed],.lib-select-option) { transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease; }
+:where([aria-expanded]) > svg:last-child { transition: rotate 220ms var(--iv-motion-out); }
+:where(.lib-select-trigger,.pr-date-trigger)[aria-expanded="true"] > svg:last-child { rotate: 180deg; }
+/* Native disclosure transitions preserve semantics, search and keyboard behavior. */
+@supports (interpolate-size: allow-keywords) {
+    details { interpolate-size: allow-keywords; }
+    details::details-content {
+        block-size: 0;
+        opacity: 0;
+        overflow: clip;
+        transition: block-size 700ms var(--iv-motion-out), opacity 400ms var(--iv-motion-out), content-visibility 700ms allow-discrete;
+    }
+    details[open]::details-content { block-size: auto; opacity: 1; }
+}
+/* Radix keeps its content mounted until the exit animation ends. */
+.lib-select-menu { transform-origin: var(--radix-select-content-transform-origin); }
+.lib-select-menu[data-state="open"] { animation: iv-popover-in 220ms var(--iv-motion-out); }
+.lib-select-menu[data-state="closed"] { animation: iv-popover-out 160ms var(--iv-motion-out); }
+@keyframes iv-popover-in { from { opacity: 0; transform: translateY(-4px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes iv-popover-out { to { opacity: 0; transform: translateY(-4px) scale(.97); } }
+@media (prefers-reduced-motion: reduce) {
+    :where(button,a,input,textarea,select,summary,[role="tab"],[role="switch"],[role="checkbox"]) { transition-duration: 80ms; }
+    :where(button,a):active { scale: 1; }
+    details::details-content { transition-duration: 0ms; }
+    .lib-select-menu[data-state] { animation: none; }
+}
+html[data-motion-input="keyboard"] .lib-select-menu { animation: none; }
+@media print { [data-motion-page] * { animation: none !important; transition: none !important; } }
+/* Avoid a second entrance from legacy card keyframes. */
+:root .report-entry,:root .job-card { animation: none; }
+:root dialog[data-motion-dialog] { animation: none; }
+dialog[data-motion-dialog]::backdrop { transition: opacity 200ms var(--iv-motion-out); }
+dialog[data-motion-dialog="closing"] { pointer-events: none; }
+dialog[data-motion-dialog="closing"]::backdrop { opacity: 0; }
+@starting-style { dialog[data-motion-dialog="open"]::backdrop { opacity: 0; } }
+html[data-motion-input="keyboard"] details::details-content { transition-duration: 0ms; }
+.iv-motion-button { position: relative; }
+.iv-button-content { display: inline-flex; align-items: center; justify-content: center; gap: inherit; transition: opacity 160ms ease; }
+.iv-button-loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+@media (hover: hover) and (pointer: fine) {
+    .iv-card-hover { transition: translate 220ms var(--iv-motion-out), box-shadow 220ms ease; }
+    .iv-card-hover:hover { translate: 0 -3px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .iv-card-hover:hover { translate: none; }
+    .iv-spinner,.animate-spin { animation-duration: 2.5s; }
+}
+
+html[data-motion-input="keyboard"] :where(button,a):active { scale: 1; }

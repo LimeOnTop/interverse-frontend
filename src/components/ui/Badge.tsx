@@ -1,4 +1,6 @@
-export type BadgeVariant = 'default' | 'success' | 'warning' | 'danger' | 'info' | 'accent'
+import CompletedBadge from './CompletedBadge'
+
+export type BadgeVariant = 'default' | 'success' | 'warning' | 'danger' | 'info' | 'accent' | 'completed'
 
 // Badges are coloured text without a filled background.
 const variants: Record<BadgeVariant, string> = {
@@ -8,6 +10,7 @@ const variants: Record<BadgeVariant, string> = {
     danger: 'text-red-600 dark:text-red-400',
     info: 'text-inter-verse-green dark:text-purple-400',
     accent: 'gradient-text-adaptive',
+    completed: '',
 }
 
 interface BadgeProps {
@@ -17,6 +20,7 @@ interface BadgeProps {
 }
 
 export default function Badge({ children, variant = 'default', className = '' }: BadgeProps) {
+    if (variant === 'completed') return <CompletedBadge className={className} />
     return (
         <span className={`iv-badge ${variants[variant]} ${className}`}>
             {children}
@@ -28,7 +32,7 @@ export const statusBadgeVariant = (status: string): BadgeVariant => {
     const map: Record<string, BadgeVariant> = {
         scheduled: 'info',
         in_progress: 'warning',
-        completed: 'success',
+        completed: 'completed',
         cancelled: 'danger',
         draft: 'default',
     }

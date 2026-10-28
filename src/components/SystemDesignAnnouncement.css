@@ -16,7 +16,7 @@
 .sd-announcement-front {
     position: relative;
     color: #fff;
-    background: linear-gradient(115deg, #116b49, #22594b);
+    background: linear-gradient(115deg, #a855f7, #7e22ce);
 }
 .dark .sd-announcement-front {
     background: linear-gradient(115deg, #4d3077, #302c59);
@@ -60,7 +60,7 @@
     margin-top: 20px;
     padding: 12px 17px;
     border-radius: 8px;
-    color: #145e42;
+    color: #7e22ce;
     background: #fff;
     font-size: 13px;
     font-weight: 650;

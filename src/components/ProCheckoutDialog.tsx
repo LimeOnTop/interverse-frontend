@@ -1,10 +1,11 @@
+import { useDialogMotion } from '../hooks/useDialogMotion'
 import '../styles/subscription.css'
 import { useEffect, useRef, useState } from 'react'
 import { Check, Sparkles, X } from 'lucide-react'
 import Button from './ui/Button'
 import { PRO_FEATURES, formatRub, type PaidOffer } from '../utils/subscription'
 
-export default function ProCheckoutDialog({ offer, busy, available, settingsError, onClose, onPay }: {
+export default function ProCheckoutDialog({ offer, busy, available, settingsError, onClose: finishClose, onPay }: {
     offer: PaidOffer; busy: boolean; available: boolean | null; settingsError: string; onClose: () => void; onPay: () => void
 }) {
     const [consent, setConsent] = useState(false)
@@ -20,6 +21,7 @@ export default function ProCheckoutDialog({ offer, busy, available, settingsErro
         document.body.style.overflow = 'hidden'
         return () => { element?.close(); document.body.style.overflow = previousOverflow; if (previousFocus?.isConnected) previousFocus.focus() }
     }, [])
+    const onClose = useDialogMotion(dialog, finishClose)
     return <dialog ref={dialog} className="pro-checkout" aria-labelledby="pro-checkout-title"
         onCancel={(event) => { event.preventDefault(); if (!busy) onClose() }}
         onClick={(event) => { if (event.target === event.currentTarget && !busy) onClose() }}>

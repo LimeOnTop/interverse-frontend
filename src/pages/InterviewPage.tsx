@@ -416,7 +416,7 @@ export default function InterviewPage() {
                 <section ref={stepPanel} className="iv-panel rounded-2xl p-5 sm:p-7 min-w-0">
                     {/* initial={false}: the first step appears with the page, not in a second fade after it. */}
                     <AnimatePresence mode="wait" initial={false}>
-                        <motion.div
+                        <motion.div data-motion-owned
                             key={currentStep?.id}
                             initial={reduceMotion ? { opacity: 1 } : { opacity: 0, x: 14 }}
                             animate={{ opacity: 1, x: 0 }}

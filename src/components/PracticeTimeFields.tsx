@@ -1,3 +1,5 @@
+import { AnimatePresence, motion } from 'framer-motion'
+import { useRevealMotion } from '../hooks/useRevealMotion'
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
 import { CalendarDays, ChevronDown, ChevronLeft, ChevronRight, Clock3 } from 'lucide-react'
 import '../styles/practice-reminders.css'
@@ -11,6 +13,7 @@ const monthLabel = (day: string) => new Intl.DateTimeFormat('ru-RU', { month: 'l
 const pad = (n: number) => String(n).padStart(2, '0')
 
 export default function PracticeTimeFields({ value, onChange, zone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Moscow', disabled = false }: { value: string; onChange: (value: string) => void; zone?: string; disabled?: boolean }) {
+    const reveal = useRevealMotion(true)
     const id = useId(), wrapper = useRef<HTMLDivElement>(null), trigger = useRef<HTMLButtonElement>(null)
     const [day = '', time = '19:00'] = value.split('T')
     const [hour = '19', minute = '00'] = time.split(':')
@@ -51,11 +54,11 @@ export default function PracticeTimeFields({ value, onChange, zone = Intl.DateTi
         <div className="pr-quick"><button type="button" disabled={disabled || today.time >= '19:00'} onClick={() => quick(0)}>Сегодня, 19:00</button><button type="button" disabled={disabled} onClick={() => quick(1)}>Завтра, 19:00</button></div>
         <div className="pr-fields pr-fields--picker">
             <div className="pr-date-field"><span id={`${id}-label`} className="pr-input-label">Дата</span><button ref={trigger} type="button" className="pr-date-trigger" aria-label={`Выбрать дату, ${day ? shortDay(day) : 'не выбрана'}`} aria-expanded={open} aria-controls={`${id}-calendar`} disabled={disabled} onClick={() => { if (open) close(); else { const date = clamp(day || today.day); setMonth(date); setFocused(date); setOpen(true) } }}><CalendarDays size={17}/><span>{day ? shortDay(day) : 'Выбрать дату'}</span><ChevronDown size={16}/></button></div>
-        {open && <div className="pr-calendar" id={`${id}-calendar`} role="group" aria-labelledby={`${id}-month`}>
+        <AnimatePresence initial={false}>{open && <motion.div data-motion-owned {...reveal} style={{transformOrigin:"top left"}} className="pr-calendar" id={`${id}-calendar`} role="group" aria-labelledby={`${id}-month`}>
             <div className="pr-calendar-heading"><button type="button" aria-label="Предыдущий месяц" disabled={month.slice(0,7) <= today.day.slice(0,7)} onClick={()=>{const next=clamp(shiftMonth(month,-1));setMonth(next);setFocused(next)}}><ChevronLeft size={18}/></button><b id={`${id}-month`} aria-live="polite">{monthLabel(month)}</b><button type="button" aria-label="Следующий месяц" disabled={month.slice(0,7) >= max.slice(0,7)} onClick={()=>{const next=clamp(shiftMonth(month,1));setMonth(next);setFocused(next)}}><ChevronRight size={18}/></button></div>
-            <div role="grid" aria-label={monthLabel(month)}><div role="row" className="pr-calendar-row pr-weekdays">{['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(name=><span role="columnheader" key={name}>{name}</span>)}</div>{Array.from({length:6},(_,row)=><div role="row" className="pr-calendar-row" key={row}>{days.slice(row*7,row*7+7).map(date=><button type="button" role="gridcell" key={date} data-day={date} aria-label={dayLabel(date)} aria-selected={date===day} aria-current={date===today.day?'date':undefined} tabIndex={date===focused?0:-1} disabled={disabled||date<today.day||date>max} className={date.slice(0,7)!==month.slice(0,7)?'outside':''} onKeyDown={event=>key(event,date)} onClick={()=>choose(date)}>{Number(date.slice(-2))}</button>)}</div>)}</div>
+            <motion.div data-motion-owned key={month.slice(0,7)} initial={{opacity:reveal.transition.duration===0?1:0}} animate={{opacity:1}} transition={{duration:reveal.transition.duration===0?0:.18}} role="grid" aria-label={monthLabel(month)}><div role="row" className="pr-calendar-row pr-weekdays">{['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(name=><span role="columnheader" key={name}>{name}</span>)}</div>{Array.from({length:6},(_,row)=><div role="row" className="pr-calendar-row" key={row}>{days.slice(row*7,row*7+7).map(date=><button type="button" role="gridcell" key={date} data-day={date} aria-label={dayLabel(date)} aria-selected={date===day} aria-current={date===today.day?'date':undefined} tabIndex={date===focused?0:-1} disabled={disabled||date<today.day||date>max} className={date.slice(0,7)!==month.slice(0,7)?'outside':''} onKeyDown={event=>key(event,date)} onClick={()=>choose(date)}>{Number(date.slice(-2))}</button>)}</div>)}</motion.div>
             <div className="pr-calendar-footer"><button type="button" onClick={()=>choose(today.day)}>Сегодня</button><button type="button" onClick={close}>Готово</button></div>
-        </div>}
+        </motion.div>}</AnimatePresence>
             <fieldset className="pr-time-field"><legend className="pr-input-label"><Clock3 size={13}/> Время</legend><div className="pr-time-selectors"><label><span>Часы</span><select aria-label="Часы" value={hour} disabled={disabled} onChange={event => onChange(`${day}T${event.target.value}:${minute}`)}>{Array.from({length:24},(_,n)=><option key={n} value={pad(n)}>{pad(n)}</option>)}</select><ChevronDown size={14}/></label><b aria-hidden="true">:</b><label><span>Минуты</span><select aria-label="Минуты" value={minute} disabled={disabled} onChange={event => onChange(`${day}T${hour}:${event.target.value}`)}>{Array.from({length:60},(_,n)=><option key={n} value={pad(n)}>{pad(n)}</option>)}</select><ChevronDown size={14}/></label></div></fieldset>
         </div>
         <small className="pr-zone">Часовой пояс: {timeZoneLabel(zone)}</small>

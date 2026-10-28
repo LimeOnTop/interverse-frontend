@@ -1,3 +1,5 @@
+import CompletedBadge from '../components/ui/CompletedBadge'
+import AnimatedNumber from '../components/motion/AnimatedNumber'
 import { ReminderButton } from '../components/PracticeReminderDialog'
 import { PreparationSection } from '../components/VacancyPreparationCard'
 import { usePreparations } from '../lib/preparations'
@@ -158,7 +160,6 @@ export default function InterviewServicePage() {
 
     if (loading) return <Spinner size="lg" className="h-64" />
 
-    const pad = (value: number) => String(value).padStart(2, '0')
     const waiting = counts.active
     const activePreparations = preparations.preparations.filter(p=>!p.archived)
     const completedPaths=activePreparations.filter(p=>p.steps.every((_,i)=>p.attempts.some(a=>a.step_index===i&&a.status==='completed'))).length
@@ -209,9 +210,9 @@ export default function InterviewServicePage() {
                         <h2>Практика в удобном темпе</h2>
                     </div>
                     <div className="session-numbers">
-                        <div><strong>{pad(counts.all)}</strong><small>Всего тренировок</small></div>
-                        <div><strong>{pad(counts.active)}</strong><small>В процессе</small></div>
-                        <div><strong>{pad(counts.done)}</strong><small>{pluralRu(counts.done, ['Завершена', 'Завершены', 'Завершено'])}</small></div>
+                        <div><strong><AnimatedNumber value={counts.all} pad={2} /></strong><small>Всего тренировок</small></div>
+                        <div><strong><AnimatedNumber value={counts.active} pad={2} /></strong><small>В процессе</small></div>
+                        <div><strong><AnimatedNumber value={counts.done} pad={2} /></strong><small>{pluralRu(counts.done, ['Завершена', 'Завершены', 'Завершено'])}</small></div>
                     </div>
                 </aside>
             </div>}
@@ -314,7 +315,7 @@ function SessionCard({ interview, report, starting, busy, onStart }: SessionCard
             <div className="session-card-body">
                 <div className="session-card-heading">
                     <h3>{sessionTitle(interview)}</h3>
-                    <span className={`lib-chip ${statusClass}`}>{STATUS_LABELS[interview.status] || interview.status}</span>
+                    {done ? <CompletedBadge /> : <span className={`lib-chip ${statusClass}`}>{STATUS_LABELS[interview.status] || interview.status}</span>}
                 </div>
                 <div className="session-card-meta">
                     {techs.slice(0, 4).map((tech) => <span key={tech} className="session-tech">{tech}</span>)}

@@ -25,7 +25,7 @@ export default function AuthSplitLayout({
                     <div className="hidden lg:flex relative z-10 auth-diagonal-panel">
                         <div className="absolute inset-0 gradient-bg-adaptive" />
                         <div className="hero-noise absolute inset-0" />
-                        <motion.div
+                        <motion.div data-motion-owned
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.6 }}

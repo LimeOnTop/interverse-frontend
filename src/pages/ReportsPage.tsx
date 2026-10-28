@@ -1,3 +1,6 @@
+import CompletedBadge from '../components/ui/CompletedBadge'
+import AnimatedNumber from '../components/motion/AnimatedNumber'
+import LibrarySelect from '../components/LibrarySelect'
 import { previousComparableReport } from '../lib/reportComparison'
 import { PreparationSection } from '../components/VacancyPreparationCard'
 import { usePreparations } from '../lib/preparations'
@@ -176,16 +179,12 @@ export default function ReportsPage() {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
-                        <select
-                            aria-label="Уровень отчётов"
+                        <LibrarySelect
+                            label="Уровень отчётов"
                             value={levelFilter}
-                            onChange={(e) => setLevelFilter(e.target.value)}
-                        >
-                            <option value="all">Все уровни</option>
-                            {levels.map((level) => (
-                                <option key={level} value={level}>{levelLabel(level)}</option>
-                            ))}
-                        </select>
+                            onChange={setLevelFilter}
+                            options={[{ value: 'all', label: 'Все уровни' }, ...levels.map(level => ({ value: level, label: levelLabel(level) }))]}
+                        />
                     </div>
 
 
@@ -302,7 +301,7 @@ function ReportEntry({ report, index, exporting, deleting, onExport, onDelete }:
                     style={{ '--score': `${score}%` } as React.CSSProperties}
                     aria-label={`Общий результат ${score} процентов`}
                 >
-                    <strong>{score}<span>%</span></strong>
+                    <strong><span className="score-value"><AnimatedNumber value={score} /><span className="score-unit">%</span></span></strong>
                 </div>
                 <small>Итоговый результат</small>
             </aside>
@@ -318,7 +317,7 @@ function ReportEntry({ report, index, exporting, deleting, onExport, onDelete }:
                             {counts && <span>{counts}</span>}
                         </div>
                     </div>
-                    <span className="lib-chip is-done">Завершено</span>
+                    <CompletedBadge />
                 </header>
 
                 <div className="report-parts">

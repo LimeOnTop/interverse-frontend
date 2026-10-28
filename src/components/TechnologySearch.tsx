@@ -141,7 +141,7 @@ const TechnologySearch: React.FC<TechnologySearchProps> = ({
             {selectedTechnologies.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-3">
                     {selectedTechnologies.map((tech) => (
-                        <motion.div
+                        <motion.div data-motion-owned
                             key={tech}
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
@@ -184,7 +184,7 @@ const TechnologySearch: React.FC<TechnologySearchProps> = ({
             {/* Dropdown */}
             <AnimatePresence>
                 {isOpen && (
-                    <motion.div
+                    <motion.div data-motion-owned
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
@@ -198,10 +198,9 @@ const TechnologySearch: React.FC<TechnologySearchProps> = ({
                             technologies.map((tech) => {
                                 const isSelected = selectedTechnologies.includes(tech.name)
                                 return (
-                                    <motion.div
+                                    <motion.div data-motion-owned
                                         key={tech.id}
-                                        whileHover={{ backgroundColor: '#f5f2ea' }}
-                                        className={`p-3 cursor-pointer border-b border-gray-100 last:border-b-0 ${isSelected ? 'bg-green-50' : ''
+                                        className={`p-3 cursor-pointer border-b border-gray-100 last:border-b-0 ${isSelected ? 'bg-purple-50' : ''
                                             }`}
                                         onClick={() => !isSelected && handleTechnologySelect(tech)}
                                     >

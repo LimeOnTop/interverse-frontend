@@ -156,13 +156,13 @@ export default function InterviewWizardPage() {
                             const done = index < stepIndex
                             const active = step.id === currentStep
                             return (
-                                <motion.li key={step.id} layout={staticMotion ? false : 'position'}
+                                <motion.li data-motion-owned key={step.id} layout={staticMotion ? false : 'position'}
                                     initial={staticMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: staticMotion ? 0 : 0.1 } }}
                                     transition={{ duration: staticMotion ? 0 : 0.18, ease: WIZARD_EASE, layout: { duration: staticMotion ? 0 : 0.22, ease: WIZARD_EASE } }}
                                     className="relative flex gap-4 pb-8 last:pb-0">
                                     {index < steps.length - 1 && (
                                         <span className="absolute left-[17px] top-10 bottom-1 w-px bg-gray-200 dark:bg-iv-dark-line overflow-hidden" aria-hidden>
-                                            <motion.span className="absolute inset-0 bg-inter-verse-green dark:bg-purple-400" style={{ transformOrigin: 'top' }} initial={false}
+                                            <motion.span data-motion-owned className="absolute inset-0 bg-inter-verse-green dark:bg-purple-400" style={{ transformOrigin: 'top' }} initial={false}
                                                 animate={{ transform: `scaleY(${done ? 1 : 0})` }} transition={{ duration: staticMotion ? 0 : 0.22, ease: WIZARD_EASE }} />
                                         </span>
                                     )}
@@ -192,9 +192,9 @@ export default function InterviewWizardPage() {
                         <span className="font-mono text-xs text-secondary" aria-live="polite">ШАГ 0{stepNumber} / 0{steps.length}</span>
                         <div role="progressbar" aria-label="Прогресс настройки тренировки" aria-valuemin={1} aria-valuemax={steps.length} aria-valuenow={stepNumber} className="flex w-28 gap-1.5 sm:w-36">
                             <AnimatePresence initial={false} mode="popLayout">
-                                {steps.map((step, index) => <motion.span key={step.id} layout={!staticMotion} initial={staticMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                {steps.map((step, index) => <motion.span data-motion-owned key={step.id} layout={!staticMotion} initial={staticMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                                     transition={{ duration: staticMotion ? 0 : 0.18, ease: WIZARD_EASE }} className="relative h-1.5 flex-1 min-w-0 overflow-hidden rounded-full bg-gray-100 dark:bg-iv-dark-line" aria-hidden>
-                                    <motion.span className="absolute inset-0 rounded-full gradient-bg-adaptive" style={{ transformOrigin: 'left' }} initial={false}
+                                    <motion.span data-motion-owned className="absolute inset-0 rounded-full gradient-bg-adaptive" style={{ transformOrigin: 'left' }} initial={false}
                                         animate={{ transform: `scaleX(${index <= stepIndex ? 1 : 0})` }} transition={{ duration: staticMotion ? 0 : 0.22, ease: WIZARD_EASE }} />
                                 </motion.span>)}
                             </AnimatePresence>
@@ -203,7 +203,7 @@ export default function InterviewWizardPage() {
 
                     {currentStep === 5 && <AvailabilityNotice check={availability} />}
                     <AnimatePresence mode="wait" initial={false}>
-                        <motion.div
+                        <motion.div data-motion-owned
                             key={currentStep}
                             initial={staticMotion ? false : { opacity: 0, transform: `translateX(${12 * direction}px)` }}
                             animate={{ opacity: 1, transform: 'translateX(0px)' }}

@@ -53,7 +53,7 @@ export default function ProfileSkillsEditor({ skills, onChange }: ProfileSkillsE
             <div className="flex flex-wrap items-center gap-2">
                 <AnimatePresence initial={false}>
                     {isSearchOpen && (
-                        <motion.div
+                        <motion.div data-motion-owned
                             key="search-input"
                             initial={{ opacity: 0, width: 0 }}
                             animate={{ opacity: 1, width: 240 }}
@@ -95,7 +95,7 @@ export default function ProfileSkillsEditor({ skills, onChange }: ProfileSkillsE
                             {searchResults.map((tech) => {
                                 const isSelected = skills.includes(tech)
                                 return (
-                                    <motion.button
+                                    <motion.button data-motion-owned
                                         key={tech}
                                         type="button"
                                         onClick={() => toggleSkill(tech)}

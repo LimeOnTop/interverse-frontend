@@ -113,18 +113,18 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <AnimatePresence>
                 {mobileOpen && (
                     <>
-                        <motion.div
+                        <motion.div data-motion-owned
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             className="fixed inset-0 bg-black/50 z-50 lg:hidden"
                             onClick={() => setMobileOpen(false)}
                         />
-                        <motion.aside
+                        <motion.aside data-motion-owned
                             initial={{ x: '-100%' }}
                             animate={{ x: 0 }}
                             exit={{ x: '-100%' }}
-                            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                            transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
                             className="fixed inset-y-0 left-0 z-50 w-60 iv-sidebar flex flex-col lg:hidden"
                         >
                             <div className="flex justify-end p-3">

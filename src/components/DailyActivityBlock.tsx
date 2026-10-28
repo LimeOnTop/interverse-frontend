@@ -93,9 +93,9 @@ function barsForWidth(width: number) {
     return clamp(count, MIN_BARS, MAX_BARS)
 }
 
-const CUBE_BOTTOM_LIGHT_RGB = { r: 251, g: 146, b: 120 } // peach
-const CUBE_BOTTOM_DARK_RGB = { r: 220, g: 38, b: 38 } // red-600
-const CUBE_TOP_LIGHT_RGB = { r: 74, g: 222, b: 128 } // light green (green-400)
+const CUBE_BOTTOM_LIGHT_RGB = { r: 220, g: 38, b: 38 } // red base
+const CUBE_BOTTOM_DARK_RGB = { r: 220, g: 38, b: 38 } // red base
+const CUBE_TOP_LIGHT_RGB = { r: 147, g: 51, b: 234 } // gradient end
 const CUBE_TOP_DARK_RGB = { r: 147, g: 51, b: 234 } // logo purple
 
 function cubeColor(cubeIndex: number, isDark: boolean) {
@@ -205,10 +205,10 @@ export default function DailyActivityBlock({
     }, [range.min, range.max, barCount])
 
     return (
-        <motion.div
+        <motion.div data-motion-owned
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+            transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
             className="iv-panel p-5 sm:p-6 grid gap-6 sm:grid-cols-[15rem_1fr] lg:grid-cols-[16rem_1fr] sm:items-end w-full"
         >
             <div className="flex flex-col gap-4">
@@ -230,11 +230,11 @@ export default function DailyActivityBlock({
                         <span className="tabular-nums font-semibold text-gray-900 dark:text-gray-100">{percent}%</span>
                     </div>
                     <div className="h-1.5 rounded-full bg-gray-100 dark:bg-iv-dark-bg overflow-hidden">
-                        <motion.div
+                        <motion.div data-motion-owned
                             className="h-full rounded-full gradient-bg-adaptive"
                             initial={{ width: 0 }}
                             animate={{ width: `${percent}%` }}
-                            transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+                            transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
                         />
                     </div>
                 </div>

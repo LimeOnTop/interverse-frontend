@@ -31,12 +31,12 @@ export default function ScoreBars({ theory, coding, theoryCorrect, theoryTotal =
             {rows.map((row) => (
                 <div key={row.name}>
                     <div className="flex items-baseline justify-between gap-3 text-sm mb-2">
-                        <span className="text-gray-900 dark:text-gray-100">
+                        <span data-report-detail="meta" className="text-gray-900 dark:text-gray-100">
                             {row.name} <span className="text-secondary">· {row.hint}</span>
                         </span>
-                        <b className="tabular-nums text-gray-900 dark:text-gray-100">{row.score}%</b>
+                        <b data-report-detail="value" className="tabular-nums text-gray-900 dark:text-gray-100">{row.score}%</b>
                     </div>
-                    <div className="iv-track"><span style={{ width: `${Math.min(100, Math.max(0, row.score))}%` }} /></div>
+                    <div className="iv-track"><span data-report-bar style={{ width: `${Math.min(100, Math.max(0, row.score))}%` }} /></div>
                 </div>
             ))}
         </div>

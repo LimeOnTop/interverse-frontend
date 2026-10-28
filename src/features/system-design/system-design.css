@@ -1,7 +1,7 @@
 .sd-page {
     --sd-accent: var(--iv-brand-accent);
     --sd-danger: #b64332;
-    --sd-good: #28734d;
+    --sd-good: #9333ea;
     --sd-edge: #7c9185;
     --sd-dot: #cdd1c8;
     color: var(--iv-text);
@@ -10,7 +10,7 @@
 }
 .dark .sd-page {
     --sd-danger: #ff9b91;
-    --sd-good: #89d8a9;
+    --sd-good: #c084fc;
     --sd-edge: #a58cbd;
     --sd-dot: #363a45;
 }
@@ -1575,3 +1575,5 @@ body.sd-grabbing * {
     opacity: 0;
     pointer-events: none;
 }
+
+:root:not(.dark) .sd-page :is(.sd-check,.sd-primary) { background: var(--iv-gradient); color: #ffffff; }

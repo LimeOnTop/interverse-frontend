@@ -2,7 +2,7 @@ import { usePreparations, stepResults } from '../lib/preparations'
 import PreparationReportActions from '../components/report/PreparationReportActions'
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import ReportEntrance from '../components/report/ReportEntrance'
 import { ArrowLeft, Download, Sparkles, Lock } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { api } from '../services/api'
@@ -150,8 +150,8 @@ export default function ReportDetailPage() {
     ]
 
     return (
-        <PageTransition className="space-y-6 sm:space-y-8">
-            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <ReportEntrance className="space-y-6 sm:space-y-8">
+            <div data-report-block className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
                 <div>
                     <Link to={preparationId ? `/reports?preparation=${encodeURIComponent(preparationId)}&stage=${encodeURIComponent(report.interview_id)}#preparation-${encodeURIComponent(preparationId)}` : '/reports'} className="inline-flex items-center gap-1.5 text-sm text-secondary hover:text-gray-900 dark:hover:text-gray-100 mb-2">
                         <ArrowLeft className="w-4 h-4" /> {preparationId ? 'К подготовке по вакансии' : 'Отчёты'}
@@ -162,7 +162,7 @@ export default function ReportDetailPage() {
                     {preparation && <p className="mt-2 text-sm text-secondary">{stepResults(preparation, preparation.attempts.find(a=>a.interview_id===report.interview_id)!.step_index, preparationData.reports).passed ? 'Этап засчитан по лучшей попытке.' : 'Для зачёта этапа нужен результат больше 80%.'} Все повторы входят в одну попытку подготовки.</p>}
                 </div>
                 {locked ? (
-                    <Link to="/subscription" className="shrink-0 inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 dark:border-iv-dark-line px-4 py-2.5 text-sm font-semibold text-gray-900 dark:text-gray-100" title="Скачивание отчёта в PDF доступно в Pro">
+                    <Link to="/subscription" className="btn-primary-adaptive shrink-0 inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold" title="Скачивание отчёта в PDF доступно в Pro">
                         <Lock className="w-4 h-4" /> PDF в Pro
                     </Link>
                 ) : (
@@ -172,11 +172,7 @@ export default function ReportDetailPage() {
                 )}
             </div>
 
-            <motion.section
-                className="iv-panel p-5 sm:p-8 grid gap-6 md:grid-cols-[12rem_1fr] md:gap-10 items-center"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-            >
+            <section data-report-block className="iv-panel p-5 sm:p-8 grid gap-6 md:grid-cols-[12rem_1fr] md:gap-10 items-center">
                 <div className="text-center">
                     <ScoreRing score={report.overall_score} />
                     <p className={`mt-3 text-sm font-semibold ${report.overall_score >= PASS_SCORE_THRESHOLD ? 'text-inter-verse-green dark:text-purple-400' : 'text-red-600 dark:text-red-400'}`}>
@@ -213,9 +209,9 @@ export default function ReportDetailPage() {
                         </div>
                     )}
                 </div>
-            </motion.section>
+            </section>
 
-            <div className="flex gap-6 overflow-x-auto border-b border-gray-200 dark:border-iv-dark-line" role="tablist">
+            <div data-report-block className="flex gap-6 overflow-x-auto border-b border-gray-200 dark:border-iv-dark-line" role="tablist">
                 {tabs.map((item) => (
                     <button
                         key={item.key}
@@ -235,7 +231,7 @@ export default function ReportDetailPage() {
             </div>
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.65fr_1fr] items-start">
-                <motion.div key={tab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="min-w-0">
+                <div key={tab} data-report-block className="min-w-0">
                     {tab === 'errors' && (
                         locked
                             ? <WeakPointsSection locked count={weakCount} points={[]} />
@@ -243,9 +239,9 @@ export default function ReportDetailPage() {
                     )}
                     {tab === 'strengths' && <StrengthsTab report={report} locked={locked} />}
                     {tab === 'answers' && <QuestionGrid items={reviews} />}
-                </motion.div>
+                </div>
 
-                <div className="lg:sticky lg:top-0">
+                <div data-report-block className="lg:sticky lg:top-0">
                     {preparation && <PreparationReportActions preparation={preparation} report={report} reports={preparationData.reports} />}
                     <FocusPlan
                         action={!preparationId && !preparationData.loading}
@@ -257,7 +253,7 @@ export default function ReportDetailPage() {
                     />
                 </div>
             </div>
-        </PageTransition>
+        </ReportEntrance>
     )
 }
 
@@ -277,19 +273,19 @@ function StrengthsTab({ report, locked }: { report: Report; locked: boolean }) {
     }
     return (
         <section className="space-y-8">
-            <div>
+            <div data-report-block>
                 <p className="iv-eyebrow">По результатам тренировки</p>
                 <h2 className="mt-2 mb-4 text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Сильные стороны</h2>
                 <AccentList text={report.strengths} />
             </div>
             {report.weaknesses && (
-                <div>
+                <div data-report-block>
                     <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Над чем поработать</h3>
                     <AccentList text={report.weaknesses} />
                 </div>
             )}
             {report.recommendations && (
-                <div>
+                <div data-report-block>
                     <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Рекомендации</h3>
                     <AccentList text={report.recommendations} />
                 </div>

@@ -8,7 +8,7 @@ export default {
     theme: {
         extend: {
             colors: {
-                // Day palette "Шалфей" via CSS channels in styles/common.css;
+                // Day palette via CSS channels in styles/common.css;
                 // the .dark class swaps in the stock values.
                 white: 'rgb(var(--iv-white) / <alpha-value>)',
                 gray: {

@@ -1,0 +1,31 @@
+/* Shared completed status across reports, dashboard and training lists. */
+.iv-status-completed {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 550;
+    line-height: 1.45;
+    padding: 4px 9px;
+    border-radius: 6px;
+    border: 0;
+    background: transparent;
+    color: var(--iv-brand-accent);
+    white-space: nowrap;
+}
+.iv-status-completed::before {
+    content: '';
+    width: 11px;
+    height: 11px;
+    flex-shrink: 0;
+    background: var(--iv-gradient);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' d='m3 8 3 3 7-7'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+
+.iv-status-completed-label {
+    background: var(--iv-gradient);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+}

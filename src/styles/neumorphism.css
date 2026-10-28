@@ -1,0 +1,339 @@
+/* One raised level: dashboard panels and navigation, with flat inner controls. */
+:root {
+    --iv-neu-surface: linear-gradient(145deg, #fafbfc 0%, #f2f3f6 55%, #eceef3 100%);
+    --iv-neu-shadow: 12px 12px 26px #b8bfce80, -10px -10px 26px #ffffff, inset 1px 1px 1px #ffffff, inset -1px -1px 2px #b8bfce45;
+    --iv-neu-edge: #ffffff;
+}
+.dark {
+    --iv-neu-surface: #1d2027;
+    --iv-neu-shadow: 8px 8px 22px #090b1080, -7px -7px 22px #292d3640;
+    --iv-neu-edge: #ffffff06;
+}
+.iv-dashboard { padding: 4px 0 16px; }
+.iv-dashboard .iv-panel,
+.iv-dashboard .sd-announcement .sd-announcement-front,
+.iv-dashboard .sd-announcement-back > section {
+    background: var(--iv-neu-surface);
+    border: 1px solid var(--iv-neu-edge);
+    border-radius: 24px;
+    box-shadow: var(--iv-neu-shadow);
+}
+.iv-dashboard .iv-panel .iv-panel {
+    background: transparent;
+    box-shadow: none;
+    border-color: var(--iv-border);
+    border-radius: 12px;
+}
+.iv-dashboard :is(.btn-primary,.btn-primary-adaptive,.iv-btn-primary,.iv-btn-secondary,.iv-chip,.sd-announcement-cta) {
+    box-shadow: none;
+}
+.iv-dashboard :is(.btn-primary,.btn-primary-adaptive,.iv-btn-primary):hover { box-shadow: none; }
+.iv-dashboard .sd-announcement .sd-announcement-front { color: var(--iv-text); }
+.iv-dashboard .sd-announcement-eyebrow { color: var(--iv-text-secondary); }
+.iv-dashboard .sd-announcement-copy p { color: var(--iv-text-secondary); }
+.iv-dashboard .sd-announcement .sd-announcement-cta { background: var(--iv-gradient); color: #fff; }
+.iv-dashboard .sd-announcement h2 { font-weight: 600; letter-spacing: -.035em; }
+.iv-dashboard > div:first-child h1 { font-weight: 600; }
+.iv-sidebar-rail { position: relative; width: 104px; height: 100%; z-index: 35; }
+.iv-sidebar-rail + .iv-app-scroll { transition: transform 260ms cubic-bezier(.23,1,.32,1); }
+@media (min-width:1024px) {
+    .iv-sidebar-rail.is-expanded + .iv-app-scroll { transform: translateX(176px); }
+}
+.iv-sidebar-desktop.iv-sidebar {
+    position: absolute;
+    top: 14px;
+    bottom: 14px;
+    left: 14px;
+    height: auto;
+    width: 76px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    border: 1px solid var(--iv-neu-edge);
+    border-radius: 24px;
+    background: var(--iv-neu-surface);
+    box-shadow: var(--iv-neu-shadow);
+    transition: width 260ms cubic-bezier(.23,1,.32,1);
+    scrollbar-width: thin;
+}
+.iv-sidebar-desktop.is-expanded { width: 252px; }
+.iv-sidebar-desktop > div { width: 250px; flex-shrink: 0; }
+.iv-sidebar-desktop .iv-nav-item { width: 224px; min-height: 44px; gap: 14px; border: 0; padding: 12px 14px; border-radius: 12px; }
+.iv-sidebar-desktop .iv-nav-item > svg { width: 20px; height: 20px; }
+.iv-sidebar-desktop .iv-nav-item > span,
+.iv-sidebar-desktop .iv-nav-group,
+.iv-sidebar-desktop .iv-sidebar-cta > span,
+.iv-sidebar-desktop .sidebar-profile-info,
+.iv-sidebar-desktop .sidebar-profile-chevron {
+    opacity: 0;
+    transition: opacity 120ms ease;
+    white-space: nowrap;
+}
+.iv-sidebar-desktop.is-expanded :is(.iv-nav-item > span,.iv-nav-group,.iv-sidebar-cta > span,.sidebar-profile-info,.sidebar-profile-chevron) { opacity: 1; transition-delay: 45ms; }
+.iv-sidebar-desktop .iv-nav-group { height: 15px; }
+.iv-sidebar-desktop .iv-sidebar-cta { width: 48px; height: 46px; min-height: 46px; padding: 12px 14px; gap: 14px; overflow: hidden; border-radius: 13px; box-shadow: none; transition: width 260ms cubic-bezier(.23,1,.32,1); }
+.iv-sidebar-desktop.is-expanded .iv-sidebar-cta { width: 224px; }
+.iv-sidebar-desktop .iv-sidebar-cta svg { flex-shrink: 0; width: 20px; height: 20px; }
+.iv-sidebar-desktop .iv-sidebar-cta span { flex-shrink: 0; }
+.iv-sidebar-desktop .sidebar-profile { width: 224px; padding: 8px 4px; background: transparent; border-color: transparent; box-shadow: none; }
+.iv-sidebar .iv-nav-item-active { background: var(--iv-tint); color: var(--iv-brand-accent); border-color: transparent; }
+.iv-sidebar .iv-nav-item { transition: border-color 150ms ease, box-shadow 150ms ease; }
+/* Mobile drawer shares the material, with the existing modal behavior. */
+.iv-sidebar[role="dialog"] { background: var(--iv-neu-surface); border: 1px solid var(--iv-neu-edge); box-shadow: var(--iv-neu-shadow); border-radius: 0 24px 24px 0; }
+.iv-sidebar[role="dialog"] :is(.iv-sidebar-cta,.sidebar-profile) { box-shadow: none; }
+@media (hover:hover) and (pointer:fine) {
+    .iv-app-layout .iv-sidebar .iv-nav-item:not(.iv-nav-item-active):hover {
+        background: transparent;
+        box-shadow: inset 0 0 0 1.5px var(--iv-brand-accent);
+    }
+}
+@media (max-width:639px) {
+    .iv-dashboard .iv-panel,
+    .iv-dashboard .sd-announcement .sd-announcement-front,
+    .iv-dashboard .sd-announcement-back > section { border-radius: 20px; }
+    .iv-dashboard { padding-top: 2px; }
+}
+@media (prefers-reduced-motion:reduce) {
+    .iv-sidebar-rail + .iv-app-scroll,.iv-sidebar-desktop,.iv-sidebar-desktop .iv-sidebar-cta,.iv-sidebar-desktop :is(.iv-nav-item > span,.iv-nav-group,.sidebar-profile-info,.sidebar-profile-chevron) { transition: none; }
+}
+.iv-dashboard .sd-announcement :is(.sd-announcement-close,.sd-announcement-restore) { color: var(--iv-text-secondary); }
+.iv-dashboard .sd-announcement-diagram > span { border-color: var(--iv-border); background: transparent; color: var(--iv-brand-accent); }
+.iv-dashboard .sd-announcement-diagram :is(small,b) { color: var(--iv-text-secondary); }
+.iv-dashboard .sd-announcement-diagram i { background: var(--iv-border-hover); }
+.iv-dashboard :is(.pr-card,.vp-card) { background: var(--iv-neu-surface); border-color: var(--iv-neu-edge); border-radius: 24px; box-shadow: var(--iv-neu-shadow); }
+.iv-dashboard :is(.pr-card,.vp-card) :is(button,a,.vp-step) { box-shadow: none; }
+@media (hover:hover) and (pointer:fine) {
+    .iv-dashboard .sd-announcement-link:hover .sd-announcement-cta { background: var(--iv-gradient); filter: brightness(1.06); }
+    .iv-dashboard .sd-announcement :is(.sd-announcement-close,.sd-announcement-restore):hover { background: var(--iv-tint); }
+}
+.iv-sidebar-desktop:not(.is-expanded) .iv-sidebar-cta > span,
+.iv-sidebar-desktop:not(.is-expanded) .iv-nav-item > span { display: none; }
+.iv-sidebar-desktop:not(.is-expanded) .iv-nav-item { width: 48px; }
+.iv-sidebar-desktop .iv-sidebar-cta { justify-content: flex-start; }
+.iv-dashboard .sd-announcement .sd-announcement-cta { color: #fff; }
+.iv-dashboard .sd-announcement-back > section { color: var(--iv-text); }
+.iv-dashboard .sd-announcement-back > section p { color: var(--iv-text-secondary); }
+.iv-dashboard .sd-announcement-back > section :is(.border-white\/25,.border-white\/40,.border-white\/30) { border-color: var(--iv-border); }
+.iv-dashboard .sd-announcement-back > section a { background: var(--iv-gradient); color: #fff; box-shadow: none; }
+.iv-dashboard .sd-announcement-back > section a { background-clip: border-box; -webkit-background-clip: border-box; -webkit-text-fill-color: #fff; }
+/* Unframed header; its controls keep a neutral surface in both palettes. */
+.iv-app-layout > header.iv-header {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+.iv-header .iv-header-frame {
+    background: var(--iv-surface);
+    color: var(--iv-text);
+    border-color: var(--iv-border);
+    box-shadow: none;
+    transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+.iv-header .iv-header-frame:is([aria-expanded="true"],:focus-visible) {
+    background: var(--iv-tint);
+    border-color: var(--iv-brand-accent);
+}
+.iv-header .iv-header-frame > svg { color: var(--iv-text-secondary); }
+@media (hover:hover) and (pointer:fine) {
+    .iv-header .iv-header-frame:hover { background: var(--iv-tint); border-color: var(--iv-brand-accent); }
+}
+.iv-header .iv-header-brand { padding: 0 14px; border-radius: 14px; }
+.iv-app-layout > header.iv-header { background-image: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+@media (max-width:639px) {
+    .iv-header .iv-header-brand { padding: 0 8px; }
+    .iv-header-brand .iv-wordmark { font-size: 15px; letter-spacing: .18em; }
+}
+/* Float the controls above the scroll surface rather than reserving a solid strip. */
+.iv-app-layout > header.iv-header {
+    position: absolute;
+    inset: 0 0 auto;
+    pointer-events: none;
+}
+.iv-app-layout > header.iv-header :is(a,button,.iv-updates-panel,.iv-dropdown) { pointer-events: auto; }
+.iv-app-layout .iv-app-scroll > .max-w-content {
+    padding-top: calc(5.25rem + env(safe-area-inset-top));
+}
+.iv-app-layout .iv-sidebar-rail {
+    margin-top: calc(4rem + env(safe-area-inset-top));
+    height: calc(100% - 4rem - env(safe-area-inset-top));
+}
+@media (min-width:640px) {
+    .iv-app-layout .iv-app-scroll > .max-w-content { padding-top: calc(6rem + env(safe-area-inset-top)); }
+}
+/* Progressive backdrop blur: clear at the lower edge, strongest at the top. */
+.iv-app-layout > header.iv-header { isolation: isolate; }
+.iv-app-layout > header.iv-header::before,
+.iv-app-layout > header.iv-header::after {
+    content: '';
+    position: absolute;
+    inset: 0 0 -36px;
+    z-index: -1;
+    pointer-events: none;
+    background: transparent;
+}
+.iv-app-layout > header.iv-header::before {
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    mask-image: linear-gradient(to bottom, #000 0%, #000 30%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 30%, transparent 100%);
+}
+.iv-app-layout > header.iv-header::after {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    mask-image: linear-gradient(to bottom, #000 0%, #000 10%, transparent 75%);
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 10%, transparent 75%);
+}
+@media (prefers-reduced-transparency:reduce) {
+    .iv-app-layout > header.iv-header::before,
+    .iv-app-layout > header.iv-header::after { backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+/* Header controls are independent raised surfaces, matching the dashboard. */
+.iv-app-layout .iv-header .iv-header-frame {
+    background: var(--iv-neu-surface);
+    border-color: var(--iv-neu-edge);
+    box-shadow: var(--iv-neu-shadow);
+}
+.iv-app-layout .iv-header .iv-header-frame:is([aria-expanded="true"],:focus-visible) {
+    border-color: var(--iv-brand-accent);
+}
+@media (hover:hover) and (pointer:fine) {
+    .iv-app-layout .iv-header .iv-header-frame:hover {
+        background: var(--iv-neu-surface);
+        border-color: var(--iv-brand-accent);
+        box-shadow: var(--iv-neu-shadow);
+    }
+}
+:root {
+    --iv-neu-control-raised: 5px 5px 12px #b8bfce70, -5px -5px 12px #ffffff, inset 1px 1px 0 #ffffff90;
+    --iv-neu-sidebar-control-inset: inset 3px 3px 7px #a7afc05c, inset -3px -3px 7px #ffffffd9;
+    --iv-neu-accent-raised: 5px 5px 12px #6f3aaf45, -4px -4px 10px #ffffffb3, inset 0 1px 0 #ffffff45;
+    --iv-neu-accent-inset: inset 3px 3px 7px #47147670, inset -3px -3px 7px #efc7ff65;
+}
+.dark {
+    --iv-neu-control-raised: 5px 5px 12px #080a0e99, -4px -4px 10px #34394755, inset 0 1px 0 #ffffff0c;
+    --iv-neu-sidebar-control-inset: inset 3px 3px 7px #07090eb3, inset -3px -3px 7px #41475550;
+    --iv-neu-accent-raised: 5px 5px 12px #07090d99, -4px -4px 10px #48335945, inset 0 1px 0 #ffffff35;
+    --iv-neu-accent-inset: inset 3px 3px 7px #350c5c99, inset -3px -3px 7px #e0adff50;
+}
+/* Neutral controls are flat; the sidebar retains its original depth. */
+:root { --iv-neu-control-inset: none; }
+.iv-sidebar { --iv-neu-control-inset: var(--iv-neu-sidebar-control-inset); }
+/* Independent controls rise above the page. Accent controls on a panel sink into it. */
+:is(.iv-btn,.btn-primary,.btn-primary-adaptive,.iv-btn-primary,.btn-secondary,.iv-btn-secondary,.iv-landing-button,.pr-btn,.lib-btn,.sd-primary,.sd-check) {
+    box-shadow: var(--iv-neu-control-raised);
+}
+:is(.btn-primary,.btn-primary-adaptive,.iv-btn-primary,.iv-landing-button,.pr-btn.primary,.lib-btn.is-primary,.sd-primary,.sd-check) {
+    box-shadow: var(--iv-neu-accent-raised);
+}
+:is(.iv-panel,.iv-card,.iv-form-card,.lib-card,.pr-card,.vp-card,.sd-task-panel,.sd-announcement,.iv-sidebar) :is(.iv-btn,.btn-primary,.btn-primary-adaptive,.iv-btn-primary,.btn-secondary,.iv-btn-secondary,.iv-landing-button,.pr-btn,.lib-btn,.sd-primary,.sd-check,.iv-sidebar-cta,.sd-announcement-cta) {
+    box-shadow: var(--iv-neu-control-inset);
+}
+:is(.iv-panel,.iv-card,.iv-form-card,.lib-card,.pr-card,.vp-card,.sd-task-panel,.sd-announcement,.iv-sidebar) :is(.btn-primary,.btn-primary-adaptive,.iv-btn-primary,.iv-landing-button,.pr-btn.primary,.lib-btn.is-primary,.sd-primary,.sd-check,.iv-sidebar-cta,.sd-announcement-cta) {
+    box-shadow: var(--iv-neu-accent-inset);
+}
+.iv-dashboard :is(.iv-panel,.sd-announcement) :is(.btn-primary,.btn-primary-adaptive,.iv-btn-primary,.sd-announcement-cta),
+.iv-dashboard .sd-announcement .sd-announcement-cta,
+.iv-dashboard .sd-announcement-back > section a {
+    box-shadow: var(--iv-neu-accent-inset);
+}
+.iv-dashboard > div:first-child .btn-primary-adaptive { box-shadow: var(--iv-neu-accent-raised); }
+@media (hover:hover) and (pointer:fine) {
+    :is(.iv-panel,.iv-card,.iv-form-card,.lib-card,.pr-card,.vp-card,.sd-task-panel,.sd-announcement,.iv-sidebar) :is(.btn-primary,.btn-primary-adaptive,.iv-btn-primary,.iv-landing-button,.pr-btn.primary,.lib-btn.is-primary,.sd-primary,.sd-check,.iv-sidebar-cta,.sd-announcement-cta):hover,
+    .iv-dashboard .sd-announcement-link:hover .sd-announcement-cta { box-shadow: var(--iv-neu-accent-inset); }
+}
+.iv-app-layout :is(.btn-icon,.btn-ghost) { box-shadow: var(--iv-neu-control-raised); }
+.iv-app-layout :is(.iv-panel,.iv-card,.iv-form-card,.pr-card,.vp-card,.sd-announcement,.iv-sidebar) :is(.btn-icon,.btn-ghost,button:not(.sd-announcement-restore):not([role="switch"]):not([role="tab"]):not([role="checkbox"])) {
+    box-shadow: var(--iv-neu-control-inset);
+}
+.iv-app-layout :is(.iv-panel,.iv-card,.iv-form-card,.pr-card,.vp-card,.sd-announcement,.iv-sidebar) :is(.btn-primary,.btn-primary-adaptive,.iv-btn-primary,.pr-btn.primary,.lib-btn.is-primary,.sd-check,.sd-primary,.iv-sidebar-cta,.sd-announcement-cta) {
+    box-shadow: var(--iv-neu-accent-inset);
+}
+@media (hover:hover) and (pointer:fine) {
+    .iv-dashboard > div:first-child .btn-primary-adaptive:hover { box-shadow: var(--iv-neu-accent-raised); }
+}
+.iv-app-layout .session-filters button[aria-pressed='true'] {
+    background: var(--iv-gradient);
+    color: #fff;
+    box-shadow: var(--iv-neu-accent-inset);
+}
+.iv-app-layout .session-filters button[aria-pressed='true'] span { opacity: 1; }
+
+/* All raised surface families share inset controls, including report and session cards. */
+:root :is(.iv-panel,.iv-card,.iv-form-card,.lib-card,.library-insight,.report-entry,.next-practice,.report-next,.job-card,.opportunity-profile,.lib-hero,.track-point,.session-feature,.session-summary,.session-card,.session-filters,.pr-card,.pr-calendar,.vp-card,.vp-step,.sd-task-panel,.sd-panel,.sd-announcement,.iv-sidebar,.iv-start-form,.iv-start-layout,.sd-home-feature,.iv-dropdown,dialog,[class~="bg-white"],[class~="dark:bg-iv-dark-surface"]) :is(.iv-btn,.btn-primary,.btn-primary-adaptive,.iv-btn-primary,.btn-secondary,.iv-btn-secondary,.btn-ghost,.btn-icon,.iv-landing-button,.pr-btn,.lib-btn,.sd-primary,.sd-check,.iv-sidebar-cta,.sd-announcement-cta) { box-shadow: var(--iv-neu-control-inset); }
+:root :is(.iv-panel,.iv-card,.iv-form-card,.lib-card,.library-insight,.report-entry,.next-practice,.report-next,.job-card,.opportunity-profile,.lib-hero,.track-point,.session-feature,.session-summary,.session-card,.session-filters,.pr-card,.pr-calendar,.vp-card,.vp-step,.sd-task-panel,.sd-panel,.sd-announcement,.iv-sidebar,.iv-start-form,.iv-start-layout,.sd-home-feature,.iv-dropdown,dialog,[class~="bg-white"],[class~="dark:bg-iv-dark-surface"]) :is(.btn-primary,.btn-primary-adaptive,.iv-btn-primary,.iv-landing-button,.pr-btn.primary,.lib-btn.is-primary,.sd-primary,.sd-check,.iv-sidebar-cta,.sd-announcement-cta) { box-shadow: var(--iv-neu-accent-inset); }
+@media (hover:hover) and (pointer:fine) {
+    :root :is(.iv-panel,.iv-card,.iv-form-card,.lib-card,.library-insight,.report-entry,.next-practice,.report-next,.job-card,.opportunity-profile,.lib-hero,.track-point,.session-feature,.session-summary,.session-card,.session-filters,.pr-card,.pr-calendar,.vp-card,.vp-step,.sd-task-panel,.sd-panel,.sd-announcement,.iv-sidebar,.iv-start-form,.iv-start-layout,.sd-home-feature,.iv-dropdown,dialog,[class~="bg-white"],[class~="dark:bg-iv-dark-surface"]) :is(.iv-btn,.btn-primary,.btn-primary-adaptive,.iv-btn-primary,.btn-secondary,.iv-btn-secondary,.btn-ghost,.btn-icon,.iv-landing-button,.pr-btn,.lib-btn,.sd-primary,.sd-check,.iv-sidebar-cta,.sd-announcement-cta):hover { box-shadow: var(--iv-neu-control-inset); }
+    :root :is(.iv-panel,.iv-card,.iv-form-card,.lib-card,.library-insight,.report-entry,.next-practice,.report-next,.job-card,.opportunity-profile,.lib-hero,.track-point,.session-feature,.session-summary,.session-card,.session-filters,.pr-card,.pr-calendar,.vp-card,.vp-step,.sd-task-panel,.sd-panel,.sd-announcement,.iv-sidebar,.iv-start-form,.iv-start-layout,.sd-home-feature,.iv-dropdown,dialog,[class~="bg-white"],[class~="dark:bg-iv-dark-surface"]) :is(.btn-primary,.btn-primary-adaptive,.iv-btn-primary,.iv-landing-button,.pr-btn.primary,.lib-btn.is-primary,.sd-primary,.sd-check,.iv-sidebar-cta,.sd-announcement-cta):hover { box-shadow: var(--iv-neu-accent-inset); }
+}
+.iv-app-layout .iv-sidebar .iv-nav-item-active,
+.iv-app-layout .iv-sidebar .iv-nav-item-active:hover {
+    position: relative;
+    isolation: isolate;
+    background: transparent;
+    color: var(--iv-text);
+    box-shadow: inset 0 0 0 1.5px var(--iv-brand-accent);
+    border-color: transparent;
+}
+.iv-app-layout .iv-sidebar .iv-nav-item-active::before {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: 8px;
+    background: var(--iv-neu-surface);
+    box-shadow: var(--iv-neu-control-raised);
+}
+.iv-app-layout .next-practice {
+    background: var(--iv-neu-surface);
+    color: var(--iv-text);
+    border: 1px solid var(--iv-neu-edge);
+    box-shadow: var(--iv-neu-shadow);
+}
+.iv-app-layout .iv-dashboard .sd-announcement button.sd-announcement-restore,
+.iv-app-layout .iv-dashboard .sd-announcement button.sd-announcement-restore:hover {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    color: var(--iv-brand-accent);
+    -webkit-text-fill-color: currentColor;
+}
+.iv-app-layout .iv-dashboard .sd-announcement button.sd-announcement-restore:hover { text-decoration: underline; text-underline-offset: 3px; }
+:root .iv-app-layout .iv-dashboard .sd-announcement button.sd-announcement-restore,
+:root .iv-app-layout .iv-dashboard .sd-announcement button.sd-announcement-restore:hover {
+    background: transparent;
+    box-shadow: none;
+    border: 0;
+    color: var(--iv-brand-accent);
+}
+
+/* This card action is a plain text link in every interaction state. */
+.iv-app-layout button.sd-announcement-restore {
+    box-shadow: none !important;
+    background: transparent !important;
+    border: 0;
+    border-radius: 0;
+    text-shadow: none;
+    filter: none;
+}
+
+/* Neutral panel actions retain their frame without an inset surface. */
+:root .iv-app-layout :is(.iv-panel,.iv-card,.iv-form-card,.lib-card,.library-insight,.report-entry,.next-practice,.report-next,.job-card,.opportunity-profile,.lib-hero,.track-point,.session-feature,.session-summary,.session-card,.session-filters,.pr-card,.pr-calendar,.vp-card,.vp-step,.sd-task-panel,.sd-panel,.sd-announcement,.iv-start-form,.iv-start-layout,.sd-home-feature,.iv-dropdown,dialog,[class~="bg-white"],[class~="dark:bg-iv-dark-surface"]) :is(.iv-btn,.btn-secondary,.iv-btn-secondary,.btn-ghost,.btn-icon,.lib-btn,.pr-btn,.vp-btn):not(:is(.is-primary,.primary,.btn-primary,.btn-primary-adaptive,.iv-btn-primary,.gradient-bg,.gradient-bg-adaptive,.gradient-bg-dark,.danger,.is-danger,[aria-pressed="true"])),
+:root .iv-app-layout :is(.iv-panel,.iv-card,.iv-form-card,.lib-card,.library-insight,.report-entry,.next-practice,.report-next,.job-card,.opportunity-profile,.lib-hero,.track-point,.session-feature,.session-summary,.session-card,.session-filters,.pr-card,.pr-calendar,.vp-card,.vp-step,.sd-task-panel,.sd-panel,.sd-announcement,.iv-start-form,.iv-start-layout,.sd-home-feature,.iv-dropdown,dialog,[class~="bg-white"],[class~="dark:bg-iv-dark-surface"]) :is(.iv-btn,.btn-secondary,.iv-btn-secondary,.btn-ghost,.btn-icon,.lib-btn,.pr-btn,.vp-btn):not(:is(.is-primary,.primary,.btn-primary,.btn-primary-adaptive,.iv-btn-primary,.gradient-bg,.gradient-bg-adaptive,.gradient-bg-dark,.danger,.is-danger,[aria-pressed="true"])):hover {
+    --iv-control-radius: 12px;
+    position: relative;
+    isolation: isolate;
+    background: transparent;
+    border: 1.5px solid var(--iv-border);
+    border-radius: var(--iv-control-radius);
+    box-shadow: var(--iv-neu-control-inset);
+}
+
+:root .iv-app-layout :is(.iv-panel,.iv-card,.iv-form-card,.lib-card,.library-insight,.report-entry,.next-practice,.report-next,.job-card,.opportunity-profile,.lib-hero,.track-point,.session-feature,.session-summary,.session-card,.session-filters,.pr-card,.pr-calendar,.vp-card,.vp-step,.sd-task-panel,.sd-panel,.sd-announcement,.iv-start-form,.iv-start-layout,.sd-home-feature,.iv-dropdown,dialog,[class~="bg-white"],[class~="dark:bg-iv-dark-surface"]) :is(.iv-btn,.btn-secondary,.iv-btn-secondary,.btn-ghost,.btn-icon,.lib-btn,.pr-btn,.vp-btn):not(:is(.is-primary,.primary,.btn-primary,.btn-primary-adaptive,.iv-btn-primary,.gradient-bg,.gradient-bg-adaptive,.gradient-bg-dark,.danger,.is-danger,[aria-pressed="true"])):focus-visible {
+    outline: 2px solid var(--iv-brand-accent);
+    outline-offset: 3px;
+}
+
+/* Preserve the accent interaction frame. */
+:root .iv-app-layout :is(.iv-panel,.iv-card,.iv-form-card,.lib-card,.library-insight,.report-entry,.next-practice,.report-next,.job-card,.opportunity-profile,.lib-hero,.track-point,.session-feature,.session-summary,.session-card,.session-filters,.pr-card,.pr-calendar,.vp-card,.vp-step,.sd-task-panel,.sd-panel,.sd-announcement,.iv-start-form,.iv-start-layout,.sd-home-feature,.iv-dropdown,dialog,[class~="bg-white"],[class~="dark:bg-iv-dark-surface"]) :is(.iv-btn,.btn-secondary,.iv-btn-secondary,.btn-ghost,.btn-icon,.lib-btn,.pr-btn,.vp-btn):not(:is(.is-primary,.primary,.btn-primary,.btn-primary-adaptive,.iv-btn-primary,.gradient-bg,.gradient-bg-adaptive,.gradient-bg-dark,.danger,.is-danger,[aria-pressed="true"])):is(:hover,:active,:focus-visible,[aria-expanded="true"],[data-state="open"],[data-state="on"],.is-active,.active) {
+    border-color: var(--iv-brand-accent);
+}

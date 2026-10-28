@@ -1,3 +1,4 @@
+import { useRevealMotion } from '../hooks/useRevealMotion'
 import { useState, useRef, useEffect, useLayoutEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { ChevronDown, Check } from 'lucide-react'
@@ -29,6 +30,7 @@ export default function ModernSelect({
     borderless = false,
     searchable,
 }: ModernSelectProps) {
+    const reveal = useRevealMotion(true)
     const [isOpen, setIsOpen] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
     const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({})
@@ -128,14 +130,11 @@ export default function ModernSelect({
             {typeof document !== 'undefined' && createPortal(
                 <AnimatePresence>
                     {isOpen && (
-                        <motion.div
+                        <motion.div data-motion-owned
                             ref={menuRef}
                             role="listbox"
-                            initial={{ opacity: 0, y: -6, scale: 0.98 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: -6, scale: 0.98 }}
-                            transition={{ duration: 0.15 }}
-                            style={menuStyle}
+                            {...reveal}
+                            style={{...menuStyle, transformOrigin: "top center"}}
                             className="modern-select-dropdown modern-select-dropdown-portal"
                         >
                             {showSearch && (

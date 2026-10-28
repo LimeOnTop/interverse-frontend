@@ -35,7 +35,7 @@ export default function LandingBackground({ fixed = true }: LandingBackgroundPro
                 style={{
                     background: isDark
                         ? 'linear-gradient(135deg, rgba(45, 27, 105, 0.92) 0%, rgba(26, 11, 61, 0.96) 50%, rgba(47, 47, 47, 0.98) 100%)'
-                        : 'linear-gradient(135deg, rgba(245, 242, 234, 0.97) 0%, rgba(255, 253, 248, 0.95) 40%, rgba(49, 93, 70, 0.05) 100%)',
+                        : 'linear-gradient(135deg, rgba(255, 255, 255, 0.97) 0%, rgba(255, 255, 255, 0.95) 40%, rgba(168, 85, 247, 0.05) 100%)',
                 }}
             />
 

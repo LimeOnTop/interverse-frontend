@@ -1,3 +1,5 @@
+import CompletedBadge from '../components/ui/CompletedBadge'
+import AnimatedNumber from '../components/motion/AnimatedNumber'
 import SystemDesignAnnouncement from '../components/SystemDesignAnnouncement'
 import UpcomingPractice from '../components/UpcomingPractice'
 import { PreparationSection } from '../components/VacancyPreparationCard'
@@ -115,7 +117,7 @@ export default function DashboardPage() {
     )
 
     return (
-        <PageTransition className="space-y-6 sm:space-y-8">
+        <PageTransition className="iv-dashboard space-y-6 sm:space-y-8">
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
                 <div>
                     <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
@@ -173,7 +175,7 @@ export default function DashboardPage() {
                     ) : (
                         <ul>
                             {recent.map((interview, index) => (
-                                <motion.li
+                                <motion.li data-motion-owned
                                     key={interview.id}
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -259,10 +261,10 @@ function LastResultPanel({ report }: { report: ReportWithInterview | null }) {
         <section className="iv-panel p-5 sm:p-6">
             <div className="flex items-center justify-between gap-3">
                 <p className="iv-eyebrow">Последний результат</p>
-                <span className="iv-pill">Завершено</span>
+                <CompletedBadge />
             </div>
             <div className="mt-3 text-5xl font-bold tabular-nums tracking-tight gradient-text-adaptive">
-                {report.overall_score}<span className="text-2xl">%</span>
+                <AnimatedNumber value={report.overall_score} /><span className="text-2xl">%</span>
             </div>
             <p className="mt-1 text-sm text-secondary">
                 {[
@@ -290,7 +292,7 @@ function Metric({ label, value, hint }: { label: string; value: number; hint: st
     return (
         <div className="p-5 sm:p-6">
             <p className="text-sm text-secondary">{label}</p>
-            <p className="mt-2 text-3xl font-bold tabular-nums text-gray-900 dark:text-gray-100">{value}</p>
+            <p className="mt-2 text-3xl font-bold tabular-nums text-gray-900 dark:text-gray-100"><AnimatedNumber value={value} /></p>
             <p className="mt-2 text-xs text-secondary">{hint}</p>
         </div>
     )
@@ -315,9 +317,7 @@ function TrainingRow({ interview, reportId }: { interview: Interview; reportId?:
                 {completed ? <Check className="w-4 h-4" /> : <Code2 className="w-4 h-4" />}
             </span>
             <div className="min-w-0 flex-1">
-                <span className={`text-[11px] font-semibold ${completed ? 'text-inter-verse-green dark:text-purple-400' : 'text-amber-600 dark:text-amber-400'}`}>
-                    {STATUS_LABELS[interview.status] || interview.status}
-                </span>
+                {completed ? <CompletedBadge /> : <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400">{STATUS_LABELS[interview.status] || interview.status}</span>}
                 <h3 className="font-semibold text-gray-900 dark:text-gray-100 truncate">{interview.title}</h3>
                 {meta && <p className="text-xs text-secondary truncate mt-0.5">{meta}</p>}
             </div>

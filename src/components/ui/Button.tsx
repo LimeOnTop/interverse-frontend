@@ -18,11 +18,13 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ({ variant = 'primary', loading, className = '', children, disabled, ...props }, ref) => (
         <button
             ref={ref}
-            className={`${variantClass[variant]} ${className} ${disabled || loading ? 'opacity-50 pointer-events-none' : ''}`}
+            className={`iv-motion-button ${variantClass[variant]} ${className} ${disabled || loading ? 'opacity-50 pointer-events-none' : ''}`}
+            aria-busy={loading || undefined}
             disabled={disabled || loading}
             {...props}
         >
-            {loading ? 'Загрузка…' : children}
+            <span className="iv-button-content" style={{ opacity: loading ? 0 : 1 }}>{children}</span>
+            {loading && <span className="iv-button-loading" role="status">Загрузка…</span>}
         </button>
     )
 )

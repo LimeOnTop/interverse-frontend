@@ -1,23 +1,23 @@
 /* InterVerse Design Tokens */
 
 :root {
-    /* Day palette "Шалфей" (design-review/interverse-day-palettes.css, sage).
+    /* White day palette with the shared purple accent.
        Tailwind gray/white/brand colours read these channels, so the whole day
        theme follows them; .dark restores the stock values for the night theme. */
-    --iv-white: 255 253 248;
-    --iv-gray-50: 245 242 234;
-    --iv-gray-100: 236 234 225;
-    --iv-gray-200: 221 222 218;
-    --iv-gray-300: 201 204 196;
-    --iv-gray-400: 154 163 155;
-    --iv-gray-500: 112 124 115;
-    --iv-gray-600: 99 112 102;
-    --iv-gray-700: 70 83 74;
-    --iv-gray-800: 51 63 55;
-    --iv-gray-900: 38 51 43;
-    --iv-green: 35 73 54;
-    --iv-green-light: 49 93 70;
-    --iv-tint: #e8eee3;
+    --iv-white: 255 255 255;
+    --iv-gray-50: 255 255 255;
+    --iv-gray-100: 244 244 245;
+    --iv-gray-200: 228 228 231;
+    --iv-gray-300: 199 199 204;
+    --iv-gray-400: 156 156 163;
+    --iv-gray-500: 113 113 122;
+    --iv-gray-600: 82 82 91;
+    --iv-gray-700: 63 63 70;
+    --iv-gray-800: 39 39 42;
+    --iv-gray-900: 32 33 36;
+    --iv-green: 192 132 252;
+    --iv-green-light: 147 51 234;
+    --iv-tint: #f3e8ff;
 
     /* Cards and panels; controls use the small radius. */
     --iv-radius: 0.75rem;
@@ -29,30 +29,30 @@
     --iv-duration-page: 500ms;
 
     /* Brand gradients — light */
-    --iv-gradient-from: #234936;
-    --iv-gradient-to: #315d46;
-    --iv-gradient: linear-gradient(135deg, #234936 0%, #315d46 100%);
+    --iv-gradient-from: #c084fc;
+    --iv-gradient-to: #9333ea;
+    --iv-gradient: linear-gradient(to right, #c084fc 0%, #9333ea 100%);
 
     --iv-pro-badge-background: linear-gradient(to right, var(--iv-gradient-from), var(--iv-gradient-to));
 
     /* Wordmark accent (the "V" in INTERVERSE) — light */
-    --iv-brand-accent: #315D46;
-    --iv-brand-glow: 0 0 7px rgba(49, 93, 70, 0.22), 0 0 16px rgba(49, 93, 70, 0.12);
+    --iv-brand-accent: #a855f7;
+    --iv-brand-glow: 0 0 7px rgba(168, 85, 247, 0.22), 0 0 16px rgba(168, 85, 247, 0.12);
 
     /* Neutrals — light */
-    --iv-bg: #F5F2EA;
-    --iv-surface: #FFFDF8;
-    --iv-text: #26332B;
-    --iv-text-secondary: #637066;
-    --iv-border: #DDDEDA;
-    --iv-border-hover: #C9CCC4;
+    --iv-bg: #ffffff;
+    --iv-surface: #ffffff;
+    --iv-text: #202124;
+    --iv-text-secondary: #62656b;
+    --iv-border: #e4e4e7;
+    --iv-border-hover: #c7c7cc;
 
     /* Focus */
-    --iv-focus-ring: rgba(49, 93, 70, 0.4);
+    --iv-focus-ring: rgba(168, 85, 247, 0.4);
 
     /* Scrollbar */
-    --iv-scrollbar-track: #ECEAE1;
-    --iv-scrollbar-thumb: #315D46;
+    --iv-scrollbar-track: #f4f4f5;
+    --iv-scrollbar-thumb: #a855f7;
 }
 
 .dark {
@@ -69,8 +69,8 @@
     --iv-gray-700: 55 65 81;
     --iv-gray-800: 31 41 55;
     --iv-gray-900: 17 24 39;
-    --iv-green: 1 50 32;
-    --iv-green-light: 1 77 48;
+    --iv-green: 192 132 252;
+    --iv-green-light: 147 51 234;
     --iv-tint: #30263F;
 
     --iv-gradient-from: #c084fc;
@@ -147,3 +147,17 @@ html.theme-transition .eq-visualizer *::after {
  .iv-public-header-space{display:block;height:calc(68px + env(safe-area-inset-top,0px));flex-shrink:0}
  .iv-public-header .iv-public-mobile-menu{max-height:calc(100dvh - 68px - env(safe-area-inset-top,0px))}
 }
+
+/* The new palette spreads from the theme control; the old snapshot stays still. */
+html.theme-wave,
+html.theme-wave *,
+html.theme-wave *::before,
+html.theme-wave *::after { transition: none !important; }
+html.theme-wave::view-transition-old(root),
+html.theme-wave::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+    pointer-events: none;
+}
+html.theme-wave::view-transition-old(root) { z-index: 1; }
+html.theme-wave::view-transition-new(root) { z-index: 2; }

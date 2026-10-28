@@ -1,3 +1,4 @@
+import AnimatedNumber from '../components/motion/AnimatedNumber'
 import { Link } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
 import ProgressChart from '../components/ProgressChart'
@@ -42,7 +43,7 @@ export default function ActivityPage() {
                 <div className="iv-panel p-5 sm:p-6">
                     <p className="iv-eyebrow">Последний результат</p>
                     <p className="mt-3 text-4xl font-bold tabular-nums gradient-text-adaptive">
-                        {report ? <>{report.overall_score}<span className="text-xl">%</span></> : '—'}
+                        {report ? <><AnimatedNumber value={report.overall_score} /><span className="text-xl">%</span></> : '—'}
                     </p>
                     <p className="mt-2 text-xs text-secondary">
                         {report ? formatDay(report.interview?.scheduled_at || report.created_at) : 'Пока нет отчётов'}
@@ -50,7 +51,7 @@ export default function ActivityPage() {
                 </div>
                 <div className="iv-panel p-5 sm:p-6">
                     <p className="iv-eyebrow">Завершено</p>
-                    <p className="mt-3 text-4xl font-bold tabular-nums text-gray-900 dark:text-gray-100">{completed}</p>
+                    <p className="mt-3 text-4xl font-bold tabular-nums text-gray-900 dark:text-gray-100"><AnimatedNumber value={completed} /></p>
                     <p className="mt-2 text-xs text-secondary">
                         {completed} {pluralRu(completed, ['тренировка', 'тренировки', 'тренировок'])} за всё время
                     </p>

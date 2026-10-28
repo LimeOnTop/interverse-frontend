@@ -17,8 +17,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                         {label}
                     </label>
                 )}
-                <input ref={ref} id={id} className={`${inputClass} ${className}`} {...props} />
-                {error && <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{error}</p>}
+                <input ref={ref} id={id} aria-invalid={Boolean(error) || undefined} aria-describedby={error && id ? `${id}-error` : undefined} className={`${inputClass} ${className}`} {...props} />
+                {error && <p id={id ? `${id}-error` : undefined} role="alert" className="mt-1.5 text-sm text-red-600 dark:text-red-400">{error}</p>}
             </div>
         )
     }
