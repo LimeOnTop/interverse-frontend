@@ -79,7 +79,7 @@ export default function SubscriptionPage() {
     const { user, accessToken } = useAuthStore()
     const currentPlan = resolveSubscriptionPlan(user)
     const [buyingPlan, setBuyingPlan] = useState<string | null>(null)
-    const submitRobokassaForm = usePaymentNavigation(() => setBuyingPlan(null))
+    const submitPaymentForm = usePaymentNavigation(() => setBuyingPlan(null))
     const [paidOffers, setPaidOffers] = useState<PaidOffer[]>(FALLBACK_PAID_OFFERS)
     const [earlyBirdRemaining, setEarlyBirdRemaining] = useState(27)
     const [earlyBirdLimit, setEarlyBirdLimit] = useState(100)
@@ -138,7 +138,7 @@ export default function SubscriptionPage() {
             }
             const owner = useAuthStore.getState().user?.id
             if (owner) checkoutStarted(Number(data.inv_id), data.plan || planId, String(owner))
-            submitRobokassaForm(payment)
+            submitPaymentForm(payment)
         } catch (error: unknown) {
             const message =
                 (error as { response?: { data?: { error?: string } } })?.response?.data?.error ||
@@ -153,7 +153,7 @@ export default function SubscriptionPage() {
     const quota = summary?.quota
 
     return (
-        <PageTransition className="space-y-6 sm:space-y-8">
+        <PageTransition className="iv-subscription space-y-6 sm:space-y-8">
             <div>
                 <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Твой план подготовки</h1>
                 <p className="mt-2 text-secondary">

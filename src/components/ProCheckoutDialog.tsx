@@ -52,10 +52,10 @@ export default function ProCheckoutDialog({ offer, busy, available, settingsErro
                 <span>{trial ? 'Согласен на оплату 1 ₽ за 3 дня, затем — автоматические списания 390 ₽ каждый месяц до отмены.' : available ? `Я согласен на автоматические списания: ${formatRub(offer.price)} каждые ${offer.durationDays} дней.` : `Я согласен на разовую оплату ${formatRub(offer.price)} за ${trial ? '72 часа доступа' : `${offer.durationDays} дней доступа`}.`} Принимаю <a href="/legal/oferta.html#renewal" target="_blank" rel="noopener noreferrer" className="underline">условия оферты</a>. Автопродление можно отключить в профиле до следующего списания.</span>
             </label>
             <Button type="button" className="w-full justify-center mt-5" loading={busy} disabled={!consent || available === null || (trial && !available)} onClick={onPay}>{trial ? 'Перейти к оплате' : `Оплатить ${formatRub(offer.price)}`} </Button>
-            {!trial && <p className="mt-3 text-xs text-secondary leading-relaxed">Успешная оплата подтверждается Робокассой. Доступ сохраняется до конца оплаченного периода даже после отключения автопродления.</p>}
+            {!trial && <p className="mt-3 text-xs text-secondary leading-relaxed">Доступ сохраняется до конца оплаченного периода даже после отключения автопродления.</p>}
 
             {available === null && <p role="status" className="mt-3 text-xs text-secondary">{settingsError || 'Загружаем настройки оплаты…'}</p>}
-            {available === false && !trial && <p className="mt-3 text-xs text-secondary">Сейчас автоматические списания ещё не подключены. Эта оплата будет разовой; автопродление станет доступно после подключения сервиса и новой оплаты с привязкой карты.</p>}
+            {available === false && trial && <p role="status" className="mt-3 text-xs text-secondary">Оплата временно недоступна. Попробуй ещё раз позже.</p>}
         </div>
     </dialog>
 }

@@ -27,3 +27,68 @@
 .dark .pro-checkout__card { background: #1d2027; backdrop-filter: none; }
 
 #pro-checkout-title:focus { outline: none; }
+
+/* Subscription uses one raised layer, matching the dashboard's material. */
+.iv-subscription { padding: 4px 0 16px; }
+.iv-subscription > div:first-child h1 { font-weight: 600; }
+.iv-subscription .iv-panel {
+    min-width: 0;
+    background: var(--iv-neu-surface);
+    border: 1px solid var(--iv-neu-edge);
+    border-radius: 24px;
+    box-shadow: var(--iv-neu-shadow);
+}
+.iv-subscription .iv-panel .iv-panel {
+    background: transparent;
+    border-color: var(--iv-border);
+    border-radius: 12px;
+    box-shadow: none;
+}
+.iv-subscription .iv-panel h2 { letter-spacing: -.025em; }
+.iv-subscription .iv-panel .iv-track { background: var(--iv-border); }
+.iv-subscription .iv-panel :is(.iv-btn-primary,.btn-primary,.btn-primary-adaptive) {
+    border-radius: 12px;
+    box-shadow: var(--iv-neu-accent-inset);
+}
+.iv-subscription .pro-trial-offer {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) auto;
+    column-gap: 32px;
+    padding: 28px 32px;
+}
+.iv-subscription .pro-trial-offer > .iv-pro-badge { justify-self: start; grid-column: 1; }
+.iv-subscription .pro-trial-offer__title { grid-column: 1; }
+.iv-subscription .pro-trial-offer__description {
+    grid-column: 1;
+    max-width: 72ch;
+    font-size: 14px;
+    line-height: 1.7;
+}
+.iv-subscription .pro-trial-offer__action {
+    grid-column: 2;
+    grid-row: 2 / 4;
+    align-self: center;
+    margin-top: 0;
+}
+.iv-subscription .pro-trial-offer__legal { grid-column: 1 / -1; }
+.iv-subscription .pro-checkout__card,
+.iv-subscription .pro-checkout__card:hover {
+    background: var(--iv-neu-surface);
+    border: 1px solid var(--iv-neu-edge);
+    border-radius: 24px;
+    box-shadow: var(--iv-neu-shadow);
+}
+.iv-subscription .pro-checkout__price {
+    background: transparent;
+    border-color: var(--iv-border);
+    border-radius: 12px;
+    box-shadow: none;
+}
+.iv-subscription .pro-checkout__close { box-shadow: none; background: transparent; }
+.iv-subscription .iv-panel a:focus-visible { outline: 2px solid var(--iv-brand-accent); outline-offset: 4px; }
+@media (max-width: 767px) {
+    .iv-subscription .iv-panel { border-radius: 20px; }
+    .iv-subscription .iv-panel .iv-panel { border-radius: 12px; }
+    .iv-subscription .pro-trial-offer { grid-template-columns: minmax(0,1fr); padding: 24px; gap: 0; }
+    .iv-subscription .pro-trial-offer__action { grid-column: 1; grid-row: auto; width: 100%; margin-top: 20px; }
+}
