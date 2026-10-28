@@ -694,7 +694,7 @@
         border-color: var(--sd-accent);
         background: color-mix(in srgb, var(--sd-accent) 2%, var(--iv-surface));
     }
-    .sd-page button:hover:not(:disabled):not(.sd-primary):not(.sd-check):not(.sd-drawer-scrim) {
+    .sd-page button:hover:not(:disabled):not(.sd-primary):not(.sd-check):not(.sd-drawer-scrim):not(.sd-secondary) {
         background-color: var(--iv-tint);
     }
 }
@@ -1577,3 +1577,26 @@ body.sd-grabbing * {
 }
 
 :root:not(.dark) .sd-page :is(.sd-check,.sd-primary) { background: var(--iv-gradient); color: #ffffff; }
+
+/* Keep toolbar icon frames square at every responsive breakpoint. */
+.sd-toolbar-group { gap: 4px; }
+.sd-toolbar-group button {
+    box-sizing: border-box;
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    min-height: 40px;
+    padding: 0;
+    flex: 0 0 40px;
+}
+@media (max-width: 800px) {
+    .sd-toolbar-group button {
+        width: 44px;
+        min-width: 44px;
+        height: 44px;
+        min-height: 44px;
+        flex-basis: 44px;
+    }
+    .sd-toolbar { flex-wrap: wrap; }
+    .sd-toolbar-group button svg { width: 18px; height: 18px; }
+}

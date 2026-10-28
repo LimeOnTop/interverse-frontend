@@ -1,3 +1,4 @@
+import LibrarySelect from '../components/LibrarySelect'
 import PreparationCreateDialog from '../components/PreparationCreateDialog'
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -305,11 +306,11 @@ export default function VacanciesPage() {
 
 
     return (
-        <PageTransition>
+        <PageTransition className="iv-vacancies">
             {head}
 
                             <div className="list-controls">
-                                <div className="search-wrap">
+                                <div className="search-wrap" data-accent-border>
                                     <Search aria-hidden="true" strokeWidth={1.75} />
                                     <input
                                         type="search"
@@ -319,18 +320,16 @@ export default function VacanciesPage() {
                                         onChange={(e) => setFilter('query', e.target.value)}
                                     />
                                 </div>
-                                <select aria-label="Уровень вакансий" value={f.level} onChange={(e) => setFilter('level', e.target.value)}>
-                                    <option value="all">Все уровни</option>
-                                    {['intern', 'junior', 'middle', 'senior'].map((level) => (
-                                        <option key={level} value={level}>{levelLabel(level)}</option>
-                                    ))}
-                                </select>
-                                <select aria-label="Формат работы" value={f.mode} onChange={(e) => setFilter('mode', e.target.value)}>
-                                    <option value="all">Любой формат</option>
-                                    <option value="remote">Удалённо</option>
-                                    <option value="hybrid">Гибрид</option>
-                                    <option value="office">Офис</option>
-                                </select>
+                                <LibrarySelect menuClassName="iv-vacancies-select-menu" label="Уровень вакансий" value={f.level} onChange={value => setFilter('level', value)} options={[
+                                    { value: 'all', label: 'Все уровни' },
+                                    ...['intern', 'junior', 'middle', 'senior'].map(value => ({ value, label: levelLabel(value) })),
+                                ]} />
+                                <LibrarySelect menuClassName="iv-vacancies-select-menu" label="Формат работы" value={f.mode} onChange={value => setFilter('mode', value)} options={[
+                                    { value: 'all', label: 'Любой формат' },
+                                    { value: 'remote', label: 'Удалённо' },
+                                    { value: 'hybrid', label: 'Гибрид' },
+                                    { value: 'office', label: 'Офис' },
+                                ]} />
                             </div>
 
 
@@ -405,16 +404,11 @@ export default function VacanciesPage() {
                                     >
                                         {f.scope === 'all' ? `Избранное${saved.size ? ` · ${saved.size}` : ''}` : 'Все вакансии'}
                                     </button>
-                                    <select
-                                        className="lib-select"
-                                        aria-label="Сортировка вакансий"
-                                        value={f.sort}
-                                        onChange={(e) => setFilter('sort', e.target.value as SortMode)}
-                                    >
-                                        <option value="match">По совпадению стека</option>
-                                        <option value="recent">Сначала новые</option>
-                                        <option value="salary">По зарплате</option>
-                                    </select>
+                                    <LibrarySelect menuClassName="iv-vacancies-select-menu" label="Сортировка вакансий" value={f.sort} onChange={value => setFilter('sort', value as SortMode)} options={[
+                                        { value: 'match', label: 'По совпадению стека' },
+                                        { value: 'recent', label: 'Сначала новые' },
+                                        { value: 'salary', label: 'По зарплате' },
+                                    ]} />
                                 </div>
                             </div>
                             <div className="job-legend"><span>Есть в твоём профиле</span><span>Можно добавить в подготовку</span></div>

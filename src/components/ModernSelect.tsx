@@ -158,7 +158,7 @@ export default function ModernSelect({
                                         role="option"
                                         aria-selected={value === option.value}
                                         onClick={() => handleSelect(option)}
-                                        className="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 flex items-center justify-between group"
+                                        className="modern-select-option w-full px-4 py-3 text-left flex items-center justify-between group"
                                     >
                                         <div className="flex items-center space-x-3 min-w-0">
                                             {option.icon}

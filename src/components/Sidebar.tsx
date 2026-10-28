@@ -193,7 +193,7 @@ function MobileDrawer({ onClose }: { onClose?: () => void }) {
                         <LogOut className="w-5 h-5 shrink-0" strokeWidth={1.75} />
                         <span>Выйти</span>
                     </button>
-                    <ThemeToggle />
+                    <ThemeToggle className="iv-sidebar-theme-toggle" />
                 </div>
             </motion.aside>
         </>

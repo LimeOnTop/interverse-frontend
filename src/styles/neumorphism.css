@@ -408,3 +408,188 @@ button[data-iv-close] > :is(svg, [data-iv-close-glyph]) {
     button[data-iv-close] > :is(svg, [data-iv-close-glyph]) { transition: none; }
     button[data-iv-close]:not(:disabled):hover > :is(svg, [data-iv-close-glyph]) { transform: none; }
 }
+
+/* Sampled Motion spring: 500ms, bounce .2. Shared geometry keeps the panel and page together. */
+@supports (transition-timing-function: linear(0, 1)) {
+    :root { --iv-sidebar-spring: linear(0.00000, 0.02241, 0.07939, 0.15808, 0.24859, 0.34353, 0.43755, 0.52693, 0.60932, 0.68333, 0.74837, 0.80439, 0.85176, 0.89109, 0.92313, 0.94875, 0.96879, 0.98410, 0.99545, 1.00356, 1.00908, 1.01254, 1.01443, 1.01513, 1.01499, 1.01425, 1.01313, 1.01180, 1.01037, 1.00893, 1.00755, 1.00627, 1.00511, 1.00408, 1.00320, 1.00244, 1.00181, 1.00129, 1.00088, 1.00055, 1.00000); }
+    .iv-sidebar-rail + .iv-app-scroll { transition: transform 500ms var(--iv-sidebar-spring); }
+    .iv-sidebar-desktop.iv-sidebar,
+    .iv-sidebar-desktop .iv-sidebar-cta { transition: width 500ms var(--iv-sidebar-spring); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .iv-sidebar-rail + .iv-app-scroll,
+    .iv-sidebar-desktop.iv-sidebar,
+    .iv-sidebar-desktop .iv-sidebar-cta { transition: none; }
+}
+html[data-motion-input="keyboard"] .iv-sidebar-rail + .iv-app-scroll,
+html[data-motion-input="keyboard"] .iv-sidebar-desktop.iv-sidebar,
+html[data-motion-input="keyboard"] .iv-sidebar-desktop .iv-sidebar-cta { transition: none; }
+
+/* Mobile menu trigger shares the header's accent icon color in both themes. */
+:root .iv-header .iv-header-menu,
+:root .iv-header .iv-header-menu:is(:hover, :active, :focus-visible) {
+    color: var(--iv-brand-accent);
+}
+
+:root .iv-header .iv-header-menu > svg { color: var(--iv-brand-accent); }
+
+/* System Design controls share the workspace material without tint flashes. */
+:root .iv-app-layout .sd-page :is(.sd-board-section, .sd-side) {
+    background: var(--iv-neu-surface);
+    border-color: var(--iv-neu-edge);
+    box-shadow: var(--iv-neu-shadow);
+}
+:root .iv-app-layout .sd-page :is(.sd-toolbar, .sd-tabs) { background: var(--iv-neu-surface); }
+:root .iv-app-layout .sd-page :is(.sd-check, .sd-primary),
+:root .iv-app-layout .sd-page :is(.sd-check, .sd-primary):is(:hover, :active, :focus-visible) {
+    background: var(--iv-gradient);
+    color: #fff;
+    box-shadow: var(--iv-neu-accent-inset) !important;
+}
+:root .iv-app-layout .sd-page :is(.sd-toolbar-group button, .sd-tabs button, .sd-fit, .sd-icon-button:not([data-iv-close])) {
+    background: transparent;
+    border: 1px solid var(--iv-border);
+    box-shadow: none;
+    transition: transform 140ms var(--iv-motion-out, ease-out), color 180ms ease;
+}
+:root .iv-app-layout .sd-page .sd-tabs button { border-color: transparent; }
+:root .iv-app-layout .sd-page .sd-tabs button[aria-selected='true'] { color: var(--iv-brand-accent); }
+@media (hover: hover) and (pointer: fine) {
+    :root .iv-app-layout .sd-page :is(.sd-toolbar-group button, .sd-tabs button, .sd-fit, .sd-icon-button:not([data-iv-close])):hover:not(:disabled):not([aria-selected="true"]) {
+        background: transparent;
+        color: var(--iv-brand-accent);
+    }
+}
+@media (prefers-reduced-motion: no-preference) {
+    html:not([data-motion-input='keyboard']) .sd-page :is(.sd-toolbar-group button, .sd-tabs button, .sd-fit):active:not(:disabled) { transform: scale(.97); }
+}
+
+/* The selected workspace tab uses the same accent material as Add block. */
+:root .iv-app-layout .sd-page .sd-tabs button[aria-selected='true'],
+:root .iv-app-layout .sd-page .sd-tabs button[aria-selected='true']:is(:hover, :active, :focus-visible) {
+    background: var(--iv-gradient);
+    color: #fff;
+    box-shadow: var(--iv-neu-accent-inset) !important;
+}
+:root .iv-app-layout .sd-page .sd-tabs button[aria-selected='true']::after { display: none; }
+
+:root .iv-app-layout .sd-page .sd-secondary {
+    background: transparent;
+    box-shadow: none !important;
+    transition: color 180ms ease;
+}
+:root .iv-app-layout .sd-page .sd-secondary:is(:active, :focus-visible) {
+    background: transparent;
+    color: var(--iv-brand-accent);
+}
+@media (hover: hover) and (pointer: fine) {
+    :root .iv-app-layout .sd-page .sd-secondary:hover:not(:disabled) {
+        background: transparent;
+        color: var(--iv-brand-accent);
+        border-color: var(--iv-brand-accent);
+    }
+}
+
+.iv-burger-bars { display: flex; flex-direction: column; justify-content: space-between; width: 20px; height: 16px; }
+.iv-burger-bars > span {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--iv-text);
+    overflow: hidden;
+}
+.dark .iv-burger-bars > span { background: #fff; }
+.iv-burger-bars > span::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--iv-brand-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 220ms var(--iv-motion-out, cubic-bezier(.23,1,.32,1));
+}
+.iv-burger-bars > span:nth-child(2)::after { transition-delay: 45ms; }
+.iv-burger-bars > span:nth-child(1)::after { transition-delay: 90ms; }
+@media (hover: hover) and (pointer: fine) {
+    .iv-header-menu:hover .iv-burger-bars > span::after { transform: scaleX(1); }
+}
+.iv-header-menu:focus-visible .iv-burger-bars > span::after { transform: scaleX(1); }
+@media (prefers-reduced-motion: reduce) {
+    .iv-burger-bars > span::after { transition: none; }
+}
+html[data-motion-input='keyboard'] .iv-burger-bars > span::after { transition: none; }
+
+:root .iv-app-layout .iv-sidebar button.iv-sidebar-theme-toggle,
+:root .iv-app-layout .iv-sidebar button.iv-sidebar-theme-toggle:is(:hover, :active, :focus-visible) {
+    box-shadow: none !important;
+}
+
+/* Profile cards use raised surfaces; their inner choices stay flat until selected. */
+:root .iv-app-layout .profile-block {
+    background: var(--iv-neu-surface);
+    color: var(--iv-text);
+    border: 1px solid var(--iv-neu-edge);
+    border-radius: 24px;
+    box-shadow: var(--iv-neu-shadow);
+}
+:root .iv-app-layout .profile-block .profile-block-title { color: var(--iv-text); }
+:root .iv-app-layout .profile-block .profile-block-hint { color: var(--iv-text-secondary); }
+:root .iv-app-layout .profile-block .wizard-stack-panel {
+    background: transparent;
+    border-color: var(--iv-border);
+    box-shadow: none;
+}
+:root .iv-app-layout .profile-block .wizard-tech-chip {
+    background: transparent;
+    color: var(--iv-text);
+    border: 1px solid var(--iv-border);
+    border-radius: 12px;
+    box-shadow: none;
+}
+:root .iv-app-layout .profile-block :is(.wizard-tech-chip-selected, .wizard-stack-chip),
+:root .iv-app-layout .profile-block .btn-primary-adaptive {
+    background: var(--iv-gradient);
+    color: #fff;
+    box-shadow: var(--iv-neu-accent-inset) !important;
+}
+:root .iv-app-layout .profile-block .wizard-tech-chip-selected::after { display: none; }
+:root .iv-app-layout .profile-block-check { background: var(--iv-gradient); border-radius: 50%; }
+
+/* Portal select menus share the same options as the library filters. */
+:root .modern-select-dropdown-portal {
+    padding: 6px;
+    background: var(--iv-neu-surface);
+    border: 1px solid var(--iv-neu-edge);
+    border-radius: 16px;
+    box-shadow: var(--iv-neu-shadow);
+}
+:root .modern-select-dropdown .modern-select-option {
+    position: relative;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--iv-text);
+    box-shadow: none;
+    margin: 2px 0;
+}
+:root .modern-select-dropdown .modern-select-option[aria-selected='true'] {
+    background: var(--iv-gradient);
+    color: #fff;
+    box-shadow: var(--iv-neu-accent-inset);
+}
+:root .modern-select-dropdown .modern-select-option :is(span, svg) { color: inherit; }
+:root .modern-select-dropdown .modern-select-option[aria-selected='true']::after { display: none; }
+:root .modern-select-dropdown .modern-select-option:focus-visible { outline: none; }
+
+.account-email-code { position: relative; display: block; }
+.account-email-code__slots { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+.account-email-code__slots > span { display: grid; place-items: center; min-height: 48px; border: 1px solid var(--iv-border); border-radius: 10px; color: var(--iv-text); font-size: 20px; background: var(--iv-surface); }
+.account-email-code__input { position: absolute; inset: 0; width: 100%; opacity: 0; cursor: text; font-size: 16px; }
+.account-email-code:focus-within .account-email-code__slots > span { border-color: var(--iv-brand-accent); }
+
+:root .iv-app-layout .iv-mobile-create,
+:root .iv-app-layout .iv-mobile-create:is(:hover, :active, :focus-visible) {
+    box-shadow: var(--iv-neu-accent-inset);
+}

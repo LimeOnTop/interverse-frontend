@@ -15,27 +15,52 @@ export default function AccountSecurity() {
     const [message, setMessage] = useState('')
     const changingEmail = Boolean(email.trim() && email.trim().toLowerCase() !== user?.email.toLowerCase())
     if (!user || user.role === 'admin') return null
-    const fail = (e: unknown) => setMessage((e as { response?: { data?: { error?: string } } }).response?.data?.error || 'Не удалось изменить данные. Проверь пароль и код.')
-    async function sendCode() {
-        setBusy(true); setMessage('')
-        try { await api.post(`/users/${user!.id}/email-change`, { email: email.trim(), current_password: currentPassword }); setSentTo(email.trim().toLowerCase()); setMessage('Код отправлен на новый адрес. Текущий email пока не изменён.') }
-        catch (e) { fail(e) } finally { setBusy(false) }
+    const fail = (e: unknown) => setMessage((e as { response?: { data?: { error?: string } } }).response?.data?.error || 'Не удалось изменить данные. Попробуй ещё раз.')
+    async function finish() {
+        setPassword(''); setCurrentPassword(''); setCode('')
+        await logout(); navigate('/login', { replace: true })
     }
-    async function save(e: React.FormEvent) {
-        e.preventDefault(); setBusy(true); setMessage('')
+    async function submitEmail(e: React.FormEvent) {
+        e.preventDefault()
+        if (busy || (!sentTo && !changingEmail) || (sentTo && code.length !== 6)) return
+        setBusy(true); setMessage('')
         try {
-            await api.put(`/users/${user!.id}`, { ...(changingEmail ? { email: email.trim(), email_code: code } : {}), ...(password ? { password } : {}), current_password: currentPassword })
-            setPassword(''); setCurrentPassword(''); setCode('')
-            await logout(); navigate('/login', { replace: true })
+            if (sentTo) {
+                await api.put(`/users/${user!.id}`, { email: sentTo, email_code: code })
+                await finish()
+            } else {
+                const address = email.trim().toLowerCase()
+                await api.post(`/users/${user!.id}/email-change`, { email: address })
+                setSentTo(address); setCode('')
+            }
         } catch (e) { fail(e) } finally { setBusy(false) }
     }
-    return <form onSubmit={save} className="grid gap-4 max-w-lg ym-hide-content" data-private>
-            <p className="text-sm text-secondary">После изменения потребуется войти заново. Подтверди изменения текущим паролем аккаунта.</p>
-            <label className="grid gap-2 text-sm">Текущий пароль<input className="input-field" type="password" autoComplete="current-password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} required maxLength={72} /></label>
-            <label className="grid gap-2 text-sm">Новый email<input className="input-field" type="email" autoComplete="email" placeholder={user.email} value={email} onChange={e => { setEmail(e.target.value); setCode('') }} /></label>
-            {changingEmail && <><button type="button" className="btn-secondary" disabled={busy || !currentPassword} onClick={sendCode}>Отправить код на новый email</button><label className="grid gap-2 text-sm">Код из письма<input className="input-field" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} value={code} onChange={e => setCode(e.target.value)} required /></label></>}
-            <label className="grid gap-2 text-sm">Новый пароль<input className="input-field" type="password" autoComplete="new-password" minLength={8} maxLength={72} value={password} onChange={e => setPassword(e.target.value)} /></label>
-            <p role="status" className="text-sm text-secondary">{message}</p>
-            <button className="btn-primary-adaptive px-4 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled={busy || !currentPassword || (!password && !changingEmail) || (changingEmail && (code.length !== 6 || sentTo !== email.trim().toLowerCase()))}>Сохранить и выйти на всех устройствах</button>
-    </form>
+    async function submitPassword(e: React.FormEvent) {
+        e.preventDefault()
+        if (busy || !password || !currentPassword) return
+        setBusy(true); setMessage('')
+        try {
+            await api.put(`/users/${user!.id}`, { password, current_password: currentPassword })
+            await finish()
+        } catch (e) { fail(e) } finally { setBusy(false) }
+    }
+    return <div className="grid gap-6 max-w-lg ym-hide-content" data-private onClick={e => e.stopPropagation()}>
+        <p className="text-sm text-secondary">После изменения потребуется войти заново.</p>
+        <form onSubmit={submitEmail} className="grid gap-3">
+            {sentTo ? <label className="grid gap-2 text-sm">Код из письма
+                <span className="account-email-code">
+                    <span className="account-email-code__slots" aria-hidden="true">{Array.from({ length: 6 }, (_, i) => <span key={i}>{code[i] || '—'}</span>)}</span>
+                    <input className="account-email-code__input" aria-label="Код из письма" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required value={code} onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))} autoFocus disabled={busy} />
+                </span>
+            </label> : <label className="grid gap-2 text-sm">Новый email<input className="input-field" type="email" autoComplete="email" placeholder={user.email} value={email} onChange={e => setEmail(e.target.value)} required disabled={busy} /></label>}
+            <button type="submit" className="btn-primary-adaptive px-4 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled={busy || (sentTo ? code.length !== 6 : !changingEmail)}>{sentTo ? 'Подтвердить' : 'Отправить'}</button>
+            {sentTo && <button type="button" className="text-sm text-secondary justify-self-start" disabled={busy} onClick={() => { setSentTo(''); setCode(''); setMessage('') }}>Изменить email</button>}
+        </form>
+        <form onSubmit={submitPassword} className="grid gap-4">
+            <label className="grid gap-2 text-sm">Новый пароль<input className="input-field" type="password" autoComplete="new-password" minLength={8} maxLength={72} value={password} onChange={e => setPassword(e.target.value)} required disabled={busy} /></label>
+            {password && <label className="grid gap-2 text-sm">Текущий пароль<input className="input-field" type="password" autoComplete="current-password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} required maxLength={72} disabled={busy} /></label>}
+            <button type="submit" className="btn-primary-adaptive px-4 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled={busy || !password || !currentPassword}>Изменить пароль</button>
+        </form>
+        <p role="status" aria-live="polite" className="text-sm text-secondary">{message}</p>
+    </div>
 }

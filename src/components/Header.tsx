@@ -2,7 +2,7 @@ import { useRevealMotion } from '../hooks/useRevealMotion'
 import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
-import { LogOut, User, Menu, ChevronDown } from 'lucide-react'
+import { LogOut, User, ChevronDown } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 import { motion, AnimatePresence } from 'framer-motion'
 import { NAVIGATION } from './navigation'
@@ -54,10 +54,10 @@ export default function Header({ onMenuClick }: HeaderProps) {
                 <div className="flex items-center gap-1 sm:gap-4 min-w-0">
                     <button
                         onClick={onMenuClick}
-                        className="btn-icon lg:hidden"
+                        className="btn-icon iv-header-frame iv-header-menu lg:hidden"
                         aria-label="Открыть меню"
                     >
-                        <Menu className="w-5 h-5" />
+                        <span className="iv-burger-bars" aria-hidden="true"><span /><span /><span /></span>
                     </button>
                     <Link
                         to="/dashboard"

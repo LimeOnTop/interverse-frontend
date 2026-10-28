@@ -30,3 +30,9 @@
 @media (hover:hover) and (pointer:fine) {
     :root .iv-home-select:hover { border-color: var(--iv-brand-accent); }
 }
+
+:root .iv-vacancies-select-menu .lib-select-option[data-state='checked'] {
+    background: var(--iv-gradient);
+    color: #fff;
+    box-shadow: var(--iv-neu-accent-inset);
+}

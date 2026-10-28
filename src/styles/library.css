@@ -848,3 +848,25 @@
 :root:not(.dark) .iv-app-layout .lib-hero p { color: var(--iv-text-secondary); }
 :root:not(.dark) .iv-app-layout .lib-hero :is(.lib-eyebrow,.lib-hero-route) { color: var(--iv-brand-accent); }
 :root:not(.dark) .iv-app-layout .lib-hero-route { opacity: .4; }
+
+.iv-vacancies .search-wrap {
+    border: 1px solid var(--iv-border);
+    border-radius: 12px;
+    background: var(--iv-surface);
+}
+:root .iv-vacancies .search-wrap input,
+:root .iv-vacancies .search-wrap input:focus {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    outline: none;
+}
+:root .iv-vacancies .lib-select-trigger,
+:root .iv-vacancies .lib-select-trigger:focus-visible {
+    box-shadow: none !important;
+    outline: none;
+}
+@media (max-width: 639px) {
+    .iv-vacancies .list-controls > .search-wrap { flex-basis: 100%; }
+    .iv-vacancies .list-controls > .lib-select-trigger { flex: 1; min-width: 0; }
+}

@@ -99,6 +99,7 @@ export default function ProfileSkillsEditor({ skills, onChange }: ProfileSkillsE
                                         key={tech}
                                         type="button"
                                         onClick={() => toggleSkill(tech)}
+                                        aria-pressed={isSelected}
                                         whileTap={{ scale: 0.98 }}
                                         className={`wizard-tech-chip ${isSelected ? 'wizard-tech-chip-selected' : ''}`}
                                     >

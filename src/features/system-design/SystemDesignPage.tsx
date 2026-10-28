@@ -941,6 +941,7 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                             </button>
                             <button
                                 ref={expandButton}
+                                aria-pressed={expanded}
                                 onClick={() => void toggleExpanded()}
                                 aria-label={expanded ? 'Свернуть доску' : 'Развернуть доску'}
                                 title={expanded ? 'Свернуть доску' : 'Развернуть доску'}
