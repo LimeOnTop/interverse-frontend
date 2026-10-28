@@ -72,7 +72,7 @@ export default function PracticeReminderDialog({ target, existing, onClose: fini
     const blocked = busy || !ready || (target.kind === 'draft' && !check.data?.available)
     const onClose = useDialogMotion(dialog, finishClose)
     return <dialog ref={dialog} className="pr-dialog" aria-labelledby="pr-dialog-title" onCancel={event => { event.preventDefault(); if (!busy) onClose() }}>
-        <header><div><span className="pr-eyebrow">Следующая практика</span><h2 id="pr-dialog-title">{saved ? 'Изменить план' : 'Запланировать практику'}</h2></div><button className="pr-close" type="button" aria-label="Закрыть" disabled={busy} onClick={onClose}><X size={18} /></button></header>
+        <header><div><span className="pr-eyebrow">Следующая практика</span><h2 id="pr-dialog-title">{saved ? 'Изменить план' : 'Запланировать практику'}</h2></div><button data-iv-close className="pr-close" type="button" aria-label="Закрыть" disabled={busy} onClick={onClose}><X size={18} /></button></header>
         <div className="pr-dialog-body"><div className="pr-target"><Bell size={18} /><div><b>{target.title}</b><small>{target.kind === 'preparation' ? 'Этап подготовки по вакансии' : target.kind === 'review' ? 'Повторение вопросов с ошибками' : 'Практика по выбранным параметрам'}</small></div></div>
             <form onSubmit={event => { event.preventDefault(); void save() }}>
                 {target.kind === 'draft' && ready && <><PracticeOptionsEditor value={payload} onChange={setPayload} disabled={busy} /><AvailabilityNotice check={check} /></>}

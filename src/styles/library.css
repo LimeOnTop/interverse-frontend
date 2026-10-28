@@ -835,3 +835,16 @@
 }
 
 :root:not(.dark) .lib-btn.is-primary { color: #ffffff; }
+
+/* Tracks uses the same light raised surface as the rest of the workspace. */
+:root:not(.dark) .iv-app-layout .lib-hero {
+    background: var(--iv-neu-surface);
+    color: var(--iv-text);
+    border: 1px solid var(--iv-neu-edge);
+    border-radius: 24px;
+    box-shadow: var(--iv-neu-shadow);
+}
+:root:not(.dark) .iv-app-layout .lib-hero h2 { color: var(--iv-text); }
+:root:not(.dark) .iv-app-layout .lib-hero p { color: var(--iv-text-secondary); }
+:root:not(.dark) .iv-app-layout .lib-hero :is(.lib-eyebrow,.lib-hero-route) { color: var(--iv-brand-accent); }
+:root:not(.dark) .iv-app-layout .lib-hero-route { opacity: .4; }

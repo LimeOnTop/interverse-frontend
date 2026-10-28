@@ -149,7 +149,7 @@ const TechnologySearch: React.FC<TechnologySearchProps> = ({
                             className="inline-flex items-center gap-2 px-3 py-1 gradient-bg-adaptive text-white rounded-md text-sm"
                         >
                             <span>{tech}</span>
-                            <button
+                            <button data-iv-close
                                 onClick={() => handleTechnologyRemove(tech)}
                                 className="hover:bg-white dark:bg-iv-dark-surface hover:bg-opacity-20 rounded-md p-0.5 transition-colors"
                             >

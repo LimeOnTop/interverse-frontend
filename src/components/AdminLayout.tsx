@@ -128,7 +128,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                             className="fixed inset-y-0 left-0 z-50 w-60 iv-sidebar flex flex-col lg:hidden"
                         >
                             <div className="flex justify-end p-3">
-                                <button
+                                <button data-iv-close
                                     type="button"
                                     onClick={() => setMobileOpen(false)}
                                     className="btn-icon"

@@ -134,7 +134,7 @@ export default function InterviewWizardPage() {
     }
 
     return (
-        <PageTransition className="max-w-6xl mx-auto">
+        <PageTransition className="iv-interview-wizard max-w-6xl mx-auto">
             <div onPointerDownCapture={() => setKeyboardInteraction(false)} onKeyDownCapture={() => setKeyboardInteraction(true)}>
             <header className="flex items-start justify-between gap-4 mb-6 sm:mb-10">
                 <div>

@@ -78,7 +78,7 @@ export default function AdminUsersPage() {
                     <Search size={18} aria-hidden="true" />
                     <input value={input} onChange={event => setInput(event.target.value)} maxLength={100}
                         aria-label="Поиск по имени или почте" placeholder="Имя или почта пользователя" type="search" />
-                    {input && <button type="button" onClick={() => setInput('')} aria-label="Очистить поиск"><X size={16} /></button>}
+                    {input && <button data-iv-close type="button" onClick={() => setInput('')} aria-label="Очистить поиск"><X size={16} /></button>}
                 </div>
             </section>
             <div className="admin-users-caption">

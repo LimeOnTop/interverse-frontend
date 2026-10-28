@@ -472,7 +472,7 @@ export default function ProfilePage() {
         const accented = filled && !open
 
         return (
-            <motion.article data-motion-owned
+            <motion.article
                 key={key}
                 layout={reduceMotion ? false : "position"}
                 transition={{ layout: PROFILE_BLOCK_LAYOUT }}
@@ -688,7 +688,7 @@ export default function ProfilePage() {
 
                     {profile.work_experiences.length < MAX_WORK_EXPERIENCES
                         && profile.work_experiences.every((item) => item.trim()) && (
-                        <motion.article data-motion-owned
+                        <motion.article
                             key="add_experience"
                             layout={reduceMotion ? false : "position"}
                             transition={{ layout: PROFILE_BLOCK_LAYOUT }}
@@ -751,7 +751,7 @@ export default function ProfilePage() {
                                     Вставь ссылку на резюме, открытое для просмотра. Заполним должность, навыки, образование и уровень английского — проверь поля и сохрани профиль.
                                 </p>
                             </div>
-                            <button
+                            <button data-iv-close
                                 type="button"
                                 className="btn-icon"
                                 aria-label="Закрыть"

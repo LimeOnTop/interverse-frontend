@@ -38,7 +38,7 @@ export default function LandingVideo({ startAt, onClose: finishClose }: { startA
     const onClose = useDialogMotion(dialog, finishClose)
     return <dialog ref={dialog} className="iv-film-dialog" aria-labelledby="film-title" onCancel={event => { event.preventDefault(); onClose() }} onClick={e => { if (e.target === e.currentTarget) onClose() }}>
         <div className="iv-film-shell">
-            <div className="iv-film-heading"><div><span className="iv-eyebrow">INTERVERSE / В ДЕЙСТВИИ</span><h2 id="film-title">Твой следующий шаг</h2></div><button autoFocus className="iv-film-icon" onClick={onClose} aria-label="Закрыть видео"><X /></button></div>
+            <div className="iv-film-heading"><div><span className="iv-eyebrow">INTERVERSE / В ДЕЙСТВИИ</span><h2 id="film-title">Твой следующий шаг</h2></div><button data-iv-close autoFocus className="iv-film-icon" onClick={onClose} aria-label="Закрыть видео"><X /></button></div>
             <div className="iv-film-screen">
                 <video ref={video} playsInline preload="none" onLoadedMetadata={() => { if (video.current) { setDuration(video.current.duration); video.current.currentTime = startAt; setReady(true); void video.current.play().catch(() => setPlaying(false)) } }} onTimeUpdate={() => setTime(video.current?.currentTime || 0)} onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} onEnded={() => setPlaying(false)} onError={() => setError(true)} onClick={toggle} aria-label="Видео о возможностях InterVerse" />
                 {!playing && !error && <button className="iv-film-play" onClick={toggle} aria-label={time >= duration ? 'Посмотреть ещё раз' : 'Воспроизвести видео'}>{time >= duration ? <RotateCcw /> : <Play fill="currentColor" />}</button>}

@@ -324,6 +324,7 @@ function TrainingRow({ interview, reportId }: { interview: Interview; reportId?:
             {action && (
                 <Link
                     to={action.to}
+                    data-accent-border
                     className="shrink-0 inline-flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-iv-dark-line px-3 sm:px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:border-inter-verse-green dark:hover:border-purple-400 transition-iv"
                 >
                     {action.label} <ArrowRight className="w-4 h-4" />

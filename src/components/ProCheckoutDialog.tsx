@@ -26,7 +26,7 @@ export default function ProCheckoutDialog({ offer, busy, available, settingsErro
         onCancel={(event) => { event.preventDefault(); if (!busy) onClose() }}
         onClick={(event) => { if (event.target === event.currentTarget && !busy) onClose() }}>
         <div className="iv-form-card pro-checkout__card p-5 sm:p-8">
-            <button type="button" className="pro-checkout__close" aria-label="Закрыть окно оплаты" onClick={onClose} disabled={busy}><X size={20} /></button>
+            <button data-iv-close type="button" className="pro-checkout__close" aria-label="Закрыть окно оплаты" onClick={onClose} disabled={busy}><X size={20} /></button>
             {trial ? (
                 <>
                 <h2 ref={title} tabIndex={-1} id="pro-checkout-title" className="pr-9 text-2xl sm:text-3xl font-bold text-inter-verse-green dark:text-purple-300">Попробуй Pro за 1 ₽</h2>

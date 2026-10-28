@@ -92,3 +92,9 @@
     .iv-subscription .pro-trial-offer { grid-template-columns: minmax(0,1fr); padding: 24px; gap: 0; }
     .iv-subscription .pro-trial-offer__action { grid-column: 1; grid-row: auto; width: 100%; margin-top: 20px; }
 }
+
+/* Accent actions on subscription cards stay inset in every interaction state. */
+.iv-subscription .iv-panel :is(.iv-btn-primary,.btn-primary,.btn-primary-adaptive),
+.iv-subscription .iv-panel :is(.iv-btn-primary,.btn-primary,.btn-primary-adaptive):is(:hover,:active,:focus-visible) {
+    box-shadow: var(--iv-neu-accent-inset) !important;
+}

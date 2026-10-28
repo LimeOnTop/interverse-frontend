@@ -45,7 +45,7 @@ export default function TrainingLimitPromo() {
                         exit={{ opacity: 0, scale: 0.95, y: 12 }}
                         onClick={(event) => event.stopPropagation()}
                     >
-                        <button
+                        <button data-iv-close
                             type="button"
                             onClick={closeLimitPromo}
                             className="absolute right-4 top-4 text-secondary hover:text-gray-900 dark:hover:text-gray-100"

@@ -367,3 +367,44 @@
     .sd-announcement-close svg { transition: none; }
     .sd-announcement-close:hover svg { transform: none; }
 }
+
+/* Wizard primary actions sit inside the training setup surface. */
+:root .iv-app-layout .iv-interview-wizard .btn-primary-adaptive,
+:root .iv-app-layout .iv-interview-wizard .btn-primary-adaptive:is(:hover, :active, :focus-visible) {
+    box-shadow: var(--iv-neu-accent-inset) !important;
+}
+
+/* Primary empty-state actions are inset into their containing panel. */
+:root .iv-app-layout .collection-empty .lib-btn.is-primary,
+:root .iv-app-layout .collection-empty .lib-btn.is-primary:is(:hover, :active, :focus-visible) {
+    box-shadow: var(--iv-neu-accent-inset) !important;
+}
+
+/* Shared bare close control, including dialogs rendered outside the app shell. */
+:root body button[data-iv-close],
+:root body button[data-iv-close]:is(:hover, :active, :focus-visible) {
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    color: var(--iv-text-secondary) !important;
+    transition: color 180ms ease;
+}
+:root body button[data-iv-close]::before,
+:root body button[data-iv-close]::after { display: none !important; }
+button[data-iv-close] > :is(svg, [data-iv-close-glyph]) {
+    display: inline-block;
+    transform-origin: center;
+    transition: transform 220ms var(--iv-motion-out, ease-out);
+}
+:root body button[data-iv-close]:focus-visible {
+    outline: 2px solid var(--iv-brand-accent);
+    outline-offset: 2px;
+}
+@media (hover: hover) and (pointer: fine) {
+    :root body button[data-iv-close]:not(:disabled):hover { color: var(--iv-brand-accent) !important; }
+    button[data-iv-close]:not(:disabled):hover > :is(svg, [data-iv-close-glyph]) { transform: rotate(90deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+    button[data-iv-close] > :is(svg, [data-iv-close-glyph]) { transition: none; }
+    button[data-iv-close]:not(:disabled):hover > :is(svg, [data-iv-close-glyph]) { transform: none; }
+}

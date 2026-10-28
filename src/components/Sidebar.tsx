@@ -179,7 +179,7 @@ function MobileDrawer({ onClose }: { onClose?: () => void }) {
                             {user?.email && <span className="sidebar-profile-role text-xs">{user.email}</span>}
                         </span>
                     </Link>
-                    <button onClick={onClose} className="btn-icon shrink-0" aria-label="Закрыть меню">
+                    <button data-iv-close onClick={onClose} className="btn-icon shrink-0" aria-label="Закрыть меню">
                         <X className="w-5 h-5" />
                     </button>
                 </div>

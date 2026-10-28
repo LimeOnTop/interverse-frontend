@@ -221,7 +221,7 @@ export default function EditInterviewFullPage() {
                                 {techStack.map((tech, index) => (
                                     <Badge key={index} variant="success" className="gap-2">
                                         {tech}
-                                        <button type="button" onClick={() => removeTechStackItem(index)} className="hover:opacity-70">×</button>
+                                        <button data-iv-close type="button" onClick={() => removeTechStackItem(index)} className="hover:opacity-70" aria-label="Убрать технологию"><span data-iv-close-glyph>×</span></button>
                                     </Badge>
                                 ))}
                             </div>

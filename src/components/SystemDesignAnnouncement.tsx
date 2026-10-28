@@ -128,7 +128,7 @@ export default function SystemDesignAnnouncement({ children }: { children: React
                             </b>
                         </div>
                     </Link>
-                    <button
+                    <button data-iv-close
                         ref={close}
                         type="button"
                         className="sd-announcement-close"

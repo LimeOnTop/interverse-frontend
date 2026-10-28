@@ -137,6 +137,7 @@ export default function PublicNav({ landing = false, overlay = false }: PublicNa
                         className={overlay && !pastHero ? 'hover:bg-transparent dark:hover:bg-transparent' : ''}
                     />
                     <button
+                        data-iv-close={menuOpen || undefined}
                         ref={toggle}
                         type="button"
                         aria-controls={menuId}

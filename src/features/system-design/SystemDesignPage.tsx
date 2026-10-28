@@ -1080,7 +1080,7 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                                     {label(selectedWire.source)} <ArrowRight size={14} />{' '}
                                     {label(selectedWire.target)}
                                 </strong>
-                                <button
+                                <button data-iv-close
                                     className="sd-icon-button"
                                     onClick={() => setSelectedWireId(null)}
                                     aria-label="Закрыть действия со связью"
@@ -1157,7 +1157,7 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                                     <Trash2 size={17} />
                                 </button>
                             )}
-                            <button
+                            <button data-iv-close
                                 className="sd-icon-button"
                                 aria-label="Закрыть сведения о блоке"
                                 onClick={() => setSelected(null)}
@@ -1185,7 +1185,7 @@ function Editor({ exercise: ex, owner }: { exercise: Exercise; owner: string }) 
                 >
                     <div className="sd-side-header">
                         {expanded && (
-                            <button
+                            <button data-iv-close
                                 className="sd-drawer-close"
                                 aria-label="Закрыть панель"
                                 onClick={() => {
