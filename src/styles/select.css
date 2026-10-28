@@ -36,3 +36,9 @@
     color: #fff;
     box-shadow: var(--iv-neu-accent-inset);
 }
+
+:root .iv-home-select-menu .lib-select-option[data-state='checked'] {
+    background: var(--iv-gradient);
+    color: #fff;
+    box-shadow: var(--iv-neu-accent-inset);
+}

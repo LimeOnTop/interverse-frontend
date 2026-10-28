@@ -105,9 +105,16 @@
     white-space: nowrap;
 }
 .iv-wordmark > span:last-child { margin-right: -0.26em; }
-.iv-wordmark-v {
-    color: var(--iv-brand-accent);
-    text-shadow: var(--iv-brand-glow);
+.iv-wordmark .iv-wordmark-v {
+    background-image: var(--iv-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    text-shadow: none;
+}
+@media (forced-colors: active) {
+    .iv-wordmark .iv-wordmark-v { background: none; color: LinkText; -webkit-text-fill-color: currentColor; }
 }
 @media (max-width: 600px) {
     .iv-wordmark { font-size: 17px; letter-spacing: 0.22em; }
