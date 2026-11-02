@@ -95,7 +95,7 @@ export default function RegisterPage() {
             marketingDescription={`${freeTrainingCaption()} бесплатно. Вопросы под твой стек — от Intern до Senior. Без привязки карты.`}
         >
             <div className="w-full">
-                <FormCard>
+                <FormCard className="iv-auth-card">
                     <div className="mb-6">
                         <h1 className="text-xl sm:text-2xl font-bold tracking-tight mb-2">Регистрация</h1>
                         <p className="text-secondary text-sm leading-relaxed">
@@ -106,7 +106,7 @@ export default function RegisterPage() {
                         </p>
                     </div>
 
-                    <div className="mb-4"><AuthLegalNotice neutral /></div>
+                    <div className="mb-4"><AuthLegalNotice neutral buttonLabel="Зарегистрироваться" /></div>
                     <GoogleAuthButton onClick={() => registrationFunnel('google_click', { method: 'google' })} />
                     <div className="my-5 flex items-center gap-3 text-xs text-secondary">
                         <span className="h-px flex-1 bg-gray-200 dark:bg-iv-dark-line" />

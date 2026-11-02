@@ -1,6 +1,7 @@
 @import './styles/common.css';
 @import './styles/neumorphism.css';
 @import './styles/accent-border.css';
+@import './styles/marketing-neumorphism.css';
 
 @tailwind base;
 @tailwind components;

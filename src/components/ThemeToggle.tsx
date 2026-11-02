@@ -16,7 +16,7 @@ export default function ThemeToggle({ iconClassName = '', className = '' }: Them
                 const bounds = event.currentTarget.getBoundingClientRect()
                 void toggleTheme({ x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 })
             }}
-            className={`btn-icon relative overflow-hidden min-w-[44px] min-h-[44px] ${className}`}
+            className={`iv-theme-toggle btn-icon relative min-w-[44px] min-h-[44px] ${className}`}
             aria-label="Переключить тему"
         >
             <motion.div data-motion-owned

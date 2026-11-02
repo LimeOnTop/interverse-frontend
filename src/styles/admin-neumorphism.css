@@ -1,0 +1,55 @@
+/* Admin shares the product material; nested controls stay on one visual level. */
+:root .iv-admin-layout :is(.iv-card, .iv-form-card, .iv-panel, .admin-user-card) {
+    background: var(--iv-neu-surface);
+    border: 1px solid var(--iv-neu-edge);
+    border-radius: 24px;
+    box-shadow: var(--iv-neu-shadow);
+    backdrop-filter: none;
+}
+:root .iv-admin-layout :is(.iv-card, .iv-form-card) :is(.iv-card, .iv-form-card, .iv-panel) {
+    background: transparent;
+    border-color: var(--iv-border);
+    border-radius: 16px;
+    box-shadow: none;
+}
+:root .iv-admin-layout .iv-card-shine,
+:root .iv-admin-layout .iv-form-card-shine-clip { display: none; }
+:root .iv-admin-layout .iv-card-hover:hover { transform: none; }
+:root .iv-admin-layout .iv-admin-sidebar {
+    background: var(--iv-neu-surface);
+    border: 1px solid var(--iv-neu-edge);
+    box-shadow: var(--iv-neu-shadow);
+}
+:root .iv-admin-layout > .iv-admin-sidebar {
+    margin: 14px 0 14px 14px;
+    height: calc(100% - 28px);
+    border-radius: 24px;
+}
+:root .iv-admin-layout :is(.btn-primary, .btn-primary-adaptive, .iv-btn-primary) {
+    background: var(--iv-gradient);
+    color: #fff;
+    -webkit-text-fill-color: #fff;
+    border-color: transparent;
+    box-shadow: var(--iv-neu-accent-inset);
+}
+:root .iv-admin-layout :is(.btn-secondary, .btn-ghost, .input-field, .modern-select-trigger) {
+    box-shadow: none;
+}
+:root .iv-admin-layout .admin-users-period {
+    background: transparent;
+    border: 1px solid var(--iv-border);
+    border-radius: 12px;
+    color: var(--iv-text);
+}
+:root .iv-admin-layout .admin-users-period:is(:hover, :focus-visible, .is-active) {
+    border-color: var(--iv-accent-border);
+}
+:root .iv-admin-layout .admin-users-period.is-active {
+    background: var(--iv-gradient);
+    color: #fff;
+    box-shadow: var(--iv-neu-accent-inset);
+}
+@media (max-width: 639px) {
+    .iv-admin-layout main > div { padding: 24px 16px; }
+    :root .iv-admin-layout :is(.iv-card, .iv-form-card, .iv-panel, .admin-user-card) { border-radius: 20px; }
+}

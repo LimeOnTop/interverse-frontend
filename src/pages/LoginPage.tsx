@@ -60,13 +60,13 @@ export default function LoginPage() {
             marketingDescription="Проходи симуляции технических интервью под свой стек и уровень. Отрабатывай ответы и снимай стресс до встречи с работодателем."
         >
             <div className="w-full">
-                <FormCard>
+                <FormCard className="iv-auth-card">
                     <div className="mb-8">
                         <h1 className="text-xl sm:text-2xl font-bold tracking-tight mb-2">Вход</h1>
                         <p className="text-secondary text-sm">Войди, чтобы продолжить тренировки</p>
                     </div>
 
-                    <div className="mb-5"><AuthLegalNotice /></div>
+                    <div className="mb-5"><AuthLegalNotice neutral buttonLabel="Войти" /></div>
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                         <Input
                             label="Логин"

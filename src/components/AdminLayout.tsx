@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { BarChart3, ClipboardCheck, HelpCircle, LifeBuoy, LineChart, LogOut, Menu, Users, X } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import ThemeToggle from './ThemeToggle'
+import '../styles/admin-neumorphism.css'
 
 const navigation = [
     { name: 'Статистика', href: '/admin', icon: BarChart3, end: true },
@@ -86,7 +87,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     const [mobileOpen, setMobileOpen] = useState(false)
 
     return (
-        <div className="h-screen iv-page flex overflow-hidden">
+        <div className="iv-admin-layout h-screen iv-page flex overflow-hidden">
             <aside className="iv-admin-sidebar iv-sidebar hidden lg:flex flex-col shrink-0 h-full overflow-y-auto custom-scrollbar w-60">
                 <NavContent />
             </aside>

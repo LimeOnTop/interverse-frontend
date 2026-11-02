@@ -147,3 +147,15 @@
 @media (hover:hover) and (pointer:fine) {
     :root .iv-home .sd-preview-repair:not(:disabled):hover { border-color: var(--iv-brand-accent); }
 }
+
+/* Selection swaps the gradient and its text contrast in the same frame. */
+:root body .iv-home .iv-levels button {
+    transition: border-color 180ms ease, box-shadow 180ms ease, scale 140ms var(--iv-motion-out);
+    -webkit-text-fill-color: var(--iv-text);
+    color: var(--iv-text);
+}
+:root body .iv-home .iv-levels button.selected,
+:root body .iv-home .iv-levels button[aria-pressed='true'] {
+    color: #fff;
+    -webkit-text-fill-color: #fff;
+}

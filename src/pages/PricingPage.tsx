@@ -61,7 +61,7 @@ export default function PricingPage() {
     }, [])
 
     return (
-        <div className="min-h-screen relative bg-gray-50 dark:bg-iv-dark-bg flex flex-col">
+        <div className="iv-marketing-page min-h-screen relative bg-gray-50 dark:bg-iv-dark-bg flex flex-col">
             <PublicNav landing />
 
             <PageTransition className="flex-1">

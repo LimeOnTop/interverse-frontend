@@ -1,0 +1,106 @@
+/* Shared raised material for public product pages. Layout wrappers remain open. */
+:root {
+    --iv-marketing-surface: #fff;
+    --iv-marketing-shadow: 10px 12px 26px #a8b1c452, -6px -6px 18px #c8ceda26, inset 1px 1px 1px #fff, inset -1px -1px 2px #aeb7c333;
+    --iv-marketing-edge: #edf0f4;
+}
+.dark {
+    --iv-marketing-surface: var(--iv-neu-surface);
+    --iv-marketing-shadow: var(--iv-neu-shadow);
+    --iv-marketing-edge: var(--iv-neu-edge);
+}
+:root body :is(.iv-home,.iv-marketing-page) :is(
+    .rd-stage,.sd-home-feature,.sd-preview,.iv-video-cover,.iv-capability,.iv-start-layout,.iv-start-form,
+    .prep-quiz,.prep-task,.prep-report-example,.public-catalog-grid>a,
+    .public-job,.public-jobs-aside,.sd-task-samples>a,.sd-topics>div,
+    .iv-form-card,.iv-panel,.prep-reading>.prep-section:not(.prep-faq)
+) {
+    background: var(--iv-marketing-surface);
+    border: 1px solid var(--iv-marketing-edge);
+    border-radius: 24px;
+    box-shadow: var(--iv-marketing-shadow);
+    backdrop-filter: none;
+}
+/* Inner surfaces retain their outline, without another raised level. */
+:root body :is(.iv-home,.iv-marketing-page) :is(.sd-home-feature,.iv-start-layout,.prep-reading>.prep-section:not(.prep-faq),.iv-panel,.iv-form-card) :is(
+    .sd-preview,.iv-start-form,.prep-task,.prep-report-example,.iv-panel,.iv-form-card
+) {
+    background: transparent;
+    border: 1px solid var(--iv-border);
+    border-radius: 16px;
+    box-shadow: none;
+}
+:root body .iv-home .prep-reading>.prep-section:not(.prep-faq) { padding: 24px; }
+:root body .iv-home .public-jobs-aside { padding: 24px; }
+:root body .iv-marketing-page .iv-form-card:hover { transform: none; }
+.iv-marketing-page .iv-form-card-shine-clip { display: none; }
+@media (max-width: 639px) {
+    :root body :is(.iv-home,.iv-marketing-page) :is(.sd-home-feature,.iv-capability,.iv-start-layout,.public-job,.public-jobs-aside,.iv-form-card,.iv-panel,.prep-reading>.prep-section:not(.prep-faq)) { border-radius: 20px; }
+    :root body .iv-home .prep-reading>.prep-section:not(.prep-faq) { padding: 20px; }
+}
+
+:root body .iv-home .rd-stage .rd-report {
+    background: transparent;
+    border: 1px solid var(--iv-border);
+    border-radius: 16px;
+    box-shadow: none;
+}
+
+/* Topic cards need their own inner spacing after becoming raised surfaces. */
+:root body .iv-home .sd-topics > div {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    min-width: 0;
+    padding: 24px;
+}
+:root body .iv-home .sd-topics > div > small {
+    margin: 0;
+    color: var(--iv-brand-accent);
+    font-size: 12px;
+    line-height: 1.4;
+    font-variant-numeric: tabular-nums;
+}
+:root body .iv-home .sd-topics > div > h2 {
+    margin: 0;
+    font-size: clamp(21px, 2.4vw, 28px);
+    line-height: 1.2;
+    letter-spacing: -.025em;
+    overflow-wrap: anywhere;
+}
+:root body .iv-home .sd-topics > div > p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--iv-text-secondary);
+}
+@media (max-width: 480px) {
+    .iv-home .sd-topics { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+    :root body .iv-home .sd-topics > div { padding: 20px; border-radius: 20px; }
+}
+
+/* Four topics need room for the longest title plus the card's inner padding. */
+@media (min-width: 481px) and (max-width: 1199px) {
+    .iv-home .sd-topics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 22px;
+    }
+}
+
+/* The demo label and caption belong inside the raised preview's safe area. */
+:root body .iv-home .rd-stage { padding: 20px; }
+:root body .iv-home .rd-caption {
+    margin: 16px 0 0;
+    padding: 0 4px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 10px 20px;
+    font-size: 11px;
+    line-height: 1.6;
+}
+.iv-home .rd-caption > span { min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 639px) {
+    :root body .iv-home .rd-stage { padding: 16px; }
+    :root body .iv-home .rd-caption { flex-direction: column; padding: 0; }
+}

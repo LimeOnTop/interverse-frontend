@@ -678,3 +678,71 @@ html[data-motion-input='keyboard'] .iv-burger-bars > span::after { transition: n
     background: transparent;
     color: var(--iv-text);
 }
+
+/* Header controls use compact paired shadows rather than the large card halo. */
+:root {
+    --iv-neu-header-shadow: 5px 5px 10px #aab3c452, -4px -4px 9px #ffffff, inset 1px 1px 1px #ffffffd9, inset -1px -1px 1px #b7bfcd33;
+}
+.dark {
+    --iv-neu-header-shadow: 5px 5px 11px #080a0eb3, -4px -4px 9px #34394380, inset 1px 1px 1px #ffffff0d, inset -1px -1px 1px #080a0e66;
+}
+:root body .iv-header .iv-header-frame,
+:root body .iv-public-nav-bar :is(.iv-public-brand,.iv-public-header-action,.btn-ghost,.btn-icon),
+:root body .iv-header .iv-header-frame:is(:hover,:active,:focus-visible),
+:root body .iv-public-nav-bar :is(.iv-public-brand,.iv-public-header-action,.btn-ghost,.btn-icon):is(:hover,:active,:focus-visible) {
+    box-shadow: var(--iv-neu-header-shadow);
+}
+:root body .iv-public-nav-bar :is(.btn-primary,.btn-primary-adaptive),
+:root body .iv-public-nav-bar :is(.btn-primary,.btn-primary-adaptive):is(:hover,:active,:focus-visible) {
+    box-shadow: var(--iv-neu-accent-raised);
+}
+
+/* On white canvas, the upper shadow needs a visible neutral tone as well. */
+:root:not(.dark) {
+    --iv-neu-header-shadow: 5px 6px 12px #a8b1c466, -3px -3px 8px #c8ceda40, inset 1px 1px 1px #ffffff, inset -1px -1px 2px #aeb7c34d;
+}
+:root:not(.dark) body .iv-header .iv-header-frame,
+:root:not(.dark) body .iv-public-nav-bar :is(.iv-public-brand,.iv-public-header-action,.btn-ghost,.btn-icon),
+:root:not(.dark) body .iv-header .iv-header-frame:is(:hover,:active,:focus-visible),
+:root:not(.dark) body .iv-public-nav-bar :is(.iv-public-brand,.iv-public-header-action,.btn-ghost,.btn-icon):is(:hover,:active,:focus-visible) {
+    background: #fff;
+    border-color: #edf0f4;
+    box-shadow: var(--iv-neu-header-shadow);
+}
+
+:root .iv-form-card.iv-auth-card,
+:root .iv-form-card.iv-auth-card:hover {
+    background: #fff;
+    border: 1px solid #edf0f4;
+    border-radius: 24px;
+    box-shadow: 10px 12px 26px #a8b1c452, -6px -6px 18px #c8ceda26, inset 1px 1px 1px #fff, inset -1px -1px 2px #aeb7c333;
+    transform: none;
+    backdrop-filter: none;
+}
+:root.dark .iv-form-card.iv-auth-card,
+:root.dark .iv-form-card.iv-auth-card:hover {
+    background: var(--iv-neu-surface);
+    border-color: var(--iv-neu-edge);
+    box-shadow: var(--iv-neu-shadow);
+}
+.iv-auth-card > .iv-form-card-shine-clip { display: none; }
+
+.pro-trial-offer__links { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 24px; }
+:root body .pro-trial-offer__links a {
+    color: inherit;
+    font-size: inherit;
+    font-weight: 400;
+    line-height: 1.6;
+    background: none;
+    -webkit-text-fill-color: currentColor;
+    text-underline-offset: 2px;
+}
+
+:root body .pro-trial-offer .pro-trial-offer__pricing,
+:root body .pro-trial-offer .pro-trial-offer__pricing:is(:hover,:active,:focus-visible) {
+    background: var(--iv-gradient);
+    color: #fff;
+    -webkit-text-fill-color: #fff;
+    border-color: transparent;
+    box-shadow: var(--iv-neu-accent-inset) !important;
+}
