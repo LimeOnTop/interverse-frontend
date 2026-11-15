@@ -1,7 +1,7 @@
 import { ReactNode, useState } from 'react'
 import { NavLink, Link } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { BarChart3, ClipboardCheck, HelpCircle, LifeBuoy, LineChart, LogOut, Menu, Users, X } from 'lucide-react'
+import { BarChart3, ClipboardCheck, HelpCircle, LifeBuoy, LineChart, LogOut, Menu, MessageSquare, Users, X } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import ThemeToggle from './ThemeToggle'
 import '../styles/admin-neumorphism.css'
@@ -11,6 +11,7 @@ const navigation = [
     { name: 'Пользователи', href: '/admin/users', icon: Users, end: false },
     { name: 'Модерация', href: '/admin/moderation', icon: ClipboardCheck, end: false },
     { name: 'Вопросы', href: '/admin/questions', icon: HelpCircle, end: false },
+    { name: 'Обратная связь', href: '/admin/feedback', icon: MessageSquare, end: true },
     { name: 'Поддержка', href: '/admin/support', icon: LifeBuoy, end: false },
 ]
 

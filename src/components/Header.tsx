@@ -9,6 +9,7 @@ import { NAVIGATION } from './navigation'
 import BrandWordmark from './BrandWordmark'
 import UserAvatar from './UserAvatar'
 import UpcomingUpdates from './UpcomingUpdates'
+import Feedback from './Feedback'
 
 const routeTitles: Record<string, string> = {
     ...Object.fromEntries(NAVIGATION.map((item) => [item.href, item.name])),
@@ -74,6 +75,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                 </div>
 
                 <div className="flex items-center gap-1 sm:gap-3">
+                    {user && location.pathname.replace(/\/$/, '') === '/dashboard' && <Feedback />}
                     <UpcomingUpdates />
                     <ThemeToggle className="hidden sm:inline-flex iv-header-frame is-icon" />
 
