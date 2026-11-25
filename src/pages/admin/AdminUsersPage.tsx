@@ -6,7 +6,7 @@ import Button from '../../components/ui/Button'
 import EmptyState from '../../components/ui/EmptyState'
 import { api } from '../../services/api'
 
-interface AdminUser { id: string; name: string; email: string; created_at: string }
+interface AdminUser { id: string; name: string; email: string; created_at: string; subscription_plan: string; subscription_expires_at: string }
 type Period = 'total' | 'day' | 'week' | 'month'
 const periods: { value: Period; label: string; description: string }[] = [
     { value: 'total', label: 'За всё время', description: 'Все зарегистрированные пользователи' },
@@ -65,7 +65,7 @@ export default function AdminUsersPage() {
     const selectedPeriod = periods.find(item => item.value === period)!
     return (
         <PageTransition>
-            <PageHeader title="Пользователи" description="Кто присоединился к INTERVERSE — имя, почта и дата регистрации." />
+            <PageHeader title="Пользователи" description="Пользователи и их подписки." />
             <section className="admin-users-toolbar" aria-label="Поиск и фильтры пользователей">
                 <div className="admin-users-periods" role="group" aria-label="Период регистрации">
                     {periods.map(item => (
@@ -109,6 +109,10 @@ export default function AdminUsersPage() {
                             </div>
                             <p className="admin-user-email" title={user.email}><Mail size={15} aria-hidden="true" /><span>{user.email}</span></p>
                             <p className="admin-user-date"><CalendarDays size={14} aria-hidden="true" />{registrationDate(user.created_at)}</p>
+                            <p className="mt-3 font-medium">{user.subscription_plan === 'paid' && (!user.subscription_expires_at || new Date(user.subscription_expires_at).getTime() > Date.now()) ? 'Pro' : 'Basic'}</p>
+                            {user.subscription_plan === 'paid' && !user.subscription_expires_at && <p className="text-sm text-secondary">Бессрочно</p>}
+                            {user.subscription_expires_at && <p className="text-sm text-secondary">{new Date(user.subscription_expires_at).getTime() > Date.now() ? 'Действует до' : 'Pro истёк'} {registrationDate(user.subscription_expires_at)}</p>}
+
                         </article>)}
                     </div>
                     <nav className="admin-users-pagination" aria-label="Страницы пользователей">

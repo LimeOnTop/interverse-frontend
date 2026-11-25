@@ -8,6 +8,7 @@ import '../styles/admin-neumorphism.css'
 
 const navigation = [
     { name: 'Статистика', href: '/admin', icon: BarChart3, end: true },
+    { name: 'Журнал операций', href: '/admin/operations', icon: BarChart3, end: true },
     { name: 'Пользователи', href: '/admin/users', icon: Users, end: false },
     { name: 'Модерация', href: '/admin/moderation', icon: ClipboardCheck, end: false },
     { name: 'Вопросы', href: '/admin/questions', icon: HelpCircle, end: false },

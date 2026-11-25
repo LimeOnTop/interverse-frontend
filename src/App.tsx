@@ -41,6 +41,7 @@ const SupportPage = lazy(() => import('./pages/SupportPage'))
 const SupportTicketPage = lazy(() => import('./pages/SupportTicketPage'))
 const OAuthCallbackPage = lazy(() => import('./pages/OAuthCallbackPage'))
 const AdminStatsPage = lazy(() => import('./pages/admin/AdminStatsPage'))
+const AdminOperationsPage = lazy(() => import('./pages/admin/AdminOperationsPage'))
 const AdminUsersPage = lazy(() => import('./pages/admin/AdminUsersPage'))
 const AdminFeedbackPage = lazy(() => import('./pages/admin/AdminFeedbackPage'))
 const AdminQuestionsPage = lazy(() => import('./pages/admin/AdminQuestionsPage'))
@@ -283,6 +284,7 @@ function App() {
                     />
                     <Route path="/admin/feedback" element={<AdminRoute><AdminLayout><AdminFeedbackPage /></AdminLayout></AdminRoute>} />
                     <Route path="/admin/users" element={<AdminRoute><AdminLayout><AdminUsersPage /></AdminLayout></AdminRoute>} />
+                    <Route path="/admin/operations" element={<AdminRoute><AdminLayout><AdminOperationsPage /></AdminLayout></AdminRoute>} />
                     <Route
                         path="/admin/moderation"
                         element={
